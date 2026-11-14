@@ -1,0 +1,12 @@
+/* Silbenschrift für alle Tafelbilder.
+   Wirkt nur, wenn ein umgebendes Element die Klasse "silben" hat (Schalter "Silben").
+   Ohne die Klasse erscheint der Text ganz normal. */
+.silben .w{display:inline-block;white-space:nowrap}
+.silben .w{margin-right:.38em}
+.silben .w:last-child{margin-right:0}
+/* Bogen als eigene Linie unter der Silbe: berührt die Buchstaben nicht, kleine Lücke zum Nachbarbogen */
+.silben .s{display:inline-block;position:relative;padding:0 .05em .34em;margin:0 .02em;line-height:1.15}
+.silben .s::after{content:"";position:absolute;left:.08em;right:.08em;bottom:0;height:.27em;border:3px solid #3a3a3a;border-top:none;
+  border-radius:0 0 50% 50% / 0 0 100% 100%;box-sizing:border-box;pointer-events:none}
+.silben .s.a{color:var(--s1,#1f5fbf)}
+.silben .s.b{color:var(--s2,#c8322c)}

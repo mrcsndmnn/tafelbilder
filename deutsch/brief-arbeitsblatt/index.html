@@ -87,6 +87,18 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
 .c-ort{--c:#2f6fb0;--cbg:#e4eef8}.c-anrede{--c:#b0552f;--cbg:#f8e9e2}.c-einl{--c:#7a4fa8;--cbg:#efe7f7}
 .c-text{--c:#2f7d4f;--cbg:#e3f2e8}.c-gruss{--c:#a8871a;--cbg:#f8f1d9}.c-unter{--c:#b03a6a;--cbg:#f8e3ec}
 
+/* Silbenschrift auf dem Blatt etwas enger, damit Seite 1 auf ein A4-Blatt passt */
+.silben .work .w{margin-right:.22em}
+.silben .work .s{padding-bottom:.26em;line-height:1.05;margin:0 .01em}
+.silben .work .s::after{height:.2em;border-width:1.6px}
+.silben .part{padding-block:1.6mm}
+.silben .part.first{padding-top:3mm}.silben .part.last{padding-bottom:3mm}
+.silben .card .w{margin-right:.2em}
+.silben .card .w:last-child{margin-right:0}
+.silben .card.c-ort{font-size:16pt}
+.silben .part.c-text,.silben .part.c-einl{font-size:12pt}
+.silben .task{margin-bottom:3.5mm}
+
 @media (max-width:640px){
   .sheet{padding:16px;min-height:0}
   .work{grid-template-columns:minmax(0,1fr) 18px 110px}
@@ -104,6 +116,8 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
   .sheet:last-child{page-break-after:auto;break-after:auto}
 }
 </style>
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<script src="../../gemeinsam/silben.js"></script>
 </head>
 <body>
 <a class="zurueck" href="../../">← Übersicht</a>
@@ -112,6 +126,7 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
   <strong>Version wählen:</strong>
   <label for="opt-hilfe"><input type="checkbox" id="opt-hilfe"> Hilfe: Anfangsbuchstaben in den Feldern</label>
   <label for="opt-farben"><input type="checkbox" id="opt-farben"> Farben (Brief und Kärtchen farbig passend)</label>
+  <label for="opt-silben"><input type="checkbox" id="opt-silben"> Silbenschrift (Silbenbögen, Silben blau/rot)</label>
   <span class="hint">Drucken über das Browser-Menü (Datei › Drucken, A4, Ränder „Keine“). Seite 1 = Arbeitsblatt für die Dokumentenkamera, Seite 2 = Legekärtchen (einmal ausschneiden, mehrfach verwenden; am besten laminieren).</span>
 </div>
 
@@ -126,19 +141,19 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
   </div>
 
   <div class="work">
-    <div class="part first right c-ort"><span class="txt">Gelsenkirchen, 2.11.2026</span></div>
+    <div class="part first right c-ort"><span class="txt" data-s="Gel-sen-kir-chen, 2.11.2026">Gelsenkirchen, 2.11.2026</span></div>
     <div class="link"></div>
     <div class="slot c-ort"><div class="field"><span class="help">O</span></div></div>
 
-    <div class="part short c-anrede"><span class="txt">Liebe Kinder,</span></div>
+    <div class="part short c-anrede"><span class="txt" data-s="Lie-be Kin-der,">Liebe Kinder,</span></div>
     <div class="link"></div>
     <div class="slot c-anrede"><div class="field"><span class="help">A</span></div></div>
 
-    <div class="part c-einl"><p class="txt">wie geht es euch? Mir geht es gut.<br>Ich möchte euch von meinem Halloween erzählen.</p></div>
+    <div class="part c-einl"><p class="txt" data-s="wie geht es euch? Mir geht es gut.<br>Ich möch-te euch von mei-nem Hal-lo-ween er-zäh-len.">wie geht es euch? Mir geht es gut.<br>Ich möchte euch von meinem Halloween erzählen.</p></div>
     <div class="link"></div>
     <div class="slot c-einl"><div class="field"><span class="help">E</span></div></div>
 
-    <div class="part c-text"><p class="txt">Am Freitag habe ich mich als Vampir verkleidet. Ich hatte einen schwarzen Umhang und lange Zähne.
+    <div class="part c-text"><p class="txt" data-s="Am Frei-tag ha-be ich mich als Vam-pir ver-klei-det. Ich hat-te ei-nen schwar-zen Um-hang und lan-ge Zäh-ne. Mit mei-nen Freun-den bin ich von Haus zu Haus ge-gan-gen. Wir ha-ben an den Tü-ren ge-klin-gelt und „Sü-ßes o-der Sau-res!“ ge-ru-fen. Wir ha-ben ganz vie-le Sü-ßig-kei-ten be-kom-men. Be-son-ders le-cker wa-ren die Gum-mi-bär-chen und die Scho-ko-la-de. Da-nach ha-ben wir noch ei-nen Gru-sel-film ge-schaut. Das war rich-tig toll!<br>Wie habt ihr Hal-lo-ween ge-fei-ert? Habt ihr euch auch ver-klei-det? Ich freu-e mich auf eu-re Brie-fe.">Am Freitag habe ich mich als Vampir verkleidet. Ich hatte einen schwarzen Umhang und lange Zähne.
       Mit meinen Freunden bin ich von Haus zu Haus gegangen. Wir haben an den Türen geklingelt und „Süßes oder Saures!“ gerufen.
       Wir haben ganz viele Süßigkeiten bekommen. Besonders lecker waren die Gummibärchen und die Schokolade.
       Danach haben wir noch einen Gruselfilm geschaut. Das war richtig toll!<br>
@@ -146,11 +161,11 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
     <div class="link"></div>
     <div class="slot c-text"><div class="field"><span class="help">B</span></div></div>
 
-    <div class="part short c-gruss"><span class="txt">Viele Grüße</span></div>
+    <div class="part short c-gruss"><span class="txt" data-s="Vie-le Grü-ße">Viele Grüße</span></div>
     <div class="link"></div>
     <div class="slot c-gruss"><div class="field"><span class="help">G</span></div></div>
 
-    <div class="part last short c-unter"><span class="txt">Euer Tom</span></div>
+    <div class="part last short c-unter"><span class="txt" data-s="Eu-er Tom">Euer Tom</span></div>
     <div class="link"></div>
     <div class="slot c-unter"><div class="field"><span class="help">U</span></div></div>
   </div>
@@ -167,16 +182,19 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
 </div>
 
 <script>
-const parts=[["Ort und Datum","c-ort"],["Anrede","c-anrede"],["Einleitung","c-einl"],["Brieftext","c-text"],["Gruß","c-gruss"],["Unterschrift","c-unter"]];
+// "-" trennt Silben (nur sichtbar, wenn "Silbenschrift" angehakt ist)
+const parts=[["Ort und Da-tum","c-ort"],["An-re-de","c-anrede"],["Ein-lei-tung","c-einl"],["Brief-text","c-text"],["Gruß","c-gruss"],["Un-ter-schrift","c-unter"]];
 // gemischte Reihenfolge, damit die Kinder nicht einfach abzählen
 const order=[3,0,5,1,4,2];
 const sets=document.getElementById("sets");
 for(let s=0;s<2;s++){
   const box=document.createElement("div");box.className="set";
   box.innerHTML='<h2><span class="scissor">✂</span> '+(s?'Ersatz-Satz':'Kartensatz')+'</h2><div class="cards">'+
-    order.map(i=>`<div class="card ${parts[i][1]}">${parts[i][0]}</div>`).join("")+"</div>";
+    order.map(i=>`<div class="card ${parts[i][1]}"><span>${silben(parts[i][0])}</span></div>`).join("")+"</div>";
   sets.appendChild(box);
 }
+// Brieftext in Silben aufteilen (Text steht im Attribut data-s)
+document.querySelectorAll("[data-s]").forEach(el=>{el.innerHTML=silben(el.dataset.s)});
 const ws=document.getElementById("ws");
 for(const [id,cls] of [["opt-hilfe","hilfe"],["opt-farben","farben"]]){
   const el=document.getElementById(id);
@@ -184,6 +202,7 @@ for(const [id,cls] of [["opt-hilfe","hilfe"],["opt-farben","farben"]]){
   const apply=()=>{ws.classList.toggle(cls,el.checked);try{localStorage.setItem(id,el.checked?"1":"0")}catch(e){}};
   el.addEventListener("change",apply);apply();
 }
+silbenSchalter(document.getElementById("opt-silben"),ws,"opt-silben",false);
 </script>
 </body>
 </html>

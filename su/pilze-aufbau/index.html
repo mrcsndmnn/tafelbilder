@@ -41,14 +41,7 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 .auftrag{position:absolute;left:50px;top:94px;font-size:24px;color:var(--ink)}
 .say{border:2px solid var(--ink);border-radius:10px;padding:1px 10px;font-weight:700}
 
-/* Silbenschrift: blau/rot im Wechsel, Bogen unter jeder Silbe */
-.w{display:inline-block;white-space:nowrap}
-.w+.w{margin-left:.38em}
-/* Bogen als eigene Linie unter der Silbe: berührt die Buchstaben nicht, kleine Lücke zum Nachbarbogen */
-.s{display:inline-block;position:relative;padding:0 .05em .34em;margin:0 .02em;line-height:1.15}
-.s::after{content:"";position:absolute;left:.08em;right:.08em;bottom:0;height:.27em;border:3px solid #3a3a3a;border-top:none;
-  border-radius:0 0 50% 50% / 0 0 100% 100%;box-sizing:border-box;pointer-events:none}
-.s.a{color:var(--s1)} .s.b{color:var(--s2)}
+/* Silbenschrift: kommt aus ../../gemeinsam/silben.css (Schalter "Silben") */
 
 #bild{position:absolute;left:340px;top:150px;width:540px;height:720px}
 .bracket{position:absolute;left:322px;top:223px;width:16px;height:387px;border:5px solid var(--ink);border-right:none;border-radius:10px 0 0 10px;box-sizing:border-box}
@@ -105,6 +98,8 @@ button:focus-visible,.ctrl label:focus-within{outline:4px solid #2f7d4f;outline-
 .c-hut{--c:#4f9a3a;--cbg:#e6f2e1}.c-stiel{--c:#c8322c;--cbg:#f9e3e1}.c-myzel{--c:#b8920f;--cbg:#fbf3d2}.c-frucht{--c:#2f6fb0;--cbg:#e3eef8}
 @media (prefers-reduced-motion: reduce){.card{transition:none}.antworten button.falsch{animation:none}}
 </style>
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<script src="../../gemeinsam/silben.js"></script>
 </head>
 <body>
 <a class="zurueck" href="../../">← Übersicht</a>
@@ -115,6 +110,7 @@ button:focus-visible,.ctrl label:focus-within{outline:4px solid #2f7d4f;outline-
   <div class="auftrag">Ziehe jedes Kärtchen in das richtige Feld. Sprich: <span class="say">Das ist der Hut.</span></div>
   <div class="ctrl">
     <label for="farben"><input type="checkbox" id="farben"> Farben</label>
+    <label for="silben"><input type="checkbox" id="silben"> Silben</label>
     <button type="button" id="raetselBtn" aria-pressed="false">Wer bin ich?</button>
     <button type="button" id="pruefen" class="main">Prüfen</button>
     <button type="button" id="reset">Neu</button>
@@ -139,10 +135,6 @@ button:focus-visible,.ctrl label:focus-within{outline:4px solid #2f7d4f;outline-
 
 <script>
 const S=document.getElementById('stage'), fit=document.getElementById('fit');
-// Wörter in Silben: "-" trennt Silben, Leerzeichen trennt Wörter
-function silben(t){
-  return t.split(' ').map(w=>'<span class="w">'+w.split('-').map((s,i)=>'<span class="s '+(i%2?'b':'a')+'">'+s+'</span>').join('')+'</span>').join(' ');
-}
 const parts=[
  {k:"hut",   wort:"der Hut",           satz:"Das ist der Hut.",           fx:930,fy:259,px:760,py:297},
  {k:"stiel", wort:"der Stiel",         satz:"Das ist der Stiel.",         fx:930,fy:479,px:668,py:517},
@@ -161,7 +153,7 @@ const fields=parts.map(p=>{
   f.style.left=p.fx+'px';f.style.top=p.fy+'px';f.innerHTML='<span class="mark"></span>';S.appendChild(f);
   return {el:f,k:p.k,x:p.fx,y:p.fy,card:null};
 });
-const cards=parts.map(p=>{const c=document.createElement('div');c.className='card c-'+p.k;c.innerHTML=silben(p.wort);c.dataset.k=p.k;c.setAttribute('aria-label',p.wort.replace(/-/g,''));S.appendChild(c);return {el:c,k:p.k,slot:null}});
+const cards=parts.map(p=>{const c=document.createElement('div');c.className='card c-'+p.k;c.innerHTML='<span>'+silben(p.wort)+'</span>';c.dataset.k=p.k;c.setAttribute('aria-label',p.wort.replace(/-/g,''));S.appendChild(c);return {el:c,k:p.k,slot:null}});
 const TRAY={x:1270,y:150};
 function home(c,i){c.slot=null;c.el.style.left=(TRAY.x+9)+'px';c.el.style.top=(TRAY.y+58+i*112)+'px'}
 function shuffle(){const idx=[...cards.keys()];for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
@@ -217,6 +209,7 @@ const fb=document.getElementById('farben');
 try{fb.checked=localStorage.getItem('pilz-farben')==='1'}catch(e){}
 const applyF=()=>{S.classList.toggle('farben',fb.checked);try{localStorage.setItem('pilz-farben',fb.checked?'1':'0')}catch(e){}};
 fb.addEventListener('change',applyF);applyF();
+silbenSchalter(document.getElementById('silben'),S,'pilz-silben',true);
 shuffle();
 
 // ===== Rätsel „Wer bin ich?“ (nach dem Arbeitsblatt „Der Aufbau eines Pilzes“) =====

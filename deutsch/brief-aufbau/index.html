@@ -70,13 +70,20 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 .ctrl button.main{background:var(--btn);color:var(--btnfg)}
 .ctrl input{width:22px;height:22px;accent-color:#2f7d4f}
 .ctrl button:focus-visible,.ctrl label:focus-within{outline:4px solid #2f7d4f;outline-offset:2px}
-.lob{position:absolute;left:1040px;top:28px;font-size:30px;font-weight:700;color:var(--ok);display:none}
+.lob{position:absolute;right:30px;top:92px;font-size:30px;font-weight:700;color:var(--ok);display:none}
 .alldone .lob{display:block}
 
 .c-ort{--c:#2f6fb0;--cbg:#e4eef8}.c-anrede{--c:#b0552f;--cbg:#f8e9e2}.c-einl{--c:#7a4fa8;--cbg:#efe7f7}
 .c-text{--c:#2f7d4f;--cbg:#e3f2e8}.c-gruss{--c:#a8871a;--cbg:#f8f1d9}.c-unter{--c:#b03a6a;--cbg:#f8e3ec}
+/* Silbenschrift im Brief etwas enger, damit der lange Brieftext in seinen Kasten passt */
+.silben .brief .w{margin-right:.24em}
+.silben .brief .s{padding-bottom:.27em;line-height:1.08;margin:0 .01em}
+.silben .brief .s::after{height:.21em;border-width:2.5px}
+.silben .part.c-text{font-size:20px}
 @media (prefers-reduced-motion: reduce){.card{transition:none}}
 </style>
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<script src="../../gemeinsam/silben.js"></script>
 </head>
 <body>
 <a class="zurueck" href="../../">← Übersicht</a>
@@ -87,6 +94,7 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
   <div class="lob">Super, alles richtig!</div>
   <div class="ctrl">
     <label for="farben"><input type="checkbox" id="farben"> Farben</label>
+    <label for="silben"><input type="checkbox" id="silben"> Silben</label>
     <button type="button" id="pruefen" class="main">Prüfen</button>
     <button type="button" id="reset">Neu</button>
   </div>
@@ -96,19 +104,20 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 
 <script>
 const S=document.getElementById('stage'), fit=document.getElementById('fit');
+// Texte mit Silbentrennung: "-" trennt Silben (nur sichtbar, wenn "Silben" angehakt ist)
 const parts=[
- {k:"ort",lab:"Ort und Datum",txt:"Gelsenkirchen, 2.11.2026",h:62,w:330,right:true},
- {k:"anrede",lab:"Anrede",txt:"Liebe Kinder,",h:62,w:210},
- {k:"einl",lab:"Einleitung",txt:"wie geht es euch? Mir geht es gut.<br>Ich möchte euch von meinem Halloween erzählen.",h:84},
- {k:"text",lab:"Brieftext",txt:"Am Freitag habe ich mich als Vampir verkleidet. Ich hatte einen schwarzen Umhang und lange Zähne. Mit meinen Freunden bin ich von Haus zu Haus gegangen. Wir haben an den Türen geklingelt und „Süßes oder Saures!“ gerufen. Wir haben ganz viele Süßigkeiten bekommen. Besonders lecker waren die Gummibärchen und die Schokolade. Danach haben wir noch einen Gruselfilm geschaut. Das war richtig toll!<br>Wie habt ihr Halloween gefeiert? Habt ihr euch auch verkleidet? Ich freue mich auf eure Briefe.",h:262},
- {k:"gruss",lab:"Gruß",txt:"Viele Grüße",h:62,w:190},
- {k:"unter",lab:"Unterschrift",txt:"Euer Tom",h:62,w:170},
+ {k:"ort",lab:"Ort und Da-tum",txt:"Gel-sen-kir-chen, 2.11.2026",h:62,w:330,right:true},
+ {k:"anrede",lab:"An-re-de",txt:"Lie-be Kin-der,",h:62,w:210},
+ {k:"einl",lab:"Ein-lei-tung",txt:"wie geht es euch? Mir geht es gut.<br>Ich möch-te euch von mei-nem Hal-lo-ween er-zäh-len.",h:84},
+ {k:"text",lab:"Brief-text",txt:"Am Frei-tag ha-be ich mich als Vam-pir ver-klei-det. Ich hat-te ei-nen schwar-zen Um-hang und lan-ge Zäh-ne. Mit mei-nen Freun-den bin ich von Haus zu Haus ge-gan-gen. Wir ha-ben an den Tü-ren ge-klin-gelt und „Sü-ßes o-der Sau-res!“ ge-ru-fen. Wir ha-ben ganz vie-le Sü-ßig-kei-ten be-kom-men. Be-son-ders le-cker wa-ren die Gum-mi-bär-chen und die Scho-ko-la-de. Da-nach ha-ben wir noch ei-nen Gru-sel-film ge-schaut. Das war rich-tig toll!<br>Wie habt ihr Hal-lo-ween ge-fei-ert? Habt ihr euch auch ver-klei-det? Ich freu-e mich auf eu-re Brie-fe.",h:262},
+ {k:"gruss",lab:"Gruß",txt:"Vie-le Grü-ße",h:62,w:190},
+ {k:"unter",lab:"Un-ter-schrift",txt:"Eu-er Tom",h:62,w:170},
 ];
 const BRIEF={x:48,y:150,w:880}, FX=968, GAP=18;
 const brief=document.getElementById('brief');
 let y=26; const fields=[];
 parts.forEach(p=>{
-  const d=document.createElement('div');d.className='part c-'+p.k;d.innerHTML=p.txt;
+  const d=document.createElement('div');d.className='part c-'+p.k;d.innerHTML='<span>'+silben(p.txt)+'</span>';
   const w=p.w||BRIEF.w-60; d.style.width=w+'px'; d.style.height=p.h+'px'; d.style.top=y+'px';
   if(p.right){d.style.left='auto';d.style.right='30px'}
   brief.appendChild(d);
@@ -119,7 +128,7 @@ parts.forEach(p=>{
   fields.push({el:f,k:p.k,x:FX,y:cy-35,card:null});
   y+=p.h+GAP;
 });
-const cards=parts.map(p=>{const c=document.createElement('div');c.className='card c-'+p.k;c.textContent=p.lab;c.dataset.k=p.k;S.appendChild(c);return {el:c,k:p.k,slot:null}});
+const cards=parts.map(p=>{const c=document.createElement('div');c.className='card c-'+p.k;c.innerHTML='<span>'+silben(p.lab)+'</span>';c.setAttribute('aria-label',ohneSilben(p.lab));c.dataset.k=p.k;S.appendChild(c);return {el:c,k:p.k,slot:null}});
 const TRAY={x:1316,y:200};
 function home(c,i){c.slot=null;c.el.classList.remove('inslot');c.el.style.width='224px';c.el.style.left=(TRAY.x+16)+'px';c.el.style.top=(TRAY.y+12+i*104)+'px';c.el.style.fontSize=c.k==="ort"?'24px':'27px'}
 function shuffle(){const idx=[...cards.keys()];for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
@@ -177,6 +186,7 @@ const fb=document.getElementById('farben');
 try{fb.checked=localStorage.getItem('farben')==='1'}catch(e){}
 const applyF=()=>{S.classList.toggle('farben',fb.checked);try{localStorage.setItem('farben',fb.checked?'1':'0')}catch(e){}};
 fb.addEventListener('change',applyF);applyF();
+silbenSchalter(document.getElementById('silben'),S,'brief-silben',false);
 shuffle();
 </script>
 </body>
