@@ -36,9 +36,15 @@ header p{margin:0;color:var(--soft);max-width:60ch}
 .tools input{font:inherit;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);flex:1 1 240px;min-width:0}
 .filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0}
 .flabel{font-size:15px;font-weight:700;color:var(--soft);min-width:58px}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.chips .dyn{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+/* „Alle“ steht für sich, durch einen Strich von den einzeln wählbaren Optionen getrennt */
+.chips .trenn{flex:none;width:2px;height:30px;margin:6px 6px 0;border-radius:2px;background:var(--line)}
 .chip{font:inherit;font-size:16px;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip{flex:none}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* Einzeln wählbare Optionen zeigen ein Häkchen, wenn sie gewählt sind (mehrere möglich) */
+.dyn .chip[aria-pressed="true"]::before{content:"✓ ";font-weight:700}
 .tools input:focus-visible,.chip:focus-visible,a.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .fach{margin-top:28px}
 /* Fach-Überschrift als Klapp-Knopf (Akkordeon) */
@@ -175,7 +181,7 @@ const EINTRAEGE = [
 const list = document.getElementById("list");
 const q = document.getElementById("q");
 const empty = document.getElementById("empty");
-let fachFilter = "alle", klasseFilter = "alle";
+const fachAuswahl = new Set(), klasseAuswahl = new Set();   // leer = „Alle“
 
 const klassenVon = e => [].concat(e.klasse || []);
 const vorhanden = [...new Set(EINTRAEGE.map(e => e.fach))];
@@ -183,23 +189,28 @@ const alleKlassen = EINTRAEGE.flatMap(klassenVon);
 const vorhandeneKlassen = [...KLASSEN.filter(k => alleKlassen.includes(k)),
                            ...new Set(alleKlassen.filter(k => !KLASSEN.includes(k)))];
 
-// Filter-Knöpfe ("Alle" + je ein Knopf)
-function knoepfe(ziel, eintraege, setzen){
+// Filter-Knöpfe: „Alle“ für sich, daneben die Optionen, die sich beliebig kombinieren lassen
+function knoepfe(ziel, eintraege, auswahl){
   const box = document.getElementById(ziel);
-  [["alle","Alle"], ...eintraege].forEach(([key, label], i) => {
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = label;
-    b.setAttribute("aria-pressed", i === 0);
-    b.onclick = () => {
-      setzen(key);
-      [...box.children].forEach(c => c.setAttribute("aria-pressed", c === b));
-      render();
-    };
-    box.appendChild(b);
+  const knopf = (label, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = label; return b; };
+  const alle = knopf("Alle", "chip alle");
+  const trenn = document.createElement("span"); trenn.className = "trenn"; trenn.setAttribute("aria-hidden", "true");
+  const dyn = document.createElement("div"); dyn.className = "dyn";
+  box.append(alle, trenn, dyn);
+  const kn = eintraege.map(([key, label]) => {
+    const b = knopf(label, "chip");
+    b.onclick = () => { auswahl.has(key) ? auswahl.delete(key) : auswahl.add(key); zeige(); render(); };
+    dyn.appendChild(b); return [key, b];
   });
+  alle.onclick = () => { auswahl.clear(); zeige(); render(); };
+  const zeige = () => {
+    alle.setAttribute("aria-pressed", auswahl.size === 0);
+    kn.forEach(([k, b]) => b.setAttribute("aria-pressed", auswahl.has(k)));
+  };
+  zeige();
 }
-knoepfe("chips", vorhanden.map(f => [f, FAECHER[f] || f]), k => fachFilter = k);
-knoepfe("kchips", vorhandeneKlassen.map(k => [k, k]), k => klasseFilter = k);
+knoepfe("chips", vorhanden.map(f => [f, FAECHER[f] || f]), fachAuswahl);
+knoepfe("kchips", vorhandeneKlassen.map(k => [k, k]), klasseAuswahl);
 
 // Zugeklappte Fächer merken (nur in diesem Browser)
 let zu = new Set();
@@ -212,8 +223,8 @@ function render(){
   const s = q.value.trim().toLowerCase();
   const hits = EINTRAEGE.filter(e => {
     const kl = klassenVon(e);
-    return (fachFilter === "alle" || e.fach === fachFilter) &&
-      (klasseFilter === "alle" || kl.includes(klasseFilter) || kl.includes("übergreifend")) &&
+    return (!fachAuswahl.size || fachAuswahl.has(e.fach)) &&
+      (!klasseAuswahl.size || kl.some(k => klasseAuswahl.has(k)) || kl.includes("übergreifend")) &&
       (!s || [e.titel, e.thema, e.beschreibung, e.art, kl.join(" "), FAECHER[e.fach]].join(" ").toLowerCase().includes(s));
   });
   list.innerHTML = "";
