@@ -44,7 +44,10 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 /* Silbenschrift: blau/rot im Wechsel, Bogen unter jeder Silbe */
 .w{display:inline-block;white-space:nowrap}
 .w+.w{margin-left:.38em}
-.s{display:inline-block;border-bottom:3px solid #3a3a3a;border-radius:0 0 999px 999px;padding:0 .06em .08em;margin:0 .02em;line-height:1.15}
+/* Bogen als eigene Linie unter der Silbe: berührt die Buchstaben nicht, kleine Lücke zum Nachbarbogen */
+.s{display:inline-block;position:relative;padding:0 .05em .34em;margin:0 .02em;line-height:1.15}
+.s::after{content:"";position:absolute;left:.08em;right:.08em;bottom:0;height:.27em;border:3px solid #3a3a3a;border-top:none;
+  border-radius:0 0 50% 50% / 0 0 100% 100%;box-sizing:border-box;pointer-events:none}
 .s.a{color:var(--s1)} .s.b{color:var(--s2)}
 
 #bild{position:absolute;left:340px;top:150px;width:540px;height:720px}
