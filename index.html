@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tafelbilder</title>
+<meta name="description" content="Interaktive Tafelbilder für den Unterricht, nach Fach und Thema sortiert.">
+<style>
+/* Schrift: Andika wird lokal geladen, nicht über Google Fonts (Datenschutz).
+   Dazu die Dateien Andika-Regular.woff2 und Andika-Bold.woff2 in den Ordner "fonts" legen.
+   Fehlen sie, wird automatisch eine Systemschrift verwendet. */
+@font-face{font-family:"Andika";src:url("fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f;
+  --deutsch:#b0552f; --deutsch-bg:#f8e9e2;
+  --mathe:#2f6fb0;   --mathe-bg:#e4eef8;
+  --su:#7a4fa8;      --su-bg:#efe7f7;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f;
+  --deutsch:#e89a78; --deutsch-bg:#3a2820;
+  --mathe:#7fb0e6;   --mathe-bg:#1e2c3b;
+  --su:#b99ae0;      --su-bg:#2c2338;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 16px 56px}
+header h1{font-size:clamp(30px,5vw,42px);margin:0 0 4px}
+header p{margin:0;color:var(--soft);max-width:60ch}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 8px;align-items:center}
+.tools input{font:inherit;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);flex:1 1 240px;min-width:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:16px;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tools input:focus-visible,.chip:focus-visible,a.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fach{margin-top:36px}
+.fach>h2{display:flex;align-items:center;gap:10px;font-size:26px;margin:0 0 4px}
+.fach>h2 .dot{width:14px;height:14px;border-radius:50%;background:var(--fc)}
+.thema h3{font-size:19px;margin:18px 0 10px;color:var(--soft)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+a.tile{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
+a.tile:hover{border-color:var(--fc);transform:translateY(-2px)}
+.top{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--fbg)}
+.tag.klasse{background:transparent;border:1.5px solid var(--line);color:var(--soft)}
+.tile strong{font-size:21px;line-height:1.25}
+.desc{color:var(--soft);font-size:16px}
+.go{margin-top:auto;font-weight:700;color:var(--fc)}
+.empty{color:var(--soft);margin-top:32px}
+footer{margin-top:48px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+.f-deutsch{--fc:var(--deutsch);--fbg:var(--deutsch-bg)}
+.f-mathe{--fc:var(--mathe);--fbg:var(--mathe-bg)}
+.f-su{--fc:var(--su);--fbg:var(--su-bg)}
+.sr{position:absolute;left:-9999px}
+@media (prefers-reduced-motion: reduce){a.tile{transition:none}a.tile:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Tafelbilder</h1>
+    <p>Interaktive Tafelbilder und passende Materialien, nach Fach und Thema sortiert.</p>
+  </header>
+
+  <div class="tools">
+    <label for="q" class="sr">Suchen</label>
+    <input id="q" type="search" placeholder="Suchen, z. B. Brief">
+    <div id="chips" class="chips"></div>
+  </div>
+
+  <main id="list"></main>
+  <p class="empty" id="empty" hidden>Nichts gefunden. Probiere ein anderes Wort.</p>
+
+  <footer>
+    Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten.
+    <!-- Für eine öffentliche Seite in Deutschland ggf. ergänzen: <a href="impressum.html">Impressum</a> -->
+  </footer>
+</div>
+
+<script>
+// ============================================================
+//  EINTRÄGE – hier neue Tafelbilder ergänzen
+//  fach:  "deutsch", "mathe" oder "su" (weitere unten in FAECHER anlegen)
+//  url:   Pfad zum Ordner im Repository, z. B. "su/pilze-aufbau/"
+// ============================================================
+const FAECHER = { deutsch:"Deutsch", mathe:"Mathematik", su:"Sachunterricht" };
+
+const EINTRAEGE = [
+  { fach:"deutsch", thema:"Briefe schreiben", art:"Tafelbild", klasse:"Klasse 3",
+    titel:"Aufbau eines Briefes",
+    beschreibung:"Kärtchen zu Ort und Datum, Anrede, Einleitung, Brieftext, Gruß und Unterschrift ziehen. Mit Prüfen-Knopf und Farbversion.",
+    url:"deutsch/brief-aufbau/" },
+  { fach:"deutsch", thema:"Briefe schreiben", art:"Arbeitsblatt", klasse:"Klasse 3",
+    titel:"Aufbau eines Briefes (Druckvorlage)",
+    beschreibung:"A4-Blatt für die Dokumentenkamera mit Legefeldern, dazu Legekärtchen. Farbig oder schwarz-weiß.",
+    url:"deutsch/brief-arbeitsblatt/" },
+];
+// ============================================================
+
+const list = document.getElementById("list");
+const chips = document.getElementById("chips");
+const q = document.getElementById("q");
+const empty = document.getElementById("empty");
+let fachFilter = "alle";
+
+const vorhanden = [...new Set(EINTRAEGE.map(e => e.fach))];
+[["alle","Alle"], ...vorhanden.map(f => [f, FAECHER[f] || f])].forEach(([key, label]) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = label;
+  b.setAttribute("aria-pressed", key === fachFilter);
+  b.onclick = () => {
+    fachFilter = key;
+    [...chips.children].forEach(c => c.setAttribute("aria-pressed", c === b));
+    render();
+  };
+  chips.appendChild(b);
+});
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function render(){
+  const s = q.value.trim().toLowerCase();
+  const hits = EINTRAEGE.filter(e =>
+    (fachFilter === "alle" || e.fach === fachFilter) &&
+    (!s || [e.titel, e.thema, e.beschreibung, e.art, e.klasse, FAECHER[e.fach]].join(" ").toLowerCase().includes(s)));
+  list.innerHTML = "";
+  empty.hidden = hits.length > 0;
+
+  vorhanden.filter(f => hits.some(e => e.fach === f)).forEach(f => {
+    const sec = document.createElement("section");
+    sec.className = "fach f-" + f;
+    sec.innerHTML = `<h2><span class="dot"></span>${esc(FAECHER[f] || f)}</h2>`;
+    [...new Set(hits.filter(e => e.fach === f).map(e => e.thema))].forEach(t => {
+      const th = document.createElement("div");
+      th.className = "thema";
+      th.innerHTML = `<h3>${esc(t)}</h3><div class="grid">` +
+        hits.filter(e => e.fach === f && e.thema === t).map(e => `
+          <a class="tile" href="${esc(e.url)}">
+            <div class="top"><span class="tag">${esc(e.art)}</span><span class="tag klasse">${esc(e.klasse)}</span></div>
+            <strong>${esc(e.titel)}</strong>
+            <span class="desc">${esc(e.beschreibung)}</span>
+            <span class="go">Öffnen →</span>
+          </a>`).join("") + `</div>`;
+      sec.appendChild(th);
+    });
+    list.appendChild(sec);
+  });
+}
+q.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
