@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fehler-Detektiv – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/runden.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.zettel{width:740px;padding:22px 28px 26px;background:#fffbe6;border:3px solid #d8c98a;border-radius:6px 6px 22px 6px;box-shadow:0 6px 18px rgba(0,0,0,.15);
+  background-image:repeating-linear-gradient(transparent 0 46px,#efe3b0 46px 48px)}
+.zettel h2{margin:0 0 16px;font-size:32px}
+.gl-liste{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.gl{position:relative;min-height:118px;border:3px solid var(--ink);border-radius:16px;background:#fff;font-family:var(--font);font-size:46px;font-weight:700;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;padding:0 10px;touch-action:manipulation}
+.gl:focus-visible{outline:4px solid var(--ok);outline-offset:2px}
+.gl.gewaehlt{box-shadow:0 0 0 6px var(--gelb);border-color:var(--gelbrand)}
+.gl.ok{border-color:var(--ok);background:var(--okbg)}
+.gl.gefunden{border-color:var(--ok);background:var(--okbg)}
+.gl .alt{color:#9aa59f;text-decoration:line-through 4px;font-size:.8em}
+.gl .marke{position:absolute;right:-12px;top:-14px;width:40px;height:40px;border-radius:50%;background:var(--ok);color:#fff;font-size:24px;display:grid;place-items:center}
+.panel{display:flex;flex-direction:column;gap:14px}
+.panel .gross{font-size:56px;font-weight:700}
+.panel .frage{font-size:28px;font-weight:700}
+.reihe{display:flex;gap:12px;flex-wrap:wrap}
+.panel .knopf.gross-kn{min-height:80px;font-size:28px}
+.karten .knopf{min-width:150px;min-height:80px;font-size:40px}
+.arten{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.arten .knopf{justify-content:flex-start;white-space:normal;text-align:left;min-height:64px;font-size:22px;padding:6px 14px}
+.arten .sym{display:grid;place-items:center;min-width:42px;height:42px;border-radius:10px;background:var(--hellgelb);font-size:24px}
+.rundo{width:210px}
+.zaehler{font-size:26px;font-weight:700;color:var(--soft);text-align:center}
+.bau{display:flex;gap:40px;align-items:center}
+.stellen{display:flex;gap:16px}
+.stelle{display:flex;flex-direction:column;align-items:center;gap:8px}
+.stelle .ziffer{width:110px;height:120px;display:grid;place-items:center;font-size:90px;font-weight:700;border:3px solid var(--line);border-radius:16px;background:#fff}
+.stelle .kopf2{font-size:26px;font-weight:700;color:#fff;width:110px;text-align:center;border-radius:10px}
+.stelle .knopf{width:110px}
+.ergebnisse .knopf{min-width:140px;min-height:84px;font-size:40px}
+.ergebnisse .knopf[aria-pressed="true"]{background:var(--gelb);border-color:var(--gelbrand)}
+.rolle{font-size:24px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Fehler-Detektiv",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern zum Runden.",
+ farben: "**Farben** färbt die Zahlen auf Rundos Zettel in den Stellenwertfarben.",
+ teile: [
+  { h: "Worum geht es?", text: "Der Rechen-Roboter Rundo hat gerundet und dabei Fehler gemacht. Die Kinder finden die Fehler, verbessern sie und sagen, was schiefgelaufen ist." },
+  { h: "So geht es", punkte: [
+    "Eine Gleichung auf dem Zettel antippen. Dann **Stimmt** oder **Stimmt nicht** wählen.",
+    "Bei „Stimmt nicht“ die richtige Verbesserung antippen. Die falsche Zahl wird durchgestrichen, die richtige steht daneben (wie im Heft: 138 ≈ ~~130~~ 140).",
+    "Ab Stufe ●● fragt das Tafelbild: „Was hat Rundo falsch gemacht?“ Die Kinder wählen die Fehlerart.",
+    "**Berg zeigen** blendet einen kleinen Rundungsberg mit der richtigen Lösung ein. **Auflösen** zeigt alle Fehler."]},
+  { h: "Fehlerarten", punkte: ["**Falsche Richtung** (138 ≈ 130), **falsche Stelle angeschaut** (359 ≈ 400 bei „auf Zehner“), **falscher Nachbar** (351 ≈ 340), **zweimal gerundet** (349 ≈ 400 über 350, nur bei Hunderter), **Mitte vergessen** (250 ≈ 200)."]},
+  { h: "Auswahl", punkte: [
+    "**Auf Zehner / Hunderter** bestimmt die Überschrift des Zettels.",
+    "**Stufe ●**: 1 Fehler (falsche Richtung oder Mitte vergessen), danach direkt der passende Satz. **●●**: 2 Fehler, mit Fehlerart. **●●●**: 3 Fehler, alle Fehlerarten.",
+    "**Wir sind Rundo** (Partnerarbeit): Das Antwortkind baut mit den Pfeilen eine Zahl und wählt absichtlich eine falsche Rundung. Daraus wird ein Zettel, auf dem das Fragekind den Fehler findet und erklärt."]}]
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/runden.js"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+const ARTEN = {
+  richtung: { sym: "⇄", text: "Falsche Richtung" },
+  stelle:   { sym: "◎", text: "Falsche Stelle angeschaut" },
+  nachbar:  { sym: "↔", text: "Falscher Nachbar" },
+  kette:    { sym: "2×", text: "Zweimal gerundet" },
+  mitte:    { sym: "½", text: "Mitte vergessen" },
+};
+let modus = "finden", st = "Z", stufe = 1, gls = [], sel = -1, phase = "", fehlerZahl = 0, gefunden = 0;
+
+// ---------- Aufbau ----------
+const modusWahl = T.gruppe("", [{ wert: "finden", text: "Finden" }, { wert: "rundo", text: "Wir sind Rundo" }], "finden", v => { modus = v; neu(); });
+const stWahl = T.gruppe("Auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; neu(); }, "fd-st");
+const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "fd-stufe");
+st = stWahl.wert; stufe = stufenWahl.wert;
+const aufloesKn = T.knopf("Auflösen", () => aufloesen());
+T.leiste(modusWahl, stWahl, stufenWahl, T.knopf("Neuer Zettel", () => { modusWahl.setze("finden"); modus = "finden"; neu(); }), aufloesKn);
+
+const rundoBox = T.blk(28, 220, 210);
+rundoBox.innerHTML = `<svg class="rundo" viewBox="0 0 210 300" role="img" aria-label="Rechen-Roboter Rundo">
+  <line x1="105" y1="18" x2="105" y2="48" stroke="#1d2320" stroke-width="5"/><circle cx="105" cy="14" r="10" fill="#f5c518" stroke="#1d2320" stroke-width="4"/>
+  <rect x="45" y="48" width="120" height="92" rx="22" fill="#cfe3f7" stroke="#1d2320" stroke-width="5"/>
+  <circle cx="80" cy="88" r="13" fill="#fff" stroke="#1d2320" stroke-width="4"/><circle cx="130" cy="88" r="13" fill="#fff" stroke="#1d2320" stroke-width="4"/>
+  <circle cx="82" cy="90" r="5" fill="#1d2320"/><circle cx="128" cy="90" r="5" fill="#1d2320"/>
+  <path d="M85 117 Q105 128 125 117" fill="none" stroke="#1d2320" stroke-width="4" stroke-linecap="round"/>
+  <rect x="30" y="150" width="150" height="110" rx="18" fill="#9fc5ea" stroke="#1d2320" stroke-width="5"/>
+  <text x="105" y="222" text-anchor="middle" font-family="Andika,sans-serif" font-size="60" font-weight="700" fill="#1d2320">≈</text>
+  <line x1="30" y1="185" x2="6" y2="225" stroke="#1d2320" stroke-width="8" stroke-linecap="round"/><line x1="180" y1="185" x2="204" y2="225" stroke="#1d2320" stroke-width="8" stroke-linecap="round"/>
+  <rect x="55" y="260" width="30" height="34" rx="6" fill="#1d2320"/><rect x="125" y="260" width="30" height="34" rx="6" fill="#1d2320"/></svg>`;
+const zaehler = T.el("div", "zaehler"); rundoBox.appendChild(zaehler);
+const zBox = T.blk(258, 178); const zettel = T.el("div", "zettel"); zBox.appendChild(zettel);
+const panel = T.blk(1030, 182, 540); panel.classList.add("panel");
+const bauBox = T.blk(258, 182, 1310);
+const satz = T.streifen(T.blk(258, 744, 1312));
+T.kopf({ titel: "Fehler-Detektiv", onNeu: () => neu() });
+
+// ---------- Erzeugen ----------
+function falsch(art) {
+  const b = R.BASIS[st];
+  for (let v = 0; v < 500; v++) {
+    let n = R.zufallsZahl(st, 2), shown;
+    const x = R.nachbarn(n, st), r = R.runde(n, st);
+    if (art === "richtung") { if (x.rund || R.istMitte(n, st)) continue; shown = r === x.u ? x.o : x.u; }
+    if (art === "mitte") { n = st === "Z" ? T.zufall(2, 98) * 10 + 5 : T.zufall(1, 9) * 100 + 50; const y = R.nachbarn(n, st); shown = y.u; }
+    if (art === "stelle") { shown = R.runde(n, R.ANDERE[st]); }
+    if (art === "nachbar") { if (x.rund) continue; shown = T.wahl([x.u - b, x.o + b].filter(z => z >= 0 && z <= 1000)); }
+    if (art === "kette") { n = T.zufall(1, 8) * 100 + 40 + T.zufall(5, 9); shown = R.runde(R.runde(n, "Z"), "H"); }
+    const rr = R.runde(n, st);
+    if (shown == null || shown === rr || shown === n) continue;
+    // nur eindeutige Fehler; „zweimal gerundet“ ist immer auch „falsche Richtung“ (beides gilt dann als richtig)
+    const p = passende(n, shown); if (p[0] !== art || p.length !== (art === "kette" ? 2 : 1)) continue;
+    return { n, shown, r: rr, art };
+  }
+}
+// Alle Fehlerarten, die zu einer falschen Rundung passen (manche Rundungen passen zu mehreren)
+function passende(n, shown) {
+  const x = R.nachbarn(n, st), r = R.runde(n, st), l = [];
+  if (shown === r) return l;
+  if (st === "H" && shown === R.runde(R.runde(n, "Z"), "H")) l.push("kette");
+  if (shown === R.runde(n, R.ANDERE[st])) l.push("stelle");
+  if (shown === x.u || shown === x.o) l.push(R.istMitte(n, st) && shown === x.u ? "mitte" : "richtung");
+  else l.push("nachbar");
+  return l;
+}
+const klassifiziere = (n, shown) => passende(n, shown)[0] || null;
+function fehlerSatz(g) {
+  const d = R.pruefziffer(g.n, st), x = R.nachbarn(g.n, st);
+  return {
+    richtung: `Rundo hat ${g.shown < g.r ? "abgerundet" : "aufgerundet"}. Bei ${d} runden wir ${d >= 5 ? "auf" : "ab"}.`,
+    stelle: `Rundo hat auf ${R.NAME[R.ANDERE[st]]} gerundet. Wir sollten auf ${R.NAME[st]} runden.`,
+    nachbar: `${g.n} liegt zwischen ${x.u} und ${x.o}. ${g.shown} ist kein Nachbar.`,
+    kette: "Rundo hat zweimal gerundet. Wir schauen nur einmal auf die Zehner.",
+    mitte: "Genau in der Mitte runden wir auf.",
+  }[g.art];
+}
+function baueZettel(eigene) {
+  const arten = stufe === 1 ? ["richtung", "mitte"] : stufe === 2 ? ["richtung", "mitte", "stelle", "nachbar"] : ["richtung", "mitte", "stelle", "nachbar"].concat(st === "H" ? ["kette"] : []);
+  const liste = [];
+  if (eigene) liste.push(eigene);
+  else for (const a of T.mischen(arten).concat(T.mischen(arten), arten)) { if (liste.length === stufe) break; const f = falsch(a); if (f && !liste.some(g => g.n === f.n)) liste.push(f); }
+  while (liste.length < 6) {
+    const n = R.zufallsZahl(st, stufe === 1 ? 1 : 2);
+    if (!liste.some(g => g.n === n)) liste.push({ n, shown: R.runde(n, st), r: R.runde(n, st), art: null });
+  }
+  gls = T.mischen(liste).map(g => ({ ...g, status: "offen" }));
+  fehlerZahl = gls.filter(g => g.art).length; gefunden = 0; sel = -1;
+}
+
+// ---------- Anzeige ----------
+const glHTML = g => g.status === "gefunden"
+  ? `<span class="rz">${R.zahl(g.n)}</span><span class="ca">≈</span><span class="alt">${g.shown}</span><span class="rz">${R.zahl(g.r)}</span>`
+  : `<span class="rz">${R.zahl(g.n)}</span><span class="ca">≈</span><span class="rz">${R.zahl(g.shown)}</span>`;
+function zeichneZettel() {
+  zettel.innerHTML = `<h2>Runden auf ${R.NAME[st]}</h2>`;
+  const l = T.el("div", "gl-liste"); zettel.appendChild(l);
+  gls.forEach((g, i) => {
+    const b = T.el("button", "gl" + (i === sel ? " gewaehlt" : "") + (g.status !== "offen" ? " " + g.status : ""), glHTML(g) + (g.status !== "offen" ? '<span class="marke" aria-hidden="true">✓</span>' : ""));
+    b.type = "button"; b.setAttribute("aria-label", `${g.n} ungefähr ${g.status === "gefunden" ? g.r : g.shown}`);
+    b.addEventListener("click", () => waehle(i)); l.appendChild(b);
+  });
+  zaehler.textContent = `Gefunden: ${gefunden} von ${fehlerZahl}`;
+}
+function zeichnePanel() {
+  panel.innerHTML = "";
+  if (sel < 0) {
+    panel.appendChild(T.el("div", "frage", "Tippe eine Rundung auf Rundos Zettel an."));
+    const m = T.streifen(panel, "muster hilfe"); m.innerHTML = "<p>… ist richtig, weil …</p><p>… ist falsch. Richtig ist …</p>";
+    return;
+  }
+  const g = gls[sel];
+  panel.appendChild(T.el("div", "gross zahl", `${R.zahl(g.n)}<span class="ca">≈</span>${R.zahl(g.shown)}`));
+  if (phase === "frage") {
+    const r = T.el("div", "reihe"); panel.appendChild(r);
+    r.append(T.knopf("✓ Stimmt", () => urteil(true), "gross-kn"), T.knopf(`<svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="13" cy="13" r="9" fill="#fff4c2" stroke="#b8860b" stroke-width="4"/><path d="M20 20 L29 29" stroke="#b8860b" stroke-width="5" stroke-linecap="round"/></svg>Stimmt nicht`, () => urteil(false), "gross-kn"));
+  }
+  if (phase === "verbessern") {
+    panel.appendChild(T.el("div", "frage", "Was ist richtig?"));
+    const x = R.nachbarn(g.n, st), b = R.BASIS[st];
+    const alt = T.wahl([x.u, x.o, x.u - b, x.o + b, R.runde(g.n, R.ANDERE[st])].filter(z => z !== g.r && z !== g.shown && z >= 0 && z <= 1000));
+    const r = T.el("div", "reihe karten"); panel.appendChild(r);
+    T.mischen([g.r, alt]).forEach(z => r.appendChild(T.knopf(String(z), e => verbessere(z, e.currentTarget))));
+  }
+  if (phase === "art") {
+    panel.appendChild(T.el("div", "frage", "Was hat Rundo falsch gemacht?"));
+    const a = T.el("div", "arten"); panel.appendChild(a);
+    const moegl = ["richtung", "stelle", "nachbar", "mitte"].concat(stufe === 3 && st === "H" ? ["kette"] : []);
+    moegl.forEach(k => a.appendChild(T.knopf(`<span class="sym" aria-hidden="true">${ARTEN[k].sym}</span>${ARTEN[k].text}`, e => fehlerart(k, e.currentTarget))));
+  }
+  if (phase !== "fertig") {
+    const bz = T.knopf("Berg zeigen", () => { bz.remove(); zeigeBerg(g); }); panel.appendChild(bz);
+  }
+}
+function zeigeBerg(g) {
+  const box = T.el("div"); panel.appendChild(box);
+  const b = R.berg(box, { breite: 420 }), base = Math.floor(g.n / R.BASIS[st]) * R.BASIS[st], d = R.pruefziffer(g.n, st), seite = d >= 5 ? "o" : "u";
+  b.fuesse(base, base + R.BASIS[st]); b.kugel(d, R.FARBE[st], true); b.rolle(seite); b.fuss(seite);
+}
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); sel = -1; phase = "";
+  const finden = modus === "finden";
+  [zBox, rundoBox, panel].forEach(e => e.hidden = !finden); bauBox.hidden = finden; aufloesKn.disabled = !finden;
+  if (finden) { baueZettel(); zeichneZettel(); zeichnePanel(); T.melde(satz, "", ""); }
+  else baueStart();
+}
+function waehle(i) {
+  if (gls[i].status !== "offen") return;
+  sel = i; phase = "frage"; zeichneZettel(); zeichnePanel(); T.melde(satz, "", "");
+}
+function urteil(stimmt) {
+  const g = gls[sel];
+  if (!g.art && stimmt) {
+    g.status = "ok"; const s = [`${T.lob()} ${g.n} ≈ ${g.r} ist richtig.`, R.kurzSatz(g.n, st)]; sel = -1; zeichneZettel(); zeichnePanel(); T.melde(satz, "ok", s);
+  } else if (g.art && !stimmt) { phase = "verbessern"; zeichnePanel(); T.melde(satz, "", "Gut gesehen! Wie heißt die Rundung richtig?"); }
+  else if (g.art) T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Tipp: Berg zeigen.");
+  else T.melde(satz, "noch", "Noch nicht. Die Rundung stimmt. Schau noch einmal genau.");
+}
+function verbessere(z, b) {
+  const g = gls[sel];
+  if (z !== g.r) { b.classList.add("weg"); b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
+  g.status = "gefunden"; gefunden++; zeichneZettel();
+  const t = `${g.n} ≈ ${g.shown} ist falsch. Richtig ist ${g.r}.`;
+  if (stufe === 1) fertig(g, [T.lob(), t, fehlerSatz(g)]);
+  else { phase = "art"; zeichnePanel(); T.melde(satz, "ok", [T.lob(), t]); }
+}
+function fehlerart(k, b) {
+  const g = gls[sel];
+  if (!passende(g.n, g.shown).includes(k)) { b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
+  fertig(g, [T.lob(), `${ARTEN[k].text}.`, fehlerSatz({ ...g, art: k })]);
+}
+function fertig(g, t) {
+  phase = "fertig"; sel = -1; zeichneZettel(); zeichnePanel();
+  if (gefunden === fehlerZahl) t.push(`Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden!`);
+  T.melde(satz, "ok", t);
+}
+function aufloesen() {
+  gls.filter(g => g.art && g.status !== "gefunden").forEach(g => { g.status = "gefunden"; gefunden++; });
+  sel = -1; zeichneZettel(); zeichnePanel();
+  T.melde(satz, "", gls.filter(g => g.art).map(g => `${g.n} ≈ ${g.shown} ist falsch. Richtig ist ${g.r}. ${fehlerSatz(g)}`));
+}
+
+// ---------- Wir sind Rundo ----------
+let bauZahl = 0, bauWahl = null;
+function baueStart() {
+  bauZahl = R.zufallsZahl(st, 2); bauWahl = null; zeichneBau();
+  T.melde(satz, "", "Antwortkind: Baue eine Zahl und wähle eine falsche Rundung. Fragekind: Schau nicht hin!");
+}
+function zeichneBau() {
+  const s = T.stellen(bauZahl), b = R.BASIS[st], x = R.nachbarn(bauZahl, st);
+  bauBox.innerHTML = "";
+  bauBox.appendChild(T.el("p", "rolle hilfe", "Antwortkind: Baue eine falsche Rundung. Fragekind: Finde danach den Fehler und erkläre ihn."));
+  const bau = T.el("div", "bau"); bauBox.appendChild(bau);
+  const stellen = T.el("div", "stellen"); bau.appendChild(stellen);
+  [["H", 100], ["Z", 10], ["E", 1]].forEach(([k, w]) => {
+    const sp = T.el("div", "stelle");
+    sp.append(T.el("div", "kopf2", k)); sp.lastChild.style.background = `var(--${k})`;
+    sp.append(T.knopf("▲", () => aendere(w)), T.el("div", "ziffer zahl", `<span class="${k.toLowerCase()}">${s[k] || 0}</span>`), T.knopf("▼", () => aendere(-w)));
+    stellen.appendChild(sp);
+  });
+  const re = T.el("div"); bau.appendChild(re);
+  re.appendChild(T.el("div", "frage", `${bauZahl} ≈ ? (auf ${R.NAME[st]})`)); re.lastChild.style.cssText = "font-size:34px;font-weight:700;margin-bottom:14px";
+  const kand = [...new Set([x.u - b, x.u, x.o, x.o + b, R.runde(bauZahl, R.ANDERE[st]), R.runde(R.runde(bauZahl, "Z"), "H")])].filter(z => z >= 0 && z <= 1000).sort((p, q) => p - q);
+  const erg = T.el("div", "reihe ergebnisse"); re.appendChild(erg);
+  kand.forEach(z => { const k = T.knopf(String(z), () => { bauWahl = z; zeichneBau(); }); k.setAttribute("aria-pressed", z === bauWahl); erg.appendChild(k); });
+  const fertigKn = T.knopf("Rundos Zettel erstellen", () => verstecken(), "haupt"); fertigKn.style.marginTop = "22px"; fertigKn.disabled = bauWahl === null;
+  re.appendChild(fertigKn);
+}
+function aendere(d) { const n = bauZahl + d; if (n >= 1 && n <= 999) { bauZahl = n; bauWahl = null; zeichneBau(); } }
+function verstecken() {
+  const art = klassifiziere(bauZahl, bauWahl);
+  if (!art) return T.melde(satz, "noch", "Das ist richtig gerundet. Rundo soll einen Fehler machen!");
+  modusWahl.setze("finden"); modus = "finden";
+  [zBox, rundoBox, panel].forEach(e => e.hidden = false); bauBox.hidden = true; aufloesKn.disabled = false;
+  baueZettel({ n: bauZahl, shown: bauWahl, r: R.runde(bauZahl, st), art }); zeichneZettel(); zeichnePanel();
+  T.melde(satz, "", "Fragekind: Finde Rundos Fehler und erkläre ihn.");
+}
+neu();
+</script>
+</body>
+</html>

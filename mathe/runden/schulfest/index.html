@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Genau oder gerundet? Das Schulfest – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/runden.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.szene{display:block}
+.stapel{position:relative}
+.stapel .info{font-size:24px;font-weight:700;color:var(--soft);margin-bottom:10px}
+.karte{position:relative;width:460px;min-height:200px;padding:18px 20px;border:4px solid var(--ink);border-radius:20px;background:#fff;box-shadow:6px 6px 0 #d5ddd7,12px 12px 0 #e6ebe7;
+  display:flex;gap:16px;align-items:center;cursor:grab;touch-action:none;user-select:none}
+.karte.gewaehlt{border-color:var(--gelbrand);box-shadow:0 0 0 6px var(--gelb),6px 6px 0 #d5ddd7}
+.karte .sym{font-size:66px;line-height:1;flex:none}
+.karte .txt{font-size:30px;font-weight:700;line-height:1.25}
+.ziehen{position:fixed!important;margin:0;z-index:100;cursor:grabbing;box-shadow:0 14px 30px rgba(0,0,0,.3)!important;pointer-events:none}
+.vorlesen{margin-top:16px}
+.koerbe{display:flex;gap:16px}
+.korb{flex:1;min-width:0;height:410px;border:4px dashed var(--ink);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fff;cursor:pointer}
+.korb.r{border-color:var(--aufrand);background:#f4fbf6} .korb.g{border-color:var(--abrand);background:#f3f8fe} .korb.d{border-color:var(--gelbrand);background:#fffbea}
+.korb.ziel{box-shadow:0 0 0 6px var(--gelb)}
+.korb h3{margin:0 0 4px;font-size:28px;display:flex;align-items:center;gap:10px}
+.korb h3 .z{display:grid;place-items:center;min-width:46px;height:46px;border-radius:12px;background:var(--ink);color:#fff;font-size:30px}
+.korb .inhalt{display:flex;flex-direction:column;gap:8px;overflow:auto}
+.mini{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:6px 12px;border:3px solid var(--ink);border-radius:12px;background:#fff;font-size:21px;font-weight:700;line-height:1.2;cursor:grab;touch-action:none}
+.mini .s{font-size:28px}
+.mini > span:nth-child(2){flex:1 1 70%;min-width:0}
+.mini .flagge{flex-basis:auto;margin-left:38px;padding:2px 8px;border-radius:8px;font-size:18px;background:var(--hellgelb);border:2px solid var(--gelbrand)}
+.mini .flagge.anders{background:#ffe0b3;border-color:var(--nochrand);color:#8a4500}
+.mini.rund{background:#eaf6ee}
+.satzmuster{margin-top:14px}
+/* Gerundet oder nicht? */
+.satzkarte{font-size:52px;font-weight:700;line-height:1.5;display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center}
+.wort{font-family:var(--font);font-size:52px;font-weight:700;border:3px solid transparent;border-radius:14px;background:none;color:var(--ink);padding:0 10px;cursor:pointer}
+.wort:hover{border-color:var(--line)}
+.wort.leucht{background:var(--gelb);border-color:var(--gelbrand)}
+.wort.nichts{color:#9aa59f}
+.wahlreihe{display:flex;gap:24px;justify-content:center}
+.wahlreihe .knopf{min-height:84px;font-size:32px;padding:0 34px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script src="karten.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Genau oder gerundet? Das Schulfest",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern zum Runden.",
+ farben: "**Farben** hat hier keine eigene Wirkung.",
+ teile: [
+  { h: "Worum geht es?", text: "Die Kinder entscheiden, wann Runden sinnvoll ist, und begründen mit Satzmustern." },
+  { h: "Sortieren", punkte: [
+    "Die oberste Karte in einen Korb ziehen: „Darf ich runden ≈“ oder „Muss genau sein =“. Oder: Karte antippen, dann den Korb antippen.",
+    "**Vorlesen** liest die Karte vor (nur wenn der Browser eine deutsche Sprachausgabe hat).",
+    "Nach dem Einsortieren erscheint ein Begründungssatz. Karten im Korb „runden“ antippen: Dann wird die Zahl gerundet angezeigt („etwa 250 Gäste“).",
+    "Karten lassen sich jederzeit in einen anderen Korb ziehen.",
+    "**Vergleichen** zeigt an jeder Karte die Vorschlags-Lösung als kleines Fähnchen."]},
+  { h: "Für die Lehrkraft", punkte: [
+    "Manche Karten sind bewusst diskutierbar: Becher und Sitzplätze sollten genau sein, wenn es knapp wird („Reicht der Bus?“). Eine Karte, die gut begründet im anderen Korb liegt, gilt als richtig.",
+    "Deshalb gibt es kein automatisches „Falsch“. „Vergleichen“ zeigt nur den Vorschlag, orange heißt: liegt anders als vorgeschlagen – darüber sprechen.",
+    "Auf Stufe ●●● gibt es den Korb „Darüber reden wir“ für umstrittene Karten."]},
+  { h: "Auswahl", punkte: [
+    "**Set**: Schulfest oder Alltag (Karten aus dem Heft).",
+    "**Stufe ●**: 4 eindeutige Karten (Telefonnummer, PIN, Gäste, Luftballons). **●●**: alle Karten eines Sets. **●●●**: mit Korb „Darüber reden wir“ und Satzmustern zum Begründen.",
+    "**Gerundet oder nicht?**: Ein Satz aus dem Heft. Die Kinder tippen die Signalwörter (fast, etwa, ca., ungefähr) an und entscheiden: gerundet oder genau."]}]
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/runden.js"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+const KORB = { r: { titel: "Darf ich runden", z: "≈" }, g: { titel: "Muss genau sein", z: "=" }, d: { titel: "Darüber reden wir", z: "?" } };
+let modus = "sortieren", set = "schulfest", stufe = 1, stapel = [], lage = {}, rund = new Set(), gewaehlt = null, vergleichen = false;
+const sprache = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+
+// ---------- Aufbau ----------
+const modusWahl = T.gruppe("", [{ wert: "sortieren", text: "Sortieren" }, { wert: "signal", text: "Gerundet oder nicht?" }], "sortieren", v => { modus = v; neu(); });
+const setWahl = T.gruppe("Set", SETS, "schulfest", v => { set = v; neu(); }, "fest-set");
+const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "fest-stufe");
+set = setWahl.wert; stufe = stufenWahl.wert;
+const vglKn = T.schalter("Vergleichen", false, v => { vergleichen = v; zeichneKoerbe(); });
+T.leiste(modusWahl, setWahl, stufenWahl, vglKn);
+
+// Szene (selbst gezeichnet): Zelt, Kuchentisch, Bus, Luftballons
+const szene = T.blk(24, 168, 1552);
+szene.innerHTML = `<svg class="szene" viewBox="0 0 1552 120" width="1552" height="120" aria-hidden="true">
+  <rect x="0" y="104" width="1552" height="16" fill="#cfe8c4"/>
+  <g transform="translate(70,0)"><path d="M0 104 L80 20 L160 104 Z" fill="#e0564f" stroke="#1d2320" stroke-width="4"/><path d="M80 20 L80 104" stroke="#fff" stroke-width="10"/><path d="M80 20 L40 104 M80 20 L120 104" stroke="#fff" stroke-width="7"/><path d="M80 20 L80 6" stroke="#1d2320" stroke-width="4"/><path d="M80 6 L102 12 L80 18Z" fill="#f5c518"/></g>
+  <g transform="translate(330,40)"><rect x="0" y="34" width="160" height="10" fill="#b07a45" stroke="#1d2320" stroke-width="3"/><rect x="12" y="44" width="8" height="20" fill="#1d2320"/><rect x="140" y="44" width="8" height="20" fill="#1d2320"/>
+    <path d="M30 34 L30 14 Q60 0 90 14 L90 34 Z" fill="#f8d7a8" stroke="#1d2320" stroke-width="3"/><path d="M30 18 Q60 8 90 18" stroke="#e0564f" stroke-width="5" fill="none"/><circle cx="125" cy="26" r="9" fill="#f5c518" stroke="#1d2320" stroke-width="3"/></g>
+  <g transform="translate(640,34)"><rect x="0" y="0" width="240" height="62" rx="12" fill="#f5c518" stroke="#1d2320" stroke-width="4"/>
+    ${[0, 1, 2, 3, 4].map(i => `<rect x="${14 + i * 44}" y="10" width="34" height="24" rx="4" fill="#d6eaff" stroke="#1d2320" stroke-width="2"/>`).join("")}
+    <circle cx="50" cy="66" r="13" fill="#1d2320"/><circle cx="190" cy="66" r="13" fill="#1d2320"/></g>
+  ${[[1020, "#e0564f"], [1080, "#2667c9"], [1140, "#3fae5a"], [1200, "#f5c518"], [1260, "#7a4fa8"]].map(([x, f], i) =>
+    `<path d="M${x} ${58 + (i % 2) * 8} Q${x + 6} 84 ${x - 4} 104" stroke="#1d2320" stroke-width="2" fill="none"/><ellipse cx="${x}" cy="${36 + (i % 2) * 8}" rx="20" ry="25" fill="${f}" stroke="#1d2320" stroke-width="3"/>`).join("")}
+  <text x="1420" y="70" text-anchor="middle" font-family="Andika,sans-serif" font-size="30" font-weight="700" fill="#1d2320">Schulfest</text></svg>`;
+
+const stapelBox = T.blk(24, 306, 490); stapelBox.classList.add("stapel");
+const koerbeBox = T.blk(540, 306, 1036); const koerbe = T.el("div", "koerbe"); koerbeBox.appendChild(koerbe);
+const satz = T.streifen(T.blk(540, 732, 1036));
+const signalBox = T.blk(60, 320, 1480);
+T.kopf({ titel: "Genau oder gerundet? Das Schulfest", onNeu: () => neu() });
+
+// ---------- Sortieren ----------
+const alleKarten = () => KARTEN.schulfest.concat(KARTEN.alltag);
+const karte = id => alleKarten().find(k => k.id === id);
+function neu() {
+  const sortieren = modus === "sortieren";
+  [stapelBox, koerbeBox, satz.parentNode].forEach(e => e.hidden = !sortieren); signalBox.hidden = sortieren;
+  [setWahl, stufenWahl, vglKn].forEach(el => { el.style.display = sortieren ? "" : "none"; el.previousSibling.style.display = sortieren ? "" : "none"; });
+  if (!sortieren) return neuerSatz();
+  stapel = stufe === 1 ? alleKarten().filter(k => k.leicht).map(k => k.id) : T.mischen(KARTEN[set].map(k => k.id));
+  if (stufe === 1) stapel = T.mischen(stapel);
+  lage = {}; rund = new Set(); gewaehlt = null;
+  zeichneStapel(); zeichneKoerbe(); T.melde(satz, "", "Ziehe die Karte in einen Korb. Oder: Karte antippen, dann Korb antippen.");
+}
+function zeichneStapel() {
+  stapelBox.innerHTML = "";
+  stapelBox.appendChild(T.el("div", "info", stapel.length ? `Karten: noch ${stapel.length}` : "Alle Karten sind sortiert."));
+  if (stapel.length) {
+    const k = karte(stapel[0]);
+    const el = T.el("div", "karte" + (gewaehlt === k.id ? " gewaehlt" : ""), `<span class="sym" aria-hidden="true">${k.sym}</span><span class="txt">${k.text}</span>`);
+    el.setAttribute("role", "button"); el.setAttribute("aria-label", k.text); el.tabIndex = 0;
+    ziehbar(el, k.id); stapelBox.appendChild(el);
+    if (sprache) { const v = T.knopf("🔊 Vorlesen", () => vorlesen(k.text), "vorlesen"); stapelBox.appendChild(v); }
+  }
+  if (stufe === 3) { const m = T.streifen(stapelBox, "muster hilfe satzmuster"); m.innerHTML = "<p>… darf ich runden, weil …</p><p>… muss genau sein, weil …</p>"; }
+}
+function zeichneKoerbe() {
+  koerbe.innerHTML = "";
+  (stufe === 3 ? ["r", "g", "d"] : ["r", "g"]).forEach(id => {
+    const k = T.el("div", "korb " + id); k.dataset.korb = id;
+    k.innerHTML = `<h3><span class="z">${KORB[id].z}</span>${KORB[id].titel}</h3>`;
+    const inh = T.el("div", "inhalt"); k.appendChild(inh);
+    Object.entries(lage).filter(([, b]) => b === id).forEach(([kid]) => {
+      const c = karte(kid), gerundet = id === "r" && rund.has(kid) && c.gerundet;
+      const m = T.el("div", "mini" + (gerundet ? " rund" : ""), `<span class="s" aria-hidden="true">${c.sym}</span><span>${gerundet ? c.gerundet : c.text}</span>`);
+      if (vergleichen) { const anders = id !== "d" && c.vorschlag !== id; m.insertAdjacentHTML("beforeend", `<span class="flagge${anders ? " anders" : ""}">Vorschlag ${c.vorschlag === "r" ? "≈" : "="}${anders ? " · anders gelegt" : ""}${c.reden ? " · reden" : ""}</span>`); }
+      ziehbar(m, kid); inh.appendChild(m);
+    });
+    k.addEventListener("click", e => { if (gewaehlt && !e.target.closest(".mini")) lege(gewaehlt, id); });
+    koerbe.appendChild(k);
+  });
+}
+function begruendung(c, korb) {
+  if (korb === "d") return "Darüber reden wir: Muss die Zahl genau sein, oder reicht ungefähr?";
+  const weil = korb === "r" ? c.weilR : c.weilG;
+  if (!weil) return `Stimmt das? Erkläre: ${c.wer} ${korb === "r" ? "darf ich runden" : "muss genau sein"}, weil …`;
+  return `${c.wer} ${korb === "r" ? "darf ich runden" : "muss genau sein"}, weil ${weil}.`;
+}
+function lege(id, korb) {
+  lage[id] = korb; stapel = stapel.filter(x => x !== id); gewaehlt = null; rund.delete(id);
+  zeichneStapel(); zeichneKoerbe();
+  const c = karte(id), t = [begruendung(c, korb)];
+  if (korb === "r" && c.gerundet) t.push("Tippe die Karte im Korb an: Dann siehst du die Zahl gerundet.");
+  if (!stapel.length) t.push("Alle Karten sind sortiert. Drückt „Vergleichen“ und sprecht darüber.");
+  T.melde(satz, "", t);
+}
+function tippe(id) {
+  if (lage[id]) {             // Karte liegt schon im Korb
+    if (lage[id] === "r" && karte(id).gerundet) { rund.has(id) ? rund.delete(id) : rund.add(id); zeichneKoerbe(); }
+    return;
+  }
+  gewaehlt = gewaehlt === id ? null : id; zeichneStapel();
+  if (gewaehlt) T.melde(satz, "", "Jetzt den Korb antippen.");
+}
+// Ziehen mit Finger oder Maus; kurzes Antippen = auswählen
+function ziehbar(el, id) {
+  el.addEventListener("pointerdown", e => {
+    e.preventDefault(); e.stopPropagation();
+    const start = { x: e.clientX, y: e.clientY }, r = el.getBoundingClientRect(); let geist = null;
+    const k = S.getBoundingClientRect().width / 1600;
+    const bewege = ev => {
+      if (!geist && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 10) return;
+      if (!geist) { geist = el.cloneNode(true); geist.classList.add("ziehen"); geist.style.width = r.width / k + "px"; geist.style.transformOrigin = "0 0"; geist.style.transform = `scale(${k})`; document.body.appendChild(geist); el.style.opacity = ".35"; }
+      geist.style.left = ev.clientX - (start.x - r.left) + "px"; geist.style.top = ev.clientY - (start.y - r.top) + "px";
+      const z = korbUnter(ev.clientX, ev.clientY); document.querySelectorAll(".korb").forEach(c => c.classList.toggle("ziel", c === z));
+    };
+    const ende = ev => {
+      removeEventListener("pointermove", bewege); removeEventListener("pointerup", ende); removeEventListener("pointercancel", ende);
+      document.querySelectorAll(".korb").forEach(c => c.classList.remove("ziel"));
+      if (!geist) return tippe(id);
+      geist.remove(); el.style.opacity = "";
+      const z = korbUnter(ev.clientX, ev.clientY); if (z && z.dataset.korb !== lage[id]) lege(id, z.dataset.korb);
+    };
+    addEventListener("pointermove", bewege); addEventListener("pointerup", ende); addEventListener("pointercancel", ende);
+  });
+  el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tippe(id); } });
+}
+function korbUnter(x, y) { return [...document.querySelectorAll(".korb")].find(c => { const r = c.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }) || null; }
+function vorlesen(text) {
+  if (!sprache) return;
+  speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; u.rate = .9; speechSynthesis.speak(u);
+}
+addEventListener("pagehide", () => { if (sprache) speechSynthesis.cancel(); });
+
+// ---------- Gerundet oder nicht? ----------
+let satzNr = -1, gefunden = new Set(), entschieden = false;
+function neuerSatz() {
+  satzNr = (satzNr + 1 + T.zufall(0, SAETZE.length - 2)) % SAETZE.length; gefunden = new Set(); entschieden = false;
+  zeichneSignal(); T.melde(signalSatz, "", "Gibt es ein Wort, das verrät: Die Zahl ist gerundet? Tippe es an.");
+}
+const istSignal = w => SIGNALWOERTER.includes(w.toLowerCase().replace(/[.,!?]$/, "") ) || SIGNALWOERTER.includes(w.toLowerCase());
+let signalSatz;
+function zeichneSignal() {
+  signalBox.innerHTML = "";
+  const s = T.el("div", "satzkarte"); signalBox.appendChild(s);
+  SAETZE[satzNr].split(" ").forEach(w => {
+    const b = T.el("button", "wort" + (gefunden.has(w) ? " leucht" : ""), w); b.type = "button";
+    b.addEventListener("click", () => {
+      if (istSignal(w)) { gefunden.add(w); b.classList.add("leucht"); T.melde(signalSatz, "ok", `${T.lob()} Das Wort „${w.replace(/[,!?]$/, "")}“ verrät: Die Zahl ist gerundet.`); }
+      else { b.classList.add("nichts"); T.melde(signalSatz, "", "Dieses Wort verrät nichts über die Zahl."); }
+    });
+    s.appendChild(b);
+  });
+  const reihe = T.el("div", "wahlreihe"); reihe.style.marginTop = "34px"; signalBox.appendChild(reihe);
+  reihe.append(T.knopf("gerundet ≈", () => entscheide(true)), T.knopf("genau =", () => entscheide(false)), T.knopf("Nächster Satz", () => neuerSatz(), "haupt"));
+  signalSatz = T.streifen(signalBox); signalSatz.style.marginTop = "28px";
+  const m = T.el("div", "merkkarte hilfe", "<strong>Diese Wörter verraten: Die Zahl ist gerundet.</strong>fast · etwa · ca. · ungefähr");
+  m.style.marginTop = "20px"; signalBox.appendChild(m);
+}
+function entscheide(gerundet) {
+  const sig = SAETZE[satzNr].split(" ").find(istSignal);
+  if (!!sig === gerundet) T.melde(signalSatz, "ok", sig ? `${T.lob()} Das Wort „${sig}“ verrät: Die Zahl ist gerundet.` : `${T.lob()} Hier steht kein Signalwort. Die Zahl ist genau.`);
+  else T.melde(signalSatz, "noch", T.NOCH);
+}
+neu();
+</script>
+</body>
+</html>

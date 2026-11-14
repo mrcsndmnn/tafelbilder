@@ -1,0 +1,57 @@
+/* =====================================================================
+   Runden im Zahlenraum bis 1000 – zusätzliche Bausteine
+   (Grundgestaltung kommt aus ../../zahlenraum-1000/gemeinsam/tafel.css)
+   ===================================================================== */
+:root{ --ab:#d6eaff; --abrand:#6d9fd8; --auf:#dff3e4; --aufrand:#3fae5a; }
+
+/* Lupen-Markierung: Prüfstelle unterstrichen, gelbe Lupe darüber */
+.pruef{position:relative;display:inline-block;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.12em;text-decoration-color:var(--gelbrand)}
+.pruef::before{content:"";position:absolute;left:50%;top:-.42em;width:.32em;height:.32em;margin-left:-.2em;border:.06em solid var(--gelbrand);
+  border-radius:50%;background:rgba(255,224,102,.6)}
+.pruef::after{content:"";position:absolute;left:50%;top:-.14em;width:.06em;height:.16em;margin-left:.07em;background:var(--gelbrand);border-radius:.03em;transform:rotate(-40deg)}
+
+/* Zahlen mit Stellenwertfarben nur bei „Farben“ (Klasse rz); große Anzeigen (Klasse zahl) immer farbig */
+.farben .rz .t{color:var(--T)} .farben .rz .h{color:var(--H)} .farben .rz .z{color:var(--Z)} .farben .rz .e{color:var(--E)}
+
+/* Gleichung „273 ≈ 270“ */
+.gleichung{font-size:64px;font-weight:700;line-height:1.1;white-space:nowrap}
+.gleichung .ca,.ca{color:var(--ink);margin:0 .18em;font-weight:700}
+.einblenden{animation:einbl .5s ease-out}
+@keyframes einbl{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Auf-/Ab-Symbol: Bogenpfeil mit Wort darunter */
+.aufab{display:inline-flex;flex-direction:column;align-items:center;gap:2px;font-size:20px;font-weight:700}
+.aufab svg{width:48px;height:34px}
+
+/* Rundungsberg */
+.berg svg{display:block;overflow:visible}
+.berg .hang-l{fill:var(--ab)} .berg .hang-r{fill:var(--auf)}
+.hilfen-aus .berg .hang-l,.hilfen-aus .berg .hang-r{fill:#fff}
+.hilfen-aus .berg .wort{display:none}
+.berg .umriss{fill:none;stroke:var(--ink);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.berg .platz circle{fill:#fff;stroke:#8d9892;stroke-width:4}
+.berg .platz text{font-family:var(--font);font-size:30px;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.berg .platz.tippbar{cursor:pointer}
+.berg .platz.an circle{fill:var(--gelb);stroke:var(--gelbrand)}
+.berg .platz.falsch circle{fill:#eef0ee;stroke:#c5ccc7} .berg .platz.falsch text{fill:#9aa59f}
+.berg .fuss rect{fill:#fff;stroke:var(--ink);stroke-width:4}
+.berg .fuss.links rect{stroke:var(--abrand)} .berg .fuss.rechts rect{stroke:var(--aufrand)}
+.berg .fuss text{font-family:var(--font);font-size:40px;font-weight:700;text-anchor:middle;dominant-baseline:central;fill:var(--ink)}
+.berg .fuss.tippbar{cursor:pointer}
+.berg .fuss.an rect{fill:var(--gelb);stroke:var(--gelbrand);stroke-width:6}
+.berg .wort text{font-family:var(--font);font-size:28px;font-weight:700;text-anchor:middle}
+.berg .gipfel text{font-family:var(--font);font-size:20px;font-weight:700;fill:var(--soft);text-anchor:middle}
+.berg .kugel{transition:transform .65s ease-in-out}
+.berg .kugel circle{stroke:#1d2320;stroke-width:3}
+.berg .kugel text{font-family:var(--font);font-size:30px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central}
+
+/* Merkkarte mit der Regel */
+.merkkarte{background:#fffdf3;border:4px solid var(--ink);border-radius:18px;padding:16px 22px;font-size:26px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.merkkarte strong{display:block;font-size:28px;margin-bottom:6px}
+.merkkarte .ab{color:#2d5f9e} .merkkarte .auf{color:#24753a}
+
+@media (prefers-reduced-motion: reduce){.einblenden{animation:none}.berg .kugel{transition:none}}
+
+/* In der Stellenwerttafel sitzt die Lupe schräg rechts oben an der Ziffer (nicht im Tafelkopf) */
+.swt td .pruef::before{top:-.08em;left:auto;right:-.42em;margin:0;width:.36em;height:.36em}
+.swt td .pruef::after{top:.24em;left:auto;right:-.47em;margin:0;height:.18em;transform:rotate(-40deg)}

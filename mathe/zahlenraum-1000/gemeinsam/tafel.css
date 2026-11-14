@@ -27,6 +27,7 @@ body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);ov
 #stage{position:absolute;left:0;top:0;width:1600px;height:900px;background:var(--stage);border-radius:18px;
   box-shadow:0 6px 30px rgba(0,0,0,.18);transform-origin:0 0;overflow:hidden}
 .blk{position:absolute}
+[hidden]{display:none!important}
 .hilfen-aus .hilfe{visibility:hidden}
 
 /* ---------- Knöpfe und Schalter (mind. 64 px hoch, Schrift 24 px) ---------- */
