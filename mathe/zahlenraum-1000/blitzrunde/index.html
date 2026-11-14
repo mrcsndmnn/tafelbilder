@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Blitzrunde – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.karte{display:flex;gap:24px;width:880px;height:420px;padding:28px 36px;border:5px solid var(--ink);border-radius:26px;background:#fff;box-shadow:0 6px 0 #c9d1cb}
+.karte .links{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.startzahl{font-size:170px;font-weight:700;line-height:1}
+.befehl{display:flex;align-items:center;gap:18px;font-size:44px;font-weight:700;margin-top:14px;line-height:1.15}
+.befehl .pf{font-size:64px;min-width:64px;text-align:center;flex:none;white-space:nowrap}
+.befehl .pf.lang{font-size:46px}
+.loesung{font-size:64px;font-weight:700;margin-top:18px;min-height:76px}
+.loesung .gl{color:var(--soft);font-size:44px}
+.ausschnitt{width:300px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px}
+.ausschnitt .quadrat{--z:54px}
+.ausschnitt .quadrat .feld{cursor:default}
+.ausschnitt .titel{font-size:20px;font-weight:700;color:var(--soft);text-align:center}
+.zeit{width:880px;height:20px;border-radius:10px;background:#e6ebe7;overflow:hidden}
+.zeit div{height:100%;width:100%;background:var(--E);border-radius:10px}
+.bedien{display:flex;gap:14px;align-items:center;width:880px}
+.zaehler{margin-left:auto;font-size:30px;font-weight:700;color:var(--soft)}
+.ampel h2{font-size:32px;margin:0 0 6px}
+.ampel p{font-size:22px;color:var(--soft);margin:0 0 16px}
+.ampel .kn{display:flex;align-items:center;gap:22px;margin-bottom:16px}
+.ampel .licht{width:118px;height:118px;border-radius:50%;border:5px solid var(--ink);cursor:pointer;font-family:var(--font);font-size:22px;font-weight:700;touch-action:manipulation}
+.ampel .licht:focus-visible{outline:5px solid var(--ok);outline-offset:3px}
+.ampel .licht:active{transform:scale(.95)}
+.ampel .gruen{background:#3fae5a;color:#fff}.ampel .gelb{background:#f5c518;color:var(--ink)}.ampel .rot{background:#e0564f;color:#fff}
+.ampel .anz{font-size:56px;font-weight:700;min-width:90px}
+.summe{font-size:24px;border:3px solid var(--ink);border-radius:14px;padding:14px 18px;background:#fff}
+.summe .balken{display:flex;height:30px;border-radius:8px;overflow:hidden;margin-top:10px;background:#e6ebe7}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const RUNDEN = 10;
+let stufe = 1, zeit = T.laden("blitz-zeit", 0), runde = 1, aufg = null, gezeigt = false, uhr = null;
+const ampel = { gruen: 0, gelb: 0, rot: 0 };
+
+// ---------- Aufbau ----------
+const stufenWahl = T.stufen(v => { stufe = v; start(); }, "blitz-stufe"); stufe = stufenWahl.wert;
+const zeitWahl = T.gruppe("Zeit", [{ wert: 0, text: "aus" }, { wert: 5, text: "5 s" }, { wert: 10, text: "10 s" }], 0,
+  v => { zeit = v; T.merken("blitz-zeit", v); zeigeAufgabe(); }, "blitz-zeit");
+zeit = zeitWahl.wert;
+T.leiste(stufenWahl, zeitWahl);
+
+const kBox = T.blk(60, 186); const karte = T.el("div", "karte"); kBox.appendChild(karte);
+const links = T.el("div", "links"); const aus = T.el("div", "ausschnitt"); karte.append(links, aus);
+const startEl = T.el("div", "startzahl zahl"), befehlEl = T.el("div", "befehl"), loesEl = T.el("div", "loesung zahl");
+links.append(startEl, befehlEl, loesEl);
+const zeitBox = T.blk(60, 632); const zeitEl = T.el("div", "zeit", "<div></div>"); zeitBox.appendChild(zeitEl);
+const bed = T.blk(60, 668); const bedien = T.el("div", "bedien"); bed.appendChild(bedien);
+const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Runde", () => weiter());
+const zaehler = T.el("span", "zaehler"); bedien.append(loesKn, weiterKn, zaehler);
+const satz = T.streifen(T.blk(60, 752, 880), "hilfe");
+
+const ab = T.blk(1000, 186, 560); ab.classList.add("ampel");
+ab.innerHTML = "<h2>Klassen-Ampel</h2><p>Daumen hoch, Mitte oder runter? Tippe für jedes Kind.</p>";
+const anz = {};
+[["gruen", "Gut"], ["gelb", "Geht so"], ["rot", "Schwer"]].forEach(([k, t]) => {
+  const zeile = T.el("div", "kn"); const b = T.el("button", "licht " + k, t); b.type = "button";
+  const a = T.el("span", "anz", "0"); anz[k] = a;
+  b.addEventListener("click", () => { ampel[k]++; a.textContent = ampel[k]; if (runde > RUNDEN) zeigeSumme(); });
+  zeile.append(b, a); ab.appendChild(zeile);
+});
+const summe = T.el("div", "summe"); summe.hidden = true; ab.appendChild(summe);
+
+T.kopf({ titel: "Blitzrunde zum Stundenbeginn", onNeu: () => start() });
+
+// ---------- Aufgaben ----------
+const istSprung = a => T.stellenSatz(a.st, a.e, a.ri, a.k).startsWith("Sprung");
+function neueAufgabe() {
+  for (let v = 0; v < 2000; v++) {
+    const st = T.zufall(1, 1000); let ri, k;
+    if (stufe === 1) { ri = T.wahl(T.GERADE); k = 1; }
+    else if (stufe === 2) { ri = T.wahl(T.ACHT); k = T.zufall(1, 2); }
+    else if (Math.random() < .35) { ri = T.wahl(["plus100", "minus100"]); k = T.zufall(1, 2); }
+    else { ri = T.wahl(T.ACHT); k = T.zufall(1, 3); }
+    const e = T.schritt(st, ri, k); if (e === null) continue;
+    const a = { st, ri, k, e };
+    if (stufe < 3 && istSprung(a)) continue;                       // Stufe 1 und 2 ohne Sprungstellen
+    if (stufe === 3 && !T.R[ri].ds && !istSprung(a)) continue;      // Stufe 3: Sprungstellen oder ±100
+    return a;
+  }
+}
+function befehlText(a) {
+  if (a.ri === "plus100") return a.k === 1 ? "ins nächste Quadrat" : `${a.k} Quadrate weiter`;
+  if (a.ri === "minus100") return a.k === 1 ? "ins Quadrat davor" : `${a.k} Quadrate zurück`;
+  return `${a.k} ${T.R[a.ri].text}`;
+}
+
+// ---------- Ablauf ----------
+function stoppeUhr() { clearTimeout(uhr); uhr = null; const b = zeitEl.firstChild; b.style.transition = "none"; b.style.width = "100%"; }
+addEventListener("pagehide", stoppeUhr);
+function start() {
+  runde = 1; Object.keys(ampel).forEach(k => { ampel[k] = 0; anz[k].textContent = "0"; }); summe.hidden = true; weiterKn.disabled = false;
+  aufg = neueAufgabe(); zeigeAufgabe();
+}
+function zeigeAufgabe() {
+  stoppeUhr(); gezeigt = false;
+  startEl.innerHTML = T.zahlHTML(aufg.st);
+  befehlEl.innerHTML = `<span class="pf${T.R[aufg.ri].ds ? " lang" : ""}" aria-hidden="true">${T.R[aufg.ri].pfeil}</span><span>${befehlText(aufg)}</span>`;
+  loesEl.innerHTML = ""; aus.innerHTML = ""; T.melde(satz, "", "");
+  zaehler.textContent = `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`;
+  loesKn.disabled = false; weiterKn.textContent = runde >= RUNDEN ? "Runde beenden" : "Nächste Runde";
+  zeitBox.style.visibility = zeit ? "visible" : "hidden";
+  if (zeit) {
+    const b = zeitEl.firstChild; b.getBoundingClientRect();
+    b.style.transition = `width ${zeit}s linear`; b.style.width = "0%";
+    uhr = setTimeout(loesung, zeit * 1000);
+  }
+}
+function loesung() {
+  if (gezeigt) return; gezeigt = true; clearTimeout(uhr); loesKn.disabled = true;
+  const a = aufg;
+  loesEl.innerHTML = `<span class="gl">=</span> ${T.zahlHTML(a.e)}`;
+  const text = T.R[a.ri].ds
+    ? (a.k === 1 ? T.bewegungsSatz(a.st, a.e, a.ri) : `Ich springe ${a.k} Quadrate ${a.ri === "plus100" ? "weiter" : "zurück"}: von ${a.st} bis ${a.e}. ` + T.stellenSatz(a.st, a.e, a.ri, a.k))
+    : (a.k === 1 ? T.bewegungsSatz(a.st, a.e, a.ri) : T.wegSatz(a.st, a.e, a.ri, a.k));
+  T.melde(satz, "", text);
+  zeigeAusschnitt(a);
+}
+function zeigeAusschnitt(a) {
+  aus.innerHTML = "";
+  const p = T.pos(a.st), q2 = T.pos(a.e);
+  if (p.s !== q2.s) {
+    aus.appendChild(T.el("div", "titel", `Quadrat ${p.s + 1} → Quadrat ${q2.s + 1}`));
+    const l = T.leporello(aus, {}); l.knoepfe.forEach((b, i) => { b.classList.toggle("aktiv", i === q2.s); b.style.width = "28px"; b.querySelector(".lbl").remove();
+      const m = b.querySelector(".mini"); m.style.width = "26px"; m.style.height = "26px"; if (i === p.s) m.style.background = "var(--hellgelb)"; });
+    aus.firstChild.nextSibling.style.gap = "2px";
+    return;
+  }
+  // kleiner Ausschnitt rund um Start und Ziel (höchstens 5 × 5 Felder)
+  let r0 = Math.min(p.r, q2.r), r1 = Math.max(p.r, q2.r), c0 = Math.min(p.c, q2.c), c1 = Math.max(p.c, q2.c);
+  if (r1 - r0 < 4) { r0 = Math.max(0, r0 - 1); r1 = Math.min(9, r1 + 1); } if (r1 - r0 > 4) r1 = r0 + 4;
+  if (c1 - c0 < 4) { c0 = Math.max(0, c0 - 1); c1 = Math.min(9, c1 + 1); } if (c1 - c0 > 4) c1 = c0 + 4;
+  const g = T.el("div", "quadrat"); g.style.gridTemplateColumns = `repeat(${c1 - c0 + 1}, var(--z))`;
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const n = T.num(p.s, r, c), f = T.el("div", "feld" + (n === a.st ? " vor" : n === a.e ? " sel" : ""), T.zahlHTML(n));
+    g.appendChild(f);
+  }
+  aus.append(T.el("div", "titel", `Start ${a.st} · Ziel ${a.e}`), g);
+}
+function weiter() {
+  if (!gezeigt) loesung();
+  if (runde >= RUNDEN) { runde = RUNDEN + 1; zeigeSumme(); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; return; }
+  runde++; aufg = neueAufgabe(); zeigeAufgabe();
+}
+function zeigeSumme() {
+  const g = ampel.gruen + ampel.gelb + ampel.rot;
+  summe.hidden = false;
+  summe.innerHTML = `<strong>Runde fertig!</strong><br>Gut: ${ampel.gruen} · Geht so: ${ampel.gelb} · Schwer: ${ampel.rot}` +
+    (g ? `<div class="balken"><div style="width:${ampel.gruen / g * 100}%;background:#3fae5a"></div><div style="width:${ampel.gelb / g * 100}%;background:#f5c518"></div><div style="width:${ampel.rot / g * 100}%;background:#e0564f"></div></div>` : "");
+}
+start();
+</script>
+</body>
+</html>

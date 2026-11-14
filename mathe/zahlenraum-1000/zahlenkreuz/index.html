@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zahlenkreuz und Zahlenfenster – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.fenster{position:relative;width:650px;height:650px}
+.zf{position:absolute;width:170px;height:170px;border:4px solid var(--ink);border-radius:20px;background:#fff;
+  font-family:var(--font);font-size:66px;font-weight:700;color:var(--ink);display:grid;place-items:center;padding:0;cursor:default}
+.zf.gegeben{background:var(--gelb);border-color:var(--gelbrand);border-width:6px}
+.zf.frage{border-style:dashed;color:#8d9892;cursor:pointer;background:#f6f8f6}
+.zf.frage:hover{background:#eef3ef}
+.zf.weg{visibility:hidden}
+.farben .zf .t{color:var(--T)}.farben .zf .h{color:var(--H)}.farben .zf .z{color:var(--Z)}.farben .zf .e{color:var(--E)}
+.zf.auf{animation:auf .35s ease-out}
+@keyframes auf{from{transform:scale(.8);opacity:.3}to{transform:none;opacity:1}}
+.zf:focus-visible{outline:5px solid var(--ok);outline-offset:3px}
+.plbl{position:absolute;width:74px;height:46px;margin:-23px 0 0 -37px;display:grid;place-items:center;font-size:26px;font-weight:700;
+  background:#fff;border:2px solid var(--line);border-radius:10px;color:var(--soft)}
+.miniq{display:grid;grid-template-columns:repeat(10,30px);grid-auto-rows:30px;gap:3px}
+.miniq div{border:2px solid #cfd6d1;border-radius:5px;background:#fff}
+.miniq .im{background:var(--hellblau);border-color:var(--blaurand)}
+.miniq .mi{background:var(--gelb);border-color:var(--gelbrand)}
+.lage{font-size:24px;font-weight:700;color:var(--soft);margin:0 0 10px}
+@media (prefers-reduced-motion: reduce){.zf.auf{animation:none}}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const REL = { rechts: "Rechts neben", links: "Links neben", unten: "Unter", oben: "Über",
+  ru: "Schräg rechts unter", lu: "Schräg links unter", ro: "Schräg rechts über", lo: "Schräg links über" };
+const GEGEN = { rechts: "links", links: "rechts", oben: "unten", unten: "oben", ro: "lu", lu: "ro", lo: "ru", ru: "lo" };
+const KREUZ = ["oben", "links", "rechts", "unten"];
+
+let stufe = 1, sprung = T.laden("kreuz-sprung", false), mitte = 0, gegeben = null;
+
+// ---------- Aufbau ----------
+const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "kreuz-stufe"); stufe = stufenWahl.wert;
+T.leiste(stufenWahl,
+  T.schalter("Sprungstellen", sprung, v => { sprung = v; T.merken("kreuz-sprung", v); neu(); }),
+  T.knopf("Neue Zahl", () => neu()),
+  T.knopf("Alle aufdecken", () => zellen.forEach(z => z.el.classList.contains("frage") && decke(z, false))));
+
+const fenster = T.el("div", "fenster"); T.blk(70, 190).appendChild(fenster);
+const zellen = [];   // {el, dr, dc, ri}
+[-1, 0, 1].forEach(dr => [-1, 0, 1].forEach(dc => {
+  const ri = dr === 0 && dc === 0 ? "mitte" : T.ACHT.find(k => T.R[k].dr === dr && T.R[k].dc === dc);
+  const el = T.el("button", "zf"); el.type = "button";
+  el.style.left = (dc + 1) * 240 + "px"; el.style.top = (dr + 1) * 240 + "px";
+  const z = { el, dr, dc, ri };
+  el.addEventListener("click", () => { if (el.classList.contains("frage")) decke(z, true); });
+  fenster.appendChild(el); zellen.push(z);
+  if (ri !== "mitte") {
+    const l = T.el("div", "plbl hilfe"); l.style.left = 325 + dc * 120 + "px"; l.style.top = 325 + dr * 120 + "px";
+    const d = T.R[ri].d; l.textContent = (d > 0 ? "+" : "−") + Math.abs(d);
+    fenster.appendChild(l); z.lbl = l;
+  }
+}));
+
+const rechts = T.blk(830, 190, 730);
+rechts.appendChild(T.el("p", "lage", "Hier liegt das Fenster:"));
+const lepo = T.leporello(rechts, {});
+const miniBox = T.el("div"); miniBox.style.marginTop = "14px"; rechts.appendChild(miniBox);
+const mini = T.el("div", "miniq"); miniBox.appendChild(mini);
+for (let i = 0; i < 100; i++) mini.appendChild(T.el("div"));
+const muster = T.streifen(T.blk(830, 660, 730), "muster hilfe");
+muster.innerHTML = "<p>Rechts neben … steht …</p><p>Unter … steht …</p>";
+const satz = T.streifen(T.blk(830, 790, 730));
+
+T.kopf({ titel: "Zahlenkreuz und Zahlenfenster", onNeu: () => neu() });
+
+// ---------- Ablauf ----------
+function zahlVon(z) { return z.ri === "mitte" ? mitte : T.schritt(mitte, z.ri); }
+function neu() {
+  const s = T.zufall(0, 9);
+  const c = sprung ? 8 : T.zufall(1, 8);
+  const r = sprung && Math.random() < .5 ? 8 : T.zufall(1, 8);
+  mitte = T.num(s, r, c);
+  gegeben = stufe === 3 ? T.wahl(T.ACHT) : null;
+  zellen.forEach(z => {
+    const sichtbar = stufe === 2 || z.ri === "mitte" || KREUZ.includes(z.ri) || (stufe === 3 && z.ri === gegeben);
+    const istGegeben = stufe === 3 ? z.ri === gegeben : z.ri === "mitte";
+    const zeigen = stufe === 3 ? (z.ri === gegeben || z.ri === "mitte") : sichtbar;
+    z.el.className = "zf" + (!zeigen ? " weg" : istGegeben ? " gegeben" : " frage");
+    z.el.innerHTML = istGegeben ? T.zahlHTML(zahlVon(z)) : zeigen ? "?" : "";
+    z.el.setAttribute("aria-label", istGegeben ? String(zahlVon(z)) : "verdeckt, antippen zum Aufdecken");
+    if (z.lbl) z.lbl.style.display = (stufe === 3 ? z.ri === gegeben : zeigen) ? "" : "none";
+  });
+  const p = T.pos(mitte);
+  lepo.setze(p.s);
+  [...mini.children].forEach((d, i) => {
+    const rr = Math.floor(i / 10), cc = i % 10;
+    const imFenster = Math.abs(rr - p.r) <= 1 && Math.abs(cc - p.c) <= 1 &&
+      (stufe === 2 || stufe === 3 || rr === p.r || cc === p.c);
+    d.className = rr === p.r && cc === p.c ? "mi" : imFenster ? "im" : "";
+  });
+  T.melde(satz, "", stufe === 3 ? "Welche Zahl steht in der Mitte?" : "Nenne die Zahl. Dann tippe zum Aufdecken.");
+}
+function decke(z, mitSatz) {
+  const n = zahlVon(z);
+  z.el.className = "zf auf"; z.el.innerHTML = T.zahlHTML(n); z.el.setAttribute("aria-label", String(n));
+  if (!mitSatz) return;
+  if (z.ri === "mitte") { const g = T.schritt(mitte, gegeben); T.melde(satz, "", `${REL[GEGEN[gegeben]]} ${g} steht ${n}.`); }
+  else T.melde(satz, "", `${REL[z.ri]} ${mitte} steht ${n}.`);
+}
+neu();
+</script>
+</body>
+</html>

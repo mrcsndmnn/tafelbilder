@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Linien – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.folge{font-size:56px;font-weight:700;line-height:1.25;min-height:140px}
+.folge .leer{font-size:30px;color:var(--soft);font-weight:400}
+.frage{font-size:30px;font-weight:700;margin:0 0 12px}
+.wahl{display:flex;gap:16px}
+.wahl .knopf{min-height:80px;font-size:30px;padding:0 26px}
+.wahl .knopf.richtig{background:var(--okbg);border-color:var(--ok);color:var(--ok);opacity:1}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const TYP = ri => (ri === "rechts" || ri === "links") ? "waagerecht" : (ri === "oben" || ri === "unten") ? "senkrecht" : "diagonal";
+const ADJ = { waagerecht: "waagerechte", senkrecht: "senkrechte", diagonal: "diagonale" };
+
+let modus = "legen", linie = [], ri = null, geloest = false, grau = false;
+
+// ---------- Aufbau ----------
+const neueFolge = T.knopf("Neue Folge", () => neu());
+const loeschen = T.knopf("Linie löschen", () => { linie = []; ri = null; geloest = false; T.melde(satz, "", ""); zeichne(); });
+const modusWahl = T.gruppe("", [{ wert: "legen", text: "Linie legen" }, { wert: "raten", text: "Welche Linie?" }], "legen",
+  v => { modus = v; neu(); }, "linien-modus");
+modus = modusWahl.wert;
+const zusatz = T.el("div", "gruppe"); zusatz.append(neueFolge, loeschen);
+T.leiste(modusWahl, zusatz);
+
+const lepo = T.leporello(T.blk(40, 178), { onTap: s => { if (modus === "legen") { q.zeigeQuadrat(s); lepo.setze(s); linie = []; zeichne(); } } });
+const q = T.quadrat(T.blk(44, 262), { zelle: 56, onTap: n => tippe(n) });
+
+const re = T.blk(700, 186, 860);
+const folgeEl = T.el("div", "folge zahl"); re.appendChild(folgeEl);
+const gleich = T.schalter("Was bleibt gleich?", false, v => { grau = v; zeichneFolge(); });
+gleich.style.marginTop = "6px"; re.appendChild(gleich);
+const frageBox = T.blk(700, 430, 860);
+frageBox.appendChild(T.el("p", "frage", "Welche Linie ist das?"));
+const wahl = T.el("div", "wahl"); frageBox.appendChild(wahl);
+const wahlKn = ["waagerecht", "senkrecht", "diagonal"].map(t => { const b = T.knopf(t, () => antwort(t, b)); wahl.appendChild(b); return b; });
+const satz = T.streifen(T.blk(700, 596, 860));
+
+T.kopf({ titel: "Linien: waagerecht, senkrecht, diagonal", onNeu: () => neu() });
+
+// ---------- Anzeige ----------
+function zeichneFolge() {
+  if (!linie.length) { folgeEl.innerHTML = `<span class="leer">${modus === "legen" ? "Tippe Felder nacheinander an." : ""}</span>`; return; }
+  const st = linie.map(T.stellen);
+  const konst = p => st.every(s => (s[p] || "0") === (st[0][p] || "0"));
+  folgeEl.innerHTML = linie.map(n => {
+    const s = T.stellen(n);
+    return '<span class="ziffern">' + ["T", "H", "Z", "E"].filter(p => s[p] !== "")
+      .map(p => `<span class="${p.toLowerCase()}${grau && konst(p) ? " grau" : ""}">${s[p]}</span>`).join("") + "</span>";
+  }).join(", ");
+}
+function zeichne() {
+  q.leere();
+  const zeigeLinie = modus === "legen" || geloest;
+  if (zeigeLinie) linie.forEach((n, i) => q.mark(n, i === linie.length - 1 && modus === "legen" ? "sel" : "weg"));
+  zeichneFolge();
+  const fragen = linie.length >= 3;
+  frageBox.style.visibility = fragen ? "visible" : "hidden";
+  wahlKn.forEach(b => { b.classList.remove("richtig"); b.disabled = geloest; });
+}
+function erklaerung() {
+  const s0 = T.stellen(linie[0]);
+  const konst = p => linie.every(n => (T.stellen(n)[p] || "0") === (s0[p] || "0"));
+  const teile = [`Das ist eine ${ADJ[TYP(ri)]} Linie.`];
+  const stellen = ["H", "Z", "E"].filter(p => p !== "H" || !konst("H"));
+  stellen.filter(konst).forEach(p => teile.push(`Die ${T.NAME[p]} bleibt gleich.`));
+  stellen.filter(p => !konst(p)).forEach(p => teile.push(`Die ${T.NAME[p]} ändert sich.`));
+  const spruenge = linie.slice(1).filter((n, i) => T.stellenSatz(linie[i], n, ri).startsWith("Sprung"));
+  spruenge.forEach(n => teile.push(`Bei ${n} gibt es einen Sprung.`));
+  return teile.join(" ");
+}
+
+// ---------- Ablauf ----------
+function neu() {
+  linie = []; ri = null; geloest = false;
+  neueFolge.style.display = modus === "raten" ? "" : "none";
+  loeschen.style.display = modus === "legen" ? "" : "none";
+  if (modus === "raten") {
+    // Zahlenfolge mit 4–5 Zahlen in einer der acht Richtungen, ganz in einem Quadrat
+    let start, laenge;
+    do { ri = T.wahl(T.ACHT); laenge = T.zufall(4, 5); start = T.zufall(1, 1000); } while (T.schritt(start, ri, laenge - 1) === null);
+    for (let i = 0; i < laenge; i++) linie.push(T.schritt(start, ri, i));
+    q.zeigeQuadrat(T.pos(start).s); lepo.setze(T.pos(start).s);
+    T.melde(satz, "", "Lies die Zahlen. Welche Linie ist das?");
+  } else {
+    if (!q.felder[0].n) { q.zeigeQuadrat(3); lepo.setze(3); }
+    T.melde(satz, "", "");
+  }
+  zeichne();
+}
+function tippe(n) {
+  if (modus !== "legen") return;
+  const letzte = linie[linie.length - 1];
+  if (n === letzte) { linie.pop(); if (linie.length < 2) ri = null; }
+  else if (!linie.length) linie.push(n);
+  else if (linie.length === 1) {
+    const r = T.richtungZwischen(letzte, n);
+    if (!r) { T.melde(satz, "noch", "Tippe ein Feld direkt daneben."); return; }
+    ri = r; linie.push(n);
+  } else if (T.schritt(letzte, ri) === n) linie.push(n);
+  else { T.melde(satz, "noch", "Bleib auf deiner Linie."); return; }
+  geloest = false; T.melde(satz, "", ""); zeichne();
+}
+function antwort(t, b) {
+  if (geloest || linie.length < 3) return;
+  if (t === TYP(ri)) {
+    geloest = true; zeichne(); b.classList.add("richtig");
+    T.melde(satz, "ok", [T.lob(), erklaerung()]);
+  } else T.melde(satz, "noch", T.NOCH);
+}
+neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zahlendetektiv – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.auftrag{font-size:30px;font-weight:700;margin:0 0 14px}
+.hkarte{display:flex;align-items:center;gap:18px;min-height:84px;padding:10px 22px;margin-bottom:12px;border:4px solid var(--ink);border-radius:16px;
+  background:var(--hellgelb);font-size:32px;font-weight:700}
+.hkarte .nr{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--ink);color:#fff;font-size:26px;flex:none}
+.hkarte.zu{background:#f1f4f2;border-style:dashed;color:#8d9892}
+.hkarte.zu .nr{background:#8d9892}
+.rolle{font-size:24px;color:var(--soft);margin:4px 0 12px}
+.zeile{display:flex;gap:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+let modus = "loesen", art = "ort", geheim = 0, offen = 1, geloest = false, gewaehlt = null;
+
+// ---------- Aufbau ----------
+const modusWahl = T.gruppe("", [{ wert: "loesen", text: "Rätsel lösen" }, { wert: "bauen", text: "Rätsel bauen" }], "loesen", v => { modus = v; neu(); });
+const artWahl = T.gruppe("Hinweise", [{ wert: "ort", text: "Ort" }, { wert: "stellen", text: "Stellen" }], "ort", v => { art = v; zeigeKarten(); }, "detektiv-art");
+art = artWahl.wert;
+T.leiste(modusWahl, artWahl, T.knopf("Neues Rätsel", () => { modusWahl.setze("loesen"); modus = "loesen"; neu(); }));
+
+const lepo = T.leporello(T.blk(40, 178), { onTap: s => { q.zeigeQuadrat(s); lepo.setze(s); } });
+const q = T.quadrat(T.blk(44, 262), { zelle: 56, onTap: n => tippe(n) });
+const re = T.blk(700, 186, 860);
+const satzBox = T.blk(700, 640, 860), satz = T.streifen(satzBox);
+T.kopf({ titel: "Zahlendetektiv", onNeu: () => { modusWahl.setze("loesen"); modus = "loesen"; neu(); } });
+
+// ---------- Hinweise ----------
+function hinweise(n) {
+  const p = T.pos(n), s = T.stellen(n);
+  if (art === "ort") return [`Ich wohne im ${p.s + 1}. Quadrat.`, `Ich bin in der ${p.r + 1}. Zeile.`, `Ich bin in der ${p.c + 1}. Spalte.`];
+  return [s.H ? `Meine Hunderterstelle ist ${s.H}.` : "Ich habe keine Hunderterstelle.",
+          s.Z ? `Meine Zehnerstelle ist ${s.Z}.` : "Ich habe keine Zehnerstelle.",
+          `Meine Einerstelle ist ${s.E}.`];
+}
+function zeigeKarten() {
+  re.innerHTML = "";
+  if (modus === "loesen") {
+    re.appendChild(T.el("p", "auftrag", "Wer bin ich? Tippe die Geheimzahl an."));
+    hinweise(geheim).forEach((h, i) => {
+      const auf = i < offen || geloest;
+      re.appendChild(T.el("div", "hkarte" + (auf ? "" : " zu"), `<span class="nr">${i + 1}</span>${auf ? h : "Hinweis " + (i + 1)}`));
+    });
+    const z = T.el("div", "zeile"); re.appendChild(z);
+    const b = T.knopf("Nächster Hinweis", () => { offen = Math.min(3, offen + 1); zeigeKarten(); }); b.disabled = offen >= 3 || geloest;
+    z.appendChild(b);
+  } else {
+    re.appendChild(T.el("p", "auftrag", gewaehlt ? "Lies vor:" : "Tippe deine Geheimzahl an."));
+    re.appendChild(T.el("p", "rolle hilfe", "Antwortkind: Lies die Hinweise vor. Fragekind: Rate die Zahl."));
+    if (gewaehlt) {
+      re.appendChild(T.el("div", "hkarte", `<span class="nr">★</span>Ich bin eine Geheimzahl.`));
+      hinweise(gewaehlt).forEach((h, i) => re.appendChild(T.el("div", "hkarte", `<span class="nr">${i + 1}</span>${h}`)));
+    }
+    const z = T.el("div", "zeile"); re.appendChild(z);
+    const b = T.knopf("Verstecken", () => verstecken(), "haupt"); b.disabled = !gewaehlt; z.appendChild(b);
+  }
+  satzBox.style.top = 186 + re.offsetHeight + 18 + "px";
+}
+
+// ---------- Ablauf ----------
+function neu(zahl) {
+  geheim = zahl || T.zufall(1, 999); offen = 1; geloest = false; gewaehlt = null;
+  q.leere(); q.zeigeQuadrat(0); lepo.setze(0);
+  zeigeKarten(); T.melde(satz, "", modus === "loesen" ? "Tippe deine Vermutung an. Wechsle das Quadrat oben." : "");
+}
+function verstecken() { const z = gewaehlt; modusWahl.setze("loesen"); modus = "loesen"; neu(z); }
+function tippe(n) {
+  if (modus === "bauen") {
+    if (gewaehlt) q.mark(gewaehlt, "sel", false);
+    gewaehlt = n; q.mark(n, "sel"); zeigeKarten(); T.melde(satz, "", "");
+    return;
+  }
+  if (geloest || q.hat(n, "falsch")) return;
+  if (n === geheim) {
+    geloest = true; q.mark(n, "sel"); zeigeKarten();
+    T.melde(satz, "ok", [T.lob(), `Ich bin die ${n}. Ich wohne ${T.ortsSatz(n)}.`]);
+  } else {
+    q.mark(n, "falsch");
+    T.melde(satz, "noch", offen < 3 ? "Noch nicht. Nimm den nächsten Hinweis dazu." : T.NOCH);
+  }
+}
+neu();
+</script>
+</body>
+</html>

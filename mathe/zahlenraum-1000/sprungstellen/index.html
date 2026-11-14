@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sprungstellen – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.aufgabe{font-size:46px;font-weight:700;line-height:1.2;min-height:56px}
+.zeile{display:flex;gap:12px;margin-top:16px;align-items:center}
+.tipp{font-size:24px;color:var(--soft);margin-top:12px}
+.neuq{position:absolute;padding:8px 18px;background:var(--gelb);border:4px solid var(--gelbrand);border-radius:14px;font-size:32px;font-weight:700;
+  z-index:5;visibility:hidden}
+.neuq.an{visibility:visible}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+let richtung = "danach", sprungart = "gemischt", start = 0, ziel = 0, cur = 0, geloest = false, laeuft = false;
+
+// ---------- Aufbau ----------
+const rWahl = T.gruppe("Richtung", [{ wert: "danach", text: "danach" }, { wert: "davor", text: "davor" }, { wert: "gemischt", text: "gemischt" }],
+  "danach", v => { richtung = v; neu(); }, "sprung-richtung");
+const aWahl = T.gruppe("Sprung", [{ wert: "zehner", text: "Zehner" }, { wert: "hunderter", text: "Hunderter" }, { wert: "gemischt", text: "gemischt" }],
+  "gemischt", v => { sprungart = v; neu(); }, "sprung-art");
+richtung = rWahl.wert; sprungart = aWahl.wert;
+T.leiste(rWahl, aWahl, T.knopf("Neue Aufgabe", () => { T.stop(); neu(); }));
+
+const lepo = T.leporello(T.blk(40, 178), { onTap: s => { if (!laeuft) { q.zeigeQuadrat(s); lepo.setze(s); } } });
+const q = T.quadrat(T.blk(44, 262), { zelle: 56, onTap: n => tippe(n) });
+const ov = T.ueberlagerung(q);
+const neuQ = T.el("div", "neuq", "Neues Quadrat!"); q.box.appendChild(neuQ); neuQ.style.left = "190px"; neuQ.style.top = "-6px";
+
+const re = T.blk(700, 186, 860);
+const aufgabeEl = T.el("div", "aufgabe"); re.appendChild(aufgabeEl);
+const zeile = T.el("div", "zeile"); re.appendChild(zeile);
+const zeigenKn = T.knopf("Zeigen", () => zeigen(), "haupt");
+zeile.append(zeigenKn, T.knopf("−1", () => zaehle(-1)), T.knopf("+1", () => zaehle(1)));
+re.appendChild(T.el("div", "tipp hilfe", "Sag die Zahl laut. Dann tippe sie an oder drücke „Zeigen“."));
+const swt = T.stellenwerttafel(T.blk(694, 384));
+const gz = T.grosseZahl(T.blk(1190, 384, 370));
+const satz = T.streifen(T.blk(700, 598, 860));
+T.kopf({ titel: "Sprungstellen", onNeu: () => neu() });
+
+// ---------- Aufgaben ----------
+function paar() {
+  // x → x+1 an einer Sprungstelle; Zehner: …9→…0 und …0→…1, Hunderter: …99→…00, …00→…01 und 999→1000
+  const art = sprungart === "gemischt" ? T.wahl(["zehner", "hunderter"]) : sprungart;
+  let x;
+  if (art === "zehner") {
+    do { x = T.zufall(1, 99) * 10 + T.wahl([-1, 0]); } while (x < 1 || x % 100 === 99 || x % 100 === 0 || x >= 1000);
+  } else {
+    x = T.zufall(1, 9) * 100 + T.wahl([-1, 0]); if (Math.random() < .1) x = 999;
+  }
+  return [x, x + 1];
+}
+function neu() {
+  T.stop(); laeuft = false; geloest = false; ov.leere(); neuQ.classList.remove("an");
+  const [x, y] = paar(), r = richtung === "gemischt" ? T.wahl(["danach", "davor"]) : richtung;
+  start = r === "danach" ? x : y; ziel = r === "danach" ? y : x; cur = start;
+  aufgabeEl.textContent = `Welche Zahl kommt ${r === "danach" ? "nach" : "vor"} ${start}?`;
+  zeigeStart(start); zeigenKn.disabled = false;
+  T.melde(satz, "", "");
+}
+function zeigeStart(n) {
+  const s = T.pos(n).s; q.zeigeQuadrat(s); lepo.setze(s); q.leere(); q.mark(n, "sel");
+  swt.zeige(n); gz.zeige(n);
+}
+function tippe(n) {
+  if (laeuft || geloest) return;
+  if (n === ziel) zeigen(true);
+  else T.melde(satz, "noch", T.NOCH);
+}
+function zaehle(d) {
+  if (laeuft) return;
+  const n = cur + d; if (n < 1 || n > 1000) return;
+  aufgabeEl.textContent = "Zähle weiter.";
+  zeigeSchritt(cur, n, false);
+}
+
+// ---------- Zeigen ----------
+function ortSatz(a, b) {
+  const p = T.pos(a), q2 = T.pos(b), vor = b > a;
+  if (p.s !== q2.s) return `Neues Quadrat! Die ${b} steht im ${vor ? "nächsten" : "vorherigen"} Quadrat ${vor ? "oben links" : "unten rechts"}.`;
+  if (p.r !== q2.r) return `Neue Zeile! Die ${b} steht in der ${vor ? "nächsten Zeile ganz links" : "Zeile davor ganz rechts"}.`;
+  return `Die ${b} steht in derselben Zeile direkt ${vor ? "rechts" : "links"} daneben.`;
+}
+function zeigen(getippt) {
+  if (laeuft || geloest) return;
+  geloest = true; zeigenKn.disabled = true;
+  zeigeSchritt(start, ziel, true, getippt);
+}
+async function zeigeSchritt(a, b, mitAntwort, getippt) {
+  laeuft = true; const lauf = T.lauf;
+  const p = T.pos(a), p2 = T.pos(b);
+  ov.leere(); neuQ.classList.remove("an");
+  if (q.s !== p.s) { q.zeigeQuadrat(p.s); lepo.setze(p.s); }
+  q.leere(); q.mark(a, "vor");
+  if (p.s !== p2.s) {
+    lepo.blink(p2.s); neuQ.classList.add("an");
+    await T.warte(1400); if (lauf !== T.lauf) return;
+    q.zeigeQuadrat(p2.s); lepo.setze(p2.s);
+  } else {
+    const A = q.mitte(a), B = q.mitte(b);
+    const pf = p.r === p2.r
+      ? ov.pfeil(`M${A.x + (B.x > A.x ? 18 : -18)},${A.y} L${B.x + (B.x > A.x ? -18 : 18)},${B.y}`)
+      : ov.pfeil(`M${A.x},${A.y + (b > a ? 16 : -16)} C${A.x + (b > a ? -120 : 120)},${A.y + (b > a ? 80 : -80)} ${B.x + (b > a ? 120 : -120)},${B.y + (b > a ? -80 : 80)} ${B.x + (b > a ? 6 : -6)},${B.y + (b > a ? -18 : 18)}`);
+    if (T.bewegt) { const l = pf.getTotalLength(); pf.style.strokeDasharray = l; pf.style.strokeDashoffset = l; pf.getBoundingClientRect();
+      pf.style.transition = "stroke-dashoffset .9s ease-in-out"; pf.style.strokeDashoffset = 0; }
+    await T.warte(900); if (lauf !== T.lauf) return;
+  }
+  q.mark(b, "sel"); swt.zeige(b, a); gz.zeige(b, a); cur = b; laeuft = false;
+  const teile = [];
+  if (mitAntwort) teile.push(`${getippt ? T.lob() + " " : ""}${b > a ? "Nach" : "Vor"} ${a} kommt ${b}.`);
+  teile.push(T.aenderungsSatz(a, b), ortSatz(a, b));
+  T.melde(satz, mitAntwort && getippt ? "ok" : "", teile);
+}
+neu();
+</script>
+</body>
+</html>

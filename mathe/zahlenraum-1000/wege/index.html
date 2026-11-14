@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wege mit dem Marienkäfer – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.qtitel{font-size:26px;font-weight:700;color:var(--soft)}
+.kaefer{position:absolute;width:32px;height:32px;z-index:3;pointer-events:none;transition:left .28s ease-in-out,top .28s ease-in-out;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+.kaefer svg{width:100%;height:100%}
+.auftrag{font-size:30px;font-weight:700;margin:0 0 14px;line-height:1.3}
+.karten{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;min-height:96px}
+.karte{min-width:140px;height:92px;padding:0 20px;border:4px solid var(--ink);border-radius:16px;background:var(--hellgelb);
+  display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;gap:10px}
+.karte .mal{font-size:30px}
+.reihe{display:flex;gap:10px;flex-wrap:wrap;min-height:92px;padding:10px;border:3px dashed var(--line);border-radius:16px;margin-bottom:16px;align-items:center}
+.reihe .karte{height:68px;min-width:96px;font-size:36px;border-width:3px}
+.reihe .leer{font-size:24px;color:var(--soft)}
+.palette{display:flex;gap:10px;margin-bottom:16px}
+.palette .knopf{width:84px}
+.palette .knopf{height:84px;font-size:44px;padding:0}
+.zeile{display:flex;gap:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+let modus = "wohin", stufe = 1, start = 0, ziel = 0, befehle = [], eingabe = [], vermutung = null, laeuft = false;
+
+// ---------- Aufbau ----------
+const modusWahl = T.gruppe("", [{ wert: "wohin", text: "Wohin läuft der Käfer?" }, { wert: "weg", text: "Finde den Weg" }], "wohin",
+  v => { modus = v; neu(); }, "wege-modus");
+const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "wege-stufe");
+modus = modusWahl.wert; stufe = stufenWahl.wert;
+T.leiste(modusWahl, stufenWahl, T.knopf("Neue Aufgabe", () => { T.stop(); neu(); }));
+
+const qTitel = T.el("div", "qtitel"); T.blk(64, 178).appendChild(qTitel);
+const q = T.quadrat(T.blk(60, 220), { zelle: 60, onTap: n => tippe(n) });
+const kaefer = T.el("div", "kaefer", T.KAEFER); q.box.appendChild(kaefer);
+
+const re = T.blk(740, 182, 820);
+const satzBox = T.blk(740, 590, 820), satz = T.streifen(satzBox);
+T.kopf({ titel: "Wege mit dem Marienkäfer", onNeu: () => neu() });
+
+// ---------- Hilfen ----------
+const setzeKaefer = n => { const m = q.mitte(n); kaefer.style.left = m.x - 30 - 7 + "px"; kaefer.style.top = m.y - 30 - 9 + "px"; };
+const karte = (ri, k) => `<div class="karte">${k > 1 ? `<span class="mal">${k} ×</span>` : ""}<span>${T.R[ri].pfeil}</span></div>`;
+const gruppiere = l => l.reduce((g, ri) => { const x = g[g.length - 1]; x && x.ri === ri ? x.k++ : g.push({ ri, k: 1 }); return g; }, []);
+const ende = (n, l) => l.reduce((m, b) => m === null ? null : T.schritt(m, b.ri, b.k), n);
+
+function aufgabe() {
+  // Befehle je Stufe: 1 = ein Befehl ← → ↑ ↓; 2 = zwei Befehle; 3 = mit Diagonalen
+  for (let v = 0; v < 500; v++) {
+    const s = T.zufall(0, 9); const st = T.num(s, T.zufall(0, 9), T.zufall(0, 9));
+    let l;
+    if (stufe === 1) l = [{ ri: T.wahl(T.GERADE), k: T.zufall(1, 4) }];
+    else if (stufe === 2) { const a = T.wahl(["rechts", "links"]), b = T.wahl(["oben", "unten"]); l = T.mischen([{ ri: a, k: T.zufall(1, 3) }, { ri: b, k: T.zufall(1, 3) }]); }
+    else { l = [{ ri: T.wahl(T.SCHRAEG), k: T.zufall(1, 3) }]; if (Math.random() < .5) l.push({ ri: T.wahl(T.GERADE), k: T.zufall(1, 2) }); l = T.mischen(l); }
+    const e = ende(st, l);
+    if (e !== null && e !== st) return { st, l, e };
+  }
+}
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); laeuft = false; vermutung = null; eingabe = [];
+  const a = aufgabe(); start = a.st; befehle = a.l; ziel = a.e;
+  const s = T.pos(start).s;
+  q.zeigeQuadrat(s); q.leere(); qTitel.textContent = `Quadrat ${s + 1}: ${T.bereich(s)}`;
+  q.mark(start, "vor"); setzeKaefer(start);
+  if (modus === "weg") q.mark(ziel, "ziel");
+  baueRechts(); T.melde(satz, "", "");
+}
+function baueRechts() {
+  re.innerHTML = "";
+  if (modus === "wohin") {
+    re.appendChild(T.el("p", "auftrag", `Der Käfer startet bei ${start}. Wohin läuft er? Tippe das Feld an.`));
+    re.appendChild(T.el("div", "karten", befehle.map(b => karte(b.ri, b.k)).join("")));
+    const z = T.el("div", "zeile"); z.appendChild(T.knopf("Los", () => los(befehle), "haupt")); re.appendChild(z);
+  } else {
+    re.appendChild(T.el("p", "auftrag", `Finde den Weg von ${start} zur Fahne bei ${ziel}.`));
+    const pal = T.el("div", "palette"); re.appendChild(pal);
+    (stufe === 3 ? ["lo", "oben", "ro", "links", "rechts", "lu", "unten", "ru"] : ["links", "oben", "unten", "rechts"]).forEach(ri => {
+      const b = T.knopf(T.R[ri].pfeil, () => { if (laeuft) return; eingabe.push(ri); zeigeReihe(); });
+      b.setAttribute("aria-label", T.R[ri].text); pal.appendChild(b);
+    });
+    const reihe = T.el("div", "reihe"); reihe.id = "reihe"; re.appendChild(reihe);
+    const z = T.el("div", "zeile"); re.appendChild(z);
+    z.append(T.knopf("Letzten entfernen", () => { if (!laeuft) { eingabe.pop(); zeigeReihe(); } }),
+             T.knopf("Löschen", () => { if (!laeuft) { eingabe = []; zeigeReihe(); } }),
+             T.knopf("Los", () => eingabe.length && los(gruppiere(eingabe)), "haupt"));
+    zeigeReihe();
+  }
+  satzBox.style.top = 182 + re.offsetHeight + 18 + "px";   // Satzstreifen direkt unter die Knöpfe
+}
+function zeigeReihe() {
+  const r = document.getElementById("reihe"); if (!r) return;
+  r.innerHTML = eingabe.length ? gruppiere(eingabe).map(b => karte(b.ri, b.k)).join("") : '<span class="leer">Tippe Pfeile an.</span>';
+}
+function tippe(n) {
+  if (modus !== "wohin" || laeuft) return;
+  if (vermutung) q.mark(vermutung, "vermutung", false);
+  vermutung = n; q.mark(n, "vermutung");
+}
+async function los(liste) {
+  if (laeuft) return;
+  laeuft = true; const lauf = T.lauf;
+  q.leere("weg"); q.leere("sel"); setzeKaefer(start); T.melde(satz, "", "");
+  let n = start; const saetze = [];
+  for (const b of liste) {
+    const a = n; let k = 0;
+    for (let i = 0; i < b.k; i++) {
+      const m = T.schritt(n, b.ri);
+      if (m === null) {
+        if (k) saetze.push(T.wegSatz(a, n, b.ri, k));
+        saetze.push("Hier ist das Quadrat zu Ende.");
+        laeuft = false; return T.melde(satz, "noch", saetze);
+      }
+      await T.warte(320); if (lauf !== T.lauf) return;
+      n = m; k++; q.mark(n, "weg"); setzeKaefer(n);
+    }
+    saetze.push(T.wegSatz(a, n, b.ri, k));
+  }
+  laeuft = false;
+  if (modus === "wohin") {
+    if (vermutung === n) T.melde(satz, "ok", [`${T.lob()} Der Käfer ist bei ${n}.`, ...saetze]);
+    else if (vermutung) T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}.`, ...saetze]);
+    else T.melde(satz, "", [`Der Käfer ist bei ${n}.`, ...saetze]);
+  } else {
+    if (n === ziel) T.melde(satz, "ok", [`${T.lob()} Der Käfer ist an der Fahne.`, ...saetze]);
+    else T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}. Die Fahne ist bei ${ziel}.`, ...saetze]);
+  }
+}
+neu();
+</script>
+</body>
+</html>

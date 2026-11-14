@@ -1,0 +1,128 @@
+/* =====================================================================
+   Zahlenraum bis 1000 – gemeinsame Gestaltung aller Tafelbilder
+   Bühne 1600 × 900, wird auf den Bildschirm skaliert.
+   ===================================================================== */
+
+/* Schrift Andika lokal (kein Google Fonts). Fehlen die Dateien, greift die Systemschrift. */
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  --T:#444444; --H:#2e8b3e; --Z:#d03a32; --E:#2667c9;
+  --room:#dfe5e0; --stage:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#b9c2bc; --feld:#ffffff;
+  --gelb:#ffe066; --gelbrand:#b8860b; --hellgelb:#fff4c2; --hellblau:#d6eaff; --blaurand:#6d9fd8;
+  --ok:#2f7d4f; --okbg:#e8f5ec; --noch:#b35c00; --nochrand:#e08a1e; --nochbg:#fff3e0;
+  --font:"Andika","Comic Sans MS","Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--room:#141816}}
+:root[data-theme="dark"]{--room:#141816}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);overflow:hidden;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));
+  user-select:none;-webkit-user-select:none}
+#fit{position:relative;width:100%;height:100%}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;background:var(--stage);border-radius:18px;
+  box-shadow:0 6px 30px rgba(0,0,0,.18);transform-origin:0 0;overflow:hidden}
+.blk{position:absolute}
+.hilfen-aus .hilfe{visibility:hidden}
+
+/* ---------- Knöpfe und Schalter (mind. 64 px hoch, Schrift 24 px) ---------- */
+.knopf{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:64px;padding:0 22px;
+  font-family:var(--font);font-size:24px;font-weight:700;line-height:1.1;color:var(--ink);background:#fff;
+  border:3px solid var(--ink);border-radius:14px;cursor:pointer;text-decoration:none;touch-action:manipulation;white-space:nowrap}
+.knopf:hover{background:#f1f5f2}
+.knopf.haupt{background:var(--ink);color:#fff}
+.knopf.haupt:hover{background:#38423d}
+.knopf[aria-pressed="true"]{background:#e3f2e8;border-color:var(--ok)}
+.knopf:disabled{opacity:.3;cursor:default;background:#fff}
+.knopf:focus-visible,.feld:focus-visible,.lepo button:focus-visible{outline:4px solid var(--ok);outline-offset:2px}
+.knopf .box{width:26px;height:26px;border:3px solid var(--ink);border-radius:6px;display:inline-grid;place-items:center;font-size:20px;line-height:1}
+.knopf[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.knopf[aria-pressed="true"] .box::after{content:"✓"}
+
+/* ---------- Kopfleiste ---------- */
+.kopf{position:absolute;left:24px;right:24px;top:16px;height:64px;display:flex;align-items:center;gap:20px}
+.kopf h1{margin:0;font-size:34px;line-height:1.1;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kopf .rechts{display:flex;gap:12px}
+.knopf.start{gap:8px}
+.leiste{position:absolute;left:24px;right:24px;top:96px;height:64px;display:flex;align-items:center;gap:22px}
+.gruppe{display:flex;align-items:center;gap:8px}
+.gruppe .glabel{font-size:22px;font-weight:700;color:var(--soft);margin-right:2px}
+.gruppe .knopf{padding:0 16px}
+.trenner{width:2px;height:44px;background:#d5ddd7}
+
+/* ---------- Hunderterquadrat ---------- */
+.qbox{position:absolute}
+.quadrat{--z:58px;display:grid;grid-template-columns:repeat(10,var(--z));grid-auto-rows:var(--z);gap:3px;position:relative}
+.feld{width:var(--z);height:var(--z);padding:0;border:2px solid var(--line);border-radius:8px;background:var(--feld);color:var(--ink);
+  font-family:var(--font);font-weight:700;font-size:calc(var(--z) * .40);line-height:1;cursor:pointer;touch-action:manipulation;
+  display:grid;place-items:center;position:relative}
+.feld.sel{background:var(--gelb);border:5px solid var(--gelbrand)}
+.feld.vor{background:var(--hellgelb)}
+.feld.weg{background:var(--hellblau);border-color:var(--blaurand)}
+.feld.zeile{background:var(--hellblau)}
+.feld.falsch{background:#eef0ee;color:#8d9892;text-decoration:line-through 3px}
+.feld.vermutung{box-shadow:inset 0 0 0 4px var(--gelbrand)}
+.feld.ziel::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:14px;
+  background:linear-gradient(var(--Z),var(--Z)) 3px 0/13px 9px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 0/3px 14px no-repeat}
+.feld.aus{cursor:default}
+.farben .feld .t,.zahl .t{color:var(--T)}
+.farben .feld .h,.zahl .h{color:var(--H)}
+.farben .feld .z,.zahl .z{color:var(--Z)}
+.farben .feld .e,.zahl .e{color:var(--E)}
+.zahl .grau{color:#b4bcb7!important}
+
+/* ---------- Leporello-Leiste ---------- */
+.lepo{display:flex;gap:4px}
+.lepo button{width:58px;padding:0;border:none;background:none;cursor:pointer;font-family:var(--font);color:var(--ink);touch-action:manipulation}
+.lepo .mini{display:block;width:54px;height:54px;margin:0 auto;border:3px solid #8d9892;border-radius:6px;background-color:#fff;
+  background-image:linear-gradient(#cfd6d1 1px,transparent 1px),linear-gradient(90deg,#cfd6d1 1px,transparent 1px);background-size:4.8px 4.8px;background-position:2px 2px}
+.lepo .lbl{display:block;font-size:14px;font-weight:700;margin-top:3px;color:var(--soft);white-space:nowrap;letter-spacing:-.02em}
+.lepo button.aktiv .mini{border-color:var(--gelbrand);background-color:var(--gelb);border-width:5px}
+.lepo button.aktiv .lbl{color:var(--ink)}
+.lepo button.blink .mini{animation:blink .45s ease-in-out 4}
+@keyframes blink{50%{background-color:var(--gelb);border-color:var(--gelbrand);transform:scale(1.12)}}
+
+/* ---------- Stellenwerttafel ---------- */
+.swt{border-collapse:separate;border-spacing:6px 0}
+.swt th{width:104px;height:56px;color:#fff;font-size:30px;border-radius:12px 12px 0 0}
+.swt td{height:104px;text-align:center;font-size:68px;font-weight:700;border:3px solid #cfd6d1;border-top:none;border-radius:0 0 12px 12px;background:#fff}
+.swt .t{background:var(--T)} .swt .h{background:var(--H)} .swt .z{background:var(--Z)} .swt .e{background:var(--E)}
+.swt td.t{background:#fff;color:var(--T)} .swt td.h{background:#fff;color:var(--H)} .swt td.z{background:#fff;color:var(--Z)} .swt td.e{background:#fff;color:var(--E)}
+.swt td.neu{animation:puls .9s ease-out 1;box-shadow:inset 0 0 0 5px var(--gelb),0 0 0 4px var(--gelbrand)}
+@keyframes puls{0%{transform:scale(1)}35%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ---------- Große Zahl ---------- */
+.gzahl{font-size:120px;font-weight:700;line-height:1}
+.ginfo{font-size:30px;font-weight:700;color:var(--soft);margin-top:8px;min-height:40px}
+
+/* ---------- Satzstreifen und Rückmeldung ---------- */
+.streifen{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 20px;font-size:30px;line-height:1.3;min-height:66px}
+.streifen:empty{visibility:hidden}
+.streifen.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg)}
+.streifen.noch{color:var(--noch);border-color:var(--nochrand);background:var(--nochbg)}
+.streifen.muster{border-style:dashed;color:var(--soft)}
+.streifen p{margin:0}
+.streifen p+p{margin-top:6px}
+
+/* ---------- Material (Hunderterplatten, Zehnerstangen, Einerwürfel) ---------- */
+.material{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.material .grp{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-end}
+.platte{width:46px;height:46px;background-color:var(--H);border:2px solid #1f5f2a;
+  background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:4.2px 4.2px}
+.stange{width:9px;height:46px;background-color:var(--Z);border:2px solid #8e2620;background-image:linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px);background-size:100% 4.2px}
+.wuerfel{width:9px;height:9px;background:var(--E);border:2px solid #1a4787}
+.tausender{width:60px;height:60px;background:var(--T);border:2px solid #222;
+  background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:6px 6px}
+.material .leer{font-size:22px;color:var(--soft)}
+
+/* ---------- Pfeil-Overlay ---------- */
+.ueber{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+
+@media (prefers-reduced-motion: reduce){
+  .swt td.neu,.lepo button.blink .mini{animation:none}
+  *{transition:none!important}
+}

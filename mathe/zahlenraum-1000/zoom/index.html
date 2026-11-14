@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zoom: vom Leporello ins Quadrat – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.ziel{font-size:56px;font-weight:700;line-height:1.1}
+.schritt{font-size:30px;font-weight:700;color:var(--soft);margin-top:8px}
+.heft{display:flex;gap:14px}
+.block{width:130px;padding:0;border:none;background:none;cursor:pointer;font-family:var(--font);color:var(--ink);touch-action:manipulation}
+.block .flaeche{display:block;width:130px;height:130px;border:4px solid #8d9892;border-radius:10px;background-color:#fff;
+  background-image:linear-gradient(#d5ddd7 1.5px,transparent 1.5px),linear-gradient(90deg,#d5ddd7 1.5px,transparent 1.5px);background-size:12.2px 12.2px;background-position:2px 2px}
+.block .lbl{display:block;font-size:24px;font-weight:700;margin-top:8px}
+.block.falsch .flaeche{background-color:#eef0ee;border-color:#c5ccc7}
+.block.falsch .lbl{color:#8d9892;text-decoration:line-through 2px}
+.block:focus-visible{outline:4px solid var(--ok);outline-offset:3px}
+.zoomer{position:absolute;border:4px solid var(--gelbrand);border-radius:10px;background:var(--hellgelb);z-index:10;pointer-events:none;
+  transition:left .45s ease-in-out,top .45s ease-in-out,width .45s ease-in-out,height .45s ease-in-out}
+.zeilen{display:grid;grid-auto-rows:58px;gap:3px}
+.zeilen .knopf{min-height:58px;height:58px;font-size:22px;padding:0 10px;width:118px}
+.zeilen .knopf.an{background:var(--hellblau);border-color:var(--blaurand)}
+.qtitel{font-size:32px;font-weight:700;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+let modus = "erkunden", ansicht = "heft", s = 0, zeile = null, ziel = 0, schritt = 1, laeuft = false;
+
+// ---------- Aufbau ----------
+const neueZahl = T.knopf("Neue Zahl", () => neu());
+const zurueck = T.knopf('<span aria-hidden="true">←</span> Zurück zum Heft', () => zumHeft());
+const modusWahl = T.gruppe("", [{ wert: "erkunden", text: "Erkunden" }, { wert: "finden", text: "Finde die Zahl" }], "erkunden",
+  v => { modus = v; neu(); }, "zoom-modus");
+modus = modusWahl.wert;
+T.leiste(modusWahl, neueZahl, zurueck);
+
+// Ansicht 1: das Heft (zehn große Blöcke)
+const kopfText = T.blk(87, 190, 1426);
+const zielEl = T.el("div", "ziel"), schrittEl = T.el("div", "schritt"); kopfText.append(zielEl, schrittEl);
+const heftBox = T.blk(87, 350); const heft = T.el("div", "heft"); heftBox.appendChild(heft);
+const bloecke = [];
+for (let i = 0; i < 10; i++) {
+  const b = T.el("button", "block", `<span class="flaeche"></span><span class="lbl">${T.bereichKurz(i)}</span>`);
+  b.type = "button"; b.setAttribute("aria-label", `Quadrat ${i + 1}: ${T.bereich(i)}`);
+  b.addEventListener("click", () => blockGetippt(i)); heft.appendChild(b); bloecke.push(b);
+}
+const heftSatz = T.streifen(T.blk(87, 580, 1426));
+
+// Ansicht 2: ein Quadrat mit Zeilen-Knöpfen
+const qAnsicht = [];
+const zeilenBox = T.blk(40, 196); const zeilenEl = T.el("div", "zeilen"); zeilenBox.appendChild(zeilenEl);
+const zeilenKn = [];
+for (let r = 0; r < 10; r++) { const b = T.knopf(`Zeile ${r + 1}`, () => zeileGetippt(r)); zeilenEl.appendChild(b); zeilenKn.push(b); }
+const qBlk = T.blk(170, 196);
+const q = T.quadrat(qBlk, { zelle: 58, onTap: n => feldGetippt(n), zeige: n => T.hilfen() || T.pos(n).c === 0 || T.pos(n).r === zeile });
+const re = T.blk(830, 190, 730);
+const qTitel = T.el("div", "qtitel"); re.appendChild(qTitel);
+const swtBox = T.el("div"); re.appendChild(swtBox); const swt = T.stellenwerttafel(swtBox);
+const qSatz = T.streifen(T.blk(830, 560, 730));
+qAnsicht.push(zeilenBox, qBlk, re, qSatz.parentNode);
+
+T.kopf({ titel: "Zoom: vom Leporello ins Quadrat", onNeu: () => neu(), onHilfen: () => q.zeichne() });
+
+// ---------- Ansichten ----------
+function zeigeAnsicht(a) {
+  ansicht = a;
+  [kopfText, heftBox, heftSatz.parentNode].forEach(e => e.hidden = a !== "heft");
+  qAnsicht.forEach(e => e.hidden = a !== "quadrat");
+  zurueck.style.display = a === "quadrat" ? "" : "none";
+}
+function zumHeft() { if (laeuft) return; zeile = null; zeigeAnsicht("heft"); if (modus === "finden" && schritt > 1) { schritt = 1; texte(); } }
+async function zoomeIn(i) {
+  laeuft = true; const lauf = T.lauf;
+  const r = bloecke[i].querySelector(".flaeche"), sr = S.getBoundingClientRect(), br = r.getBoundingClientRect(), k = sr.width / 1600;
+  const z = T.el("div", "zoomer"); S.appendChild(z);
+  Object.assign(z.style, { left: (br.left - sr.left) / k + "px", top: (br.top - sr.top) / k + "px", width: 130 + "px", height: 130 + "px" });
+  z.getBoundingClientRect();
+  Object.assign(z.style, { left: "170px", top: "196px", width: q.groesse + "px", height: q.groesse + "px" });
+  await T.warte(480); z.remove(); if (lauf !== T.lauf) return;
+  s = i; zeile = null; q.leere(); q.zeigeQuadrat(s);
+  qTitel.textContent = `Quadrat ${s + 1}: ${T.bereich(s)}`; swtBox.hidden = true;
+  zeilenKn.forEach(b => b.classList.remove("an"));
+  zeigeAnsicht("quadrat"); laeuft = false; texte();
+}
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); laeuft = false; zeile = null; schritt = 1;
+  bloecke.forEach(b => b.classList.remove("falsch"));
+  ziel = T.zufall(1, 999);
+  neueZahl.style.display = modus === "finden" ? "" : "none";
+  zeigeAnsicht("heft"); texte(); T.melde(heftSatz, "", ""); T.melde(qSatz, "", "");
+}
+function texte() {
+  if (modus === "erkunden") {
+    zielEl.textContent = "Das Heft: zehn Quadrate"; schrittEl.textContent = "Tippe ein Quadrat an.";
+    if (ansicht === "quadrat") T.melde(qSatz, "", "Tippe eine Zeile oder ein Feld an.");
+  } else {
+    zielEl.innerHTML = `Finde die <span class="zahl">${T.zahlHTML(ziel)}</span>.`;
+    schrittEl.textContent = ["", "1. Welches Quadrat?", "2. Welche Zeile?", "3. Welches Feld?", "Gefunden!"][schritt];
+    if (ansicht === "quadrat") qTitel.innerHTML = `Finde die <span class="zahl">${T.zahlHTML(ziel)}</span>. <br><span style="font-size:26px;color:var(--soft)">${schrittEl.textContent}</span>`;
+  }
+}
+function blockGetippt(i) {
+  if (laeuft) return;
+  if (modus === "finden") {
+    if (i !== T.pos(ziel).s) { bloecke[i].classList.add("falsch"); return T.melde(heftSatz, "noch", `Noch nicht. In diesem Quadrat stehen die Zahlen ${T.bereich(i)}.`); }
+    schritt = 2; T.melde(heftSatz, "", "");
+  }
+  zoomeIn(i);
+}
+function markiereZeile(r) {
+  zeile = r; q.leere("zeile"); for (let c = 0; c < 10; c++) q.mark(T.num(s, r, c), "zeile");
+  zeilenKn.forEach((b, i) => b.classList.toggle("an", i === r)); q.zeichne();
+}
+function zeileGetippt(r) {
+  if (modus === "erkunden") { markiereZeile(r); return T.melde(qSatz, "", `Zeile ${r + 1}: ${T.num(s, r, 0)} bis ${T.num(s, r, 9)}`); }
+  if (schritt !== 2) return;
+  if (r !== T.pos(ziel).r) return T.melde(qSatz, "noch", `Noch nicht. In dieser Zeile stehen die Zahlen ${T.num(s, r, 0)} bis ${T.num(s, r, 9)}.`);
+  markiereZeile(r); schritt = 3; texte(); T.melde(qSatz, "", "Richtig, diese Zeile. Jetzt das Feld.");
+}
+function feldGetippt(n) {
+  const p = T.pos(n);
+  if (modus === "erkunden") {
+    q.leere("sel"); q.mark(n, "sel"); swtBox.hidden = false; swt.zeige(n);
+    return T.melde(qSatz, "", `Das ist die ${n}. Sie steht in der ${p.r + 1}. Zeile, im ${p.c + 1}. Feld.`);
+  }
+  if (schritt === 2) return zeileGetippt(p.r);
+  if (schritt !== 3) return;
+  if (p.r !== zeile) return T.melde(qSatz, "noch", "Bleib in deiner Zeile.");
+  if (n !== ziel) return T.melde(qSatz, "noch", `Noch nicht. Das ist die ${n}.`);
+  q.mark(n, "sel"); swtBox.hidden = false; swt.zeige(n); schritt = 4; texte();
+  T.melde(qSatz, "ok", [T.lob(), `Die ${n} ist ${T.ortsSatz(n).replace(/in der (\d+)\. Spalte/, "im $1. Feld")}.`]);
+}
+neu();
+</script>
+</body>
+</html>

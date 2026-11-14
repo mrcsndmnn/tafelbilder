@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zahlenraum bis 1000 – Tafelbilder</title>
+<meta name="description" content="Neun interaktive Tafelbilder zur 1000er-Tafel als Leporello.">
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<style>
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --mathe:#2f6fb0; --mathe-bg:#e4eef8;
+  --T:#444444; --H:#2e8b3e; --Z:#d03a32; --E:#2667c9;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --mathe:#7fb0e6; --mathe-bg:#1e2c3b; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{max-width:none;margin:0 0 20px}
+h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
+.unter{margin:0;color:var(--soft);max-width:62ch}
+.legende{display:flex;flex-wrap:wrap;gap:10px 22px;margin:20px 0 6px;align-items:center}
+.legende .f{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.legende .f i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;color:#fff;font-style:normal;font-size:20px}
+.hinweis{color:var(--soft);font-size:16px;margin:6px 0 0;max-width:75ch}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}
+@media (max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+a.kachel{display:grid;grid-template-columns:64px 1fr;gap:6px 16px;align-items:start;text-decoration:none;color:inherit;background:var(--card);
+  border:2px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
+a.kachel:hover{border-color:var(--mathe);transform:translateY(-2px)}
+a.kachel:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sym{grid-row:span 3;width:64px;height:64px;border-radius:14px;background:var(--mathe-bg);display:grid;place-items:center}
+.sym svg{width:44px;height:44px}
+.nr{font-size:14px;font-weight:700;color:var(--mathe)}
+.kachel strong{font-size:21px;line-height:1.25}
+.kachel span.desc{color:var(--soft);font-size:16px}
+footer{margin-top:44px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){a.kachel{transition:none}a.kachel:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <header>
+    <h1>Zahlenraum bis 1000 – Tafelbilder</h1>
+    <p class="unter">Die 1000er-Tafel als Leporello: 10 Quadrate nebeneinander, jedes von 1 bis 100</p>
+  </header>
+  <div class="legende" aria-label="Farben der Stellen">
+    <span class="f"><i style="background:var(--H)">H</i>Hunderter</span>
+    <span class="f"><i style="background:var(--Z)">Z</i>Zehner</span>
+    <span class="f"><i style="background:var(--E)">E</i>Einer</span>
+    <span class="f"><i style="background:var(--T)">T</i>Tausender (nur bei 1000)</span>
+  </div>
+  <p class="hinweis">Auf jeder Seite oben rechts: <strong>Farben</strong> färbt die Ziffern im Quadrat, <strong>Hilfen</strong> blendet Pfeilbeschriftungen und Satzmuster ein oder aus, <strong>Neu</strong> setzt das Tafelbild zurück. Mit <strong>Start</strong> geht es hierher zurück.</p>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten. Gebaut für das Smartboard (Bühne 1600 × 900).</footer>
+</div>
+<script>
+const S = (d) => `<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const TAFELN = [
+  ["entdecken", "Entdecken: Tafel und Stellenwerttafel", "Mit dem Steuerkreuz über die Tafel gehen und sehen, welche Ziffer sich ändert.",
+    S('<circle cx="19" cy="19" r="11"/><path d="M27 27 L38 38"/>')],
+  ["zahlenkreuz", "Zahlenkreuz und Zahlenfenster", "Nachbarzahlen nennen und aufdecken – im Kreuz oder im ganzen Fenster.",
+    S('<rect x="16" y="4" width="12" height="12" rx="2"/><rect x="4" y="16" width="12" height="12" rx="2"/><rect x="16" y="16" width="12" height="12" rx="2" fill="currentColor"/><rect x="28" y="16" width="12" height="12" rx="2"/><rect x="16" y="28" width="12" height="12" rx="2"/>')],
+  ["linien", "Linien: waagerecht, senkrecht, diagonal", "Linien legen und benennen: Was bleibt gleich, was ändert sich?",
+    S('<rect x="4" y="4" width="36" height="36" rx="3"/><path d="M10 34 L34 10"/><path d="M4 22 H40" stroke-dasharray="3 4"/>')],
+  ["wege", "Wege mit dem Marienkäfer", "Befehlskarten wie „3 × →“ lesen, den Weg vorhersagen oder selbst legen.",
+    S('<ellipse cx="22" cy="25" rx="13" ry="14"/><circle cx="22" cy="9" r="5"/><path d="M22 14 V39"/><circle cx="15" cy="23" r="2" fill="currentColor"/><circle cx="29" cy="23" r="2" fill="currentColor"/><circle cx="15" cy="31" r="2" fill="currentColor"/><circle cx="29" cy="31" r="2" fill="currentColor"/>')],
+  ["detektiv", "Zahlendetektiv", "Geheimzahl mit Hinweisen zu Ort oder Stellen finden – oder selbst ein Rätsel bauen.",
+    S('<circle cx="22" cy="22" r="17"/><path d="M16.5 17 a5.5 5.5 0 1 1 7.5 5 c-1.6.8-2 1.8-2 3.5"/><circle cx="22" cy="31.5" r="1.2" fill="currentColor"/>')],
+  ["sprungstellen", "Sprungstellen", "Welche Zahl kommt nach 359 oder vor 400? Ziffern- und Orts-Sprünge erklären.",
+    S('<path d="M6 14 H30 C40 14 40 30 30 30 H12"/><path d="M17 25 L12 30 L17 35"/>')],
+  ["fehlersuche", "Fehlersuche", "Im Tafelausschnitt falsche Zahlen finden und begründen.",
+    S('<rect x="4" y="4" width="36" height="36" rx="3"/><path d="M4 16 H40 M4 28 H40 M16 4 V40 M28 4 V40"/><path d="M30 18 L38 26 M38 18 L30 26" stroke-width="3.5"/>')],
+  ["zoom", "Zoom: vom Leporello ins Quadrat", "In drei Schritten zur Zahl: Quadrat, Zeile, Feld.",
+    S('<rect x="3" y="26" width="8" height="8" rx="1"/><rect x="13" y="26" width="8" height="8" rx="1"/><rect x="23" y="16" width="18" height="18" rx="2"/><path d="M17 22 L23 18"/>')],
+  ["blitzrunde", "Blitzrunde zum Stundenbeginn", "10 schnelle Runden: Startzahl und Befehl, dann Lösung. Mit Klassen-Ampel.",
+    S('<path d="M25 4 L10 25 H21 L18 40 L34 18 H23 Z"/>')],
+];
+document.getElementById("grid").innerHTML = TAFELN.map(([pfad, titel, text, sym], i) => `
+  <a class="kachel" href="${pfad}/">
+    <span class="sym" style="color:var(--mathe)">${sym}</span>
+    <span class="nr">Tafelbild ${i + 1}</span>
+    <strong>${titel}</strong>
+    <span class="desc">${text}</span>
+  </a>`).join("");
+</script>
+</body>
+</html>

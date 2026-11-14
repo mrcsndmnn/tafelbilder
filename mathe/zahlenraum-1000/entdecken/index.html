@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entdecken – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+/* Steuerkreuz 3 × 3 */
+.kreuz{display:grid;grid-template-columns:repeat(3,100px);grid-auto-rows:100px;gap:10px}
+.kreuz .knopf{flex-direction:column;gap:0;padding:0;font-size:46px;line-height:1}
+.kreuz .knopf .lbl{font-size:20px;color:var(--soft);margin-top:4px}
+.kreuz .mitte{display:grid;place-items:center;border:3px dashed var(--line);border-radius:14px;font-size:30px;font-weight:700}
+.hundert{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.hundert .knopf{width:320px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const START = 347;
+let n = START;
+
+// ---------- Aufbau ----------
+const lepo = T.leporello(T.blk(40, 104), { onTap: s => wechsleQuadrat(s) });
+const q = T.quadrat(T.blk(44, 196), { zelle: 58, onTap: m => gehe(m, `Du hast die ${m} angetippt.`) });
+
+const steuer = T.blk(700, 196);
+const kreuz = T.el("div", "kreuz"); steuer.appendChild(kreuz);
+const pfeile = {};
+T.ACHT.slice(0, 4).concat(["mitte"], T.ACHT.slice(4)).forEach(ri => {
+  if (ri === "mitte") { const m = T.el("div", "mitte zahl"); kreuz.appendChild(m); pfeile.mitte = m; return; }
+  const R = T.R[ri], d = R.d;
+  const b = T.knopf(`<span aria-hidden="true">${R.pfeil}</span><span class="lbl hilfe">${d > 0 ? "+" : "−"}${Math.abs(d)}</span>`, () => schritt(ri));
+  b.setAttribute("aria-label", R.text);
+  kreuz.appendChild(b); pfeile[ri] = b;
+});
+const hundert = T.el("div", "hundert"); steuer.appendChild(hundert);
+pfeile.minus100 = T.knopf("−100 Quadrat davor", () => schritt("minus100"));
+pfeile.plus100 = T.knopf("+100 nächstes Quadrat", () => schritt("plus100"));
+hundert.append(pfeile.minus100, pfeile.plus100);
+
+const gz = T.grosseZahl(T.blk(1060, 186, 500));
+const swt = T.stellenwerttafel(T.blk(1054, 380));
+const matBox = T.blk(1060, 568, 500, 130);
+const mat = T.material(matBox);
+const satz = T.streifen(T.blk(700, 708, 860), "hilfe");
+
+const matAn = T.laden("material", false);
+matBox.hidden = !matAn;
+T.kopf({
+  titel: "Entdecken: Tafel und Stellenwerttafel",
+  extra: [T.schalter("Material zeigen", matAn, v => { matBox.hidden = !v; T.merken("material", v); })],
+  onNeu: () => { n = START; q.leere(); zeige(null); T.melde(satz, "", ""); },
+});
+
+// ---------- Ablauf ----------
+function zeige(vorher) {
+  const p = T.pos(n);
+  if (q.s !== p.s) q.zeigeQuadrat(p.s);
+  q.leere(); if (vorher != null && vorher !== n) q.mark(vorher, "vor"); q.mark(n, "sel");
+  lepo.setze(p.s);
+  gz.zeige(n, vorher); swt.zeige(n, vorher); mat.zeige(n);
+  pfeile.mitte.innerHTML = T.zahlHTML(n);
+  Object.keys(T.R).forEach(ri => { if (pfeile[ri]) pfeile[ri].disabled = T.schritt(n, ri) === null; });
+}
+function gehe(m, text) { const v = n; n = m; zeige(v); T.melde(satz, "", text); }
+function schritt(ri) { const m = T.schritt(n, ri); if (m !== null) gehe(m, T.bewegungsSatz(n, m, ri)); }
+function wechsleQuadrat(s) {
+  const p = T.pos(n); if (s === p.s) return;
+  const m = T.num(s, p.r, p.c), k = Math.abs(s - p.s), ri = s > p.s ? "plus100" : "minus100";
+  gehe(m, `Ich springe ins ${s + 1}. Quadrat an dieselbe Stelle. ` + T.stellenSatz(n, m, ri, k));
+}
+q.zeigeQuadrat(T.pos(n).s); zeige(null);
+</script>
+</body>
+</html>

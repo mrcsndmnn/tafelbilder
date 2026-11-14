@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fehlersuche – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<style>
+.qtitel{font-size:26px;font-weight:700;color:var(--soft)}
+.aus{display:grid;grid-template-columns:repeat(5,120px);grid-auto-rows:120px;gap:10px}
+.ff{border:3px solid var(--line);border-radius:14px;background:#fff;font-family:var(--font);font-size:46px;font-weight:700;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;cursor:pointer;touch-action:manipulation}
+.ff:focus-visible{outline:4px solid var(--ok);outline-offset:2px}
+.ff.gefunden{background:var(--okbg);border-color:var(--ok);border-width:4px}
+.ff .alt{font-size:32px;color:#8d9892;text-decoration:line-through 3px}
+.ff .neu{font-size:40px}
+.farben .ff .t{color:var(--T)}.farben .ff .h{color:var(--H)}.farben .ff .z{color:var(--Z)}.farben .ff .e{color:var(--E)}
+.ff .alt span{color:inherit!important}
+.auftrag{font-size:34px;font-weight:700;margin:0 0 8px}
+.zaehler{font-size:28px;color:var(--soft);margin:0 0 18px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const T = Tafel, S = T.buehne();
+let stufe = 1, sprung = T.laden("fehler-sprung", false), zellen = [], fehlerZahl = 0, gefunden = 0;
+
+// ---------- Aufbau ----------
+const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "fehler-stufe"); stufe = stufenWahl.wert;
+T.leiste(stufenWahl, T.schalter("Sprungstellen", sprung, v => { sprung = v; T.merken("fehler-sprung", v); neu(); }),
+  T.knopf("Neue Aufgabe", () => neu()), T.knopf("Auflösen", () => aufloesen()));
+const qTitel = T.el("div", "qtitel"); T.blk(64, 182).appendChild(qTitel);
+const aus = T.el("div", "aus"); T.blk(60, 226).appendChild(aus);
+const re = T.blk(760, 186, 800);
+const auftrag = T.el("p", "auftrag"), zaehler = T.el("p", "zaehler"); re.append(auftrag, zaehler);
+const muster = T.streifen(re, "muster hilfe"); muster.innerHTML = "<p>Unter … steht …</p><p>Rechts neben … steht …</p>";
+const satz = T.streifen(T.blk(760, 470, 800));
+T.kopf({ titel: "Fehlersuche", onNeu: () => neu() });
+
+// ---------- Fehler erzeugen ----------
+function falscheZahl(n, amRand) {
+  const s = T.stellen(n), m = [];
+  if (n % 100 === 0 && n > 100) m.push(n - 100);                       // Hunderter nicht erhöht (400 als 300)
+  if (+s.E === 0 && n % 100 !== 0 && n > 10) m.push(n - 10);           // Zehner nicht erhöht (340 als 330)
+  if (amRand && m.length) return T.wahl(m);
+  if (s.Z && s.E !== s.Z && +s.E !== 0) m.push(+((s.H || "") + s.E + s.Z));   // Zahlendreher (47 → 74)
+  [10, -10, 1, -1].forEach(d => { if (n + d >= 1 && n + d <= 1000) m.push(n + d); });
+  return T.wahl(m.filter(x => x !== n));
+}
+function neu() {
+  const s = T.zufall(0, 9), r0 = T.zufall(0, 6), c0 = sprung ? 5 : T.zufall(0, 5);
+  qTitel.textContent = `Quadrat ${s + 1}: ${T.bereich(s)}`;
+  zellen = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) zellen.push({ n: T.num(s, r0 + r, c0 + c), r, c, falsch: null, gefunden: false });
+  fehlerZahl = stufe; gefunden = 0;
+  let kandidaten = T.mischen(zellen);
+  if (sprung) kandidaten = kandidaten.sort((a, b) => (b.c === 4) - (a.c === 4));     // bevorzugt Spalte 10
+  kandidaten.slice(0, fehlerZahl).forEach(z => { z.falsch = falscheZahl(z.n, sprung && z.c === 4); });
+  aus.innerHTML = "";
+  zellen.forEach(z => {
+    const b = T.el("button", "ff"); b.type = "button"; z.el = b;
+    b.innerHTML = T.zahlHTML(z.falsch || z.n); b.addEventListener("click", () => tippe(z));
+    aus.appendChild(b);
+  });
+  zaehle(); auftrag.textContent = `Finde ${fehlerZahl === 1 ? "den Fehler" : fehlerZahl + " Fehler"}.`;
+  T.melde(satz, "", "");
+}
+const zaehle = () => zaehler.textContent = `Gefunden: ${gefunden} von ${fehlerZahl}`;
+function nachbarSatz(z) {
+  const bei = (r, c) => zellen.find(x => x.r === r && x.c === c && (!x.falsch || x.gefunden));
+  const v = [[0, -1, "Rechts neben"], [-1, 0, "Unter"], [0, 1, "Links neben"], [1, 0, "Über"]]
+    .map(([dr, dc, w]) => ({ x: bei(z.r + dr, z.c + dc), w })).find(o => o.x);
+  return v ? `${v.w} ${v.x.n} steht ${z.n}.` : `Hier steht ${z.n}.`;
+}
+function decke(z) {
+  z.gefunden = true; z.el.classList.add("gefunden");
+  z.el.innerHTML = `<span class="alt">${z.falsch}</span><span class="neu">${T.zahlHTML(z.n)}</span>`;
+}
+
+// ---------- Ablauf ----------
+function tippe(z) {
+  if (z.gefunden) return;
+  if (z.falsch) {
+    decke(z); gefunden++; zaehle();
+    const t = ["Das stimmt nicht. " + nachbarSatz(z)];
+    if (gefunden === fehlerZahl) t.push(`${T.lob()} Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden.`);
+    T.melde(satz, "ok", t);
+  } else T.melde(satz, "", "Die Zahl stimmt. Such weiter.");
+}
+function aufloesen() {
+  zellen.filter(z => z.falsch && !z.gefunden).forEach(decke);
+  gefunden = fehlerZahl; zaehle();
+  T.melde(satz, "", "Hier sind alle Fehler. Sprecht darüber: Was ist passiert?");
+}
+neu();
+</script>
+</body>
+</html>
