@@ -23,16 +23,6 @@
 .zeit div{height:100%;width:100%;background:var(--E);border-radius:10px}
 .bedien{display:flex;gap:14px;align-items:center;width:880px}
 .zaehler{margin-left:auto;font-size:30px;font-weight:700;color:var(--soft)}
-.ampel h2{font-size:32px;margin:0 0 6px}
-.ampel p{font-size:22px;color:var(--soft);margin:0 0 16px}
-.ampel .kn{display:flex;align-items:center;gap:22px;margin-bottom:16px}
-.ampel .licht{width:118px;height:118px;border-radius:50%;border:5px solid var(--ink);cursor:pointer;font-family:var(--font);font-size:22px;font-weight:700;touch-action:manipulation}
-.ampel .licht:focus-visible{outline:5px solid var(--ok);outline-offset:3px}
-.ampel .licht:active{transform:scale(.95)}
-.ampel .gruen{background:#3fae5a;color:#fff}.ampel .gelb{background:#f5c518;color:var(--ink)}.ampel .rot{background:#e0564f;color:#fff}
-.ampel .anz{font-size:56px;font-weight:700;min-width:90px}
-.summe{font-size:24px;border:3px solid var(--ink);border-radius:14px;padding:14px 18px;background:#fff}
-.summe .balken{display:flex;height:30px;border-radius:8px;overflow:hidden;margin-top:10px;background:#e6ebe7}
 </style>
 </head>
 <body>
@@ -52,7 +42,7 @@ window.HINWEISE = {
    "punkte": [
     "Startzahl und Befehl lesen, z. B. „628, 1 nach oben“. Die Kinder rechnen im Kopf und zeigen mit dem Daumen.",
     "**Lösung** zeigt das Ergebnis, einen Satz und einen kleinen Ausschnitt der Tafel mit Start und Ziel.",
-    "**Nächste Runde**. Nach 10 Runden kommt die Zusammenfassung. **Neu** beginnt von vorn."
+    "**Nächste Runde**. Nach 10 Runden ist die Blitzrunde fertig. **Neu** beginnt von vorn."
    ]
   },
   {
@@ -60,12 +50,6 @@ window.HINWEISE = {
    "punkte": [
     "**Stufe ●**: ein Schritt ← → ↑ ↓. **●●**: auch schräg, 1–2 Schritte. **●●●**: Sprungstellen und ganze Quadrate (±100), 1–3 Schritte.",
     "**Zeit**: aus, 5 s oder 10 s. Ein Balken läuft ab, danach erscheint die Lösung von selbst."
-   ]
-  },
-  {
-   "h": "Klassen-Ampel",
-   "punkte": [
-    "Für jedes Kind einmal Gut, Geht so oder Schwer antippen (Daumen hoch, Mitte, runter). Die Zahlen werden nicht gespeichert."
    ]
   }
  ]
@@ -76,7 +60,6 @@ window.HINWEISE = {
 const T = Tafel, S = T.buehne();
 const RUNDEN = 10;
 let stufe = 1, zeit = T.laden("blitz-zeit", 0), runde = 1, aufg = null, gezeigt = false, uhr = null;
-const ampel = { gruen: 0, gelb: 0, rot: 0 };
 
 // ---------- Aufbau ----------
 const stufenWahl = T.stufen(v => { stufe = v; start(); }, "blitz-stufe"); stufe = stufenWahl.wert;
@@ -85,26 +68,16 @@ const zeitWahl = T.gruppe("Zeit", [{ wert: 0, text: "aus" }, { wert: 5, text: "5
 zeit = zeitWahl.wert;
 T.leiste(stufenWahl, zeitWahl);
 
-const kBox = T.blk(60, 186); const karte = T.el("div", "karte"); kBox.appendChild(karte);
+const kBox = T.blk(360, 186); const karte = T.el("div", "karte"); kBox.appendChild(karte);
 const links = T.el("div", "links"); const aus = T.el("div", "ausschnitt"); karte.append(links, aus);
 const startEl = T.el("div", "startzahl zahl"), befehlEl = T.el("div", "befehl"), loesEl = T.el("div", "loesung zahl");
 links.append(startEl, befehlEl, loesEl);
-const zeitBox = T.blk(60, 632); const zeitEl = T.el("div", "zeit", "<div></div>"); zeitBox.appendChild(zeitEl);
-const bed = T.blk(60, 668); const bedien = T.el("div", "bedien"); bed.appendChild(bedien);
+const zeitBox = T.blk(360, 632); const zeitEl = T.el("div", "zeit", "<div></div>"); zeitBox.appendChild(zeitEl);
+const bed = T.blk(360, 668); const bedien = T.el("div", "bedien"); bed.appendChild(bedien);
 const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Runde", () => weiter());
 const zaehler = T.el("span", "zaehler"); bedien.append(loesKn, weiterKn, zaehler);
-const satz = T.streifen(T.blk(60, 752, 880), "hilfe");
+const satz = T.streifen(T.blk(360, 752, 880), "hilfe");
 
-const ab = T.blk(1000, 186, 560); ab.classList.add("ampel");
-ab.innerHTML = "<h2>Klassen-Ampel</h2><p>Daumen hoch, Mitte oder runter? Tippe für jedes Kind.</p>";
-const anz = {};
-[["gruen", "Gut"], ["gelb", "Geht so"], ["rot", "Schwer"]].forEach(([k, t]) => {
-  const zeile = T.el("div", "kn"); const b = T.el("button", "licht " + k, t); b.type = "button";
-  const a = T.el("span", "anz", "0"); anz[k] = a;
-  b.addEventListener("click", () => { ampel[k]++; a.textContent = ampel[k]; if (runde > RUNDEN) zeigeSumme(); });
-  zeile.append(b, a); ab.appendChild(zeile);
-});
-const summe = T.el("div", "summe"); summe.hidden = true; ab.appendChild(summe);
 
 T.kopf({ titel: "Blitzrunde zum Stundenbeginn", onNeu: () => start() });
 
@@ -134,7 +107,7 @@ function befehlText(a) {
 function stoppeUhr() { clearTimeout(uhr); uhr = null; const b = zeitEl.firstChild; b.style.transition = "none"; b.style.width = "100%"; }
 addEventListener("pagehide", stoppeUhr);
 function start() {
-  runde = 1; Object.keys(ampel).forEach(k => { ampel[k] = 0; anz[k].textContent = "0"; }); summe.hidden = true; weiterKn.disabled = false;
+  runde = 1; weiterKn.disabled = false;
   aufg = neueAufgabe(); zeigeAufgabe();
 }
 function zeigeAufgabe() {
@@ -184,14 +157,8 @@ function zeigeAusschnitt(a) {
 }
 function weiter() {
   if (!gezeigt) loesung();
-  if (runde >= RUNDEN) { runde = RUNDEN + 1; zeigeSumme(); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; return; }
+  if (runde >= RUNDEN) { runde = RUNDEN + 1; T.melde(satz, "ok", "Geschafft! Alle 10 Runden sind fertig."); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; return; }
   runde++; aufg = neueAufgabe(); zeigeAufgabe();
-}
-function zeigeSumme() {
-  const g = ampel.gruen + ampel.gelb + ampel.rot;
-  summe.hidden = false;
-  summe.innerHTML = `<strong>Runde fertig!</strong><br>Gut: ${ampel.gruen} · Geht so: ${ampel.gelb} · Schwer: ${ampel.rot}` +
-    (g ? `<div class="balken"><div style="width:${ampel.gruen / g * 100}%;background:#3fae5a"></div><div style="width:${ampel.gelb / g * 100}%;background:#f5c518"></div><div style="width:${ampel.rot / g * 100}%;background:#e0564f"></div></div>` : "");
 }
 start();
 </script>
