@@ -32,15 +32,29 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .wrap{max-width:1100px;margin:0 auto;padding:32px 16px 56px}
 header h1{font-size:clamp(30px,5vw,42px);margin:0 0 4px}
 header p{margin:0;color:var(--soft);max-width:60ch}
-.tools{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 8px;align-items:center}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 6px;align-items:center}
 .tools input{font:inherit;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);flex:1 1 240px;min-width:0}
+.filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0}
+.flabel{font-size:15px;font-weight:700;color:var(--soft);min-width:58px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{font:inherit;font-size:16px;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tools input:focus-visible,.chip:focus-visible,a.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.fach{margin-top:36px}
-.fach>h2{display:flex;align-items:center;gap:10px;font-size:26px;margin:0 0 4px}
-.fach>h2 .dot{width:14px;height:14px;border-radius:50%;background:var(--fc)}
+.fach{margin-top:28px}
+/* Fach-Überschrift als Klapp-Knopf (Akkordeon) */
+.fach>h2{margin:0;font-size:clamp(20px,5.4vw,26px)}
+.fkopf{display:flex;align-items:center;gap:clamp(8px,2.5vw,12px);width:100%;min-width:0;font:inherit;font-weight:700;color:var(--ink);background:var(--card);
+  border:2px solid var(--line);border-radius:14px;padding:10px clamp(12px,3vw,16px);cursor:pointer;text-align:left}
+.fkopf:hover{border-color:var(--fc)}
+.fkopf:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fkopf .dot{width:14px;height:14px;border-radius:50%;background:var(--fc);flex:none}
+.fkopf .titel{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:clamp(8px,2.5vw,12px);min-width:0;flex:1}
+.fkopf .anzahl{font-size:15px;font-weight:400;color:var(--soft);white-space:nowrap}
+.fkopf .pfeil{width:12px;height:12px;border-right:3px solid var(--soft);border-bottom:3px solid var(--soft);
+  transform:rotate(45deg);margin-top:-6px;margin-right:4px;transition:transform .15s,margin .15s;flex:none}
+.fkopf[aria-expanded="false"] .pfeil{transform:rotate(-45deg);margin-top:0}
+.inhalt{padding:0 4px 4px}
+.inhalt[hidden]{display:none}
 .thema h3{font-size:19px;margin:18px 0 10px;color:var(--soft)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
 a.tile{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
@@ -58,7 +72,7 @@ footer a{color:inherit}
 .f-mathe{--fc:var(--mathe);--fbg:var(--mathe-bg)}
 .f-su{--fc:var(--su);--fbg:var(--su-bg)}
 .sr{position:absolute;left:-9999px}
-@media (prefers-reduced-motion: reduce){a.tile{transition:none}a.tile:hover{transform:none}}
+@media (prefers-reduced-motion: reduce){a.tile{transition:none}a.tile:hover{transform:none}.fkopf .pfeil{transition:none}}
 </style>
 </head>
 <body>
@@ -71,11 +85,18 @@ footer a{color:inherit}
   <div class="tools">
     <label for="q" class="sr">Suchen</label>
     <input id="q" type="search" placeholder="Suchen, z. B. Brief">
-    <div id="chips" class="chips"></div>
+  </div>
+  <div class="filter">
+    <span class="flabel" id="l-fach">Fach</span>
+    <div id="chips" class="chips" role="group" aria-labelledby="l-fach"></div>
+  </div>
+  <div class="filter">
+    <span class="flabel" id="l-klasse">Klasse</span>
+    <div id="kchips" class="chips" role="group" aria-labelledby="l-klasse"></div>
   </div>
 
   <main id="list"></main>
-  <p class="empty" id="empty" hidden>Nichts gefunden. Probiere ein anderes Wort.</p>
+  <p class="empty" id="empty" hidden>Nichts gefunden. Probiere ein anderes Wort oder einen anderen Filter.</p>
 
   <footer>
     Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten.
@@ -87,18 +108,22 @@ footer a{color:inherit}
 // ============================================================
 //  EINTRÄGE – hier neue Tafelbilder ergänzen
 //  fach:  "deutsch", "mathe" oder "su" (weitere unten in FAECHER anlegen)
+//  klasse: eine Stufe aus KLASSEN, z. B. "Klasse 3" – oder mehrere: ["SEP 2","SEP 3"]
+//          "übergreifend" erscheint bei jedem Klassen-Filter mit
 //  url:   Pfad zum Ordner im Repository, z. B. "su/pilze-aufbau/"
 // ============================================================
 const FAECHER = { deutsch:"Deutsch", mathe:"Mathematik", su:"Sachunterricht" };
+// Reihenfolge der Klassen-Filter (ein Knopf erscheint, sobald es dazu ein Material gibt)
+const KLASSEN = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3", "Klasse 4", "übergreifend"];
 
 const EINTRAEGE = [
   { fach:"deutsch", thema:"Briefe schreiben", art:"Tafelbild", klasse:"Klasse 3",
     titel:"Aufbau eines Briefes",
-    beschreibung:"Kärtchen zu Ort und Datum, Anrede, Einleitung, Brieftext, Gruß und Unterschrift ziehen. Mit Prüfen-Knopf und Farbversion.",
+    beschreibung:"Kärtchen zu Ort und Datum, Anrede, Einleitung, Brieftext, Gruß und Unterschrift ziehen. Mit Prüfen-Knopf, Farbversion und Silbenschrift.",
     url:"deutsch/brief-aufbau/" },
   { fach:"deutsch", thema:"Briefe schreiben", art:"Arbeitsblatt", klasse:"Klasse 3",
     titel:"Aufbau eines Briefes (Druckvorlage)",
-    beschreibung:"A4-Blatt für die Dokumentenkamera mit Legefeldern, dazu Legekärtchen. Farbig oder schwarz-weiß.",
+    beschreibung:"A4-Blatt für die Dokumentenkamera mit Legefeldern, dazu Legekärtchen. Farbig oder schwarz-weiß, wahlweise in Silbenschrift.",
     url:"deutsch/brief-arbeitsblatt/" },
   { fach:"su", thema:"Pilze", art:"Tafelbild", klasse:"Klasse 3",
     titel:"Aufbau eines Pilzes",
@@ -108,50 +133,82 @@ const EINTRAEGE = [
 // ============================================================
 
 const list = document.getElementById("list");
-const chips = document.getElementById("chips");
 const q = document.getElementById("q");
 const empty = document.getElementById("empty");
-let fachFilter = "alle";
+let fachFilter = "alle", klasseFilter = "alle";
 
+const klassenVon = e => [].concat(e.klasse || []);
 const vorhanden = [...new Set(EINTRAEGE.map(e => e.fach))];
-[["alle","Alle"], ...vorhanden.map(f => [f, FAECHER[f] || f])].forEach(([key, label]) => {
-  const b = document.createElement("button");
-  b.type = "button"; b.className = "chip"; b.textContent = label;
-  b.setAttribute("aria-pressed", key === fachFilter);
-  b.onclick = () => {
-    fachFilter = key;
-    [...chips.children].forEach(c => c.setAttribute("aria-pressed", c === b));
-    render();
-  };
-  chips.appendChild(b);
-});
+const alleKlassen = EINTRAEGE.flatMap(klassenVon);
+const vorhandeneKlassen = [...KLASSEN.filter(k => alleKlassen.includes(k)),
+                           ...new Set(alleKlassen.filter(k => !KLASSEN.includes(k)))];
+
+// Filter-Knöpfe ("Alle" + je ein Knopf)
+function knoepfe(ziel, eintraege, setzen){
+  const box = document.getElementById(ziel);
+  [["alle","Alle"], ...eintraege].forEach(([key, label], i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = label;
+    b.setAttribute("aria-pressed", i === 0);
+    b.onclick = () => {
+      setzen(key);
+      [...box.children].forEach(c => c.setAttribute("aria-pressed", c === b));
+      render();
+    };
+    box.appendChild(b);
+  });
+}
+knoepfe("chips", vorhanden.map(f => [f, FAECHER[f] || f]), k => fachFilter = k);
+knoepfe("kchips", vorhandeneKlassen.map(k => [k, k]), k => klasseFilter = k);
+
+// Zugeklappte Fächer merken (nur in diesem Browser)
+let zu = new Set();
+try { zu = new Set(JSON.parse(localStorage.getItem("uebersicht-zu") || "[]")); } catch (e) {}
+const merken = () => { try { localStorage.setItem("uebersicht-zu", JSON.stringify([...zu])); } catch (e) {} };
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function render(){
   const s = q.value.trim().toLowerCase();
-  const hits = EINTRAEGE.filter(e =>
-    (fachFilter === "alle" || e.fach === fachFilter) &&
-    (!s || [e.titel, e.thema, e.beschreibung, e.art, e.klasse, FAECHER[e.fach]].join(" ").toLowerCase().includes(s)));
+  const hits = EINTRAEGE.filter(e => {
+    const kl = klassenVon(e);
+    return (fachFilter === "alle" || e.fach === fachFilter) &&
+      (klasseFilter === "alle" || kl.includes(klasseFilter) || kl.includes("übergreifend")) &&
+      (!s || [e.titel, e.thema, e.beschreibung, e.art, kl.join(" "), FAECHER[e.fach]].join(" ").toLowerCase().includes(s));
+  });
   list.innerHTML = "";
   empty.hidden = hits.length > 0;
 
   vorhanden.filter(f => hits.some(e => e.fach === f)).forEach(f => {
+    const treffer = hits.filter(e => e.fach === f);
+    const offen = !!s || !zu.has(f);   // beim Suchen immer aufgeklappt
     const sec = document.createElement("section");
     sec.className = "fach f-" + f;
-    sec.innerHTML = `<h2><span class="dot"></span>${esc(FAECHER[f] || f)}</h2>`;
-    [...new Set(hits.filter(e => e.fach === f).map(e => e.thema))].forEach(t => {
+    sec.innerHTML = `<h2><button type="button" class="fkopf" aria-expanded="${offen}" aria-controls="inhalt-${esc(f)}">
+        <span class="dot"></span>
+        <span class="titel"><span>${esc(FAECHER[f] || f)}</span>
+          <span class="anzahl">${treffer.length} ${treffer.length === 1 ? "Material" : "Materialien"}</span></span>
+        <span class="pfeil" aria-hidden="true"></span></button></h2>
+      <div class="inhalt" id="inhalt-${esc(f)}"${offen ? "" : " hidden"}></div>`;
+    const inhalt = sec.querySelector(".inhalt"), kopf = sec.querySelector(".fkopf");
+    kopf.onclick = () => {
+      const jetztOffen = kopf.getAttribute("aria-expanded") !== "true";
+      kopf.setAttribute("aria-expanded", jetztOffen);
+      inhalt.hidden = !jetztOffen;
+      if (!s) { jetztOffen ? zu.delete(f) : zu.add(f); merken(); }
+    };
+    [...new Set(treffer.map(e => e.thema))].forEach(t => {
       const th = document.createElement("div");
       th.className = "thema";
       th.innerHTML = `<h3>${esc(t)}</h3><div class="grid">` +
-        hits.filter(e => e.fach === f && e.thema === t).map(e => `
+        treffer.filter(e => e.thema === t).map(e => `
           <a class="tile" href="${esc(e.url)}">
-            <div class="top"><span class="tag">${esc(e.art)}</span><span class="tag klasse">${esc(e.klasse)}</span></div>
+            <div class="top"><span class="tag">${esc(e.art)}</span>${klassenVon(e).map(k => `<span class="tag klasse">${esc(k)}</span>`).join("")}</div>
             <strong>${esc(e.titel)}</strong>
             <span class="desc">${esc(e.beschreibung)}</span>
             <span class="go">Öffnen →</span>
           </a>`).join("") + `</div>`;
-      sec.appendChild(th);
+      inhalt.appendChild(th);
     });
     list.appendChild(sec);
   });
