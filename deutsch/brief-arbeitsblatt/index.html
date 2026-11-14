@@ -112,6 +112,7 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
 <link rel="stylesheet" href="../../gemeinsam/silben.css">
 <script src="../../gemeinsam/silben.js"></script>
 <link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/hinweise.css">
 </head>
 <body>
 <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
@@ -197,6 +198,41 @@ for(const [id,cls] of [["opt-hilfe","hilfe"],["opt-farben","farben"]]){
   el.addEventListener("change",apply);apply();
 }
 silbenSchalter(document.getElementById("opt-silben"),ws,"opt-silben",false);
+</script>
+<script src="../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“
+Hinweise.einbauen({
+ "titel": "Aufbau eines Briefes (Druckvorlage)",
+ "teile": [
+  {
+   "h": "Wozu",
+   "text": "Druckvorlage für die Dokumentenkamera: Seite 1 zeigt den Brief mit Legefeldern, Seite 2 die Legekärtchen zum Ausschneiden (mit Ersatz-Satz)."
+  },
+  {
+   "h": "Version wählen",
+   "punkte": [
+    "**Hilfe**: Anfangsbuchstaben in den Legefeldern.",
+    "**Farben**: Brief und Kärtchen farbig passend.",
+    "**Silbenschrift**: Brief und Kärtchen mit Silbenbögen. Die Auswahl lässt sich kombinieren."
+   ]
+  },
+  {
+   "h": "Drucken",
+   "punkte": [
+    "Im Browser **Datei › Drucken**: Papier A4, Ränder „Keine“.",
+    "Für die farbige Version **Hintergrundgrafiken drucken** einschalten (unter „Weitere Einstellungen“).",
+    "Die Leiste oben und die Knöpfe werden nicht mitgedruckt."
+   ]
+  },
+  {
+   "h": "Tipp",
+   "punkte": [
+    "Kärtchen einmal ausschneiden und laminieren, dann sind sie lange haltbar."
+   ]
+  }
+ ]
+}, document.querySelector(".zurueck-zeile"));
 </script>
 </body>
 </html>

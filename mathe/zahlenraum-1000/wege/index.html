@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Wege mit dem Marienkäfer – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .qtitel{font-size:26px;font-weight:700;color:var(--soft)}
 .kaefer{position:absolute;width:32px;height:32px;z-index:3;pointer-events:none;transition:left .28s ease-in-out,top .28s ease-in-out;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
@@ -25,6 +26,40 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Wege mit dem Marienkäfer",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Richtungen und Schritte lesen, vorhersagen und versprachlichen."
+  },
+  {
+   "h": "Wohin läuft der Käfer?",
+   "punkte": [
+    "Die Befehlskarten lesen: „3 × →“ heißt 3 Schritte nach rechts.",
+    "Das vermutete Ziel-Feld antippen (gelber Rahmen), dann **Los**: Der Käfer läuft, das Ergebnis wird verglichen."
+   ]
+  },
+  {
+   "h": "Finde den Weg",
+   "punkte": [
+    "Start ist hellgelb, das Ziel hat eine Fahne. Pfeile antippen, sie kommen in die Befehlsreihe (gleiche Pfeile werden zu „2 × →“ zusammengefasst).",
+    "**Letzten entfernen**, **Löschen**, dann **Los**. Läuft der Käfer über den Rand: „Hier ist das Quadrat zu Ende.“"
+   ]
+  },
+  {
+   "h": "Stufen",
+   "punkte": [
+    "**●** ein Befehl mit ← → ↑ ↓. **●●** zwei Befehle. **●●●** auch schräge Richtungen.",
+    "Nach jedem Lauf steht für jeden Befehl ein Satz da: „Ich gehe 3 Schritte nach rechts: von 37 bis 40.“"
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

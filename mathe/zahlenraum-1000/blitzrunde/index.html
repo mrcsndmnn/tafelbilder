@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Blitzrunde – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .karte{display:flex;gap:24px;width:880px;height:420px;padding:28px 36px;border:5px solid var(--ink);border-radius:26px;background:#fff;box-shadow:0 6px 0 #c9d1cb}
 .karte .links{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
@@ -36,6 +37,40 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Blitzrunde zum Stundenbeginn",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Kurze Wiederholung am Stundenanfang (3–5 Minuten), immer mit demselben Ablauf."
+  },
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Startzahl und Befehl lesen, z. B. „628, 1 nach oben“. Die Kinder rechnen im Kopf und zeigen mit dem Daumen.",
+    "**Lösung** zeigt das Ergebnis, einen Satz und einen kleinen Ausschnitt der Tafel mit Start und Ziel.",
+    "**Nächste Runde**. Nach 10 Runden kommt die Zusammenfassung. **Neu** beginnt von vorn."
+   ]
+  },
+  {
+   "h": "Auswahl oben",
+   "punkte": [
+    "**Stufe ●**: ein Schritt ← → ↑ ↓. **●●**: auch schräg, 1–2 Schritte. **●●●**: Sprungstellen und ganze Quadrate (±100), 1–3 Schritte.",
+    "**Zeit**: aus, 5 s oder 10 s. Ein Balken läuft ab, danach erscheint die Lösung von selbst."
+   ]
+  },
+  {
+   "h": "Klassen-Ampel",
+   "punkte": [
+    "Für jedes Kind einmal Gut, Geht so oder Schwer antippen (Daumen hoch, Mitte, runter). Die Zahlen werden nicht gespeichert."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

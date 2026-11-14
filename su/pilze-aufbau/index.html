@@ -94,6 +94,7 @@ button:focus-visible,.ctrl label:focus-within{outline:4px solid #2f7d4f;outline-
 <link rel="stylesheet" href="../../gemeinsam/silben.css">
 <script src="../../gemeinsam/silben.js"></script>
 <link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/hinweise.css">
 </head>
 <body class="tafel">
 <a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a>
@@ -242,6 +243,45 @@ const rb=document.getElementById('raetselBtn');
 function setR(on){S.classList.toggle('mode-raetsel',on);rb.setAttribute('aria-pressed',on);if(on){mischen();zeige()}}
 rb.onclick=()=>setR(!S.classList.contains('mode-raetsel'));
 document.getElementById('zu').onclick=()=>setR(false);
+</script>
+<script src="../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“
+Hinweise.einbauen({
+ "titel": "Aufbau eines Pilzes",
+ "teile": [
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Die Kärtchen **Hut**, **Stiel**, **Myzel** und **Fruchtkörper** an die passenden Felder am Pilzbild ziehen.",
+    "Der **Fruchtkörper** gehört links an die Klammer: Er ist Hut und Stiel zusammen.",
+    "**Prüfen** zeigt an jedem Feld ✓ oder ✗. Sind alle richtig, erscheint „Super, alles richtig!“."
+   ]
+  },
+  {
+   "h": "Wer bin ich?",
+   "punkte": [
+    "Öffnet eine Rätsel-Tafel: Satz lesen („Ich trage den Hut.“), dann die passende Antwort antippen.",
+    "**Nächstes Rätsel** zeigt das nächste (10 Rätsel), **Schließen** führt zurück zum Pilz."
+   ]
+  },
+  {
+   "h": "Knöpfe",
+   "punkte": [
+    "**Farben**: Felder, Kärtchen und Klammer bekommen passende Farben.",
+    "**Silben**: Silbenschrift mit Silbenbögen (beim ersten Öffnen an).",
+    "**Neu**: Die Kärtchen werden gemischt und liegen wieder in der Ablage."
+   ]
+  },
+  {
+   "h": "Im Unterricht",
+   "punkte": [
+    "Das Satzmuster oben nutzen: „Das ist der Hut.“",
+    "Mit **F11** auf Vollbild schalten. **Übersicht** führt zur Liste aller Tafelbilder."
+   ]
+  }
+ ]
+});
 </script>
 </body>
 </html>

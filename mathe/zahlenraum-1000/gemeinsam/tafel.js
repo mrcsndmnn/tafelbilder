@@ -174,7 +174,18 @@
   T.kopf = ({ titel, onNeu, extra = [], onHilfen }) => {
     const k = T.el("div", "kopf");
     const start = T.el("a", "knopf start", '<span aria-hidden="true">←</span> Start'); start.href = "../";
-    k.append(start, T.el("h1", "", titel));
+    k.append(start);
+    // Knopf „?“ mit Hinweisen (Text steht auf jeder Seite in window.HINWEISE)
+    if (window.Hinweise && window.HINWEISE) {
+      const inhalt = { titel: window.HINWEISE.titel || titel, teile: window.HINWEISE.teile.concat([{ h: "Knöpfe oben", punkte: [
+        "**Start** führt zur Startseite mit allen Tafelbildern zum Zahlenraum bis 1000.",
+        "**Farben** färbt die Ziffern im Hunderterquadrat: Hunderter grün, Zehner rot, Einer blau (Tausender grau).",
+        "**Hilfen** blendet Pfeilbeschriftungen und Satzmuster ein oder aus. Beim Öffnen sind die Hilfen an.",
+        "**Neu** setzt das Tafelbild zurück.",
+        "Tipp: Mit **F11** auf Vollbild schalten." ] }]) };
+      k.appendChild(window.Hinweise.knopf(inhalt, "knopf rund"));
+    }
+    k.appendChild(T.el("h1", "", titel));
     const re = T.el("div", "rechts");
     extra.forEach(x => re.appendChild(x));
     const farben = T.laden("farben", false);

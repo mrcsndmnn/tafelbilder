@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Zoom: vom Leporello ins Quadrat – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .ziel{font-size:56px;font-weight:700;line-height:1.1}
 .schritt{font-size:30px;font-weight:700;color:var(--soft);margin-top:8px}
@@ -26,6 +27,41 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Zoom: vom Leporello ins Quadrat",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Orientierung in drei Schritten: Quadrat (Hunderter), Zeile (Zehner), Feld (Einer). Es ist immer nur ein Quadrat zu sehen."
+  },
+  {
+   "h": "Erkunden",
+   "punkte": [
+    "Ein Quadrat im Heft antippen: Es wird groß gezoomt.",
+    "Einen Knopf **Zeile 1 … Zeile 10** antippen hebt die Zeile hervor („Zeile 6: 451 bis 460“). Ein Feld antippen zeigt die Zahl in der Stellenwerttafel.",
+    "**Zurück zum Heft** zeigt wieder alle zehn Quadrate."
+   ]
+  },
+  {
+   "h": "Finde die Zahl",
+   "punkte": [
+    "1. Quadrat im Heft antippen, 2. Zeile wählen, 3. Feld antippen.",
+    "Bei einem Fehler nennt der Satz den Zahlenbereich, z. B. „In diesem Quadrat stehen die Zahlen 301 bis 400.“",
+    "**Neue Zahl** stellt die nächste Aufgabe."
+   ]
+  },
+  {
+   "h": "Hilfen",
+   "punkte": [
+    "Mit **Hilfen aus** stehen im Quadrat nur die Zahlen der ersten Spalte (und der gewählten Zeile). Das fordert mehr Orientierung."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

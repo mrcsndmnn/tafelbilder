@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Zahlenkreuz und Zahlenfenster – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .fenster{position:relative;width:650px;height:650px}
 .zf{position:absolute;width:170px;height:170px;border:4px solid var(--ink);border-radius:20px;background:#fff;
@@ -29,6 +30,35 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Zahlenkreuz und Zahlenfenster",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Nachbarzahlen bestimmen und selbst kontrollieren: erst die Zahl nennen, dann aufdecken."
+  },
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Die gelbe Zahl ist vorgegeben. Ein Feld mit **?** antippen deckt die Zahl auf. Der Satzstreifen sagt dazu z. B. „Unter 347 steht 357.“",
+    "**Stufe ●**: Kreuz (oben, unten, links, rechts). **●●**: ganzes Fenster mit den schrägen Feldern. **●●●**: Nur ein Nachbar ist vorgegeben, die Mitte ist gesucht.",
+    "**Sprungstellen**: Das Fenster liegt am rechten (oft auch unteren) Rand, z. B. 389 mit 390, 399 und 400.",
+    "**Neue Zahl** wählt ein neues Fenster, **Alle aufdecken** zeigt alle Zahlen auf einmal."
+   ]
+  },
+  {
+   "h": "Was angezeigt wird",
+   "punkte": [
+    "Rechts: in welchem Quadrat und an welcher Stelle das Fenster auf der Tafel liegt.",
+    "Mit Hilfen: kleine Schilder (+1, +10, +11 …) zwischen den Feldern und Satzmuster „Rechts neben … steht …“."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sprungstellen – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .aufgabe{font-size:46px;font-weight:700;line-height:1.2;min-height:56px}
 .zeile{display:flex;gap:12px;margin-top:16px;align-items:center}
@@ -16,6 +17,35 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Sprungstellen",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Die Stellen, an denen sich mehr als eine Ziffer ändert oder die Zahl in eine neue Zeile bzw. ein neues Quadrat rutscht."
+  },
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Aufgabe lesen: „Welche Zahl kommt nach 359?“ Die Kinder sagen die Zahl laut und tippen sie im Quadrat an, oder **Zeigen** drücken.",
+    "**Zeigen**: Ein Pfeil zeigt den Weg. Bei einer neuen Zeile ist er geschwungen. Bei einem neuen Quadrat blinkt die Leiste oben: „Neues Quadrat!“",
+    "Stellenwerttafel und Satzstreifen erklären, welche Stellen sich ändern und wo die Zahl steht.",
+    "**−1 / +1** zählt frei weiter oder zurück."
+   ]
+  },
+  {
+   "h": "Auswahl oben",
+   "punkte": [
+    "**Richtung**: danach, davor oder gemischt.",
+    "**Sprung**: Zehner (z. B. 39 → 40 und 40 → 41), Hunderter (399 → 400, 400 → 401, auch 999 → 1000) oder gemischt."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

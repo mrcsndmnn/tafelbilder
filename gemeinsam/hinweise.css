@@ -1,0 +1,48 @@
+/* Knopf „?“ und Fenster „So geht's“ für alle Tafelbilder.
+   Das Fenster liegt über der ganzen Seite und wird nicht mitskaliert, damit es immer gut lesbar ist. */
+.hw-knopf{display:inline-grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #1d2320;border-radius:50%;
+  background:#fff;color:#1d2320;font-family:"Andika","Segoe UI",sans-serif;font-size:24px;font-weight:700;line-height:1;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);touch-action:manipulation}
+.hw-knopf:hover{background:#e3f2e8;border-color:#2f7d4f}
+.hw-knopf:focus-visible{outline:4px solid #2f7d4f;outline-offset:2px}
+
+/* Tafelbilder mit Knopf „Übersicht“ oben links: „?“ steht direkt rechts daneben */
+body.tafel .hw-knopf{position:fixed;z-index:50;top:calc(10px + env(safe-area-inset-top,0px));left:calc(max(16px,env(safe-area-inset-left,0px)) + 161px)}
+@media (min-aspect-ratio: 17/9){
+  body.tafel .hw-knopf{top:calc(84px + env(safe-area-inset-top,0px));left:calc(26px + env(safe-area-inset-left,0px))}
+}
+/* Arbeitsblätter: in der Zeile mit „Übersicht“ */
+.zurueck-zeile{display:flex;align-items:center;gap:12px}
+
+.hw-dialog{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 40px);padding:0;border:3px solid #1d2320;border-radius:18px;
+  background:#fff;color:#1d2320;font-family:"Andika","Segoe UI",sans-serif;font-size:19px;line-height:1.45;box-shadow:0 18px 50px rgba(0,0,0,.35);
+  user-select:text;-webkit-user-select:text}
+.hw-dialog::backdrop{background:rgba(20,24,22,.5)}
+.hw-dialog[open]{display:flex;flex-direction:column}
+.hw-kopf{display:flex;align-items:center;gap:14px;padding:16px 20px 12px;border-bottom:2px solid #e2e8e4}
+.hw-kopf .hw-sym{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#1d2320;color:#fff;font-size:22px;font-weight:700;flex:none}
+.hw-kopf h2{margin:0;font-size:24px;line-height:1.2;flex:1}
+.hw-kopf .hw-zu{width:44px;height:44px;border:2px solid #1d2320;border-radius:12px;background:#fff;color:#1d2320;font-size:24px;cursor:pointer;flex:none}
+.hw-inhalt{padding:8px 24px 6px;overflow:auto}
+.hw-inhalt h3{font-size:20px;margin:16px 0 6px;color:#2f6f4a}
+.hw-inhalt ul{margin:0;padding-left:22px}
+.hw-inhalt li{margin:4px 0}
+.hw-inhalt p{margin:4px 0}
+.hw-inhalt b{font-weight:700}
+.hw-fuss{padding:12px 20px 16px;border-top:2px solid #e2e8e4;display:flex;justify-content:flex-end}
+.hw-fuss button{min-height:52px;padding:0 26px;border:3px solid #1d2320;border-radius:14px;background:#1d2320;color:#fff;
+  font-family:inherit;font-size:21px;font-weight:700;cursor:pointer}
+.hw-dialog button:focus-visible{outline:4px solid #2f7d4f;outline-offset:2px}
+@media print{.hw-knopf,.hw-dialog{display:none!important}}
+
+/* Niedrige Bildschirme (z. B. Handy quer): Kopf und Fuß kompakt, damit mehr Text sichtbar ist */
+@media (max-height:520px){
+  .hw-dialog{font-size:16px;max-height:calc(100vh - 16px);border-radius:14px}
+  .hw-kopf{padding:8px 14px 6px;gap:10px}
+  .hw-kopf .hw-sym{width:28px;height:28px;font-size:17px}
+  .hw-kopf h2{font-size:18px}
+  .hw-kopf .hw-zu{width:40px;height:40px;font-size:20px}
+  .hw-inhalt{padding:2px 18px 4px}
+  .hw-inhalt h3{font-size:17px;margin:10px 0 2px}
+  .hw-fuss{display:none}
+}

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Linien – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .folge{font-size:56px;font-weight:700;line-height:1.25;min-height:140px}
 .folge .leer{font-size:30px;color:var(--soft);font-weight:400}
@@ -16,6 +17,40 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Linien",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Linien auf der Tafel benennen und erklären, welche Stelle gleich bleibt und welche sich ändert."
+  },
+  {
+   "h": "Linie legen",
+   "punkte": [
+    "Felder nacheinander antippen. Das zweite Feld muss direkt daneben liegen (auch schräg) und legt die Richtung fest.",
+    "Passt ein Feld nicht: „Bleib auf deiner Linie.“ Das **letzte Feld noch einmal antippen** nimmt es zurück.",
+    "**Linie löschen** fängt neu an. Über die Leiste oben das Quadrat wechseln.",
+    "Ab drei Feldern: **Welche Linie ist das?** waagerecht, senkrecht oder diagonal antippen. Danach erklärt ein Satz, was gleich bleibt, was sich ändert und wo es einen Sprung gibt."
+   ]
+  },
+  {
+   "h": "Welche Linie?",
+   "punkte": [
+    "Eine Zahlenfolge wird gezeigt. Die Kinder wählen den Begriff, danach erscheint die Linie im Quadrat. **Neue Folge** zeigt die nächste."
+   ]
+  },
+  {
+   "h": "Hilfe",
+   "punkte": [
+    "**Was bleibt gleich?** färbt die Ziffern grau, die in allen Zahlen gleich bleiben."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

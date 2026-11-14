@@ -78,6 +78,7 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 <link rel="stylesheet" href="../../gemeinsam/silben.css">
 <script src="../../gemeinsam/silben.js"></script>
 <link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/hinweise.css">
 </head>
 <body class="tafel">
 <a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a>
@@ -182,6 +183,39 @@ const applyF=()=>{S.classList.toggle('farben',fb.checked);try{localStorage.setIt
 fb.addEventListener('change',applyF);applyF();
 silbenSchalter(document.getElementById('silben'),S,'brief-silben',false);
 shuffle();
+</script>
+<script src="../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“
+Hinweise.einbauen({
+ "titel": "Aufbau eines Briefes",
+ "teile": [
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Die Kärtchen rechts mit dem Finger oder der Maus in das passende Feld neben dem Brief ziehen.",
+    "Ein Kärtchen lässt sich jederzeit in ein anderes Feld ziehen. Liegt dort schon eines, wandert dieses zurück in die Ablage.",
+    "**Prüfen** zeigt an jedem Feld ✓ oder ✗. Sind alle richtig, erscheint „Super, alles richtig!“."
+   ]
+  },
+  {
+   "h": "Knöpfe",
+   "punkte": [
+    "**Farben**: Briefteile und Kärtchen bekommen passende Farben (Hilfe zur Zuordnung).",
+    "**Silben**: Brieftext und Kärtchen in Silbenschrift mit Silbenbögen.",
+    "**Neu**: Die Kärtchen werden gemischt und liegen wieder in der Ablage."
+   ]
+  },
+  {
+   "h": "Im Unterricht",
+   "punkte": [
+    "Das Satzmuster oben nutzen: „Das ist die Anrede.“",
+    "Farben und Silben merkt sich das Gerät bis zum nächsten Mal.",
+    "Mit **F11** auf Vollbild schalten. **Übersicht** führt zur Liste aller Tafelbilder."
+   ]
+  }
+ ]
+});
 </script>
 </body>
 </html>

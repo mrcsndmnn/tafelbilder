@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Zahlendetektiv – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .auftrag{font-size:30px;font-weight:700;margin:0 0 14px}
 .hkarte{display:flex;align-items:center;gap:18px;min-height:84px;padding:10px 22px;margin-bottom:12px;border:4px solid var(--ink);border-radius:16px;
@@ -18,6 +19,40 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Zahlendetektiv",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Eine Geheimzahl über Hinweise finden und dabei Ort auf der Tafel und Stellenwert verbinden."
+  },
+  {
+   "h": "Rätsel lösen",
+   "punkte": [
+    "Hinweis 1 ist offen. **Nächster Hinweis** deckt den nächsten auf.",
+    "Über die Leiste oben das Quadrat wechseln und die Vermutung antippen. Falsche Tipps werden durchgestrichen.",
+    "Gelöst: „Ich bin die 353. Ich wohne im 4. Quadrat, in der 6. Zeile, in der 3. Spalte.“"
+   ]
+  },
+  {
+   "h": "Hinweise",
+   "punkte": [
+    "**Ort**: Quadrat, Zeile, Spalte. **Stellen**: Hunderter-, Zehner- und Einerstelle (bei kleinen Zahlen: „Ich habe keine Hunderterstelle.“)."
+   ]
+  },
+  {
+   "h": "Rätsel bauen (Partnerarbeit)",
+   "punkte": [
+    "Das Antwortkind tippt seine Geheimzahl an und liest die Hinweise vor.",
+    "**Verstecken** startet das Rätsel für das Fragekind, ohne die Zahl zu verraten."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();

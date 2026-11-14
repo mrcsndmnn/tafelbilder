@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Entdecken – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 /* Steuerkreuz 3 × 3 */
 .kreuz{display:grid;grid-template-columns:repeat(3,100px);grid-auto-rows:100px;gap:10px}
@@ -17,6 +18,43 @@
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe oben“ wird automatisch ergänzt)
+window.HINWEISE = {
+ "titel": "Entdecken",
+ "teile": [
+  {
+   "h": "Worum geht es?",
+   "text": "Die Kinder sehen gleichzeitig, wie sie sich auf der Tafel bewegen und welche Ziffer sich dabei ändert."
+  },
+  {
+   "h": "So geht es",
+   "punkte": [
+    "Mit den **Pfeilen** im Steuerkreuz einen Schritt gehen, auch schräg. Unter jedem Pfeil steht, was dazukommt (z. B. +10).",
+    "**+100 / −100** springt an dieselbe Stelle im nächsten Quadrat bzw. im Quadrat davor.",
+    "Ein **Feld antippen** springt direkt dorthin. Über die **Leiste oben** das Quadrat wechseln.",
+    "Am Rand eines Quadrats sind die Pfeile ausgegraut: Dort geht es nicht weiter."
+   ]
+  },
+  {
+   "h": "Was angezeigt wird",
+   "punkte": [
+    "Große Zahl mit Veränderung, z. B. „347 → 357 (+10)“.",
+    "Stellenwerttafel: Die Ziffer, die sich ändert, leuchtet kurz gelb auf.",
+    "Satzstreifen: „Die Zehnerstelle wird um 1 größer.“ An Sprungstellen (z. B. 39 → 40): „Sprung! Es ändern sich: …“",
+    "**Material zeigen** blendet Hunderterplatten, Zehnerstangen und Einerwürfel ein."
+   ]
+  },
+  {
+   "h": "Im Unterricht",
+   "punkte": [
+    "Erst vermuten lassen („Was ändert sich?“), dann tippen. Startzahl ist 347, „Neu“ springt dorthin zurück."
+   ]
+  }
+ ]
+};
+</script>
 <script src="../gemeinsam/tafel.js"></script>
 <script>
 const T = Tafel, S = T.buehne();
