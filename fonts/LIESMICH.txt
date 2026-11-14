@@ -1,0 +1,6 @@
+Hier die Schriftdateien ablegen:
+  Andika-Regular.woff2
+  Andika-Bold.woff2
+
+Die Schrift Andika gibt es kostenlos bei SIL: https://software.sil.org/andika/
+Fehlen die Dateien, zeigen die Seiten automatisch eine Ersatzschrift.

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aufbau eines Briefes</title>
+<style>
+/* Grundeinstellungen (wie in der Claude-Vorschau, damit alles gleich aussieht) */
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+
+/* Schrift Andika lokal aus dem Ordner "fonts" (kein Google Fonts). Fehlt die Datei, greift die Ersatzschrift. */
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+
+/* Kleiner Link zurück zur Übersicht, oben links am Rand (wird nicht mitgedruckt) */
+.zurueck{position:absolute;left:6px;top:1px;z-index:50;font-family:"Andika","Segoe UI",sans-serif;font-size:13px;line-height:1.4;
+  color:#4a554f;text-decoration:none;opacity:.7;padding:1px 6px;border-radius:6px}
+.zurueck:hover,.zurueck:focus-visible{opacity:1;text-decoration:underline}
+.zurueck:focus-visible{outline:3px solid #2f7d4f;outline-offset:1px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .zurueck{color:#a9b4ad}}
+:root[data-theme="dark"] .zurueck{color:#a9b4ad}
+@media print{.zurueck{display:none}}
+</style>
+<style>
+/* Layout: zwei A4-Blätter. Blatt 1 = Brief links + Legefelder rechts, mit Linie verbunden. Blatt 2 = Legekärtchen für die Lehrkraft. Gedacht für die Dokumentenkamera (ELMO), daher große Schrift. */
+:root{
+  --desk:#e6ebe4; --sheet:#ffffff; --ink:#1d2320; --soft:#5d6862;
+  --line:#2c3430; --field:#f3f6f2; --accent:#2f7d4f; --bar:#ffffff;
+  --font:"Andika","Comic Sans MS","Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#171c19; --bar:#222924; --soft:#a9b4ad; color-scheme:dark }}
+:root[data-theme="dark"]{ --desk:#171c19; --bar:#222924; --soft:#a9b4ad; color-scheme:dark }
+body{background:var(--desk);color:var(--ink);font-family:var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+
+.tools{max-width:210mm;margin:0 auto 16px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+  background:var(--bar);color:var(--fg,inherit);padding:12px 16px;border-radius:10px;font-size:15px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tools{color:#e8eee9}}
+:root[data-theme="dark"] .tools{color:#e8eee9}
+.tools label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.tools input{width:18px;height:18px;accent-color:var(--accent)}
+.tools .hint{color:var(--soft);font-size:13px;flex-basis:100%}
+
+/* Blatt – bleibt immer weiß wie Papier */
+.sheet{background:var(--sheet);color:#1d2320;width:210mm;max-width:100%;min-height:297mm;margin:0 auto 24px;
+  padding:11mm 12mm 10mm;box-shadow:0 2px 12px rgba(0,0,0,.18);box-sizing:border-box;display:flex;flex-direction:column}
+.head{display:flex;justify-content:space-between;gap:12px;font-size:12pt;flex-wrap:wrap}
+.head .blank{display:inline-block;width:52mm;border-bottom:1.2px solid #2c3430}
+h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
+.task{display:grid;grid-template-columns:auto 1fr;gap:2.6mm 3mm;font-size:14.5pt;margin:0 0 5mm;line-height:1.35;align-items:center}
+.say{display:inline-block;border:1.6px solid #2c3430;border-radius:2mm;padding:.6mm 3mm;font-weight:700}
+.task b{display:inline-grid;place-items:center;width:8.5mm;height:8.5mm;border-radius:50%;border:1.8px solid #2c3430;font-size:13pt}
+
+/* Arbeitsbereich */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 8mm 60mm;flex:1}
+.part{border-left:2px solid #2c3430;border-right:2px solid #2c3430;padding:2.4mm 5mm;font-size:13.5pt;line-height:1.32;display:flex;align-items:center}
+.part.first{border-top:2px solid #2c3430;border-radius:3mm 3mm 0 0;padding-top:4mm}
+.part.last{border-bottom:2px solid #2c3430;border-radius:0 0 3mm 3mm;padding-bottom:4mm}
+.part p{margin:0}
+.part.right{justify-content:flex-end}
+.part .txt{border:1.4px dashed #9aa59f;border-radius:2mm;padding:1.5mm 3mm;width:100%}
+.part.right .txt,.part.short .txt{width:auto}
+.link{display:flex;align-items:center}
+.link::before{content:"";flex:1;border-top:2px dotted #2c3430}
+.link::after{content:"";width:0;height:0;border-top:2mm solid transparent;border-bottom:2mm solid transparent;border-left:2.6mm solid #2c3430;transform:rotate(180deg)}
+.slot{display:flex;align-items:center;padding-block:1mm}
+.field{width:60mm;height:20mm;border:2.4px dashed #2c3430;border-radius:3mm;background:#f3f6f2;
+  display:grid;place-items:center;position:relative;font-size:20pt;font-weight:700;color:#c2cbc5;box-sizing:border-box}
+.field .tag{position:absolute;top:1mm;left:2.2mm;font-size:7.5pt;font-weight:400;color:#8b9690;letter-spacing:.03em}
+.field .help{display:none}
+.hilfe .field .help{display:block}
+.farben .field{border-color:var(--c)}
+.farben .part .txt{border-color:var(--c);border-style:solid;background:var(--cbg)}
+
+.foot{font-size:9.5pt;color:#6b7670;margin-top:5mm;display:flex;justify-content:space-between}
+
+/* Blatt 2: Kärtchen */
+.set{padding:2mm 0 8mm}
+.set h2{font-size:12pt;margin:0 0 4mm;font-weight:400;display:flex;gap:2mm;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(2,57mm);gap:0;justify-content:center}
+.card{width:57mm;height:18mm;display:grid;place-items:center;font-size:21pt;font-weight:700;border:1.2px dashed #2c3430;box-sizing:border-box;margin:-0.6px}
+.farben .card{background:var(--cbg)}
+.scissor{font-size:15pt}
+
+/* Farben je Bestandteil (nur in der Farb-Version sichtbar) */
+.c-ort{--c:#2f6fb0;--cbg:#e4eef8}.c-anrede{--c:#b0552f;--cbg:#f8e9e2}.c-einl{--c:#7a4fa8;--cbg:#efe7f7}
+.c-text{--c:#2f7d4f;--cbg:#e3f2e8}.c-gruss{--c:#a8871a;--cbg:#f8f1d9}.c-unter{--c:#b03a6a;--cbg:#f8e3ec}
+
+@media (max-width:640px){
+  .sheet{padding:16px;min-height:0}
+  .work{grid-template-columns:minmax(0,1fr) 18px 110px}
+  .field{width:110px;height:56px;font-size:13px}
+  .part{font-size:14px;padding:10px 12px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .card{width:auto;font-size:15px}
+  h1{font-size:24px}
+}
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff;padding:0;margin:0}
+  .tools{display:none}
+  .sheet{box-shadow:none;margin:0;height:296mm;min-height:0;overflow:hidden;page-break-after:always;break-after:page}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+}
+</style>
+</head>
+<body>
+<a class="zurueck" href="../../">← Übersicht</a>
+
+<div class="tools" id="tools">
+  <strong>Version wählen:</strong>
+  <label for="opt-hilfe"><input type="checkbox" id="opt-hilfe"> Hilfe: Anfangsbuchstaben in den Feldern</label>
+  <label for="opt-farben"><input type="checkbox" id="opt-farben"> Farben (Brief und Kärtchen farbig passend)</label>
+  <span class="hint">Drucken über das Browser-Menü (Datei › Drucken, A4, Ränder „Keine“). Seite 1 = Arbeitsblatt für die Dokumentenkamera, Seite 2 = Legekärtchen (einmal ausschneiden, mehrfach verwenden; am besten laminieren).</span>
+</div>
+
+<div id="ws">
+<!-- ===== Blatt 1 ===== -->
+<section class="sheet">
+  <h1>So ist ein Brief aufgebaut</h1>
+  <div class="task">
+    <b>1</b><span>Wir lesen den Brief von Tom.</span>
+    <b>2</b><span>Welches Kärtchen passt? Lege es in das richtige Feld.</span>
+    <b>3</b><span>Sprich im ganzen Satz: <span class="say">Das ist die Anrede.</span></span>
+  </div>
+
+  <div class="work">
+    <div class="part first right c-ort"><span class="txt">Gelsenkirchen, 2.11.2026</span></div>
+    <div class="link"></div>
+    <div class="slot c-ort"><div class="field"><span class="help">O</span></div></div>
+
+    <div class="part short c-anrede"><span class="txt">Liebe Kinder,</span></div>
+    <div class="link"></div>
+    <div class="slot c-anrede"><div class="field"><span class="help">A</span></div></div>
+
+    <div class="part c-einl"><p class="txt">wie geht es euch? Mir geht es gut.<br>Ich möchte euch von meinem Halloween erzählen.</p></div>
+    <div class="link"></div>
+    <div class="slot c-einl"><div class="field"><span class="help">E</span></div></div>
+
+    <div class="part c-text"><p class="txt">Am Freitag habe ich mich als Vampir verkleidet. Ich hatte einen schwarzen Umhang und lange Zähne.
+      Mit meinen Freunden bin ich von Haus zu Haus gegangen. Wir haben an den Türen geklingelt und „Süßes oder Saures!“ gerufen.
+      Wir haben ganz viele Süßigkeiten bekommen. Besonders lecker waren die Gummibärchen und die Schokolade.
+      Danach haben wir noch einen Gruselfilm geschaut. Das war richtig toll!<br>
+      Wie habt ihr Halloween gefeiert? Habt ihr euch auch verkleidet? Ich freue mich auf eure Briefe.</p></div>
+    <div class="link"></div>
+    <div class="slot c-text"><div class="field"><span class="help">B</span></div></div>
+
+    <div class="part short c-gruss"><span class="txt">Viele Grüße</span></div>
+    <div class="link"></div>
+    <div class="slot c-gruss"><div class="field"><span class="help">G</span></div></div>
+
+    <div class="part last short c-unter"><span class="txt">Euer Tom</span></div>
+    <div class="link"></div>
+    <div class="slot c-unter"><div class="field"><span class="help">U</span></div></div>
+  </div>
+  <div class="foot"><span>Deutsch · Briefe schreiben</span><span>Seite 1</span></div>
+</section>
+
+<!-- ===== Blatt 2 ===== -->
+<section class="sheet">
+  <h1>Legekärtchen</h1>
+  <p style="font-size:12.5pt;margin:0 0 6mm">Für die Lehrkraft: entlang der gestrichelten Linien ausschneiden. Die Kärtchen passen in die Felder auf Seite 1. Ein zweiter Satz liegt als Ersatz bei.</p>
+  <div id="sets"></div>
+  <div class="foot" style="margin-top:auto"><span>Deutsch · Briefe schreiben</span><span>Seite 2</span></div>
+</section>
+</div>
+
+<script>
+const parts=[["Ort und Datum","c-ort"],["Anrede","c-anrede"],["Einleitung","c-einl"],["Brieftext","c-text"],["Gruß","c-gruss"],["Unterschrift","c-unter"]];
+// gemischte Reihenfolge, damit die Kinder nicht einfach abzählen
+const order=[3,0,5,1,4,2];
+const sets=document.getElementById("sets");
+for(let s=0;s<2;s++){
+  const box=document.createElement("div");box.className="set";
+  box.innerHTML='<h2><span class="scissor">✂</span> '+(s?'Ersatz-Satz':'Kartensatz')+'</h2><div class="cards">'+
+    order.map(i=>`<div class="card ${parts[i][1]}">${parts[i][0]}</div>`).join("")+"</div>";
+  sets.appendChild(box);
+}
+const ws=document.getElementById("ws");
+for(const [id,cls] of [["opt-hilfe","hilfe"],["opt-farben","farben"]]){
+  const el=document.getElementById(id);
+  try{el.checked=localStorage.getItem(id)==="1"}catch(e){}
+  const apply=()=>{ws.classList.toggle(cls,el.checked);try{localStorage.setItem(id,el.checked?"1":"0")}catch(e){}};
+  el.addEventListener("change",apply);apply();
+}
+</script>
+</body>
+</html>
