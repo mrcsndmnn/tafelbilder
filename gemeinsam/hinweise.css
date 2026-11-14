@@ -29,6 +29,8 @@ body.tafel .hw-knopf{position:fixed;z-index:50;top:calc(10px + env(safe-area-ins
 .hw-inhalt li{margin:4px 0}
 .hw-inhalt p{margin:4px 0}
 .hw-inhalt b{font-weight:700}
+.hw-inhalt .hw-recht{margin:18px 0 6px;font-size:15px;color:#5d6862}
+.hw-inhalt .hw-recht a{color:inherit}
 .hw-fuss{padding:12px 20px 16px;border-top:2px solid #e2e8e4;display:flex;justify-content:flex-end}
 .hw-fuss button{min-height:52px;padding:0 26px;border:3px solid #1d2320;border-radius:14px;background:#1d2320;color:#fff;
   font-family:inherit;font-size:21px;font-weight:700;cursor:pointer}

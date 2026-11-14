@@ -5,6 +5,8 @@
 (function () {
   "use strict";
   let dialog = null;
+  // Wurzel der Seite = Ordner über „gemeinsam/“ (damit die Links aus jeder Ordnertiefe stimmen)
+  const WURZEL = (document.currentScript && document.currentScript.src || "").replace(/gemeinsam\/hinweise\.js.*$/, "");
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   // **fett** im Text erlaubt
   const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
@@ -28,7 +30,8 @@
     dialog.querySelector("h2").textContent = "So geht's: " + inhalt.titel;
     dialog.querySelector(".hw-inhalt").innerHTML = inhalt.teile.map(t =>
       `<h3>${esc(t.h)}</h3>` + (t.text ? `<p>${fmt(t.text)}</p>` : "") +
-      (t.punkte ? "<ul>" + t.punkte.map(p => `<li>${fmt(p)}</li>`).join("") + "</ul>" : "")).join("");
+      (t.punkte ? "<ul>" + t.punkte.map(p => `<li>${fmt(p)}</li>`).join("") + "</ul>" : "")).join("") +
+      `<p class="hw-recht"><a href="${WURZEL}impressum.html">Impressum</a> · <a href="${WURZEL}datenschutz.html">Datenschutz</a></p>`;
     dialog.querySelector(".hw-inhalt").scrollTop = 0;
     if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", "");
     const fuss = dialog.querySelector(".hw-fuss button");
