@@ -12,14 +12,7 @@
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
 
-/* Kleiner Link zurück zur Übersicht, oben links am Rand */
-.zurueck{position:fixed;left:6px;top:2px;z-index:50;font-family:"Andika","Segoe UI",sans-serif;font-size:13px;line-height:1.4;
-  color:#4a554f;text-decoration:none;opacity:.6;padding:1px 6px;border-radius:6px}
-.zurueck:hover,.zurueck:focus-visible{opacity:1;text-decoration:underline}
-.zurueck:focus-visible{outline:3px solid #2f7d4f;outline-offset:1px}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .zurueck{color:#a9b4ad}}
-:root[data-theme="dark"] .zurueck{color:#a9b4ad}
-@media print{.zurueck{display:none}}
+/* Knopf "Übersicht": siehe ../../gemeinsam/zurueck.css */
 </style>
 <style>
 /* Layout: eine 16:9-Bühne (1600×900), skaliert auf die Tafel. Brief links, Legefelder in der Mitte, Kärtchen-Ablage rechts. */
@@ -84,9 +77,10 @@ h1{position:absolute;left:48px;top:28px;margin:0;font-size:46px}
 </style>
 <link rel="stylesheet" href="../../gemeinsam/silben.css">
 <script src="../../gemeinsam/silben.js"></script>
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
 </head>
-<body>
-<a class="zurueck" href="../../">← Übersicht</a>
+<body class="tafel">
+<a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a>
 
 <div id="fit"><div id="stage">
   <h1>So ist ein Brief aufgebaut</h1>

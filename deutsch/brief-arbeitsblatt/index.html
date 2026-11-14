@@ -12,14 +12,7 @@
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
 
-/* Kleiner Link zurück zur Übersicht, oben links am Rand (wird nicht mitgedruckt) */
-.zurueck{position:absolute;left:6px;top:1px;z-index:50;font-family:"Andika","Segoe UI",sans-serif;font-size:13px;line-height:1.4;
-  color:#4a554f;text-decoration:none;opacity:.7;padding:1px 6px;border-radius:6px}
-.zurueck:hover,.zurueck:focus-visible{opacity:1;text-decoration:underline}
-.zurueck:focus-visible{outline:3px solid #2f7d4f;outline-offset:1px}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .zurueck{color:#a9b4ad}}
-:root[data-theme="dark"] .zurueck{color:#a9b4ad}
-@media print{.zurueck{display:none}}
+/* Knopf "Übersicht": siehe ../../gemeinsam/zurueck.css */
 </style>
 <style>
 /* Layout: zwei A4-Blätter. Blatt 1 = Brief links + Legefelder rechts, mit Linie verbunden. Blatt 2 = Legekärtchen für die Lehrkraft. Gedacht für die Dokumentenkamera (ELMO), daher große Schrift. */
@@ -118,9 +111,10 @@ h1{font-size:24pt;margin:0 0 3mm;text-wrap:balance}
 </style>
 <link rel="stylesheet" href="../../gemeinsam/silben.css">
 <script src="../../gemeinsam/silben.js"></script>
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
 </head>
 <body>
-<a class="zurueck" href="../../">← Übersicht</a>
+<div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
 
 <div class="tools" id="tools">
   <strong>Version wählen:</strong>

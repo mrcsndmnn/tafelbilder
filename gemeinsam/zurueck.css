@@ -1,0 +1,27 @@
+/* Knopf "Übersicht" für alle Tafelbilder und Arbeitsblätter.
+   Gut sichtbar wie die anderen Knöpfe (weiß, dunkler Rand), groß genug zum Antippen. */
+.zurueck{display:inline-flex;align-items:center;gap:8px;min-height:44px;box-sizing:border-box;
+  padding:6px 18px 6px 12px;border:2px solid #1d2320;border-radius:12px;background:#fff;color:#1d2320;
+  font-family:"Andika","Segoe UI",sans-serif;font-size:18px;font-weight:700;line-height:1;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer}
+.zurueck .pfeil{font-size:22px;line-height:1}
+.zurueck:hover{background:#e3f2e8;border-color:#2f7d4f}
+.zurueck:focus-visible{outline:4px solid #2f7d4f;outline-offset:2px}
+
+/* Tafelbilder: Knopf oben links über der Tafelfläche, die Tafel rückt dafür etwas nach unten */
+body.tafel{padding-top:calc(64px + env(safe-area-inset-top,0px))}
+body.tafel .zurueck{position:fixed;z-index:50;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
+
+/* Sehr breite Bildschirme (z. B. Handy quer): links neben der Tafel ist ohnehin Platz.
+   Der Knopf steht dort schmal (Pfeil über dem Wort), die Tafel behält ihre volle Höhe. */
+@media (min-aspect-ratio: 17/9){
+  body.tafel{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-left:calc(92px + env(safe-area-inset-left,0px))}
+  body.tafel .zurueck{flex-direction:column;justify-content:center;gap:3px;width:72px;padding:8px 4px;font-size:13px;
+    top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px))}
+  body.tafel .zurueck .pfeil{font-size:24px}
+}
+
+/* Arbeitsblätter: Knopf in einer eigenen Zeile über der Auswahl-Leiste */
+.zurueck-zeile{max-width:210mm;margin:0 auto 12px}
+
+@media print{.zurueck,.zurueck-zeile{display:none}}
