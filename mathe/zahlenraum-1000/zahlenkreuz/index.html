@@ -27,7 +27,46 @@
 .miniq .im{background:var(--hellblau);border-color:var(--blaurand)}
 .miniq .mi{background:var(--gelb);border-color:var(--gelbrand)}
 .lage{font-size:24px;font-weight:700;color:var(--soft);margin:0 0 10px}
-@media (prefers-reduced-motion: reduce){.zf.auf{animation:none}}
+/* ---------- Modus „Zahlen ziehen“ ---------- */
+.zquadrat .feld,.kz,.akarte{touch-action:none}
+.zquadrat .feld.sel{background:var(--gelb);border:5px solid var(--gelbrand)}
+.zquadrat .feld.luecke{color:#8d9892;background:#f6f8f6;border-style:dashed}
+.zquadrat .feld.gewaehlt,.akarte.gewaehlt,.kz.gewaehlt{outline:6px solid #5e2f91;outline-offset:1px;z-index:3}
+.zquadrat .feld.leucht{background:#dcc2f7}
+.zquadrat .feld.leucht.blitz{animation:leucht 1.4s ease-out}
+@keyframes leucht{0%,40%{background:#b98ae8;transform:scale(1.12)}100%{background:#dcc2f7;transform:none}}
+.zrahmen{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.kreuz{position:relative;width:442px;height:442px}
+.kz{position:absolute;width:110px;height:110px;padding:0;border:4px dashed #8d9892;border-radius:18px;background:#f6f8f6;
+  font-family:var(--font);font-size:44px;font-weight:700;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.kz.voll{border-style:solid;border-color:var(--ink);background:#fff}
+.kz.mitte{background:var(--gelb);border:6px solid var(--gelbrand);cursor:default}
+.kz.weg{visibility:hidden}
+.kz.hebt{opacity:.35}
+.kz.ok{background:var(--okbg);border-color:var(--ok)}
+.kz.falsch{background:var(--nochbg);border-color:var(--nochrand)}
+.kz.ok::after,.kz.falsch::after{position:absolute;right:-12px;top:-12px;width:36px;height:36px;border-radius:50%;color:#fff;
+  font-size:24px;line-height:36px;text-align:center}
+.kz.ok::after{content:"✓";background:var(--ok)}
+.kz.falsch::after{content:"?";background:var(--nochrand)}
+.kz.rast{animation:rast .25s ease-out}
+@keyframes rast{from{transform:scale(1.15)}to{transform:none}}
+.kz:focus-visible,.akarte:focus-visible{outline:5px solid var(--ok);outline-offset:3px}
+.kreuz .plbl{width:64px;height:40px;margin:-20px 0 0 -32px;font-size:22px;z-index:2}
+.karte{position:absolute;z-index:100;width:110px;height:110px;margin:-55px 0 0 -55px;border:4px solid var(--ink);border-radius:18px;background:#fff;
+  font-size:44px;font-weight:700;display:grid;place-items:center;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.karte.zurueck{transition:left .25s ease-in,top .25s ease-in,opacity .25s}
+.ablage{width:587px;height:587px;border:3px dashed var(--line);border-radius:18px;padding:20px;display:flex;flex-wrap:wrap;gap:18px;align-content:flex-start;background:#fafbfa}
+.ablage .titel{width:100%;font-size:24px;font-weight:700;color:var(--soft);margin:0}
+.akarte{width:120px;height:96px;padding:0;border:4px solid var(--ink);border-radius:16px;background:#fff;font-family:var(--font);
+  font-size:42px;font-weight:700;color:var(--ink);display:grid;place-items:center;cursor:grab}
+.akarte.benutzt{visibility:hidden}
+.zknoepfe{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.farben .kz .t,.farben .karte .t,.farben .akarte .t{color:var(--T)}
+.farben .kz .h,.farben .karte .h,.farben .akarte .h{color:var(--H)}
+.farben .kz .z,.farben .karte .z,.farben .akarte .z{color:var(--Z)}
+.farben .kz .e,.farben .karte .e,.farben .akarte .e{color:var(--E)}
+@media (prefers-reduced-motion: reduce){.zf.auf{animation:none}.kz.rast,.zquadrat .feld.leucht.blitz{animation:none}}
 </style>
 </head>
 <body>
@@ -40,21 +79,40 @@ window.HINWEISE = {
  "teile": [
   {
    "h": "Worum geht es?",
-   "text": "Nachbarzahlen bestimmen und selbst kontrollieren: erst die Zahl nennen, dann aufdecken."
+   "text": "Nachbarzahlen bestimmen und selbst kontrollieren: erst die Zahl nennen, dann aufdecken – oder die Zahlen aus der Tafel in das Kreuz ziehen."
   },
   {
-   "h": "So geht es",
+   "h": "Modus „Aufdecken“",
    "punkte": [
     "Die gelbe Zahl ist vorgegeben. Ein Feld mit **?** antippen deckt die Zahl auf. Der Satzstreifen sagt dazu z. B. „Unter 347 steht 357.“",
     "**Stufe ●**: Kreuz (oben, unten, links, rechts). **●●**: ganzes Fenster mit den schrägen Feldern. **●●●**: Nur ein Nachbar ist vorgegeben, die Mitte ist gesucht.",
+    "**Alle aufdecken** zeigt alle Zahlen auf einmal."
+   ]
+  },
+  {
+   "h": "Modus „Zahlen ziehen“",
+   "punkte": [
+    "Die Kinder ziehen passende Zahlen aus der Hundertertafel in die leeren Kästchen. Die Zahl bleibt in der Tafel stehen, eine Karte folgt dem Finger. Fällt die Karte neben ein Kästchen, gleitet sie zurück.",
+    "**Ohne Ziehen:** erst die Zahl antippen (violetter Rand), dann das Kästchen antippen.",
+    "Eine gelegte Karte kann in ein anderes Kästchen gezogen werden oder zurück auf die Tafel (dann ist sie weg). Ohne Ziehen: Kästchen antippen, dann ein anderes Kästchen – oder dasselbe Kästchen noch einmal zum Entfernen.",
+    "**Prüfen**: Richtige Kästchen werden grün mit Haken, falsche orange mit einer Frage zum Nachdenken. Falsche Karten bleiben liegen und können ausgetauscht werden.",
+    "**Sofort prüfen**: Rückmeldung schon beim Ablegen. Ist alles richtig, wird das Fenster auf der Tafel violett eingezeichnet.",
+    "**Stufe ●**: Kreuz mit 4 Kästchen, die Mitte ist auf der Tafel markiert. **●●**: Fenster mit 8 Kästchen, die Mitte ist nicht markiert. **●●●**: Rund um das Fenster stehen auf der Tafel nur **?** – die Felder lassen sich trotzdem ziehen.",
+    "**Kartenablage**: Statt der Tafel liegen Karten bereit: alle richtigen Zahlen und drei typische Fehler."
+   ]
+  },
+  {
+   "h": "Für beide Modi",
+   "punkte": [
     "**Sprungstellen**: Das Fenster liegt am rechten (oft auch unteren) Rand, z. B. 389 mit 390, 399 und 400.",
-    "**Neue Zahl** wählt ein neues Fenster, **Alle aufdecken** zeigt alle Zahlen auf einmal."
+    "**Neue Zahl** wählt ein neues Fenster."
    ]
   },
   {
    "h": "Was angezeigt wird",
    "punkte": [
-    "Rechts: in welchem Quadrat und an welcher Stelle das Fenster auf der Tafel liegt.",
+    "Aufdecken – rechts: in welchem Quadrat und an welcher Stelle das Fenster auf der Tafel liegt.",
+    "Zahlen ziehen – über der Tafel: die Leporello-Leiste mit dem aktuellen Quadrat.",
     "Mit Hilfen: kleine Schilder (+1, +10, +11 …) zwischen den Feldern und Satzmuster „Rechts neben … steht …“."
    ]
   }
@@ -68,17 +126,27 @@ const REL = { rechts: "Rechts neben", links: "Links neben", unten: "Unter", oben
   ru: "Schräg rechts unter", lu: "Schräg links unter", ro: "Schräg rechts über", lo: "Schräg links über" };
 const GEGEN = { rechts: "links", links: "rechts", oben: "unten", unten: "oben", ro: "lu", lu: "ro", lo: "ru", ru: "lo" };
 const KREUZ = ["oben", "links", "rechts", "unten"];
+const klein = t => t[0].toLowerCase() + t.slice(1);
 
 let stufe = 1, sprung = T.laden("kreuz-sprung", false), mitte = 0, gegeben = null;
+let modus = T.laden("kreuz-modus", "auf");
+let sofort = T.laden("kreuz-sofort", false), ablageAn = T.laden("kreuz-ablage", false);
 
 // ---------- Aufbau ----------
+const modusWahl = T.gruppe("", [{ wert: "auf", text: "Aufdecken" }, { wert: "ziehen", text: "Zahlen ziehen" }], modus,
+  v => setzeModus(v), "kreuz-modus");
+modus = modusWahl.wert;
 const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "kreuz-stufe"); stufe = stufenWahl.wert;
-T.leiste(stufenWahl,
+const alleKnopf = T.knopf("Alle aufdecken", () => zellen.forEach(z => z.el.classList.contains("frage") && decke(z, false)));
+const leiste = T.leiste(modusWahl, stufenWahl,
   T.schalter("Sprungstellen", sprung, v => { sprung = v; T.merken("kreuz-sprung", v); neu(); }),
-  T.knopf("Neue Zahl", () => neu()),
-  T.knopf("Alle aufdecken", () => zellen.forEach(z => z.el.classList.contains("frage") && decke(z, false))));
+  T.knopf("Neue Zahl", () => { T.stop(); neu(); }), alleKnopf);
+const alleTrenner = alleKnopf.previousElementSibling;
 
-const fenster = T.el("div", "fenster"); T.blk(70, 190).appendChild(fenster);
+// ===== Modus „Aufdecken“ =====
+const aufTeile = [];
+const fensterBlk = T.blk(70, 190); aufTeile.push(fensterBlk);
+const fenster = T.el("div", "fenster"); fensterBlk.appendChild(fenster);
 const zellen = [];   // {el, dr, dc, ri}
 [-1, 0, 1].forEach(dr => [-1, 0, 1].forEach(dc => {
   const ri = dr === 0 && dc === 0 ? "mitte" : T.ACHT.find(k => T.R[k].dr === dr && T.R[k].dc === dc);
@@ -94,26 +162,84 @@ const zellen = [];   // {el, dr, dc, ri}
   }
 }));
 
-const rechts = T.blk(830, 190, 730);
+const rechts = T.blk(830, 190, 730); aufTeile.push(rechts);
 rechts.appendChild(T.el("p", "lage", "Hier liegt das Fenster:"));
 const lepo = T.leporello(rechts, {});
 const miniBox = T.el("div"); miniBox.style.marginTop = "14px"; rechts.appendChild(miniBox);
 const mini = T.el("div", "miniq"); miniBox.appendChild(mini);
 for (let i = 0; i < 100; i++) mini.appendChild(T.el("div"));
-const muster = T.streifen(T.blk(830, 660, 730), "muster hilfe");
+const musterBlk = T.blk(830, 660, 730); aufTeile.push(musterBlk);
+const muster = T.streifen(musterBlk, "muster hilfe");
 muster.innerHTML = "<p>Rechts neben … steht …</p><p>Unter … steht …</p>";
-const satz = T.streifen(T.blk(830, 790, 730));
+const satzBlk = T.blk(830, 790, 730); aufTeile.push(satzBlk);
+const satz = T.streifen(satzBlk);
+
+// ===== Modus „Zahlen ziehen“ =====
+const zTeile = [];
+const zLepoBlk = T.blk(58, 170); zTeile.push(zLepoBlk);
+const zLepo = T.leporello(zLepoBlk, {});
+const zQBlk = T.blk(60, 256); zTeile.push(zQBlk);
+const q = T.quadrat(zQBlk, { zelle: 56, zeige: n => !luecken.has(n), onTap: n => tippeTafel(n) });
+q.q.classList.add("zquadrat");
+const rahmen = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+rahmen.setAttribute("class", "zrahmen"); rahmen.setAttribute("width", q.groesse); rahmen.setAttribute("height", q.groesse);
+zQBlk.appendChild(rahmen);
+const ablageBlk = T.blk(60, 256); zTeile.push(ablageBlk);
+const ablage = T.el("div", "ablage"); ablageBlk.appendChild(ablage);
+let luecken = new Set(), karten = [];   // karten: {n, el}
+
+const kreuzBlk = T.blk(730, 186); zTeile.push(kreuzBlk);
+const kreuz = T.el("div", "kreuz"); kreuzBlk.appendChild(kreuz);
+const kaesten = [];   // {el, ri, karte: {n, idx} | null}
+[-1, 0, 1].forEach(dr => [-1, 0, 1].forEach(dc => {
+  const ri = dr === 0 && dc === 0 ? "mitte" : T.ACHT.find(k => T.R[k].dr === dr && T.R[k].dc === dc);
+  const el = T.el("button", "kz"); el.type = "button";
+  el.style.left = (dc + 1) * 166 + "px"; el.style.top = (dr + 1) * 166 + "px";
+  const k = { el, ri, karte: null };
+  el.addEventListener("click", () => { if (!nachZug()) tippeKasten(k); });
+  el.addEventListener("pointerdown", e => { if (aktiv(k)) starteZug(e, k.karte, k, el, () => tippeKasten(k)); });
+  kreuz.appendChild(el); kaesten.push(k);
+  if (ri !== "mitte") {
+    const l = T.el("div", "plbl hilfe"); l.style.left = 221 + dc * 83 + "px"; l.style.top = 221 + dr * 83 + "px";
+    const d = T.R[ri].d; l.textContent = (d > 0 ? "+" : "−") + Math.abs(d);
+    kreuz.appendChild(l); k.lbl = l;
+  }
+}));
+const kMitte = kaesten.find(k => k.ri === "mitte");
+
+const zKnoepfeBlk = T.blk(1236, 196, 330); zTeile.push(zKnoepfeBlk);
+const zKnoepfe = T.el("div", "zknoepfe"); zKnoepfeBlk.appendChild(zKnoepfe);
+zKnoepfe.append(
+  T.knopf("Prüfen", () => pruefe(), "haupt"),
+  T.schalter("Sofort prüfen", sofort, v => { sofort = v; T.merken("kreuz-sofort", v); if (v) pruefe(true); }),
+  T.schalter("Kartenablage", ablageAn, v => { ablageAn = v; T.merken("kreuz-ablage", v); leereKaesten(); zeigeQuelle(); T.melde(zSatz, "", startSatz()); }));
+const zSatzBlk = T.blk(730, 664, 846); zTeile.push(zSatzBlk);
+const zSatz = T.streifen(zSatzBlk);
 
 T.kopf({ titel: "Zahlenkreuz und Zahlenfenster", onNeu: () => neu() });
 
-// ---------- Ablauf ----------
+// ---------- Gemeinsam ----------
 function zahlVon(z) { return z.ri === "mitte" ? mitte : T.schritt(mitte, z.ri); }
+function setzeModus(v) {
+  T.stop(); brichZugAb(); modus = v;
+  aufTeile.forEach(b => b.hidden = v !== "auf");
+  zTeile.forEach(b => b.hidden = v !== "ziehen");
+  alleKnopf.hidden = alleTrenner.hidden = v !== "auf";
+  if (v === "ziehen") zeigeQuelle();
+}
 function neu() {
+  brichZugAb();
   const s = T.zufall(0, 9);
   const c = sprung ? 8 : T.zufall(1, 8);
   const r = sprung && Math.random() < .5 ? 8 : T.zufall(1, 8);
   mitte = T.num(s, r, c);
   gegeben = stufe === 3 ? T.wahl(T.ACHT) : null;
+  neuAufdecken();
+  neuZiehen();
+}
+
+// ---------- Ablauf „Aufdecken“ ----------
+function neuAufdecken() {
   zellen.forEach(z => {
     const sichtbar = stufe === 2 || z.ri === "mitte" || KREUZ.includes(z.ri) || (stufe === 3 && z.ri === gegeben);
     const istGegeben = stufe === 3 ? z.ri === gegeben : z.ri === "mitte";
@@ -140,7 +266,197 @@ function decke(z, mitSatz) {
   if (z.ri === "mitte") { const g = T.schritt(mitte, gegeben); T.melde(satz, "", `${REL[GEGEN[gegeben]]} ${g} steht ${n}.`); }
   else T.melde(satz, "", `${REL[z.ri]} ${mitte} steht ${n}.`);
 }
+
+// ---------- Ablauf „Zahlen ziehen“ ----------
+let wahl = null;      // angetippte Karte: {n, idx, vonKasten}
+const aktiv = k => k.ri !== "mitte" && !k.el.classList.contains("weg");
+const offen = () => kaesten.filter(aktiv);
+
+function startSatz() {
+  return stufe === 1 ? `Ziehe die Nachbarzahlen von ${mitte} in die Kästchen.`
+    : `Ziehe die Zahlen aus dem Fenster um ${mitte} in die Kästchen.`;
+}
+function neuZiehen() {
+  const p = T.pos(mitte);
+  luecken = new Set();
+  if (stufe === 3) for (let rr = p.r - 2; rr <= p.r + 2; rr++) for (let cc = p.c - 2; cc <= p.c + 2; cc++)
+    if (rr >= 0 && rr <= 9 && cc >= 0 && cc <= 9) luecken.add(T.num(p.s, rr, cc));
+  q.leere(); rahmen.innerHTML = "";
+  if (stufe === 1) q.mark(mitte, "sel");
+  zLepo.setze(p.s);
+  kaesten.forEach(k => {
+    const da = k.ri === "mitte" || stufe > 1 || KREUZ.includes(k.ri);
+    k.el.classList.toggle("weg", !da);
+    if (k.lbl) k.lbl.style.display = da ? "" : "none";
+  });
+  kMitte.el.className = "kz mitte"; kMitte.el.innerHTML = T.zahlHTML(mitte); kMitte.el.setAttribute("aria-label", "Mitte: " + mitte);
+  // Kartenablage: alle richtigen Zahlen und drei typische Fehler
+  const richtig = offen().map(zahlVon);
+  karten = T.mischen(richtig.concat(ablenker(richtig))).map(n => ({ n }));
+  ablage.innerHTML = ""; ablage.appendChild(T.el("p", "titel", "Kartenablage"));
+  karten.forEach((kt, idx) => {
+    const b = T.el("button", "akarte", T.zahlHTML(kt.n)); b.type = "button"; b.setAttribute("aria-label", "Karte " + kt.n);
+    b.addEventListener("click", () => { if (!nachZug()) waehle({ n: kt.n, idx }); });
+    b.addEventListener("pointerdown", e => { if (!b.classList.contains("benutzt")) starteZug(e, { n: kt.n, idx }, null, b, () => waehle({ n: kt.n, idx })); });
+    ablage.appendChild(b); kt.el = b;
+  });
+  leereKaesten();
+  zeigeQuelle();
+  T.melde(zSatz, "", startSatz());
+}
+// Typische Fehler: Stellen verwechselt, ins falsche Quadrat (±100), Zahlendreher
+function ablenker(richtig) {
+  const m = mitte, raus = [];
+  const gut = n => n >= 1 && n <= 1000 && n !== m && !richtig.includes(n) && !raus.includes(n);
+  const dreher = richtig.map(n => { const t = String(n); return +(t.slice(0, -2) + t.slice(-1) + t.slice(-2, -1)); });
+  [stufe === 1 ? [m + 11, m - 11, m + 9, m - 9] : [m + 20, m - 20, m + 2, m - 2], [m + 100, m - 100], dreher]
+    .forEach(l => { const n = T.mischen(l).find(gut); if (n) raus.push(n); });
+  for (let d = 2; raus.length < 3; d++) [m + d * 10, m - d * 10].forEach(n => { if (raus.length < 3 && gut(n)) raus.push(n); });
+  return raus;
+}
+function zeigeQuelle() {
+  zQBlk.hidden = modus !== "ziehen" || ablageAn;
+  ablageBlk.hidden = modus !== "ziehen" || !ablageAn;
+  q.zeigeQuadrat(T.pos(mitte).s);
+  luecken.forEach(n => { const f = q.feld(n); if (f) { f.textContent = "?"; f.classList.add("luecke"); } });
+}
+function leereKaesten() {
+  waehle(null);
+  offen().forEach(k => setzeKasten(k, null));
+  karten.forEach(kt => kt.el && kt.el.classList.remove("benutzt"));
+  q.leere("leucht"); rahmen.innerHTML = "";
+  if (stufe === 1) q.mark(mitte, "sel");
+}
+function setzeKasten(k, karte) {
+  if (k.karte && k.karte.idx != null && karten[k.karte.idx]) karten[k.karte.idx].el.classList.remove("benutzt");
+  k.karte = karte;
+  if (karte && karte.idx != null) karten[karte.idx].el.classList.add("benutzt");
+  k.el.className = "kz" + (karte ? " voll" : "");
+  k.el.innerHTML = karte ? T.zahlHTML(karte.n) : "";
+  k.el.setAttribute("aria-label", `${REL[k.ri]} ${mitte}: ` + (karte ? karte.n : "leer"));
+}
+function waehle(w) {
+  q.leere("gewaehlt"); karten.forEach(kt => kt.el && kt.el.classList.remove("gewaehlt"));
+  kaesten.forEach(k => k.el.classList.remove("gewaehlt"));
+  wahl = w;
+  if (!w) return;
+  if (w.vonKasten) w.vonKasten.el.classList.add("gewaehlt");
+  else if (w.idx != null) karten[w.idx].el.classList.add("gewaehlt");
+  else q.mark(w.n, "gewaehlt");
+}
+// Karte in ein Kästchen legen. von = Kästchen, aus dem sie kommt (dann wird getauscht)
+function lege(k, karte, von) {
+  if (von === k) { waehle(null); return; }
+  const alt = k.karte;
+  if (von) { von.karte = null; k.karte = null; setzeKasten(von, alt); }   // tauschen
+  setzeKasten(k, karte);
+  if (T.bewegt) { k.el.classList.remove("rast"); void k.el.offsetWidth; k.el.classList.add("rast"); }
+  waehle(null);
+  q.leere("leucht"); rahmen.innerHTML = "";
+  if (sofort) pruefe(true, k);
+  else T.melde(zSatz, "", offen().every(x => x.karte) ? "Alle Kästchen sind voll. Tippe auf „Prüfen“." : startSatz());
+}
+function entferne(k) {
+  setzeKasten(k, null); waehle(null);
+  q.leere("leucht"); rahmen.innerHTML = "";
+  T.melde(zSatz, "", startSatz());
+}
+
+// Antippen – Antippen. Ein Tippen wird schon beim Loslassen erkannt (manche Geräte schicken
+// nach dem Ziehen kein „click“); das folgende „click“ wird dann übersprungen. Tastatur nutzt „click“.
+let gezogen = 0;   // bis zu diesem Zeitpunkt wird ein „click“ übersprungen
+const nachZug = () => { const g = performance.now() < gezogen; gezogen = 0; return g; };
+function tippeTafel(n) { if (nachZug()) return; waehle({ n, idx: null }); }
+function tippeKasten(k) {
+  if (!aktiv(k)) return;
+  if (wahl && wahl.vonKasten === k) { entferne(k); return; }          // zweimal antippen = zurück
+  if (wahl) { lege(k, wahl.vonKasten ? wahl.vonKasten.karte : { n: wahl.n, idx: wahl.idx }, wahl.vonKasten); return; }
+  if (k.karte) waehle({ vonKasten: k, n: k.karte.n });
+}
+
+// Ziehen mit Maus, Finger oder Stift (immer nur eine Karte)
+let zug = null;
+function stagePunkt(x, y) { const r = S.getBoundingClientRect(), f = r.width / 1600; return { x: (x - r.left) / f, y: (y - r.top) / f }; }
+function mittelpunkt(el) { const r = el.getBoundingClientRect(); return stagePunkt(r.left + r.width / 2, r.top + r.height / 2); }
+function starteZug(e, karte, vonKasten, el, tipp) {
+  if (zug || modus !== "ziehen" || (e.pointerType === "mouse" && e.button !== 0)) return;
+  gezogen = 0;
+  zug = { id: e.pointerId, karte, vonKasten, el, tipp, x0: e.clientX, y0: e.clientY, karteEl: null };
+}
+function bewege(e) {
+  if (!zug || e.pointerId !== zug.id) return;
+  if (!zug.karteEl) {
+    if (!zug.karte || Math.hypot(e.clientX - zug.x0, e.clientY - zug.y0) < 10) return;
+    waehle(null);
+    const c = T.el("div", "karte", T.zahlHTML(zug.karte.n));
+    S.appendChild(c); zug.karteEl = c; zug.start = mittelpunkt(zug.el);
+    if (zug.vonKasten) zug.vonKasten.el.classList.add("hebt");
+    else if (zug.karte.idx != null) zug.el.classList.add("benutzt");
+  }
+  e.preventDefault();
+  const p = stagePunkt(e.clientX, e.clientY);
+  zug.karteEl.style.left = p.x + "px"; zug.karteEl.style.top = p.y + "px";
+}
+function lasseLos(e, abbruch) {
+  if (!zug || e.pointerId !== zug.id) return;
+  const z = zug; zug = null;
+  gezogen = performance.now() + 500;                             // folgendes „click“ überspringen
+  if (!z.karteEl) { if (!abbruch) z.tipp(); return; }           // nur angetippt
+  if (z.vonKasten) z.vonKasten.el.classList.remove("hebt");
+  const unter = abbruch ? null : document.elementFromPoint(e.clientX, e.clientY);
+  const ziel = unter && kaesten.find(k => k.el === unter.closest(".kz"));
+  if (ziel && aktiv(ziel)) {
+    z.karteEl.remove();
+    if (z.karte.idx != null && !z.vonKasten) karten[z.karte.idx].el.classList.remove("benutzt");
+    lege(ziel, z.karte, z.vonKasten);
+    return;
+  }
+  if (z.vonKasten && unter && unter.closest(".zquadrat, .ablage")) { z.karteEl.remove(); entferne(z.vonKasten); return; }
+  // daneben: Karte gleitet zurück
+  const c = z.karteEl;
+  const fertig = () => { c.remove(); if (!z.vonKasten && z.karte.idx != null) karten[z.karte.idx].el.classList.remove("benutzt"); };
+  if (!T.bewegt) { fertig(); return; }
+  c.classList.add("zurueck"); c.style.left = z.start.x + "px"; c.style.top = z.start.y + "px"; c.style.opacity = ".4";
+  T.nach(260, fertig);
+}
+function brichZugAb() { if (zug && zug.karteEl) { zug.karteEl.remove(); if (zug.vonKasten) zug.vonKasten.el.classList.remove("hebt"); if (zug.karte.idx != null && !zug.vonKasten) karten[zug.karte.idx].el.classList.remove("benutzt"); } zug = null; }
+addEventListener("pointermove", bewege, { passive: false });
+addEventListener("pointerup", e => lasseLos(e, false));
+addEventListener("pointercancel", e => lasseLos(e, true));
+q.q.addEventListener("pointerdown", e => { const f = e.target.closest(".feld"); if (f) starteZug(e, { n: f.n, idx: null }, null, f, () => waehle({ n: f.n, idx: null })); });
+
+// Prüfen. still = Sofort prüfen (leere Kästchen nicht anmahnen), nur = gerade gelegtes Kästchen
+function pruefe(still, nur) {
+  const liste = offen(), voll = liste.filter(k => k.karte);
+  if (still && !voll.length) { T.melde(zSatz, "", startSatz()); return; }
+  voll.forEach(k => { k.el.classList.remove("ok", "falsch"); k.el.classList.add(k.karte.n === zahlVon(k) ? "ok" : "falsch"); });
+  const falsch = voll.filter(k => k.karte.n !== zahlVon(k)), leer = liste.length - voll.length;
+  if (falsch.length) {
+    const k = falsch.includes(nur) ? nur : falsch[0];
+    T.melde(zSatz, "noch", `Schau noch einmal: Was steht ${klein(REL[k.ri])} ${mitte}?`);
+  } else if (leer) {
+    if (still) T.melde(zSatz, "ok", `${T.lob()} Das stimmt.`);
+    else T.melde(zSatz, "noch", leer === 1 ? "Ein Kästchen ist noch leer." : `${leer} Kästchen sind noch leer.`);
+  } else erfolg();
+}
+function erfolg() {
+  const p = T.pos(mitte), zahlen = [mitte].concat(offen().map(zahlVon));
+  zahlen.forEach(n => q.mark(n, "leucht"));
+  if (T.bewegt) zahlen.forEach(n => { const f = q.feld(n); if (f) { f.classList.add("blitz"); T.nach(1500, () => f.classList.remove("blitz")); } });
+  // Rahmen um das Fenster (Kreuz: Plus-Form)
+  const pt = q.zelle + 3, a = k => k * pt - 1.5;
+  const x0 = a(p.c - 1), x1 = a(p.c), x2 = a(p.c + 1), x3 = a(p.c + 2), y0 = a(p.r - 1), y1 = a(p.r), y2 = a(p.r + 1), y3 = a(p.r + 2);
+  const pfad = stufe === 1
+    ? `M${x1} ${y0}H${x2}V${y1}H${x3}V${y2}H${x2}V${y3}H${x1}V${y2}H${x0}V${y1}H${x1}Z`
+    : `M${x0} ${y0}H${x3}V${y3}H${x0}Z`;
+  if (stufe === 3) { zahlen.forEach(n => luecken.delete(n)); zeigeQuelle(); }
+  rahmen.innerHTML = `<path d="${pfad}" fill="none" stroke="#5e2f91" stroke-width="7" stroke-linejoin="round"/>`;
+  T.melde(zSatz, "ok", ablageAn ? `${T.lob()} Alle Zahlen stimmen.`
+    : `${T.lob()} Alle Zahlen stimmen. So liegt das ${stufe === 1 ? "Kreuz" : "Fenster"} auf der Tafel.`);
+}
+
 neu();
+setzeModus(modus);
 </script>
 </body>
 </html>
