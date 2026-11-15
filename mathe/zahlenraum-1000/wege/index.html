@@ -24,6 +24,26 @@
 .palette .knopf{width:84px}
 .palette .knopf{height:84px;font-size:44px;padding:0}
 .zeile{display:flex;gap:12px;flex-wrap:wrap}
+/* Modus „Rechenweg“ */
+.rw-zeile{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.rw-aufgabe{font-size:34px;font-weight:700;line-height:1.35;margin:4px 0 16px;min-height:92px}
+.rw-aufgabe .zr{color:var(--Z)} .rw-aufgabe .er{color:var(--E)}
+.sym-z{display:inline-block;width:10px;height:30px;margin:0 6px 0 2px;vertical-align:-4px;background:var(--Z);border:2px solid #8e2620;border-radius:2px;
+  background-image:linear-gradient(rgba(255,255,255,.45) 1px,transparent 1px);background-size:100% 3px}
+.sym-e{display:inline-block;width:12px;height:12px;margin:0 6px 0 2px;vertical-align:1px;background:var(--E);border:2px solid #1a4787;border-radius:2px}
+.mat{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:8px}
+.mat .vz{font-size:40px;font-weight:700;line-height:1;margin-right:2px}
+.mat .grp{display:flex;align-items:flex-end;gap:6px}
+.mat .st{width:16px;height:66px;background:var(--Z);border:2px solid #8e2620;border-radius:2px;background-image:linear-gradient(rgba(255,255,255,.45) 1px,transparent 1px);background-size:100% 6.6px}
+.mat .wu{width:16px;height:16px;background:var(--E);border:2px solid #1a4787;border-radius:2px}
+.rw-antworten{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rw-antworten .knopf{min-height:92px;font-size:46px}
+.rw-antworten .knopf.daneben{border-color:var(--nochrand);background:var(--nochbg);color:var(--noch)}
+.rw-antworten .knopf.richtig{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.rw-beschr{display:flex;flex-direction:column;gap:10px}
+.rw-beschr .knopf{min-height:70px;font-size:28px;justify-content:flex-start}
+.rw-beschr .knopf.daneben{border-color:var(--nochrand);background:var(--nochbg);color:var(--noch)}
+.rw-beschr .knopf.richtig{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
 </style>
 </head>
 <body>
@@ -53,6 +73,18 @@ window.HINWEISE = {
    ]
   },
   {
+   "h": "Rechenweg",
+   "punkte": [
+    "Aufgabe: „Start: 347. Gehe 3 Zehner weiter. Gehe 2 Einer weiter.“ 1 Zehner = 1 Zeile nach unten, 1 Einer = 1 Feld nach rechts (zurück: nach oben bzw. links).",
+    "**Zeige**: als Text, als **Material** (Zehnerstangen und Einerwürfel, zurück mit Minuszeichen) oder als **Rechnung** (347 + 32).",
+    "Eine der vier Zahlen antippen. Falsche Knöpfe bleiben orange markiert, die Rückmeldung nennt den Fehler („Wie viele Zehner?“, „Weiter oder zurück?“).",
+    "Nach der richtigen Wahl läuft der Käfer: erst die Zehner, dann die Einer. Danach steht die Rechnung da, z. B. 347 + 32 = 379.",
+    "**Umgekehrt**: Start und Fahne sind markiert, die Kinder wählen die passende Beschreibung des Weges.",
+    "**Selbst tippen** (vor allem für Stufe ●●●): keine Antwortknöpfe, die Kinder tippen das Zielfeld an. Über die Leiste oben kann das Quadrat gewechselt werden.",
+    "**Stufe ●**: nur Zehner oder nur Einer, nur weiter. **●●**: Zehner und Einer, beide weiter oder beide zurück. **●●●**: gemischt (z. B. 3 Zehner weiter, 2 Einer zurück) oder mit Übergang in die nächste Zeile (38 + 3 Einer = 41) bzw. ins nächste Quadrat (385 + 2 Zehner = 405)."
+   ]
+  },
+  {
    "h": "Stufen",
    "punkte": [
     "**●** ein Befehl mit ← → ↑ ↓. **●●** zwei Befehle. **●●●** auch schräge Richtungen.",
@@ -68,14 +100,14 @@ const T = Tafel, S = T.buehne();
 let modus = "wohin", stufe = 1, start = 0, ziel = 0, befehle = [], eingabe = [], vermutung = null, laeuft = false;
 
 // ---------- Aufbau ----------
-const modusWahl = T.gruppe("", [{ wert: "wohin", text: "Wohin läuft der Käfer?" }, { wert: "weg", text: "Finde den Weg" }], "wohin",
+const modusWahl = T.gruppe("", [{ wert: "wohin", text: "Wohin läuft der Käfer?" }, { wert: "weg", text: "Finde den Weg" }, { wert: "rechen", text: "Rechenweg" }], "wohin",
   v => { modus = v; neu(); }, "wege-modus");
 const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "wege-stufe");
 modus = modusWahl.wert; stufe = stufenWahl.wert;
 T.leiste(modusWahl, stufenWahl, T.knopf("Neue Aufgabe", () => { T.stop(); neu(); }));
 
-const qTitel = T.el("div", "qtitel"); T.blk(64, 178).appendChild(qTitel);
-const q = T.quadrat(T.blk(60, 220), { zelle: 60, onTap: n => tippe(n) });
+const lepo = T.leporello(T.blk(58, 170), { onTap: s => { if (modus === "rechen" && rw.selbst && !rw.geloest && !laeuft) { q.zeigeQuadrat(s); lepo.setze(s); } } });
+const q = T.quadrat(T.blk(60, 256), { zelle: 60, onTap: n => tippe(n) });
 const kaefer = T.el("div", "kaefer", T.KAEFER); q.box.appendChild(kaefer);
 
 const re = T.blk(740, 182, 820);
@@ -84,6 +116,8 @@ T.kopf({ titel: "Wege mit dem Marienkäfer", onNeu: () => neu() });
 
 // ---------- Hilfen ----------
 const setzeKaefer = n => { const m = q.mitte(n); kaefer.style.left = m.x - 30 - 7 + "px"; kaefer.style.top = m.y - 30 - 9 + "px"; };
+// bei einer neuen Aufgabe springt der Käfer direkt auf den Start (ohne Gleiten)
+const kaeferAuf = n => { kaefer.style.transition = "none"; setzeKaefer(n); kaefer.getBoundingClientRect(); kaefer.style.transition = ""; };
 const karte = (ri, k) => `<div class="karte">${k > 1 ? `<span class="mal">${k} ×</span>` : ""}<span>${T.R[ri].pfeil}</span></div>`;
 const gruppiere = l => l.reduce((g, ri) => { const x = g[g.length - 1]; x && x.ri === ri ? x.k++ : g.push({ ri, k: 1 }); return g; }, []);
 const ende = (n, l) => l.reduce((m, b) => m === null ? null : T.schritt(m, b.ri, b.k), n);
@@ -104,15 +138,17 @@ function aufgabe() {
 // ---------- Ablauf ----------
 function neu() {
   T.stop(); laeuft = false; vermutung = null; eingabe = [];
+  if (modus === "rechen") return neuRechen();
   const a = aufgabe(); start = a.st; befehle = a.l; ziel = a.e;
   const s = T.pos(start).s;
-  q.zeigeQuadrat(s); q.leere(); qTitel.textContent = `Quadrat ${s + 1}: ${T.bereich(s)}`;
-  q.mark(start, "vor"); setzeKaefer(start);
+  q.zeigeQuadrat(s); q.leere(); lepo.setze(s);
+  q.mark(start, "vor"); kaeferAuf(start);
   if (modus === "weg") q.mark(ziel, "ziel");
   baueRechts(); T.melde(satz, "", "");
 }
 function baueRechts() {
   re.innerHTML = "";
+  if (modus === "rechen") { baueRechen(); satzBox.style.top = 182 + re.offsetHeight + 18 + "px"; return; }
   if (modus === "wohin") {
     re.appendChild(T.el("p", "auftrag", `Der Käfer startet bei ${start}. Wohin läuft er? Tippe das Feld an.`));
     re.appendChild(T.el("div", "karten", befehle.map(b => karte(b.ri, b.k)).join("")));
@@ -138,6 +174,7 @@ function zeigeReihe() {
   r.innerHTML = eingabe.length ? gruppiere(eingabe).map(b => karte(b.ri, b.k)).join("") : '<span class="leer">Tippe Pfeile an.</span>';
 }
 function tippe(n) {
+  if (modus === "rechen") return tippeRechen(n);
   if (modus !== "wohin" || laeuft) return;
   if (vermutung) q.mark(vermutung, "vermutung", false);
   vermutung = n; q.mark(n, "vermutung");
@@ -170,6 +207,162 @@ async function los(liste) {
     if (n === ziel) T.melde(satz, "ok", [`${T.lob()} Der Käfer ist an der Fahne.`, ...saetze]);
     else T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}. Die Fahne ist bei ${ziel}.`, ...saetze]);
   }
+}
+// =====================================================================
+//  Modus „Rechenweg“: 1 Zehner = 1 Zeile nach unten, 1 Einer = 1 Feld nach rechts
+// =====================================================================
+const rw = { darst: T.laden("wege-darst", "text"), umgekehrt: T.laden("wege-umgekehrt", false), selbst: T.laden("wege-selbst", false),
+  a: null, fehler: [], geloest: false };
+const RICHT = d => d > 0 ? "weiter" : "zurück";
+const zielVon = a => a.n + a.dz * 10 * a.z + a.de * a.e;
+
+// Aufgaben je Stufe (r = Zeile, c = Spalte, jeweils 0–9)
+function aufgabeRechen() {
+  for (let v = 0; v < 3000; v++) {
+    const n = T.zufall(1, 999), p = T.pos(n); let a;
+    if (stufe === 1) {          // nur Zehner ODER nur Einer (1–4), nur weiter, kein Übergang
+      const k = T.zufall(1, 4);
+      a = Math.random() < .5 ? { n, z: k, e: 0, dz: 1, de: 1 } : { n, z: 0, e: k, dz: 1, de: 1 };
+      if (p.r + a.z > 9 || p.c + a.e > 9) continue;
+    } else if (stufe === 2) {   // Zehner UND Einer, beide weiter oder beide zurück, kein Übergang
+      const d = T.wahl([1, -1]); a = { n, z: T.zufall(1, 4), e: T.zufall(1, 4), dz: d, de: d };
+      const r2 = p.r + d * a.z, c2 = p.c + d * a.e; if (r2 < 0 || r2 > 9 || c2 < 0 || c2 > 9) continue;
+    } else {                    // gemischt oder mit Übergang
+      const art = T.wahl(["gemischt", "gemischt", "einer", "zehner"]);
+      if (art === "gemischt") {
+        const d = T.wahl([1, -1]); a = { n, z: T.zufall(1, 4), e: T.zufall(1, 4), dz: d, de: -d };
+        const r2 = p.r + a.dz * a.z, c2 = p.c + a.de * a.e; if (r2 < 0 || r2 > 9 || c2 < 0 || c2 > 9) continue;
+      } else if (art === "einer") {   // Einer über das Zeilenende (z. B. 38 + 3 Einer = 41)
+        const d = T.wahl([1, 1, -1]); a = { n, z: T.zufall(0, 2), e: T.zufall(2, 5), dz: d, de: d };
+        const r2 = p.r + d * a.z, c2 = p.c + d * a.e;
+        if (d > 0 ? (c2 <= 9 || r2 > 8) : (c2 >= 0 || r2 < 1)) continue;
+        a.uebergang = "zeile";
+      } else {                        // Zehner über das Quadratende (z. B. 385 + 2 Zehner = 405)
+        const d = T.wahl([1, 1, -1]); a = { n, z: T.zufall(1, 3), e: T.zufall(0, 2), dz: d, de: d };
+        const r2 = p.r + d * a.z, c2 = p.c + d * a.e;
+        if (d > 0 ? (r2 <= 9 || c2 > 9) : (r2 >= 0 || c2 < 0)) continue;
+        a.uebergang = "quadrat";
+      }
+    }
+    if (!a.z) a.dz = a.de; if (!a.e) a.de = a.dz;
+    a.t = zielVon(a);
+    if (a.t < 1 || a.t > 1000 || a.t === n) continue;
+    return a;
+  }
+}
+// Fehlerzahlen: Reihenfolge = Vorrang; ungeeignete werden durch die nächste Fehlerart ersetzt
+function fehlerzahlen(a, max = 3) {
+  const k = [
+    ["vertauscht", a.n + a.dz * 10 * a.e + a.de * a.z],
+    ["nurZehner", a.n + a.dz * 10 * a.z],
+    ["richtung", a.n - (a.dz * 10 * a.z + a.de * a.e)],
+    ["nurEiner", a.n + a.de * a.e],
+    ["verzaehlt", a.t + 10], ["verzaehlt", a.t - 10], ["verzaehlt", a.t + 1], ["verzaehlt", a.t - 1],
+  ];
+  const l = [];
+  for (const [art, x] of k) if (x >= 1 && x <= 1000 && x !== a.t && x !== a.n && !l.some(f => f.x === x) && l.length < max) l.push({ art, x });
+  return l;
+}
+const RUECK = {
+  vertauscht: "Noch nicht. Schau noch einmal: Wie viele Zehner? Wie viele Einer?",
+  nurZehner: "Noch nicht. Schau noch einmal: Hast du auch die Einer gerechnet?",
+  nurEiner: "Noch nicht. Schau noch einmal: Hast du auch die Zehner gerechnet?",
+  richtung: "Noch nicht. Schau noch einmal: Weiter oder zurück?",
+  verzaehlt: "Noch nicht. Zähle noch einmal genau.",
+};
+// Darstellungen
+const teilText = (k, art, d) => k ? `Gehe <span class="${art === "Z" ? "zr" : "er"}"><span class="sym-${art.toLowerCase()}" aria-hidden="true"></span>${k} ${art === "Z" ? "Zehner" : "Einer"}</span> ${RICHT(d)}.` : "";
+const kurzText = a => [a.z ? `${a.z} Zehner ${RICHT(a.dz)}` : "", a.e ? `${a.e} Einer ${RICHT(a.de)}` : ""].filter(Boolean).join(", ");
+function rechnung(a, mitErgebnis) {
+  let r = String(a.n);
+  if (a.z && a.e && a.dz === a.de) r += ` ${a.dz > 0 ? "+" : "−"} ${10 * a.z + a.e}`;
+  else { if (a.z) r += ` ${a.dz > 0 ? "+" : "−"} ${10 * a.z}`; if (a.e) r += ` ${a.de > 0 ? "+" : "−"} ${a.e}`; }
+  return r + " = " + (mitErgebnis ? a.t : "?");
+}
+function aufgabeHTML(a) {
+  if (rw.darst === "rechnung") return `<div class="zahl" style="font-size:52px">${rechnung(a, false)}</div>`;
+  if (rw.darst === "material") {
+    const grp = (k, cls, d) => k ? `<span class="vz">${d > 0 ? "+" : "−"}</span><span class="grp" aria-label="${k} ${cls === "st" ? "Zehner" : "Einer"} ${RICHT(d)}">${`<span class="${cls}"></span>`.repeat(k)}</span>` : "";
+    return `Start: ${a.n}<div class="mat">${grp(a.z, "st", a.dz)}${grp(a.e, "wu", a.de)}</div>`;
+  }
+  return [`Start: ${a.n}.`, teilText(a.z, "Z", a.dz), teilText(a.e, "E", a.de)].filter(Boolean).join("<br>");
+}
+
+function neuRechen() {
+  rw.a = aufgabeRechen(); rw.fehler = fehlerzahlen(rw.a); rw.geloest = false;
+  const a = rw.a, s = T.pos(a.n).s;
+  q.zeigeQuadrat(s); q.leere(); lepo.setze(s); q.mark(a.n, "vor"); kaeferAuf(a.n);
+  if (rw.umgekehrt) q.mark(a.t, "ziel");
+  baueRechts(); T.melde(satz, "", "");
+}
+function baueRechen() {
+  const a = rw.a;
+  const z1 = T.el("div", "rw-zeile"); re.appendChild(z1);
+  z1.appendChild(T.gruppe("Zeige", [{ wert: "text", text: "Text" }, { wert: "material", text: "Material" }, { wert: "rechnung", text: "Rechnung" }], rw.darst,
+    v => { rw.darst = v; if (!rw.geloest) { re.innerHTML = ""; baueRechts(); } }, "wege-darst"));
+  const z2 = T.el("div", "rw-zeile"); re.appendChild(z2);
+  z2.append(T.schalter("Umgekehrt", rw.umgekehrt, v => { rw.umgekehrt = v; T.merken("wege-umgekehrt", v); neu(); }),
+            T.schalter("Selbst tippen", rw.selbst, v => { rw.selbst = v; T.merken("wege-selbst", v); neu(); }));
+  if (rw.umgekehrt) {
+    const sq = T.pos(a.t).s !== T.pos(a.n).s ? ` (im ${T.pos(a.t).s + 1}. Quadrat)` : "";
+    re.appendChild(T.el("div", "rw-aufgabe", `Wie kommt der Käfer von ${a.n} zur Fahne bei ${a.t}${sq}?`));
+    // Beschreibungen: richtig, Zehner/Einer vertauscht, falsche Richtung
+    const richtig = kurzText(a), opt = [{ t: richtig, ok: true }];
+    const kand = [kurzText({ ...a, z: a.e, e: a.z }), kurzText({ ...a, dz: -a.dz, de: -a.de }), kurzText({ ...a, z: a.z + 1 }), kurzText({ ...a, e: a.e + 1 })];
+    kand.forEach(t => { if (opt.length < 3 && t && !opt.some(o => o.t === t)) opt.push({ t, ok: false }); });
+    const box = T.el("div", "rw-beschr"); re.appendChild(box);
+    T.mischen(opt).forEach(o => { const b = T.knopf(o.t, () => beschreibung(o, b)); box.appendChild(b); });
+    return;
+  }
+  re.appendChild(T.el("div", "rw-aufgabe", aufgabeHTML(a)));
+  if (rw.selbst) { re.appendChild(T.el("p", "auftrag", "Tippe das Zielfeld auf der Tafel an. Oben kannst du das Quadrat wechseln.")); return; }
+  const box = T.el("div", "rw-antworten"); re.appendChild(box);
+  T.mischen([{ x: a.t, art: null }, ...rw.fehler]).forEach(o => { const b = T.knopf(String(o.x), () => antwortRechen(o, b)); box.appendChild(b); });
+}
+function antwortRechen(o, b) {
+  if (rw.geloest || laeuft) return;
+  if (o.art) { b.classList.add("daneben"); return T.melde(satz, "noch", RUECK[o.art]); }
+  b.classList.add("richtig"); laufeRechen();
+}
+function beschreibung(o, b) {
+  if (rw.geloest || laeuft) return;
+  if (!o.ok) { b.classList.add("daneben"); return T.melde(satz, "noch", "Noch nicht. Schau noch einmal: Wie viele Zehner, wie viele Einer, weiter oder zurück?"); }
+  b.classList.add("richtig"); laufeRechen();
+}
+function tippeRechen(n) {
+  if (!rw.selbst || rw.umgekehrt || rw.geloest || laeuft) return;
+  if (n === rw.a.t) { q.mark(n, "sel"); return laufeRechen(); }
+  q.mark(n, "falsch");
+  const f = fehlerzahlen(rw.a, 99).find(x => x.x === n);
+  T.melde(satz, "noch", f ? RUECK[f.art] : "Noch nicht. Schau noch einmal genau.");
+}
+// Der Käfer läuft: erst die Zehner (Zeile für Zeile), dann die Einer (Feld für Feld, in Zählrichtung)
+async function laufeRechen() {
+  const a = rw.a; rw.geloest = true; laeuft = true; const lauf = T.lauf;
+  let n = a.n; q.zeigeQuadrat(T.pos(n).s); lepo.setze(T.pos(n).s); q.leere("weg"); q.leere("falsch"); setzeKaefer(n);
+  const saetze = [], hinweise = [];
+  const schritt = async d => {
+    const alt = n; n += d; const s0 = T.pos(alt).s, s1 = T.pos(n).s;
+    if (s0 !== s1) {                    // neues Quadrat
+      lepo.blink(s1); T.melde(satz, "", "Neues Quadrat!"); if (!hinweise.includes("Neues Quadrat!")) hinweise.push("Neues Quadrat!");
+      await T.warte(900); if (lauf !== T.lauf) return false;
+      q.zeigeQuadrat(s1); lepo.setze(s1); q.mark(a.n, "vor");
+    } else if (Math.abs(d) === 1 && T.pos(alt).r !== T.pos(n).r) {
+      const h = d > 0 ? "Am Ende der Zeile geht es in der nächsten Zeile vorne weiter." : "Am Anfang der Zeile geht es in der Zeile davor hinten weiter.";
+      if (!hinweise.includes(h)) hinweise.push(h);
+    }
+    await T.warte(340); if (lauf !== T.lauf) return false;
+    q.mark(n, "weg"); setzeKaefer(n); return true;
+  };
+  if (a.z) { const v = n; for (let i = 0; i < a.z; i++) if (!await schritt(10 * a.dz)) return; saetze.push(`Ich gehe ${a.z} Zehner ${RICHT(a.dz)}: von ${v} bis ${n}.`); }
+  if (a.e) { const v = n; for (let i = 0; i < a.e; i++) if (!await schritt(a.de)) return; saetze.push(`Ich gehe ${a.e} Einer ${RICHT(a.de)}: von ${v} bis ${n}.`); }
+  laeuft = false; q.mark(n, "sel");
+  const ab = re.querySelector(".rw-aufgabe"); if (ab && !rw.umgekehrt) ab.innerHTML = aufgabeHTML(a) + `<div class="zahl" style="font-size:44px;margin-top:6px">${rechnung(a, true)}</div>`;
+  // Platz für die Sätze: nur die richtige Antwort bleibt stehen, der Tipp-Hinweis verschwindet
+  re.querySelectorAll(".rw-antworten .knopf:not(.richtig), .rw-beschr .knopf:not(.richtig)").forEach(k => k.remove());
+  const tipp = re.querySelector(".auftrag"); if (tipp && rw.selbst) tipp.remove();
+  satzBox.style.top = 182 + re.offsetHeight + 18 + "px";
+  T.melde(satz, "ok", [`${T.lob()} Der Käfer ist bei ${n}.`, ...saetze, ...hinweise, rechnung(a, true)]);
 }
 neu();
 </script>
