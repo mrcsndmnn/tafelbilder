@@ -24,6 +24,12 @@
 .palette .knopf{width:84px}
 .palette .knopf{height:84px;font-size:44px;padding:0}
 .zeile{display:flex;gap:12px;flex-wrap:wrap}
+/* Zielfeld (Fahne) zusätzlich farbig: violett, damit es sich von Start (hellgelb) und Weg (hellblau) abhebt
+   und auch aus größerer Entfernung gut zu erkennen ist */
+.feld.ziel{background:#c9a3f2;border:6px solid #5e2f91;box-shadow:0 0 0 3px #fff,0 0 0 7px #5e2f91;z-index:2}
+.farben .feld.ziel{background:#dcc2f7}
+.feld.ziel::after{right:-10px;top:-14px;width:24px;height:22px;
+  background:linear-gradient(#d03a32,#d03a32) 4px 0/20px 13px no-repeat,linear-gradient(#1d2320,#1d2320) 0 0/4px 22px no-repeat}
 /* Modus „Rechenweg“ */
 .rw-zeile{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .rw-aufgabe{font-size:34px;font-weight:700;line-height:1.35;margin:4px 0 16px;min-height:92px}
