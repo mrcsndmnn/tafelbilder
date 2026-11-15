@@ -97,7 +97,7 @@ window.HINWEISE = {
     "Eine gelegte Karte kann in ein anderes Kästchen gezogen werden oder zurück auf die Tafel (dann ist sie weg). Ohne Ziehen: Kästchen antippen, dann ein anderes Kästchen – oder dasselbe Kästchen noch einmal zum Entfernen.",
     "**Prüfen**: Richtige Kästchen werden grün mit Haken, falsche orange mit einer Frage zum Nachdenken. Falsche Karten bleiben liegen und können ausgetauscht werden.",
     "**Sofort prüfen**: Rückmeldung schon beim Ablegen. Ist alles richtig, wird das Fenster auf der Tafel violett eingezeichnet.",
-    "**Stufe ●**: Kreuz mit 4 Kästchen, die Mitte ist auf der Tafel markiert. **●●**: Fenster mit 8 Kästchen, die Mitte ist nicht markiert. **●●●**: Rund um das Fenster stehen auf der Tafel nur **?** – die Felder lassen sich trotzdem ziehen.",
+    "Die Mittelzahl ist auf der Tafel nicht hervorgehoben – die Kinder suchen sie selbst. **Stufe ●**: Kreuz mit 4 Kästchen. **●●**: Fenster mit 8 Kästchen. **●●●**: Rund um das Fenster stehen auf der Tafel nur **?** – die Felder lassen sich trotzdem ziehen.",
     "**Kartenablage**: Statt der Tafel liegen Karten bereit: alle richtigen Zahlen und drei typische Fehler."
    ]
   },
@@ -282,7 +282,6 @@ function neuZiehen() {
   if (stufe === 3) for (let rr = p.r - 2; rr <= p.r + 2; rr++) for (let cc = p.c - 2; cc <= p.c + 2; cc++)
     if (rr >= 0 && rr <= 9 && cc >= 0 && cc <= 9) luecken.add(T.num(p.s, rr, cc));
   q.leere(); rahmen.innerHTML = "";
-  if (stufe === 1) q.mark(mitte, "sel");
   zLepo.setze(p.s);
   kaesten.forEach(k => {
     const da = k.ri === "mitte" || stufe > 1 || KREUZ.includes(k.ri);
@@ -325,7 +324,6 @@ function leereKaesten() {
   offen().forEach(k => setzeKasten(k, null));
   karten.forEach(kt => kt.el && kt.el.classList.remove("benutzt"));
   q.leere("leucht"); rahmen.innerHTML = "";
-  if (stufe === 1) q.mark(mitte, "sel");
 }
 function setzeKasten(k, karte) {
   if (k.karte && k.karte.idx != null && karten[k.karte.idx]) karten[k.karte.idx].el.classList.remove("benutzt");
