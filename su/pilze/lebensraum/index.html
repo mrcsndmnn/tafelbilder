@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Wo wachsen Pilze? – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.szene{position:absolute;left:30px;top:172px;width:1080px;height:700px;border:3px solid var(--ink);border-radius:16px;overflow:hidden}
+.szene svg{width:100%;height:100%;display:block}
+.ort{cursor:pointer}
+.ort .flaeche{fill:transparent;stroke:transparent;stroke-width:6}
+.ort:hover .flaeche,.ort:focus .flaeche{stroke:rgba(94,47,145,.5);stroke-dasharray:14 10}
+.ort.aktiv .flaeche{stroke:#5e2f91;stroke-dasharray:none;fill:rgba(94,47,145,.08)}
+.ort:focus{outline:none}
+.panel{position:absolute;left:1140px;top:172px;width:430px;height:700px;display:flex;flex-direction:column;gap:14px}
+.panel h2{margin:0;font-size:36px;min-height:48px}
+.eig{display:flex;flex-wrap:wrap;gap:10px;min-height:66px}
+.eig span.k{font-size:30px;font-weight:700;border:3px solid var(--ink);border-radius:12px;padding:4px 14px;background:#fff}
+.eig span.feucht{background:#e3eef8;border-color:#2f6fb0}
+.eig span.trocken{background:#fbf3d2;border-color:#b8920f}
+.eig span.schattig{background:#e6f2e1;border-color:#4f9a3a}
+.eig span.sonnig{background:#fff3c4;border-color:#d9a400}
+.eig span.holz{background:#f1e2d2;border-color:#8a5a33}
+.eig span.stein{background:#eceeed;border-color:#8d9892}
+.panel .streifen{font-size:30px;min-height:120px}
+.panel .wetter{margin-top:auto}
+.panel .wetter .gruppe .knopf svg{width:30px;height:30px}
+.panel .info{font-size:22px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Wo wachsen Pilze?",
+ ziehen: false,
+ neu: "**Neu** entfernt alle Pilz-Marker, verdeckt die Pilze wieder und stellt das Wetter auf Sonne.",
+ teile: [
+  { h: "Worum geht es?", text: "Sprechanlass zum Lebensraum: Wo ist es feucht, wo schattig? Vermuten, begründen mit „weil“ und überlegen: Was wäre, wenn es regnet?" },
+  { h: "So geht es", punkte: [
+    "Einen Ort in der Szene antippen: Waldboden, Baumstamm, Wiese, Moos am Bach oder Weg. Rechts erscheinen die Eigenschaften (feucht, trocken, schattig, sonnig, totes Holz).",
+    "Mit **Hier vermute ich Pilze** setzen die Kinder einen Pilz-Marker (höchstens 5).",
+    "**Aufdecken** zeigt, wo Pilze wachsen: am Waldboden, am Baumstamm und im Moos. Auf der Wiese nur vielleicht – nach Regen. Am Weg nicht.",
+    "**Wetter**: Bei Regen wachsen auf Wiese und Waldboden mehr Pilze (Was wäre, wenn …?)." ] },
+  { h: "Ohne Hilfen", text: "Mit **Hilfen** aus verschwinden die Satzmuster. Die Eigenschaften bleiben sichtbar." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne(), K = "#1d2320";
+const EIG = { feucht: ["feucht", "feucht"], trocken: ["tro-cken", "trocken"], schattig: ["schat-tig", "schattig"], sonnig: ["son-nig", "sonnig"], holz: ["to-tes Holz", "holz"], stein: ["har-ter Stein", "stein"] };
+const ORTE = {
+  waldboden: { name: "der Wald-bo-den", eig: () => ["schattig", "feucht"], waechst: "ja", marke: [190, 600],
+    satz: "Hier wach-sen Pil-ze, weil es feucht und schat-tig ist.",
+    pilze: () => regen ? [[90, 640], [160, 610], [250, 655], [330, 600], [60, 560], [380, 660]] : [[120, 630], [230, 650], [330, 605]] },
+  stamm: { name: "der Baum-stamm", eig: () => ["holz", "schattig", "feucht"], waechst: "ja", marke: [470, 330],
+    satz: "Hier wach-sen Pil-ze, weil es to-tes Holz gibt.", pilze: () => [[370, 346], [430, 344], [500, 346], [560, 345]] },
+  wiese: { name: "die Wie-se", eig: () => regen ? ["sonnig", "feucht"] : ["sonnig", "trocken"], waechst: "vielleicht", marke: [880, 360],
+    satz: () => regen ? "Nach dem Re-gen wach-sen hier viel-leicht Pil-ze." : "Hier wach-sen nur sel-ten Pil-ze. Es ist son-nig und tro-cken.",
+    pilze: () => regen ? [[780, 440], [860, 470], [990, 430]] : [] },
+  moos: { name: "das Moos am Bach", eig: () => ["feucht", "schattig"], waechst: "ja", marke: [640, 560],
+    satz: "Hier wach-sen Pil-ze, weil es feucht ist.", pilze: () => [[600, 600], [680, 590]] },
+  weg: { name: "der Weg", eig: () => ["sonnig", "trocken", "stein"], waechst: "nein", marke: [940, 630],
+    satz: "Hier wach-sen kei-ne Pil-ze. Es ist tro-cken und hart.", pilze: () => [] },
+};
+let regen = false, offen = false, wahl = null, marker = new Set();
+
+const szene = P.el("div", "szene"); S.appendChild(szene);
+const panel = P.el("div", "panel", `<h2 aria-live="polite"></h2><div class="eig"></div><div class="mk-platz"></div><div class="streifen muster hilfe"></div><div class="info"></div><div class="wetter"></div>`);
+S.appendChild(panel);
+const titel = panel.querySelector("h2"), eig = panel.querySelector(".eig"), satz = panel.querySelector(".streifen"), info = panel.querySelector(".info");
+const markerKnopf = P.knopf("Hier vermute ich Pilze", () => setzeMarker(), "haupt");
+panel.querySelector(".mk-platz").appendChild(markerKnopf);
+
+const baum = (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-12" y="-20" width="24" height="120" fill="#7a4e2c" stroke="${K}" stroke-width="4"/>
+  <path d="M0 -170 C70 -160 96 -90 76 -50 C64 -14 -64 -14 -76 -50 C-96 -90 -70 -160 0 -170Z" fill="${c}" stroke="${K}" stroke-width="4"/></g>`;
+const kleinPilz = (x, y, s, o) => `<g transform="translate(${x} ${y}) scale(${s}) translate(-150 -340)">${P.pilzG(Object.assign({ hut: "#c98a4a", boden: false }, o || {}))}</g>`;
+function zeichne() {
+  let g = `<defs><pattern id="steine" width="60" height="40" patternUnits="userSpaceOnUse"><rect width="60" height="40" fill="#b9bfbb"/>
+      <rect x="3" y="3" width="26" height="15" rx="4" fill="#d6dad7" stroke="#7d8682" stroke-width="2"/><rect x="33" y="3" width="24" height="15" rx="4" fill="#cfd4d1" stroke="#7d8682" stroke-width="2"/>
+      <rect x="-12" y="22" width="26" height="15" rx="4" fill="#cfd4d1" stroke="#7d8682" stroke-width="2"/><rect x="18" y="22" width="26" height="15" rx="4" fill="#d6dad7" stroke="#7d8682" stroke-width="2"/><rect x="48" y="22" width="26" height="15" rx="4" fill="#d6dad7" stroke="#7d8682" stroke-width="2"/></pattern></defs>
+    <rect width="1080" height="700" fill="${regen ? "#d7dee6" : "#e8f4fb"}"/>
+    ${regen ? `<g fill="#b9c3ce" stroke="${K}" stroke-width="3"><path d="M700 90 Q690 50 740 46 Q760 10 810 26 Q850 4 880 40 Q930 40 924 80 Q930 100 900 100 H720 Q700 100 700 90Z"/><path d="M180 80 Q170 44 214 40 Q236 8 280 22 Q320 6 340 40 Q380 42 374 74 Q376 92 350 92 H200 Q180 92 180 80Z"/></g>`
+      : `<circle cx="960" cy="80" r="44" fill="#f7cf3c" stroke="${K}" stroke-width="4"/>`}
+    <path d="M0 280 Q300 250 560 290 Q800 260 1080 280 V700 H0Z" fill="#9b7a50"/>
+    <path d="M590 300 Q800 270 1080 285 V560 Q900 520 760 540 Q680 470 620 420 Z" fill="#a8d672"/>
+    ${[[700, 340], [790, 380], [930, 330], [1010, 400], [870, 470], [740, 450]].map(([x, y]) => `<g><circle cx="${x}" cy="${y}" r="7" fill="#fff" stroke="${K}" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="#f2b52c"/></g>`).join("")}
+    ${baum(70, 230, 1.15, "#3f7d38")}${baum(190, 210, 1.3, "#2f6a2e")}${baum(320, 236, 1.1, "#4b8a3c")}${baum(440, 220, 1.2, "#356f31")}
+    <path d="M0 470 Q240 430 480 480 L470 700 H0Z" fill="#6f4c2e"/>
+    ${[[40, 520, "#d9822b"], [120, 560, "#c8322c"], [210, 520, "#e0b22a"], [300, 580, "#b8601e"], [380, 520, "#d9822b"], [80, 640, "#e0b22a"], [270, 660, "#c8322c"], [420, 620, "#e0b22a"], [170, 680, "#d9822b"]].map(([x, y, c], i) =>
+      `<ellipse cx="${x}" cy="${y}" rx="16" ry="8" fill="${c}" stroke="${K}" stroke-width="2" transform="rotate(${i * 37} ${x} ${y})"/>`).join("")}
+    <g><path d="M330 340 H620 Q640 340 640 370 Q640 400 620 400 H330 Z" fill="#8f6440" stroke="${K}" stroke-width="4"/><ellipse cx="330" cy="370" rx="18" ry="30" fill="#e3c08f" stroke="${K}" stroke-width="4"/>
+      <ellipse cx="330" cy="370" rx="8" ry="14" fill="none" stroke="#a07040" stroke-width="3"/><path d="M380 356 h80 M500 384 h90" stroke="#5e3e22" stroke-width="3"/></g>
+    <path d="M540 290 Q560 400 520 470 Q500 560 590 700 L720 700 Q620 560 640 470 Q670 380 600 288 Z" fill="#7fb6e6" stroke="${K}" stroke-width="3"/>
+    <g fill="#5f9e3a" stroke="${K}" stroke-width="3"><path d="M560 560 Q580 520 630 530 Q660 540 650 580 Q610 600 560 590Z"/><path d="M640 610 Q670 580 720 596 Q740 620 720 640 Q680 650 640 640Z"/><path d="M600 640 Q620 616 650 628 Q656 650 630 660 Q600 660 600 640Z"/></g>
+    <path d="M760 700 L840 560 Q900 540 1080 560 V700 Z" fill="url(#steine)" stroke="${K}" stroke-width="3"/>`;
+  if (regen) g += `<g stroke="#4a90d9" stroke-width="3" stroke-linecap="round" opacity=".8">${Array.from({ length: 70 }, (_, i) => { const x = (i * 157) % 1080, y = 110 + (i * 89) % 560; return `<path d="M${x} ${y} l-8 18"/>`; }).join("")}</g>`;
+  if (offen) Object.values(ORTE).forEach(o => o.pilze().forEach(([x, y], i) => { g += kleinPilz(x, y, o === ORTE.stamm ? .2 : .24, o === ORTE.stamm ? { form: "flach", hut: "#c9893b" } : { hut: i % 2 ? "#b9773a" : "#d9a066" }); }));
+  // Orte zum Antippen
+  const FL = { waldboden: "M0 470 Q240 430 480 480 L470 700 H0Z", stamm: "M300 330 H650 V410 H300Z", wiese: "M590 300 Q800 270 1080 285 V550 Q900 520 760 540 Q680 470 620 420 Z",
+    moos: "M545 515 H750 V665 H560Z", weg: "M760 700 L840 560 Q900 540 1080 560 V700 Z" };
+  Object.entries(FL).forEach(([k, d]) => { g += `<g class="ort${wahl === k ? " aktiv" : ""}" data-ort="${k}" tabindex="0" role="button" aria-label="${P.ohne(ORTE[k].name)}"><path class="flaeche" d="${d}"/></g>`; });
+  // Marker
+  marker.forEach(k => {
+    const [x, y] = ORTE[k].marke, w = ORTE[k].waechst, ok = w === "ja", viel = w === "vielleicht";
+    g += `<g transform="translate(${x} ${y})" pointer-events="none"><path d="M0 0 L-14 -30 H14Z" fill="${K}"/><circle cy="-58" r="34" fill="#fff" stroke="#5e2f91" stroke-width="5"/>
+      <g transform="translate(0 -58) scale(.14) translate(-150 -200)">${P.pilzG({ hut: "#c98a4a", boden: false })}</g>
+      ${offen ? `<circle cx="30" cy="-86" r="18" fill="${ok ? "#2f7d4f" : "#d9822b"}"/><text x="30" y="-79" text-anchor="middle" font-size="22" font-weight="700" fill="#fff" font-family="Andika,sans-serif">${ok ? "✓" : "?"}</text>` : ""}</g>`;
+  });
+  szene.innerHTML = `<svg viewBox="0 0 1080 700" role="img" aria-label="Landschaft mit Wald, Baumstamm, Wiese, Bach mit Moos und Weg">${g}</svg>`;
+  szene.querySelectorAll(".ort").forEach(o => {
+    o.addEventListener("click", () => waehle(o.dataset.ort));
+    o.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); waehle(o.dataset.ort); } });
+  });
+}
+function waehle(k) { wahl = k; zeichne(); panelZeigen(); const f = szene.querySelector(`[data-ort="${k}"]`); if (f) f.focus({ preventScroll: true }); }
+function panelZeigen() {
+  if (!wahl) {
+    titel.innerHTML = P.w("Tip-pe ei-nen Ort an."); eig.innerHTML = ""; markerKnopf.hidden = true;
+    P.melde(satz, "", "Pil-ze wach-sen gern dort, wo es … ist."); satz.className = "streifen muster hilfe";
+  } else {
+    const o = ORTE[wahl];
+    titel.innerHTML = P.w(o.name);
+    eig.innerHTML = o.eig().map(e => `<span class="k ${EIG[e][1]}">${P.w(EIG[e][0])}</span>`).join("");
+    markerKnopf.hidden = false;
+    markerKnopf.textContent = marker.has(wahl) ? "Marker entfernen" : "Hier vermute ich Pilze";
+    if (offen) { satz.className = "streifen"; P.melde(satz, o.waechst === "ja" ? "ok" : "", typeof o.satz === "function" ? o.satz() : o.satz); }
+    else { satz.className = "streifen muster hilfe"; P.melde(satz, "", "Hier wach-sen Pil-ze, weil …"); }
+  }
+  info.textContent = `Pilz-Marker: ${marker.size} von 5`;
+}
+function setzeMarker() {
+  if (!wahl) return;
+  if (marker.has(wahl)) marker.delete(wahl); else if (marker.size < 5) marker.add(wahl);
+  zeichne(); panelZeigen();
+}
+function aufdecken() { offen = true; zeichne(); panelZeigen(); }
+function neu() { offen = false; wahl = null; marker = new Set(); regen = false; wetter.setze("sonne"); zeichne(); panelZeigen(); }
+const SONNE = '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="7" fill="#f7cf3c" stroke="#1d2320" stroke-width="2"/><path d="M15 2v5M15 23v5M2 15h5M23 15h5M6 6l3 3M21 21l3 3M6 24l3-3M21 9l3-3" stroke="#e0a91c" stroke-width="2.5" stroke-linecap="round"/></svg>';
+const REGEN = '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M5 14 Q4 8 10 8 Q12 3 18 5 Q24 4 25 10 Q28 11 27 15 H7 Q5 15 5 14Z" fill="#cfd8e3" stroke="#1d2320" stroke-width="2"/><path d="M10 19l-2 5M16 19l-2 5M22 19l-2 5" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round"/></svg>';
+const wetter = P.gruppe("Wetter", [{ wert: "sonne", text: SONNE + "Sonne" }, { wert: "regen", text: REGEN + "Regen" }], "sonne", v => { regen = v === "regen"; zeichne(); panelZeigen(); });
+panel.querySelector(".wetter").appendChild(wetter);
+P.kopf({ titel: "Wo wachsen Pilze?", auftrag: "Wo ver-mu-test du Pil-ze?", say: "Pil-ze wach-sen gern dort, wo es … ist.", onNeu: neu,
+  leiste: [P.knopf("Aufdecken", aufdecken)], woerter: ["feucht", "tro-cken", "schat-tig", "son-nig", "to-tes Holz", "der Wald", "das Moos", "die Wie-se", "der Re-gen"] });
+neu();
+</script>
+</body>
+</html>

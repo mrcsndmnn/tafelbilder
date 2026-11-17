@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Pilze – Tafelbilder</title>
+<meta name="description" content="13 interaktive Tafelbilder zur Reihe Pilze (Sachunterricht Klasse 3) mit eigener Pilzzucht.">
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<style>
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --su:#4f8a2f; --su-bg:#e9f3e1;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --su:#9bd07a; --su-bg:#24321d; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{max-width:none;margin:0 0 20px}
+h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
+.unter{margin:0;color:var(--soft);max-width:62ch}
+h2{font-size:26px;margin:36px 0 0;display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:2px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:16px}
+@media (max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+a.kachel{display:grid;grid-template-columns:64px 1fr;gap:6px 16px;align-items:start;text-decoration:none;color:inherit;background:var(--card);
+  border:2px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
+a.kachel:hover{border-color:var(--su);transform:translateY(-2px)}
+a.kachel:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sym{grid-row:span 3;width:64px;height:64px;border-radius:14px;background:var(--su-bg);display:grid;place-items:center;color:var(--su)}
+.sym svg{width:44px;height:44px}
+.nr{font-size:14px;font-weight:700;color:var(--su)}
+.kachel strong{font-size:21px;line-height:1.25}
+.kachel span.desc{color:var(--soft);font-size:16px}
+.legende{margin-top:40px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:760px){.legende{grid-template-columns:1fr}}
+.legende .box{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 20px}
+.legende h3{margin:0 0 8px;font-size:19px}
+.beispiel{font-size:30px;font-weight:700;background:#fff;color:#1d2320;border-radius:10px;padding:4px 12px;display:inline-block;margin:4px 0 6px}
+.teile{display:flex;flex-wrap:wrap;gap:8px}
+.teile span{border:3px solid;border-radius:10px;padding:2px 12px;font-weight:700;color:#1d2320}
+footer{margin-top:44px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+@media (prefers-reduced-motion: reduce){a.kachel{transition:none}a.kachel:hover{transform:none}}
+</style>
+<script src="../../gemeinsam/silben.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <header>
+    <h1>Pilze – Tafelbilder</h1>
+    <p class="unter">Sachunterricht Klasse 3 · mit eigener Pilzzucht</p>
+  </header>
+  <main id="gruppen"></main>
+  <section class="legende" aria-label="Legende">
+    <div class="box">
+      <h3>Silbenschrift</h3>
+      <div class="beispiel silben" id="bsp"></div>
+      <div style="color:var(--soft);font-size:16px">Silben abwechselnd blau und rot, jedes Wort beginnt blau, unter jeder Silbe ein Bogen. Auf jedem Tafelbild mit „Silben“ ein- und ausschaltbar.</div>
+    </div>
+    <div class="box">
+      <h3>Farben der Pilzteile (Schalter „Farben“)</h3>
+      <div class="teile">
+        <span style="border-color:#4f9a3a;background:#e6f2e1">Hut</span><span style="border-color:#c8322c;background:#f9e3e1">Stiel</span>
+        <span style="border-color:#b8920f;background:#fbf3d2">Myzel</span><span style="border-color:#2f6fb0;background:#e3eef8">Fruchtkörper</span>
+        <span style="border-color:#c9701e;background:#fbe9d6">Lamellen / Röhren</span><span style="border-color:#6b6b6b;background:#eeeeee">Sporen</span>
+      </div>
+    </div>
+  </section>
+  <footer>Auf jeder Seite oben rechts: <strong>Farben</strong> färbt Felder und Kärtchen, <strong>Silben</strong> schaltet die Silbenschrift, <strong>Hilfen</strong> blendet Satzmuster und Wortspeicher ein oder aus, <strong>Prüfen</strong> kontrolliert, <strong>Neu</strong> setzt zurück. Der Knopf „?“ erklärt die Bedienung.
+    Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten. Gebaut für das Smartboard (Bühne 1600 × 900).<br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
+</div>
+<script>
+const S = d => `<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const PILZ = '<path d="M6 22 C6 10 14 6 22 6 C30 6 38 10 38 22 Z"/><path d="M17 22 L16 36 H28 L27 22"/>';
+const GRUPPEN = [
+  ["Aufbau des Pilzes", [
+    ["aufbau", "Aufbau eines Pilzes", "Kärtchen zu Hut, Stiel, Myzel und Fruchtkörper an das Pilzbild ziehen. Mit Rätsel „Wer bin ich?“.", S(PILZ + '<path d="M40 14 H44 M40 30 H44"/>')],
+    ["puzzle", "Pilz-Puzzle", "Hut, Stiel und Myzel auf den Umriss legen und die Lage beschreiben.", S('<path d="M6 20 C6 10 14 6 22 6 C30 6 38 10 38 20 Z" stroke-dasharray="4 4"/><path d="M17 24 L16 38 H28 L27 24"/>')],
+    ["lupe", "Lupe: Was ist versteckt?", "Mit der Lupe Myzel, Lamellen und Sporen entdecken.", S('<circle cx="18" cy="18" r="11"/><path d="M26 26 L38 38"/>')],
+    ["lamellen-roehren", "Lamellen oder Röhren?", "Hut-Unterseiten vergleichen und Pilze sortieren.", S('<path d="M4 16 Q22 4 40 16 Q22 26 4 16Z"/><path d="M14 16 L10 22 M22 18 L22 25 M30 16 L34 22"/>')],
+    ["satzbaukasten", "Satzbaukasten „Der Pilz hat …“", "Sätze mit Artikel bauen: einen Hut, ein Myzel, Lamellen.", S('<rect x="4" y="14" width="12" height="14" rx="2"/><rect x="18" y="14" width="10" height="14" rx="2"/><rect x="30" y="14" width="10" height="14" rx="2" stroke-dasharray="3 3"/>')],
+  ]],
+  ["Entwicklung und Wachstum", [
+    ["entwicklung", "Vom Sporen-Korn zum Pilz", "Sechs Stufen ordnen und erzählen: Zuerst … Dann … – auch als Kreislauf.", S('<circle cx="8" cy="10" r="2.5"/><path d="M4 30 H40"/><path d="M14 30 C14 22 18 20 22 20 C26 20 30 22 30 30"/><path d="M36 10 A14 14 0 0 1 40 22"/>')],
+    ["zeitraffer", "Zeitraffer: So wächst ein Pilz", "Mit dem Schieberegler die Entwicklung ablaufen lassen – oder vorhersagen.", S('<path d="M4 34 H40"/><circle cx="26" cy="34" r="5"/><path d="M12 22 C12 14 16 12 20 12 C24 12 28 14 28 22 Z"/>')],
+    ["tagebuch", "Unser Pilzbox-Tagebuch", "Beobachtungen der Pilzbox mit Datum, Foto und Satz sammeln und vergleichen.", S('<rect x="6" y="6" width="32" height="32" rx="3"/><path d="M6 15 H38 M14 6 V15 M30 6 V15"/><path d="M14 30 C14 24 17 22 22 22 C27 22 30 24 30 30"/>')],
+  ]],
+  ["Pilze allgemein", [
+    ["essbar-giftig", "Essbar oder giftig?", "Pilze in zwei Körbe sortieren – danach immer die Regel: Wilde Pilze fasse ich nicht an.", S('<path d="M22 4 L40 36 H4 Z"/><path d="M22 16 V26 M22 31 V31.5"/>')],
+    ["lebensraum", "Wo wachsen Pilze?", "Orte in einer Landschaft untersuchen: feucht, schattig, totes Holz – und was ist bei Regen?", S('<path d="M4 34 Q22 26 40 34"/><path d="M12 30 V18 M12 18 C4 18 4 6 12 6 C20 6 20 18 12 18"/><path d="M28 26 C28 20 31 18 34 18 C37 18 40 20 40 26 Z"/>')],
+    ["memory", "Pilz-Memory", "Paare aus Bild und Wort finden – zwei Teams oder allein.", S('<rect x="4" y="8" width="16" height="22" rx="3"/><rect x="24" y="14" width="16" height="22" rx="3"/><path d="M28 24 C28 20 30 19 32 19 C34 19 36 20 36 24 Z"/>')],
+    ["gluecksrad", "Glücksrad „Wer bin ich?“", "Rad drehen, Rätsel lösen, im ganzen Satz antworten – 10 Runden zum Stundenbeginn.", S('<circle cx="22" cy="24" r="16"/><path d="M22 8 V40 M6 24 H38 M11 13 L33 35 M33 13 L11 35"/><path d="M18 2 H26 L22 8 Z"/>')],
+    ["hefe-versuch", "Hefe-Versuch", "Was passiert mit dem Ballon? Vermuten, beobachten, vergleichen.", S('<path d="M18 16 H26 V20 C34 24 36 28 36 32 V38 H8 V32 C8 28 10 24 18 20 Z"/><circle cx="22" cy="9" r="6"/>')],
+  ]],
+];
+let nr = 0;
+document.getElementById("gruppen").innerHTML = GRUPPEN.map(([titel, liste]) => `<h2>${titel}</h2><div class="grid">` + liste.map(([pfad, t, text, sym]) => `
+  <a class="kachel" href="${pfad}/"><span class="sym">${sym}</span><span class="nr">Tafelbild ${++nr}</span><strong>${t}</strong><span class="desc">${text}</span></a>`).join("") + "</div>").join("");
+document.getElementById("bsp").innerHTML = silben("das My-zel, der Frucht-kör-per");
+</script>
+</body>
+</html>

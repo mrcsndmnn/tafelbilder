@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Essbar oder giftig? – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.pk{width:200px;height:178px;background:#fff;border:3px solid var(--ink);border-radius:14px;display:flex;flex-direction:column;align-items:center;padding:4px 4px 0;overflow:visible}
+.pk .bild{width:180px;height:118px}
+.pk .bild svg{width:100%;height:100%;display:block}
+.pk .name{font-size:24px;font-weight:700;white-space:nowrap;line-height:1.2;margin-top:2px}
+.korb{position:absolute;top:376px;width:755px;height:490px;border:3px dashed var(--ink);border-radius:18px;background:var(--feld)}
+.korb .kopfz{position:absolute;left:0;right:0;top:8px;display:flex;justify-content:center;align-items:center;gap:14px;font-size:36px;font-weight:700}
+.korb .kopfz svg{width:54px;height:54px}
+.korb.essbar{background:#eef7f0}
+.korb.giftig{background:#fff7ec}
+.regel{left:250px;top:190px;width:1100px;height:560px;align-items:center;text-align:center}
+.regel .erg{font-size:34px;font-weight:700}
+.regel .erg.ok{color:var(--ok)} .regel .erg.noch{color:var(--noch)}
+.regel .hand{width:190px;height:190px}
+.regel .hand svg{width:100%;height:100%}
+.regel .text{font-size:42px;font-weight:700;line-height:1.45}
+.lehrkraft{position:absolute;left:34px;top:872px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Essbar oder giftig?",
+ teile: [
+  { h: "Worum geht es?", text: "Bekannte Pilze nach essbar und giftig sortieren – und die Sicherheitsregel festigen: Wilde Pilze fasse ich nicht an." },
+  { h: "So geht es", punkte: [
+    "Die Pilzkarten in den Korb **essbar** (Daumen hoch) oder **giftig** (Warnschild) ziehen.",
+    "Nach **Prüfen** erscheint immer – egal wie das Ergebnis ist – groß die Regel: „Wilde Pilze fasse ich nicht an. Ich sage einem Erwachsenen Bescheid.“",
+    "**Stufe 1**: 4 Karten (Champignon, Steinpilz, Fliegenpilz, Knollenblätterpilz). **Stufe 2**: alle 7 Karten (dazu Pfifferling, Maronenröhrling, Pantherpilz)." ] },
+  { h: "Wichtig", text: "Die Bilder sind vereinfacht gezeichnet und **nicht zum Bestimmen geeignet**. Das Tafelbild vermittelt nicht, wilde Pilze zu sammeln oder zu essen." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const ESSBAR = ["champignon", "steinpilz", "pfifferling", "marone"], GIFTIG = ["fliegenpilz", "pantherpilz", "knollenblaetterpilz"];
+const STUFE1 = ["champignon", "steinpilz", "fliegenpilz", "knollenblaetterpilz"];
+const REGEL = "Wil-de Pil-ze fas-se ich nicht an. Ich sa-ge ei-nem Er-wach-se-nen Be-scheid.";
+let stufe = 1, karten = [];
+
+const ablage = P.blk(30, 166, 1540, 196, "ablage");
+const koerbe = [{ k: "essbar", x: 30, t: "ess-bar", bild: "essbar" }, { k: "giftig", x: 815, t: "gif-tig", bild: "giftig" }].map(kb => {
+  const el = P.el("div", "korb " + kb.k, `<div class="kopfz">${P.bild(kb.bild)}${P.w(kb.t)}</div>`); el.style.left = kb.x + "px";
+  el.setAttribute("aria-label", "Korb " + P.ohne(kb.t)); S.appendChild(el); return { el, k: kb.k, x: kb.x };
+});
+S.appendChild(P.el("div", "lehrkraft", "Für die Lehrkraft: Die Bilder sind vereinfacht und nicht zum Bestimmen geeignet."));
+
+const zieh = P.zieher({
+  ziele: () => koerbe, ablage, nah: 0,
+  lege(t, kb) { t.korb = kb; P.marke(t.el, null); ordne(); },
+  zurueck(t) { t.korb = null; P.marke(t.el, null); ordne(); },
+});
+koerbe.forEach(kb => zieh.zielbar(kb));
+
+function neu() {
+  zieh.waehle(null); regel.zu();
+  karten.forEach(k => k.el.remove());
+  const liste = stufe === 1 ? STUFE1 : ESSBAR.concat(GIFTIG);
+  karten = P.mischen(liste).map((art, platz) => {
+    const el = P.el("div", "pk", `<div class="bild">${P.art(art)}</div><div class="name">${P.w(P.ARTEN[art].name.replace(/^der /, ""))}</div>`);
+    el.setAttribute("aria-label", P.ohne(P.ARTEN[art].name)); S.appendChild(el);
+    // lange Namen kleiner setzen, damit sie auf die Karte passen
+    const n = el.querySelector(".name"); for (let f = 24; f > 16 && n.scrollWidth > 190; f--) n.style.fontSize = f + "px";
+    const t = { el, art, k: ESSBAR.includes(art) ? "essbar" : "giftig", platz, korb: null }; zieh.ziehbar(t); return t;
+  });
+  ordne();
+}
+// Namen passen sich auch an, wenn die Silbenschrift ein- oder ausgeschaltet wird
+new MutationObserver(() => karten.forEach(k => { const n = k.el.querySelector(".name"); n.style.fontSize = ""; for (let f = 24; f > 16 && n.scrollWidth > 190; f--) n.style.fontSize = f + "px"; }))
+  .observe(S, { attributes: true, attributeFilter: ["class"] });
+function ordne() {
+  const frei = karten.filter(k => !k.korb).sort((a, b) => a.platz - b.platz), n = karten.length, abst = n > 4 ? 216 : 260;
+  const start = 30 + (1540 - (n - 1) * abst - 200) / 2;
+  frei.forEach(k => P.setze(k.el, start + k.platz * abst, 175));
+  koerbe.forEach(kb => karten.filter(k => k.korb === kb).forEach((k, i) => P.setze(k.el, kb.x + 32 + (i % 3) * 235, 376 + 76 + Math.floor(i / 3) * 196)));
+}
+
+// Regel: erscheint nach jedem Prüfen
+const regel = P.tafelauf({ x: 250, y: 190, w: 1100, h: 560, cls: "regel" });
+regel.el.setAttribute("aria-label", "Unsere Regel");
+function pruefen() {
+  let alle = true, gelegt = 0;
+  karten.forEach(k => { if (!k.korb) { alle = false; return; } gelegt++; const ok = k.korb.k === k.k; P.marke(k.el, ok ? "ok" : "noch"); if (!ok) alle = false; });
+  const erg = alle ? P.LOB : !gelegt ? "Sor-tie-re die Pil-ze in die Kör-be." : karten.some(k => !k.korb) ? "Es lie-gen noch Pil-ze o-ben." : P.NOCH;
+  regel.el.innerHTML = `<div class="erg ${alle ? "ok" : "noch"}">${P.w(erg)}</div><div class="hand">${P.bild("stopp", "Hand: Stopp")}</div>
+    <div class="text">${P.w(REGEL)}</div>`;
+  const b = P.knopf("Verstanden", () => regel.zu(), "haupt"); regel.el.appendChild(b);
+  regel.zeige();
+}
+const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "eg-stufe", 2); stufe = stufenWahl.wert;
+P.kopf({ titel: "Essbar oder giftig?", auftrag: "Sor-tie-re die Pil-ze.", say: "Der … ist ess-bar.", onNeu: neu, onPruefen: pruefen, leiste: [stufenWahl],
+  woerter: ["ess-bar", "gif-tig", "der Cham-pig-non", "der Stein-pilz", "der Flie-gen-pilz", "der Knol-len-blät-ter-pilz", "wild"] });
+neu();
+</script>
+</body>
+</html>

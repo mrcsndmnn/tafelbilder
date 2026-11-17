@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Aufbau eines Pilzes – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+#bild{position:absolute;left:340px;top:160px;width:540px;height:720px}
+.klammer{position:absolute;left:322px;top:233px;width:16px;height:387px;border:5px solid var(--ink);border-right:none;border-radius:10px 0 0 10px}
+.farben .klammer{border-color:var(--c)}
+.linie{position:absolute;height:0;border-top:3px dotted var(--ink)}
+.linie::before{content:"";position:absolute;left:-4px;top:-9px;border-top:7.5px solid transparent;border-bottom:7.5px solid transparent;border-right:11px solid var(--ink)}
+.punkt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--ink);transform:translate(-7px,-7px)}
+.karte.c-frucht{font-size:27px}
+.lob{position:absolute;left:1270px;top:700px;width:302px;text-align:center}
+/* Rätsel */
+.raetsel{left:910px;top:160px;width:666px;height:720px}
+.raetsel h2{margin:0;font-size:36px}
+.frage{font-size:40px;font-weight:700;line-height:1.6;min-height:160px;background:#f3f6f2;border-radius:14px;padding:18px 22px}
+.antworten{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.antworten button{white-space:nowrap;color:var(--ink);font-family:var(--font);font-size:28px;font-weight:700;background:#fff;border:3px solid var(--ink);border-radius:14px;min-height:72px;padding:8px 10px;cursor:pointer}
+.farben .antworten button{background:var(--cbg);border-color:var(--c)}
+.antworten button.richtig{border-color:var(--ok);box-shadow:0 0 0 5px rgba(47,125,79,.3)}
+.antworten button.falsch{animation:wackel .35s}
+@keyframes wackel{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.rueck{font-size:30px;min-height:76px}
+.rbar{display:flex;gap:12px;margin-top:auto;align-items:center}
+.zaehler{margin-left:auto;font-size:22px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+// Hinweise für den Knopf „?“ (Abschnitt „Knöpfe und Bedienung“ wird automatisch ergänzt)
+window.HINWEISE = {
+ titel: "Aufbau eines Pilzes",
+ teile: [
+  { h: "Worum geht es?", text: "Die Teile des Pilzes benennen und zuordnen: Hut, Stiel, Myzel und Fruchtkörper." },
+  { h: "So geht es", punkte: [
+    "Die Kärtchen aus der Ablage an die passenden Felder am Pilzbild ziehen.",
+    "Der **Fruchtkörper** gehört links an die Klammer: Er ist Hut und Stiel zusammen.",
+    "Sind alle Felder richtig, erscheint „Super, alles richtig!“." ] },
+  { h: "Wer bin ich?", punkte: [
+    "Öffnet eine Rätsel-Tafel: Satz lesen („Ich trage den Hut.“), dann die passende Antwort antippen.",
+    "**Nächstes Rätsel** zeigt das nächste (10 Rätsel), **Schließen** führt zurück zum Pilz." ] },
+  { h: "Ohne Hilfen", text: "Mit **Hilfen** aus verschwinden das Satzmuster und die gepunkteten Hinweislinien – die Kinder ordnen dann nur nach dem Bild." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+
+const TEILE = [
+  { k: "hut",    wort: "der Hut",            fx: 930, fy: 269, px: 760, py: 307 },
+  { k: "stiel",  wort: "der Stiel",          fx: 930, fy: 489, px: 668, py: 527 },
+  { k: "myzel",  wort: "das My-zel",         fx: 930, fy: 684, px: 790, py: 722 },
+  { k: "frucht", wort: "der Frucht-kör-per", fx: 16,  fy: 388, px: null },
+];
+const AB = { x: 1270, y: 160 };
+
+// ---------- Aufbau ----------
+const bild = P.el("img"); bild.id = "bild"; bild.src = "../gemeinsam/bilder/pilz-neutral.webp";
+bild.alt = "Ein Pilz mit Hut und Stiel über der Erde und weißen Myzel-Fäden in der Erde"; bild.draggable = false; S.appendChild(bild);
+S.appendChild(P.el("div", "klammer c-frucht"));
+const ablage = P.blk(AB.x, AB.y, 302, 520, "ablage"); ablage.appendChild(P.el("div", "titel", "Kärtchen"));
+const lob = P.blk(1270, 710, 302, 0, "lob"); lob.setAttribute("aria-live", "polite");
+
+const felder = TEILE.map(t => {
+  if (t.px !== null) {
+    const d = P.el("div", "punkt hilfe"); P.setze(d, t.px, t.py); S.appendChild(d);
+    const l = P.el("div", "linie hilfe"); P.setze(l, t.px + 10, t.fy + 38); l.style.width = (t.fx - t.px - 18) + "px"; S.appendChild(l);
+  }
+  const el = P.el("div", "feld c-" + t.k); P.setze(el, t.fx, t.fy);
+  el.setAttribute("aria-label", "Feld für " + P.ohne(t.wort).split(" ")[1]); S.appendChild(el);
+  return { el, k: t.k, x: t.fx, y: t.fy, karte: null };
+});
+const karten = TEILE.map(t => {
+  const el = P.el("div", "karte c-" + t.k, P.w(t.wort)); S.appendChild(el);
+  return { el, k: t.k, feld: null, platz: 0 };
+});
+
+const zieh = P.zieher({
+  ziele: () => felder, ablage, nah: 70,
+  lege(k, f) {
+    if (f.karte && f.karte !== k) heim(f.karte);
+    if (k.feld) k.feld.karte = null;
+    f.karte = k; k.feld = f; P.setze(k.el, f.x + 8, f.y + 5);
+    zuruecksetzenPruefung();
+  },
+  zurueck(k) { heim(k); zuruecksetzenPruefung(); },
+});
+felder.forEach(f => zieh.zielbar(f));
+karten.forEach(k => zieh.ziehbar(k));
+
+function heim(k) { if (k.feld) k.feld.karte = null; k.feld = null; P.setze(k.el, AB.x + 9, AB.y + 58 + k.platz * 112); }
+function zuruecksetzenPruefung() { felder.forEach(f => P.marke(f.el, null)); lob.innerHTML = ""; }
+function mischen() {
+  zieh.waehle(null);
+  P.mischen(karten).forEach((k, i) => { k.platz = i; heim(k); });
+  zuruecksetzenPruefung();
+}
+function pruefen() {
+  let alle = true;
+  felder.forEach(f => {
+    const ok = f.karte && f.karte.k === f.k;
+    P.marke(f.el, ok ? "ok" : f.karte ? "noch" : null);
+    if (!ok) alle = false;
+  });
+  lob.innerHTML = alle ? P.w(P.LOB) : "";
+}
+
+// ---------- Rätsel „Wer bin ich?“ ----------
+const RAETSEL = [
+  { k: "hut",    t: "Ich bin o-ben am Pilz." },
+  { k: "hut",    t: "Ich bin wie ein Dach." },
+  { k: "hut",    t: "Un-ter mir sind die Spo-ren." },
+  { k: "stiel",  t: "Ich tra-ge den Hut." },
+  { k: "stiel",  t: "Ich ge-he vom Hut bis zum Bo-den." },
+  { k: "myzel",  t: "Ich bin un-ter der Er-de." },
+  { k: "myzel",  t: "Ich ha-be vie-le dün-ne Fä-den." },
+  { k: "myzel",  t: "Ich hal-te den Pilz in der Er-de fest." },
+  { k: "frucht", t: "Ich bin ü-ber der Er-de." },
+  { k: "frucht", t: "Ich bin Hut und Stiel zu-sam-men." },
+];
+const NAME = { hut: "der Hut", stiel: "der Stiel", myzel: "das My-zel", frucht: "der Frucht-kör-per" };
+const rt = P.tafelauf({ x: 910, y: 160, w: 666, h: 720, schleier: false, cls: "raetsel" });
+rt.el.setAttribute("aria-label", "Rätsel: Wer bin ich?");
+rt.el.innerHTML = `<h2>${P.w("Wer bin ich?")}</h2><div class="frage" aria-live="polite"></div><div class="antworten"></div>
+  <div class="streifen rueck" aria-live="polite"></div><div class="rbar"></div>`;
+const frage = rt.el.querySelector(".frage"), antw = rt.el.querySelector(".antworten"), rueck = rt.el.querySelector(".rueck");
+TEILE.forEach(t => {
+  const b = P.el("button", "c-" + t.k, P.w(t.wort)); b.type = "button"; b.dataset.k = t.k;
+  b.addEventListener("click", () => antworte(b)); antw.appendChild(b);
+});
+const zaehler = P.el("span", "zaehler");
+rt.el.querySelector(".rbar").append(P.knopf("Nächstes Rätsel", () => { pos = (pos + 1) % reihe.length; if (!pos) reihe = P.mischen(RAETSEL); zeige(); }, "haupt"),
+  P.knopf("Schließen", () => setzeRaetsel(false)), zaehler);
+let reihe = [], pos = 0, geloest = false;
+function zeige() {
+  const r = reihe[pos];
+  frage.innerHTML = P.w(r.t) + " " + P.w("Wer bin ich?");
+  P.melde(rueck, "", ""); geloest = false;
+  [...antw.children].forEach(b => b.classList.remove("richtig", "falsch"));
+  zaehler.textContent = `Rätsel ${pos + 1} von ${reihe.length}`;
+}
+function antworte(b) {
+  if (geloest) return;
+  const r = reihe[pos];
+  if (b.dataset.k === r.k) { b.classList.add("richtig"); geloest = true; P.melde(rueck, "ok", `Rich-tig! Das ist ${NAME[r.k]}.`); }
+  else { b.classList.remove("falsch"); void b.offsetWidth; b.classList.add("falsch"); P.melde(rueck, "noch", "Lies noch ein-mal ge-nau."); }
+}
+const rKnopf = P.schalter("Wer bin ich?", false, v => setzeRaetsel(v));
+function setzeRaetsel(an) {
+  rKnopf.setze(an);
+  if (an) { reihe = P.mischen(RAETSEL); pos = 0; zeige(); rt.zeige(); } else rt.zu();
+}
+
+P.kopf({ titel: "So ist ein Pilz aufgebaut", auftrag: "Zie-he je-des Kärt-chen in das rich-ti-ge Feld.", say: "Das ist der Hut.",
+  onPruefen: pruefen, onNeu: () => { mischen(); if (rt.offen) { reihe = P.mischen(RAETSEL); pos = 0; zeige(); } }, leiste: [rKnopf],
+  woerter: ["der Hut", "der Stiel", "das My-zel", "der Frucht-kör-per", "die Er-de", "die La-mel-len", "die Spo-ren"] });
+mischen();
+</script>
+</body>
+</html>

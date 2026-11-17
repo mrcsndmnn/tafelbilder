@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Pilz-Puzzle – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.umriss{position:absolute;left:112px;top:134px;width:495px;height:667px;pointer-events:none}
+.umriss svg{width:100%;height:100%;display:block;overflow:visible}
+.teil{--sk:.75;transform:rotate(var(--rot,0deg)) scale(var(--sk))}
+.teil.drag{transform:rotate(var(--rot,0deg)) scale(calc(var(--sk) + .05));box-shadow:none;filter:drop-shadow(0 10px 14px rgba(0,0,0,.3))}
+.teil.gewaehlt{outline:none;filter:drop-shadow(0 0 0 #5e2f91) drop-shadow(0 0 6px #5e2f91) drop-shadow(0 0 3px #5e2f91)}
+.teil.sitzt{--rot:0deg;--sk:1;cursor:default;z-index:3}
+.teil svg{display:block;width:100%;height:100%;overflow:visible}
+.ziel{position:absolute;border-radius:16px}
+.ziel.hover{background:rgba(47,125,79,.12)!important;box-shadow:0 0 0 4px rgba(47,125,79,.35)!important}
+.linie{position:absolute;height:0;border-top:3px dotted var(--ink)}
+.linie::before{content:"";position:absolute;left:-4px;top:-9px;border-top:7.5px solid transparent;border-bottom:7.5px solid transparent;border-right:11px solid var(--ink)}
+.lob{position:absolute;left:1040px;top:700px;width:530px;text-align:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Pilz-Puzzle",
+ teile: [
+  { h: "Worum geht es?", text: "Den Pilz aus seinen Teilen zusammensetzen und dabei über die Lage sprechen: oben, auf, unter." },
+  { h: "So geht es", punkte: [
+    "Die Puzzleteile **Hut**, **Stiel** und **Myzel** aus der Ablage auf den Pilz-Umriss ziehen. Liegt ein Teil nah genug an der richtigen Stelle, rastet es ein.",
+    "Nach jedem Teil erscheint ein Satz, z. B. „Der Hut ist oben auf dem Stiel.“",
+    "Ist der Pilz fertig, kommen die Wortkarten. Sie werden an die Felder neben dem Pilz gezogen und mit **Prüfen** kontrolliert." ] },
+  { h: "Stufen", punkte: [
+    "**Stufe 1**: Der Umriss von Hut, Stiel und Myzel ist zu sehen.",
+    "**Stufe 2**: Nur die Erde ist zu sehen.",
+    "**Stufe 3**: Ohne Umriss und mit einem falschen Teil (Blatt), das nicht zum Pilz gehört." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne(), F = P.FORMEN, K = F.KONTUR;
+const SC = 1.65, X0 = 112, Y0 = 134;                 // Pilz-Koordinaten → Bühne
+const sx = x => x * SC + X0, sy = y => y * SC + Y0;
+const AB = { x: 1040, y: 170, w: 530, h: 590 };
+
+const TEIL = {
+  hut:   { vb: [38, 42, 224, 144], satz: "Der Hut ist o-ben auf dem Stiel.",
+           svg: `<path d="${F.FORM.kuppel.hut}" fill="#c98a4a" stroke="${K}" stroke-width="4" stroke-linejoin="round"/><path d="M84 104 Q104 68 140 60" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" opacity=".35"/>` },
+  stiel: { vb: [114, 162, 72, 192], satz: "Der Stiel steht auf der Er-de.",
+           svg: `<path d="${F.STIEL.normal.d}" fill="#f7efcf" stroke="${K}" stroke-width="4" stroke-linejoin="round"/>` },
+  myzel: { vb: [40, 334, 226, 64], satz: "Das My-zel ist un-ter der Er-de.",
+           svg: `<g fill="none" stroke-linecap="round"><g stroke="#c9a227" stroke-width="8">${F.MYZEL.map(d => `<path d="${d}"/>`).join("")}</g><g stroke="#fbf3c4" stroke-width="4">${F.MYZEL.map(d => `<path d="${d}"/>`).join("")}</g></g>` },
+  blatt: { vb: [20, 40, 270, 140], svg: "" },
+};
+// Mittelpunkte in der Ablage und Drehung
+const LAGER = { hut: [1185, 330, -9], stiel: [1478, 345, 8], myzel: [1195, 540, 6], blatt: [1440, 630, -10] };
+
+// ---------- Aufbau ----------
+const umriss = P.el("div", "umriss"); S.appendChild(umriss);
+const ablage = P.blk(AB.x, AB.y, AB.w, AB.h, "ablage"); ablage.appendChild(P.el("div", "titel", "Puzzleteile"));
+const lob = P.blk(1040, 690, 530, 0, "lob"); lob.setAttribute("aria-live", "polite");
+const satz = P.streifen(P.blk(680, 784, 890));
+
+const ziele = ["hut", "stiel", "myzel"].map(k => {
+  const [x, y, w, h] = TEIL[k].vb, el = P.el("div", "ziel"); P.setze(el, sx(x), sy(y));
+  el.style.width = w * SC + "px"; el.style.height = h * SC + "px"; el.setAttribute("aria-label", "Platz für " + k); S.appendChild(el);
+  return { el, k };
+});
+const teile = Object.keys(TEIL).map(k => {
+  const [x, y, w, h] = TEIL[k].vb;
+  const el = P.el("div", "teil", `<svg viewBox="${x} ${y} ${w} ${h}" aria-hidden="true">${k === "blatt" ? P.bild("blatt").replace(/^<svg[^>]*>|<\/svg>$/g, "") : TEIL[k].svg}</svg>`);
+  el.style.width = w * SC * (k === "blatt" ? .75 : 1) + "px"; el.style.height = h * SC * (k === "blatt" ? .75 : 1) + "px";
+  el.setAttribute("aria-label", { hut: "Puzzleteil Hut", stiel: "Puzzleteil Stiel", myzel: "Puzzleteil Myzel", blatt: "Puzzleteil Blatt" }[k]);
+  S.appendChild(el);
+  return { el, k, sitzt: false };
+});
+
+// Wortkarten und Felder (kommen, wenn der Pilz fertig ist)
+const FELD = [{ k: "hut", wort: "der Hut", y: 277, px: 540, py: 315 }, { k: "stiel", wort: "der Stiel", y: 525, px: 412, py: 563 }, { k: "myzel", wort: "das My-zel", y: 698, px: 540, py: 736 }];
+const felder = FELD.map(f => {
+  const l = P.el("div", "linie hilfe wort"); P.setze(l, f.px, f.py); l.style.width = 690 - f.px + "px"; S.appendChild(l);
+  const el = P.el("div", "feld wort c-" + f.k); P.setze(el, 700, f.y); el.setAttribute("aria-label", "Feld für " + f.k); S.appendChild(el);
+  return { el, k: f.k, x: 700, y: f.y, karte: null, linie: l };
+});
+const karten = FELD.map(f => { const el = P.el("div", "karte wort c-" + f.k, P.w(f.wort)); S.appendChild(el); return { el, k: f.k, feld: null, platz: 0, wort: true }; });
+
+let stufe = 1, phase = 1;
+const zieh = P.zieher({
+  ziele: () => phase === 1 ? ziele : felder, ablage, nah: 60,
+  lege(t, z) {
+    if (!t.wort) return legeTeil(t, z);
+    if (z.karte && z.karte !== t) heimKarte(z.karte);
+    if (t.feld) t.feld.karte = null;
+    z.karte = t; t.feld = z; P.setze(t.el, z.x + 8, z.y + 5); markenWeg();
+  },
+  zurueck(t) { if (t.wort) { heimKarte(t); markenWeg(); } else heimTeil(t); },
+});
+teile.forEach(t => zieh.ziehbar(t));
+karten.forEach(k => zieh.ziehbar(k));
+ziele.forEach(z => zieh.zielbar(z));
+felder.forEach(f => zieh.zielbar(f));
+
+function heimTeil(t) { const [x, y] = LAGER[t.k]; P.setze(t.el, x + (t.dx || 0) - t.el.offsetWidth / 2, y - t.el.offsetHeight / 2); }
+function heimKarte(k) { if (k.feld) k.feld.karte = null; k.feld = null; P.setze(k.el, AB.x + 123, AB.y + 70 + k.platz * 100); }
+function legeTeil(t, z) {
+  if (t.k === "blatt") { heimTeil(t); P.melde(satz, "noch", "Das Blatt ge-hört nicht zum Pilz."); return; }
+  if (z.k !== t.k) { heimTeil(t); P.melde(satz, "noch", P.NOCH); return; }
+  const [x, y] = TEIL[t.k].vb;
+  t.sitzt = t.fest = true; t.el.classList.add("sitzt"); t.el.style.setProperty("--rot", "0deg"); P.setze(t.el, sx(x), sy(y));
+  P.melde(satz, "ok", TEIL[t.k].satz);
+  if (teile.filter(u => u.k !== "blatt").every(u => u.sitzt)) P.nach(900, starteWoerter);
+}
+function starteWoerter() {
+  phase = 2;
+  teile.find(t => t.k === "blatt").el.hidden = true;
+  S.querySelectorAll(".wort").forEach(e => e.hidden = false);
+  P.mischen(karten).forEach((k, i) => { k.platz = i; heimKarte(k); });
+  kopf.auftrag("Zie-he die Wort-kar-ten an die Fel-der.", "Das ist der Hut.");
+  P.melde(satz, "", "Der Pilz ist fer-tig! Jetzt kom-men die Wör-ter.");
+}
+function markenWeg() { felder.forEach(f => P.marke(f.el, null)); lob.innerHTML = ""; }
+function pruefen() {
+  if (phase === 1) { P.melde(satz, "noch", "Le-ge zu-erst al-le Tei-le an den Pilz."); return; }
+  let alle = true;
+  felder.forEach(f => { const ok = f.karte && f.karte.k === f.k; P.marke(f.el, ok ? "ok" : f.karte ? "noch" : null); if (!ok) alle = false; });
+  lob.innerHTML = alle ? P.w(P.LOB) : "";
+  P.melde(satz, alle ? "ok" : "noch", alle ? "Hut, Stiel und My-zel sind ein Pilz." : P.NOCH);
+}
+function zeichneUmriss() {
+  const d = `stroke="#8d9892" stroke-width="3" stroke-dasharray="9 7" fill="none"`;
+  umriss.innerHTML = `<svg viewBox="0 0 300 404" aria-hidden="true">
+    <path d="M14 338 Q80 333 150 337 Q220 341 286 335 L288 398 Q150 404 12 398 Z" fill="#8b5a33" opacity=".9"/>
+    <path d="M14 338 Q80 333 150 337 Q220 341 286 335" fill="none" stroke="${K}" stroke-width="3.5"/>
+    ${stufe === 1 ? `<path d="${F.FORM.kuppel.hut}" ${d}/><path d="${F.STIEL.normal.d}" ${d}/>
+      <g stroke="#e9dfb8" stroke-width="3" stroke-dasharray="6 6" fill="none">${F.MYZEL.map(p => `<path d="${p}"/>`).join("")}</g>` : ""}</svg>`;
+}
+function neu() {
+  zieh.waehle(null); phase = 1;
+  zeichneUmriss();
+  teile.forEach(t => {   // jedes Mal etwas anders gedreht und verschoben
+    t.sitzt = t.fest = false; t.el.classList.remove("sitzt");
+    t.el.hidden = t.k === "blatt" && stufe < 3;
+    t.dx = t.k === "stiel" ? 0 : P.zufall(-20, 20);
+    t.el.style.setProperty("--rot", (LAGER[t.k][2] * (Math.random() < .5 ? -1 : 1) + P.zufall(-4, 4)) + "deg");
+    heimTeil(t);
+  });
+  S.querySelectorAll(".wort").forEach(e => e.hidden = true);
+  karten.forEach(k => { if (k.feld) k.feld.karte = null; k.feld = null; });
+  markenWeg(); P.melde(satz, "", "");
+  kopf.auftrag("Zie-he die Tei-le an den Pilz.", "Der Hut ist o-ben.");
+}
+
+const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "puzzle-stufe"); stufe = stufenWahl.wert;
+const kopf = P.kopf({ titel: "Pilz-Puzzle", onNeu: neu, onPruefen: pruefen, leiste: [stufenWahl],
+  woerter: ["der Hut", "der Stiel", "das My-zel", "die Er-de", "o-ben", "un-ten", "auf", "un-ter"] });
+neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Pilz-Memory – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.mem{position:absolute;width:180px;height:180px;padding:0;border:none;background:none;cursor:pointer;perspective:900px;touch-action:manipulation}
+.mem .innen{position:absolute;inset:0;transition:transform .4s;transform-style:preserve-3d}
+.mem.offen .innen{transform:rotateY(180deg)}
+.mem .vorn,.mem .hinten{position:absolute;inset:0;border:4px solid var(--ink);border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;overflow:hidden}
+.mem .hinten{background:#4f9a3a;background-image:radial-gradient(circle at 30% 30%,rgba(255,255,255,.25) 0 14px,transparent 15px),radial-gradient(circle at 72% 64%,rgba(255,255,255,.25) 0 18px,transparent 19px);color:#fff;font-size:70px;font-weight:700;font-family:var(--font)}
+.mem .vorn{background:#fff;transform:rotateY(180deg);padding:6px}
+.mem .vorn svg{width:164px;height:164px;display:block}
+.mem .vorn .wort{font-size:30px;font-weight:700;text-align:center;line-height:1.3;font-family:var(--font);color:var(--ink)}
+.mem.gefunden .vorn{border-color:var(--ok);box-shadow:inset 0 0 0 4px var(--okbg)}
+.mem.gefunden{cursor:default}
+.mem:focus-visible{outline:5px solid var(--ok);outline-offset:4px;border-radius:16px}
+.punkte{display:flex;gap:10px;font-size:24px;font-weight:700}
+.punkte span{border:3px solid var(--line);border-radius:12px;padding:8px 14px;background:#fff}
+.punkte span.dran{border-color:#5e2f91;background:#f1e8fa}
+.paar{left:300px;top:220px;width:1000px;height:520px;flex-direction:row;align-items:center;gap:40px}
+.paar .bild{width:340px;height:340px;flex:none;border:4px solid var(--ink);border-radius:20px;overflow:hidden}
+.paar .bild svg{width:100%;height:100%;display:block}
+.paar .rechts{display:flex;flex-direction:column;gap:26px;flex:1}
+.paar .gross{font-size:64px;font-weight:700}
+.paar .say{font-size:34px}
+@media (prefers-reduced-motion: reduce){.mem .innen{transition:none}}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Pilz-Memory",
+ ziehen: false,
+ neu: "**Neu** mischt die Karten und beginnt ein neues Spiel.",
+ teile: [
+  { h: "Worum geht es?", text: "Den Wortschatz der Reihe spielerisch festigen: Paare aus Bild und Wort finden und das Wort mit Artikel vorlesen." },
+  { h: "So geht es", punkte: [
+    "Zwei Karten antippen. Passen Bild und Wort zusammen, erscheint das Wort groß. Die Kinder lesen es mit Artikel vor („Das ist das Myzel.“), die Lehrkraft bestätigt mit **Weiter**.",
+    "Passen sie nicht, drehen sich die Karten nach kurzer Zeit wieder um.",
+    "**2 Teams** (Team Hut und Team Stiel): Wer ein Paar findet, ist noch einmal dran, sonst wechselt das Team. **Allein**: Die Züge werden gezählt – ohne Zeitanzeige." ] },
+  { h: "Stufen", punkte: [
+    "**Stufe 1**: 6 Paare (Hut, Stiel, Myzel, Pilz, Erde, Wald).",
+    "**Stufe 2**: 8 Paare (dazu Lamellen, Sporen).",
+    "**Stufe 3**: 12 Paare (dazu Pilzbox, Fruchtkörper, essbar, giftig)." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const PAARE = [
+  { k: "hut", wort: "der Hut" }, { k: "stiel", wort: "der Stiel" }, { k: "myzel", wort: "das My-zel" }, { k: "pilz", wort: "der Pilz" },
+  { k: "erde", wort: "die Er-de" }, { k: "wald", wort: "der Wald" }, { k: "lamellen", wort: "die La-mel-len" }, { k: "sporen", wort: "die Spo-ren" },
+  { k: "pilzbox", wort: "die Pilz-box" }, { k: "fruchtkoerper", wort: "der Frucht-kör-per" }, { k: "essbar", wort: "ess-bar", satz: "Der Pilz ist ess-bar." }, { k: "giftig", wort: "gif-tig", satz: "Der Pilz ist gif-tig." },
+];
+const ANZ = { 1: 6, 2: 8, 3: 12 };
+let stufe = 1, teams = true, karten = [], offen = [], team = 0, punkte = [0, 0], zuege = 0, sperre = false;
+
+const anzeige = P.el("div", "punkte"); anzeige.setAttribute("aria-live", "polite");
+const paar = P.tafelauf({ x: 300, y: 220, w: 1000, h: 520, cls: "paar" });
+paar.el.setAttribute("aria-label", "Paar gefunden");
+
+function zeigePunkte() {
+  anzeige.innerHTML = teams ? `<span class="${team === 0 ? "dran" : ""}">Team Hut: ${punkte[0]}</span><span class="${team === 1 ? "dran" : ""}">Team Stiel: ${punkte[1]}</span>`
+    : `<span>Züge: ${zuege}</span>`;
+  if (teams) kopf.auftrag(team === 0 ? "Team Hut ist dran." : "Team Stiel ist dran.", "");
+  else kopf.auftrag("Fin-de die Paa-re.", "");
+}
+function neu() {
+  P.stop(); paar.zu(); sperre = false; offen = []; team = 0; punkte = [0, 0]; zuege = 0;
+  karten.forEach(k => k.el.remove());
+  const n = ANZ[stufe], spalten = n === 6 ? 6 : 8, zeilen = Math.ceil(n * 2 / spalten), gap = n === 12 ? 12 : 22;
+  const breite = spalten * 180 + (spalten - 1) * gap, hoehe = zeilen * 180 + (zeilen - 1) * gap;
+  const x0 = (1600 - breite) / 2, y0 = 172 + (720 - hoehe) / 2;
+  const liste = [];
+  PAARE.slice(0, n).forEach(p => { liste.push({ p, art: "bild" }, { p, art: "wort" }); });
+  karten = P.mischen(liste).map((c, i) => {
+    const el = P.el("button", "mem"); el.type = "button";
+    const vorn = c.art === "bild" ? P.bild(c.p.k) : `<div class="wort">${P.w(c.p.wort)}</div>`;
+    el.innerHTML = `<div class="innen"><div class="hinten" aria-hidden="true">?</div><div class="vorn">${vorn}</div></div>`;
+    el.setAttribute("aria-label", "verdeckte Karte");
+    P.setze(el, x0 + (i % spalten) * (180 + gap), y0 + Math.floor(i / spalten) * (180 + gap));
+    S.appendChild(el);
+    const k = Object.assign({ el, gefunden: false }, c);
+    el.addEventListener("click", () => tippe(k));
+    return k;
+  });
+  // lange Wörter verkleinern
+  karten.forEach(k => { const w = k.el.querySelector(".wort"); if (w) for (let f = 30; f > 18 && w.scrollWidth > 164; f--) w.style.fontSize = f + "px"; });
+  zeigePunkte();
+}
+function dreh(k, auf) {
+  k.el.classList.toggle("offen", auf);
+  k.el.setAttribute("aria-label", auf ? (k.art === "bild" ? "Bild: " : "Wort: ") + P.ohne(k.p.wort) : "verdeckte Karte");
+}
+function tippe(k) {
+  if (sperre || k.gefunden || offen.includes(k) || paar.offen) return;
+  dreh(k, true); offen.push(k);
+  if (offen.length < 2) return;
+  zuege++;
+  const [a, b] = offen;
+  if (a.p === b.p) {
+    a.gefunden = b.gefunden = true; a.el.classList.add("gefunden"); b.el.classList.add("gefunden"); offen = [];
+    if (teams) punkte[team]++;
+    zeigePunkte();
+    sperre = true; P.nach(500, () => { sperre = false; zeigePaar(a.p); });
+  } else {
+    sperre = true; zeigePunkte();
+    P.nach(1500, () => { dreh(a, false); dreh(b, false); offen = []; sperre = false; if (teams) team = 1 - team; zeigePunkte(); });
+  }
+}
+function zeigePaar(p) {
+  const satz = p.satz || "Das ist " + p.wort + ".";
+  paar.el.innerHTML = `<div class="bild">${P.bild(p.k)}</div><div class="rechts"><div class="gross">${P.w(p.wort)}</div>
+    <div><span class="say hilfe"><span class="lbl">Sprich:</span>${P.w(satz)}</span></div></div>`;
+  const w = P.knopf("Weiter", () => { paar.zu(); if (karten.every(k => k.gefunden)) ende(); }, "haupt");
+  paar.el.querySelector(".rechts").appendChild(w); w.style.alignSelf = "flex-start";
+  paar.zeige();
+}
+function ende() {
+  const text = teams ? (punkte[0] === punkte[1] ? "Un-ent-schie-den! Su-per ge-spielt." : `Team ${punkte[0] > punkte[1] ? "Hut" : "Stiel"} hat ge-won-nen!`)
+    : `Al-le Paa-re ge-fun-den! Du hast ${zuege} Zü-ge ge-braucht.`;
+  paar.el.innerHTML = `<div class="rechts" style="align-items:center;text-align:center"><div class="gross" style="font-size:52px">${P.w(text)}</div></div>`;
+  const b = P.knopf("Neues Spiel", () => neu(), "haupt"); paar.el.querySelector(".rechts").appendChild(b);
+  paar.zeige();
+}
+const modus = P.gruppe("", [{ wert: true, text: "2 Teams" }, { wert: false, text: "Allein" }], true, v => { teams = v; neu(); }, "memory-teams");
+teams = modus.wert;
+const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "memory-stufe"); stufe = stufenWahl.wert;
+const kopf = P.kopf({ titel: "Pilz-Memory", onNeu: neu, leiste: [anzeige, modus, stufenWahl] });
+neu();
+</script>
+</body>
+</html>

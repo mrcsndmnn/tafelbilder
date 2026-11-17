@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Glücksrad „Wer bin ich?“ – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.rad{position:absolute;left:50px;top:190px;width:620px;height:660px;padding:0;border:none;background:none;cursor:pointer;touch-action:manipulation}
+.rad svg{width:620px;height:660px;display:block;overflow:visible}
+.rad .dreh{transform-origin:310px 350px;transition:transform 3s cubic-bezier(.17,.84,.24,1)}
+.rad:focus-visible{outline:5px solid var(--ok);outline-offset:4px;border-radius:30px}
+.karte-r{position:absolute;left:720px;top:184px;width:850px;height:690px;background:#fffdf6;border:3px solid var(--ink);border-radius:22px;padding:24px 30px;display:flex;flex-direction:column;gap:18px}
+.karte-r .thema{font-size:26px;font-weight:700;color:var(--soft);display:flex;justify-content:space-between}
+.karte-r .frage{font-size:42px;font-weight:700;line-height:1.55;min-height:200px}
+.karte-r .loesung{display:flex;gap:26px;align-items:center;min-height:250px}
+.karte-r .loesung .bild{width:240px;height:240px;flex:none;border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#fff}
+.karte-r .loesung .bild svg{width:100%;height:100%;display:block}
+.karte-r .loesung .antwort{font-size:40px;font-weight:700;color:var(--ok)}
+.karte-r .knoepfe{display:flex;gap:14px;margin-top:auto;align-items:center}
+.themen{left:420px;top:200px;width:760px;gap:16px}
+.themen h2{margin:0;font-size:32px}
+.themen .knopf{justify-content:flex-start}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Glücksrad „Wer bin ich?“",
+ ziehen: false,
+ neu: "**Neu** beginnt wieder bei Runde 1 und mischt die Rätsel.",
+ teile: [
+  { h: "Worum geht es?", text: "Wiederholung zu Stundenbeginn (3–5 Minuten): Rätsel hören oder lesen und im ganzen Satz antworten." },
+  { h: "So geht es", punkte: [
+    "Das **Rad antippen** (oder **Drehen**): Es dreht sich und bleibt bei einem Thema stehen. Dazu erscheint eine Rätselkarte, z. B. „Ich bin unter der Erde. Wer bin ich?“",
+    "**Lösung zeigen** deckt Bild und Antwort im ganzen Satz auf.",
+    "10 Runden, der Zähler steht oben auf der Karte." ] },
+  { h: "Themen", punkte: [
+    "Mit **Themen** schaltet die Lehrkraft Themen ab oder zu – so kommen nur bereits behandelte Inhalte: Teile, Wachstum, Arten, Lebensraum, Pilzbox.",
+    "Die Rätsel stehen als Liste oben im Programmtext der Seite (RAETSEL) und lassen sich leicht ergänzen." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+// ============================================================
+//  RÄTSEL – hier ergänzen. t = Rätsel (Silben mit "-"), a = Antwortsatz,
+//  bild = Name eines Bildes aus bilder.js (z. B. "wald") oder art = Pilzart (z. B. "fliegenpilz")
+// ============================================================
+const THEMEN = { teile: "Tei-le", wachstum: "Wachs-tum", arten: "Ar-ten", lebensraum: "Le-bens-raum", pilzbox: "Pilz-box" };
+const FARBE = { teile: "#e6f2e1", wachstum: "#fbf3d2", arten: "#f9e3e1", lebensraum: "#e3eef8", pilzbox: "#fbe9d6" };
+const RAETSEL = [
+  { thema: "teile", t: "Ich bin o-ben am Pilz. Ich bin wie ein Dach.", a: "Ich bin der Hut.", bild: "hut" },
+  { thema: "teile", t: "Ich tra-ge den Hut.", a: "Ich bin der Stiel.", bild: "stiel" },
+  { thema: "teile", t: "Ich bin un-ter der Er-de. Ich ha-be vie-le Fä-den.", a: "Ich bin das My-zel.", bild: "myzel" },
+  { thema: "teile", t: "Ich bin un-ter dem Hut. Ich se-he aus wie vie-le Strei-fen.", a: "Wir sind die La-mel-len.", bild: "lamellen" },
+  { thema: "teile", t: "Ich bin un-ter dem Hut. Ich ha-be vie-le klei-ne Lö-cher.", a: "Wir sind die Röh-ren.", bild: "roehren" },
+  { thema: "teile", t: "Wir sind win-zig klein. Wir fal-len aus den La-mel-len.", a: "Wir sind die Spo-ren.", bild: "sporen" },
+  { thema: "teile", t: "Ich bin Hut und Stiel zu-sam-men.", a: "Ich bin der Frucht-kör-per.", bild: "fruchtkoerper" },
+  { thema: "wachstum", t: "Ich bin ganz klein. Aus mir wächst ein neu-er Pilz.", a: "Ich bin die Spo-re.", bild: "sporen" },
+  { thema: "wachstum", t: "Ich bin ein dün-ner Fa-den. Ich wach-se aus der Spo-re.", a: "Ich bin die Hy-phe.", bild: "hyphe" },
+  { thema: "wachstum", t: "Wir sind vie-le Fä-den zu-sam-men.", a: "Wir sind das My-zel.", bild: "myzel" },
+  { thema: "wachstum", t: "Ich wach-se aus dem My-zel nach o-ben.", a: "Ich bin der Frucht-kör-per.", bild: "fruchtkoerper" },
+  { thema: "wachstum", t: "Pil-ze brau-chen mich zum Wach-sen. Ich bin nass.", a: "Ich bin das Was-ser.", bild: "wasser" },
+  { thema: "wachstum", t: "Erst bin ich klein, dann wer-de ich grö-ßer. Zum Schluss bin ich reif.", a: "Ich bin der Pilz.", bild: "pilz" },
+  { thema: "arten", t: "Ich bin rot mit wei-ßen Punk-ten. Ich bin gif-tig.", a: "Ich bin der Flie-gen-pilz.", art: "fliegenpilz" },
+  { thema: "arten", t: "Ich bin weiß. Wir züch-ten mich in der Pilz-box.", a: "Ich bin der Cham-pig-non.", art: "champignon" },
+  { thema: "arten", t: "Ich ha-be ei-nen brau-nen Hut und ei-nen di-cken Stiel.", a: "Ich bin der Stein-pilz.", art: "steinpilz" },
+  { thema: "arten", t: "Ich bin gelb und se-he aus wie ein Trich-ter.", a: "Ich bin der Pfif-fer-ling.", art: "pfifferling" },
+  { thema: "arten", t: "Ich ha-be un-ten am Stiel ei-ne Knol-le. Ich bin sehr gif-tig.", a: "Ich bin der Knol-len-blät-ter-pilz.", art: "knollenblaetterpilz" },
+  { thema: "arten", t: "Ich bin braun mit wei-ßen Punk-ten. Ich bin gif-tig.", a: "Ich bin der Pan-ther-pilz.", art: "pantherpilz" },
+  { thema: "lebensraum", t: "Bei mir ste-hen vie-le Bäu-me. Hier wach-sen vie-le Pil-ze.", a: "Ich bin der Wald.", bild: "wald" },
+  { thema: "lebensraum", t: "Ich bin grün und weich und oft feucht.", a: "Ich bin das Moos.", bild: "moos" },
+  { thema: "lebensraum", t: "Ich fal-le im Herbst von den Bäu-men.", a: "Ich bin das Laub.", bild: "laub" },
+  { thema: "lebensraum", t: "Ich bin ein um-ge-fal-le-ner Baum. Pil-ze wach-sen auf mir.", a: "Ich bin der Baum-stamm.", bild: "baumstamm" },
+  { thema: "lebensraum", t: "Ich fal-le vom Him-mel. Da-nach wach-sen vie-le Pil-ze.", a: "Ich bin der Re-gen.", bild: "regen" },
+  { thema: "lebensraum", t: "Ich bin dun-kel und kühl un-ter den Bäu-men.", a: "Ich bin der Schat-ten.", bild: "schatten" },
+  { thema: "pilzbox", t: "Ich bin ein Kar-ton. In mir wach-sen Pil-ze.", a: "Ich bin die Pilz-box.", bild: "pilzbox" },
+  { thema: "pilzbox", t: "Mit mir sprü-hen wir Was-ser auf die Er-de.", a: "Ich bin die Sprüh-fla-sche.", bild: "spruehflasche" },
+  { thema: "pilzbox", t: "Ich bin weiß und flau-schig auf der Er-de.", a: "Ich bin der Flaum.", bild: "flaum" },
+  { thema: "pilzbox", t: "Wir wach-sen in der Pilz-box. Wir sind weiß.", a: "Wir sind die Cham-pig-nons.", art: "champignon" },
+  { thema: "pilzbox", t: "Das ma-chen wir, wenn die Pil-ze groß sind.", a: "Wir ern-ten die Pil-ze.", bild: "ernten" },
+  { thema: "pilzbox", t: "Ich lie-ge o-ben in der Pilz-box. Ich bin dun-kel und feucht.", a: "Ich bin die Er-de.", bild: "erde" },
+];
+
+const P = Pilz, S = P.buehne(), K = "#1d2320", RUNDEN = 10;
+let aktiv = P.laden("rad-themen", Object.keys(THEMEN)).filter(k => THEMEN[k]); if (!aktiv.length) aktiv = Object.keys(THEMEN);
+let felder = [], winkel = 0, runde = 0, laeuft = false, benutzt = new Set(), jetzt = null;
+
+const rad = P.el("button", "rad"); rad.type = "button"; rad.setAttribute("aria-label", "Glücksrad drehen"); S.appendChild(rad);
+const karte = P.el("div", "karte-r", `<div class="thema"><span class="tn"></span><span class="zaehler"></span></div><div class="frage" aria-live="polite"></div>
+  <div class="loesung" aria-live="polite"></div><div class="knoepfe"></div>`); S.appendChild(karte);
+const $ = s => karte.querySelector(s);
+const loesKnopf = P.knopf("Lösung zeigen", () => zeigeLoesung(), "haupt");
+$(".knoepfe").appendChild(loesKnopf);
+
+function zeichneRad() {
+  felder = []; while (felder.length < 4) felder = felder.concat(aktiv);
+  if (felder.length > 6) felder = felder.slice(0, Math.max(aktiv.length, 4));
+  const n = felder.length, R = 290, cx = 310, cy = 350;
+  const pt = (a, r) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  let g = "";
+  felder.forEach((k, i) => {
+    const a1 = i * 2 * Math.PI / n, a2 = (i + 1) * 2 * Math.PI / n, [x1, y1] = pt(a1, R), [x2, y2] = pt(a2, R);
+    g += `<path d="M${cx} ${cy} L${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2} Z" fill="${FARBE[k]}" stroke="${K}" stroke-width="5"/>`;
+    const am = (a1 + a2) / 2, [tx, ty] = pt(am, R * .62), deg = am * 180 / Math.PI;
+    g += `<text x="${tx}" y="${ty}" transform="rotate(${deg > 90 && deg < 270 ? deg + 180 : deg} ${tx} ${ty})" text-anchor="middle" dominant-baseline="middle"
+      font-family="Andika,'Comic Sans MS',sans-serif" font-size="34" font-weight="700" fill="${K}">${P.ohne(THEMEN[k])}</text>`;
+  });
+  rad.innerHTML = `<svg viewBox="0 0 620 660" aria-hidden="true"><g class="dreh" style="transform:rotate(${winkel}deg)">${g}
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${K}" stroke-width="8"/></g>
+    <circle cx="${cx}" cy="${cy}" r="44" fill="#fff" stroke="${K}" stroke-width="6"/><g transform="translate(${cx} ${cy}) scale(.2) translate(-150 -200)">${P.pilzG({ hut: "#c98a4a", boden: false })}</g>
+    <path d="M${cx - 28} 22 L${cx + 28} 22 L${cx} 82 Z" fill="#5e2f91" stroke="${K}" stroke-width="5" stroke-linejoin="round"/></svg>`;
+  if (!P.bewegt) rad.querySelector(".dreh").style.transition = "none";
+}
+function drehen() {
+  if (laeuft) return;
+  if (runde >= RUNDEN) { ende(); return; }
+  laeuft = true; runde++;
+  const n = felder.length, i = P.zufall(0, n - 1), mitte = (i + .5) * 360 / n + P.zufall(-12, 12) * (180 / n) / 30;
+  winkel = winkel - (winkel % 360) + 360 * 4 + (360 - mitte);
+  rad.querySelector(".dreh").style.transform = `rotate(${winkel}deg)`;
+  $(".frage").innerHTML = ""; $(".loesung").innerHTML = ""; loesKnopf.disabled = true;
+  $(".tn").textContent = "Das Rad dreht sich …"; $(".zaehler").textContent = `Runde ${runde} von ${RUNDEN}`;
+  P.nach(3100, () => { laeuft = false; zeigeRaetsel(felder[i]); });
+}
+function zeigeRaetsel(thema) {
+  let pool = RAETSEL.filter(r => r.thema === thema && !benutzt.has(r));
+  if (!pool.length) { RAETSEL.filter(r => r.thema === thema).forEach(r => benutzt.delete(r)); pool = RAETSEL.filter(r => r.thema === thema); }
+  jetzt = P.wahl(pool); benutzt.add(jetzt);
+  $(".tn").innerHTML = "Thema: " + P.ohne(THEMEN[thema]);
+  $(".frage").innerHTML = P.w(jetzt.t) + " " + P.w("Wer bin ich?");
+  loesKnopf.disabled = false; loesKnopf.focus({ preventScroll: true });
+}
+function zeigeLoesung() {
+  if (!jetzt) return;
+  const bild = jetzt.art ? P.art(jetzt.art) : P.bild(jetzt.bild, P.ohne(jetzt.a));
+  $(".loesung").innerHTML = `<div class="bild">${bild}</div><div class="antwort">${P.w(jetzt.a)}</div>`;
+  loesKnopf.disabled = true;
+  if (runde >= RUNDEN) P.nach(400, () => { $(".tn").textContent = "Das war die letzte Runde."; });
+}
+function ende() {
+  $(".tn").textContent = ""; $(".zaehler").textContent = `${RUNDEN} von ${RUNDEN}`;
+  $(".frage").innerHTML = P.w("Ge-schafft! Ihr habt 10 Rät-sel ge-löst."); $(".loesung").innerHTML = "";
+  loesKnopf.disabled = true;
+}
+function neu() {
+  laeuft = false; runde = 0; benutzt = new Set(); jetzt = null; zeichneRad();
+  $(".tn").innerHTML = P.w("Tip-pe auf das Rad."); $(".zaehler").textContent = `Runde 0 von ${RUNDEN}`;
+  $(".frage").innerHTML = ""; $(".loesung").innerHTML = ""; loesKnopf.disabled = true;
+}
+rad.addEventListener("click", drehen);
+
+// Themen ab- und zuschalten (Lehrkraft)
+const tafel = P.tafelauf({ x: 420, y: 200, w: 760, cls: "themen" });
+tafel.el.setAttribute("aria-label", "Themen wählen");
+tafel.el.appendChild(P.el("h2", "", "Welche Themen kommen vor?"));
+Object.keys(THEMEN).forEach(k => {
+  const s = P.schalter(P.ohne(THEMEN[k]), aktiv.includes(k), v => {
+    aktiv = v ? Object.keys(THEMEN).filter(x => x === k || aktiv.includes(x)) : aktiv.filter(x => x !== k);
+    if (!aktiv.length) { aktiv = [k]; s.setze(true); }
+    P.merken("rad-themen", aktiv); zeichneRad();
+  });
+  tafel.el.appendChild(s);
+});
+tafel.el.appendChild(P.knopf("Fertig", () => tafel.zu(), "haupt"));
+
+P.kopf({ titel: "Glücksrad „Wer bin ich?“", auftrag: "Hör gut zu. Ant-wor-te im gan-zen Satz.", say: "Ich bin …", onNeu: neu,
+  leiste: [P.knopf("Drehen", drehen, "haupt"), P.knopf("Themen", () => tafel.zeige())] });
+neu();
+</script>
+</body>
+</html>

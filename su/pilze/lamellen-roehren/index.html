@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Lamellen oder Röhren? – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Teil A: Vergleichen */
+.gross{position:absolute;width:360px;height:408px}
+.gross svg{width:100%;height:100%;display:block}
+.unterseite{position:absolute;border:4px dashed #5e2f91;border-radius:50%;background:rgba(94,47,145,.08);cursor:pointer;padding:0}
+.unterseite:hover{background:rgba(94,47,145,.16)}
+.blase{position:absolute;width:300px;height:300px;border-radius:50%;border:8px solid var(--ink);overflow:hidden;background:#fff;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+.blase svg{width:100%;height:100%;display:block}
+.blase.auf{animation:auf .35s ease-out}
+@keyframes auf{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.verbinder{position:absolute;height:0;border-top:4px dashed #5e2f91;transform-origin:0 0}
+.wkarte{position:absolute;width:284px;height:66px;border:3px solid var(--ink);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700}
+.farben .wkarte{background:var(--cbg);border-color:var(--c)}
+/* Teil B: Sortieren */
+.pk{width:170px;height:196px;background:#fff;border:3px solid var(--ink);border-radius:16px;transform-origin:0 0}
+.pk svg.p{position:absolute;left:5px;top:6px;width:154px;height:178px}
+.pk .einsatz{position:absolute;right:-8px;bottom:-8px;width:72px;height:72px;border-radius:50%;border:4px solid var(--ink);overflow:hidden;background:#fff}
+.pk .einsatz svg{width:100%;height:100%;display:block}
+.pk .lk{position:absolute;right:-10px;top:-10px;width:58px;height:58px;border-radius:50%;border:3px solid var(--ink);background:#fffdf3;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:manipulation}
+.pk .lk svg{width:36px;height:36px}
+.pk.imkorb{transform:scale(.65)}
+.pk.imkorb.drag{transform:scale(1.05)}
+.pk.verdeckt{cursor:default}
+.korb{position:absolute;border:3px dashed var(--ink);border-radius:18px;background:var(--feld)}
+.korb .titel{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:30px;font-weight:700}
+.farben .korb{border-color:var(--c);background:var(--cbg)}
+.lob{position:absolute;text-align:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Lamellen oder Röhren?",
+ teile: [
+  { h: "Worum geht es?", text: "Pilze nach ihrer Hut-Unterseite vergleichen und sortieren – und begründen: „Das ist ein Lamellenpilz, weil er Lamellen hat.“" },
+  { h: "Teil A: Vergleichen", punkte: [
+    "Zwei Pilze nebeneinander. Die gestrichelte Stelle unter dem Hut antippen: Eine runde Vergrößerung klappt auf – Streifen (Lamellen) oder viele kleine Löcher (Röhren)." ] },
+  { h: "Teil B: Sortieren", punkte: [
+    "Die Pilzbilder in die Körbe **Lamellenpilz** und **Röhrenpilz** ziehen. Nach jedem richtigen Treffer erscheint der Begründungssatz.",
+    "**Stufe 1**: 4 Bilder, die Vergrößerung ist immer zu sehen. **Stufe 2**: 8 Bilder. **Stufe 3**: Die Unterseite ist verdeckt – erst mit dem Lupen-Knopf am Bild ansehen, dann sortieren.",
+    "Die Bilder sind vereinfacht gezeichnet. Namen giftiger Arten kommen hier nicht vor." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const LUPE = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="#e8f4fb" stroke="#1d2320" stroke-width="4"/><path d="M24 24 L36 36" stroke="#7a4a2a" stroke-width="6" stroke-linecap="round"/></svg>';
+const SATZ = { lamellen: "Das ist ein La-mel-len-pilz, weil er La-mel-len hat.", roehren: "Das ist ein Röh-ren-pilz, weil er Röh-ren hat." };
+const VARIANTEN = [
+  { k: "lamellen", o: { form: "kuppel", hut: "#c98a4a", unten: "#f6e7c6" } },
+  { k: "lamellen", o: { form: "flach", hut: "#e9d9b5", unten: "#f3ead8", stiel: "#fbf7ec" } },
+  { k: "lamellen", o: { form: "kuppel", hut: "#9a6a4a", unten: "#efd9b8", stielForm: "schlank" } },
+  { k: "lamellen", o: { form: "flach", hut: "#d9a066", unten: "#f7e4c4" } },
+  { k: "roehren", o: { form: "polster", hut: "#8a5228", unten: "#efe3a6", stielForm: "dick", stiel: "#efe2c2" } },
+  { k: "roehren", o: { form: "polster", hut: "#5b3820", unten: "#e8de86", stiel: "#d9c29a" } },
+  { k: "roehren", o: { form: "kuppel", hut: "#b5743a", unten: "#f0dc8a", stielForm: "dick", stiel: "#f3e6c4" } },
+  { k: "roehren", o: { form: "flach", hut: "#a0633a", unten: "#e6d27a", stiel: "#eadbb6" } },
+];
+let modus = "vergleichen", stufe = 1;
+
+// ================= Teil A: Vergleichen =================
+const teilA = [];
+const A = [{ k: "lamellen", x: 90, var: VARIANTEN[0], wort: "die La-mel-len", bx: 470, erk: "Der Pilz hat La-mel-len. Sie sind wie dün-ne Strei-fen." },
+           { k: "roehren", x: 830, var: VARIANTEN[4], wort: "die Röh-ren", bx: 1210, erk: "Der Pilz hat Röh-ren. Sie sind wie vie-le klei-ne Lö-cher." }];
+const satzA = P.streifen(P.blk(60, 790, 1480)); teilA.push(satzA.parentNode);
+A.forEach(a => {
+  const g = P.el("div", "gross", P.pilz(Object.assign({ unterseite: a.k, tief: true }, a.var.o))); P.setze(g, a.x, 180); S.appendChild(g); teilA.push(g);
+  // Unterseite: viewBox 0 20 300 340 → Maßstab 1.2
+  const u = P.el("button", "unterseite"); u.type = "button"; u.setAttribute("aria-label", "Unterseite vergrößern");
+  P.setze(u, a.x + 36 * 1.2, 180 + (150 - 20) * 1.2); u.style.width = 228 * 1.2 + "px"; u.style.height = 74 * 1.2 + "px"; S.appendChild(u); teilA.push(u);
+  const v = P.el("div", "verbinder"); S.appendChild(v); teilA.push(v);
+  const bl = P.el("div", "blase", P.bild(a.k)); P.setze(bl, a.bx, 200); bl.hidden = true; S.appendChild(bl); teilA.push(bl);
+  bl.setAttribute("role", "img"); bl.setAttribute("aria-label", a.k === "lamellen" ? "Vergrößerung: viele dünne Streifen" : "Vergrößerung: viele kleine Löcher");
+  // Linie von der Unterseite zur Blase
+  const x1 = a.x + 180 + 70, y1 = 180 + 182 * 1.2, x2 = a.bx + 40, y2 = 200 + 230;
+  P.setze(v, x1, y1); v.style.width = Math.hypot(x2 - x1, y2 - y1) + "px"; v.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`; v.hidden = true;
+  const w = P.el("div", "wkarte c-" + a.k, P.w(a.wort)); P.setze(w, a.x + 38, 620); S.appendChild(w); teilA.push(w);
+  a.blase = bl; a.verb = v;
+  u.addEventListener("click", () => {
+    const zu = !bl.hidden; bl.hidden = zu; v.hidden = zu;
+    if (!zu) { bl.classList.remove("auf"); void bl.offsetWidth; bl.classList.add("auf"); P.melde(satzA, "ok", a.erk); }
+  });
+});
+
+// ================= Teil B: Sortieren =================
+const teilB = [];
+const ablage = P.blk(30, 168, 1540, 226, "ablage"); teilB.push(ablage);
+const KOERBE = [{ k: "lamellen", x: 30, titel: "La-mel-len-pilz" }, { k: "roehren", x: 830, titel: "Röh-ren-pilz" }];
+const koerbe = KOERBE.map(kb => {
+  const el = P.el("div", "korb c-" + kb.k, `<div class="titel">${P.w(kb.titel)}</div>`); P.setze(el, kb.x, 410);
+  el.style.width = "740px"; el.style.height = "356px"; el.setAttribute("aria-label", "Korb " + P.ohne(kb.titel)); S.appendChild(el); teilB.push(el);
+  return { el, k: kb.k, x: kb.x, y: 410 };
+});
+const satzB = P.streifen(P.blk(30, 782, 1540)); teilB.push(satzB.parentNode);
+const lob = P.blk(30, 0, 1, 1); lob.hidden = true;
+let karten = [];
+const zieh = P.zieher({
+  ziele: () => koerbe, ablage, nah: 10,
+  lege(t, korb) {
+    t.korb = korb; ordne(); P.marke(t.el, null);
+    if (korb.k === t.k) P.melde(satzB, "ok", SATZ[t.k]); else P.melde(satzB, "", "");
+  },
+  zurueck(t) { t.korb = null; P.marke(t.el, null); ordne(); },
+});
+zieh.zielbar(koerbe[0]); zieh.zielbar(koerbe[1]);
+
+function karteHTML(v, offen) {
+  return `<svg class="p" viewBox="0 20 300 340" aria-hidden="true">${P.pilzG(Object.assign({}, v.o, offen ? { unterseite: v.k, tief: true } : { unterseite: "schatten", unten: "#5d4b3b", tief: true }))}</svg>` +
+    (offen && stufe === 1 ? `<div class="einsatz">${P.bild(v.k)}</div>` : "");
+}
+function baueKarten() {
+  karten.forEach(k => k.el.remove());
+  const auswahl = stufe === 1 ? P.mischen([0, 1, 2, 3]).slice(0, 2).concat(P.mischen([4, 5, 6, 7]).slice(0, 2)) : [0, 1, 2, 3, 4, 5, 6, 7];
+  karten = P.mischen(auswahl).map((i, n) => {
+    const v = VARIANTEN[i], offen = stufe < 3;
+    const el = P.el("div", "pk", karteHTML(v, offen)); S.appendChild(el);
+    el.setAttribute("aria-label", offen ? (v.k === "lamellen" ? "Pilz mit Lamellen" : "Pilz mit Röhren") : "Pilz, Unterseite verdeckt");
+    const t = { el, k: v.k, v, platz: n, korb: null, fest: !offen };
+    if (!offen) {
+      el.classList.add("verdeckt");
+      const lk = P.el("button", "lk", LUPE); lk.type = "button"; lk.setAttribute("aria-label", "Mit der Lupe ansehen"); el.appendChild(lk);
+      lk.addEventListener("pointerdown", e => e.stopPropagation());
+      lk.addEventListener("click", e => { e.stopPropagation(); aufdecken(t); });
+      el.addEventListener("click", () => { if (t.fest) P.melde(satzB, "noch", "Schau zu-erst mit der Lu-pe."); });
+    }
+    zieh.ziehbar(t);
+    return t;
+  });
+  ordne();
+}
+function aufdecken(t) {
+  t.fest = false; t.el.classList.remove("verdeckt");
+  t.el.innerHTML = karteHTML(t.v, true) + `<div class="einsatz">${P.bild(t.k)}</div>`;
+  t.el.setAttribute("aria-label", t.k === "lamellen" ? "Pilz mit Lamellen" : "Pilz mit Röhren");
+  P.melde(satzB, "", t.k === "lamellen" ? "Ich se-he Strei-fen." : "Ich se-he vie-le klei-ne Lö-cher.");
+}
+function ordne() {
+  const frei = karten.filter(k => !k.korb), abst = frei.length > 4 ? 190 : 380;
+  karten.forEach(k => k.el.classList.toggle("imkorb", !!k.korb));
+  frei.sort((a, b) => a.platz - b.platz).forEach((k, i) => P.setze(k.el, (frei.length > 4 ? 45 : 140) + i * abst, 183));
+  koerbe.forEach(kb => karten.filter(k => k.korb === kb).forEach((k, i) => P.setze(k.el, kb.x + 22 + (i % 5) * 140, kb.y + 64 + Math.floor(i / 5) * 140)));
+}
+function pruefen() {
+  if (modus !== "sortieren") { P.melde(satzA, "", "Tip-pe un-ter den Hut. Was siehst du?"); return; }
+  let alle = true;
+  karten.forEach(k => { if (!k.korb) { alle = false; P.marke(k.el, null); return; } const ok = k.korb.k === k.k; P.marke(k.el, ok ? "ok" : "noch"); if (!ok) alle = false; });
+  P.melde(satzB, alle ? "ok" : "noch", alle ? P.LOB : karten.some(k => !k.korb) ? "Sor-tie-re zu-erst al-le Pil-ze." : P.NOCH);
+}
+
+// ================= Umschalten =================
+function zeige() {
+  zieh.waehle(null);
+  teilA.forEach(e => e.hidden = modus !== "vergleichen" || (e.classList.contains("blase") || e.classList.contains("verbinder")) && e.hidden);
+  teilB.forEach(e => e.hidden = modus !== "sortieren");
+  karten.forEach(k => k.el.hidden = modus !== "sortieren");
+  stufenWahl.hidden = modus !== "sortieren";
+  if (modus === "vergleichen") kopf.auftrag("Tip-pe un-ter den Hut.", "Der Pilz hat …");
+  else kopf.auftrag("", "Das ist ein … pilz, weil er … hat.");
+}
+function neu() {
+  A.forEach(a => { a.blase.hidden = true; a.verb.hidden = true; });
+  P.melde(satzA, "", ""); P.melde(satzB, "", "");
+  baueKarten(); zeige();
+}
+const modusWahl = P.gruppe("", [{ wert: "vergleichen", text: "A: Vergleichen" }, { wert: "sortieren", text: "B: Sortieren" }], "vergleichen", v => { modus = v; zeige(); }, "lr-modus");
+modus = modusWahl.wert;
+const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "lr-stufe"); stufe = stufenWahl.wert;
+const kopf = P.kopf({ titel: "Lamellen oder Röhren?", onNeu: neu, onPruefen: pruefen, leiste: [modusWahl, stufenWahl],
+  woerter: ["die La-mel-len", "die Röh-ren", "der La-mel-len-pilz", "der Röh-ren-pilz", "der Hut", "un-ter", "Strei-fen", "Lö-cher"] });
+neu();
+</script>
+</body>
+</html>

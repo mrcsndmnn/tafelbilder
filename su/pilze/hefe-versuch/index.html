@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Hefe-Versuch – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.flasche{position:absolute;top:226px;width:357px;height:500px}
+.flasche svg{width:100%;height:100%;display:block;overflow:visible}
+.zutaten{position:absolute;top:734px;width:420px;text-align:center;font-size:27px;font-weight:700;line-height:1.35}
+.zutaten .name{font-size:32px;display:block}
+.zutaten .ohne{color:var(--noch)}
+.panel{position:absolute;left:930px;top:172px;width:640px;height:700px;background:#fffdf6;border:3px solid var(--ink);border-radius:22px;padding:20px 26px;display:flex;flex-direction:column;gap:14px}
+.panel h2{margin:0;font-size:32px}
+.stimme{display:flex;flex-direction:column;gap:8px}
+.stimme .knopf{justify-content:space-between;font-size:26px;min-height:62px}
+.stimme .knopf .zahl{min-width:52px;height:44px;border-radius:22px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:26px}
+.uhr{font-size:120px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.uhr.fertig{color:var(--ok)}
+.reihe{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.reihe .lbl{font-size:26px;font-weight:700;min-width:130px}
+.tab{border-collapse:collapse;width:100%;font-size:26px}
+.tab th,.tab td{border:3px solid var(--ink);padding:10px 12px;text-align:left;vertical-align:top}
+.tab th{background:#eef2ee}
+.mini-uhr{font-size:24px;font-weight:700;border:3px solid var(--line);border-radius:12px;padding:8px 14px;font-variant-numeric:tabular-nums}
+.panel .streifen{font-size:30px}
+.panel .hinweis{font-size:19px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Hefe-Versuch: Was passiert mit dem Ballon?",
+ ziehen: false,
+ neu: "**Neu** löscht Abstimmung, Zeitgeber und Ergebnis und beginnt wieder mit „Vermuten“.",
+ teile: [
+  { h: "Worum geht es?", text: "Hefe ist ein Pilz. Im Versuch macht sie mit Zucker Luft (Gas) – der Ballon wird groß. Die Kinder vermuten zuerst, beobachten dann den echten Versuch und vergleichen am Schluss." },
+  { h: "1 Vermuten", text: "Für jede Flasche abstimmen: „Der Ballon wird groß.“ – „Der Ballon bleibt klein.“ – „Ich weiß es nicht.“ Jedes Antippen zählt eine Stimme. Satzmuster: „Ich glaube, …“" },
+  { h: "2 Beobachten", punkte: [
+    "Zeitgeber auf 20, 25 oder 30 Minuten stellen und starten. Er läuft auch weiter, wenn man zu einem anderen Teil wechselt.",
+    "Nach dem echten Versuch das **Ergebnis eintragen**: groß oder klein, für jede Flasche." ] },
+  { h: "3 Vergleichen", text: "Vermutung und Ergebnis stehen nebeneinander. Erst nach dem Eintragen gibt es **Noch einmal zeigen**: Dann wird der Ballon im Bild aufgeblasen. Vorher zeigt das Tafelbild kein Ergebnis – der echte Versuch entscheidet." },
+  { h: "Gut zu wissen", text: "Abstimmung, Zeitgeber und Ergebnis bleiben beim Neuladen erhalten (nur in diesem Browser). Es werden keine Namen gespeichert." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const P = Pilz, S = P.buehne(), K = "#1d2320";
+const WAHL = [{ k: "gross", t: "Der Bal-lon wird groß." }, { k: "klein", t: "Der Bal-lon bleibt klein." }, { k: "weiss", t: "Ich weiß es nicht." }];
+const leer = () => ({ phase: "vermuten", stimmen: { A: { gross: 0, klein: 0, weiss: 0 }, B: { gross: 0, klein: 0, weiss: 0 } }, minuten: 25, ende: null, rest: null, ergebnis: { A: null, B: null } });
+let Z = Object.assign(leer(), P.laden("hefe", {}));
+const sichern = () => P.merken("hefe", Z);
+
+// ---------- Flaschen ----------
+function flasche(name, s, zucker) {
+  // s: 0 = schlaffer Ballon, 1 = großer Ballon
+  const ballon = s < .12
+    ? `<path d="M178 150 Q170 120 186 104 Q204 90 214 112 Q224 136 208 150 Z" fill="#e05a8a" stroke="${K}" stroke-width="4" stroke-linejoin="round"/><path d="M196 108 Q230 96 236 120" fill="none" stroke="${K}" stroke-width="4"/>`
+    : `<ellipse cx="200" cy="${150 - 60 * s}" rx="${24 + 90 * s}" ry="${30 + 90 * s}" fill="#e05a8a" stroke="${K}" stroke-width="4"/>
+       <path d="M${200 - 30 * s} ${120 - 120 * s} q-10 30 4 56" stroke="#fff" stroke-width="${4 + 6 * s}" fill="none" opacity=".45" stroke-linecap="round"/>
+       <path d="M184 154 h32 l-4 -14 h-24 Z" fill="#e05a8a" stroke="${K}" stroke-width="4"/>`;
+  const blasen = zucker && s > .2 ? [[160, 470], [230, 440], [190, 400], [250, 500], [140, 420]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#fff" stroke="#c9a227" stroke-width="2" opacity=".9"/>`).join("") : "";
+  return `<svg viewBox="0 0 400 560" role="img" aria-label="Flasche ${name}, Ballon ${s < .12 ? "schlaff" : s > .8 ? "groß" : "wird größer"}">
+    ${ballon}
+    <path d="M176 156 H224 V214 Q224 232 248 246 Q320 286 320 360 V500 Q320 540 280 540 H120 Q80 540 80 500 V360 Q80 286 152 246 Q176 232 176 214 Z" fill="#eaf5fb" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M84 400 Q200 386 316 400 V500 Q316 536 280 536 H120 Q84 536 84 500 Z" fill="${zucker ? "#f3dc9a" : "#efe3c0"}" opacity=".9"/>
+    ${zucker ? `<path d="M84 400 Q200 386 316 400" stroke="#fff" stroke-width="10" fill="none" opacity=".8"/>` : ""}${blasen}
+    <path d="M176 156 H224 V214 Q224 232 248 246 Q320 286 320 360 V500 Q320 540 280 540 H120 Q80 540 80 500 V360 Q80 286 152 246 Q176 232 176 214 Z" fill="none" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="150" y="300" width="100" height="70" rx="12" fill="#fff" stroke="${K}" stroke-width="4"/>
+    <text x="200" y="350" text-anchor="middle" font-family="Andika,sans-serif" font-size="46" font-weight="700" fill="${K}">${name}</text></svg>`;
+}
+const fA = P.el("div", "flasche"); fA.style.left = "71px"; S.appendChild(fA);
+const fB = P.el("div", "flasche"); fB.style.left = "501px"; S.appendChild(fB);
+const zA = P.el("div", "zutaten", `<span class="name">${P.w("Fla-sche A")}</span>${P.w("He-fe + Zu-cker + war-mes Was-ser")}`); zA.style.left = "40px"; S.appendChild(zA);
+const zB = P.el("div", "zutaten", `<span class="name">${P.w("Fla-sche B")}</span>${P.w("He-fe + war-mes Was-ser")} <span class="ohne">${P.w("(oh-ne Zu-cker)")}</span>`); zB.style.left = "470px"; S.appendChild(zB);
+const groesse = e => e === "gross" ? 1 : 0;
+function zeigeFlaschen(sa, sb) { fA.innerHTML = flasche("A", sa, true); fB.innerHTML = flasche("B", sb, false); }
+
+// ---------- Panel ----------
+const panel = P.el("div", "panel"); S.appendChild(panel);
+const mini = P.el("span", "mini-uhr"); mini.hidden = true;
+let tick = null;
+const fmt = ms => { const s = Math.max(0, Math.round(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
+const restZeit = () => Z.ende ? Z.ende - Date.now() : Z.rest != null ? Z.rest : Z.minuten * 60000;
+function uhrTick() {
+  const r = restZeit(), u = panel.querySelector(".uhr");
+  if (u) { u.textContent = fmt(r); u.classList.toggle("fertig", r <= 0); }
+  mini.hidden = !Z.ende; mini.textContent = "⏱ " + fmt(r);
+  const st = panel.querySelector(".uhrtext");
+  if (st && Z.ende && r <= 0) P.melde(st, "ok", "Die Zeit ist um! Schaut auf die Bal-lons.");
+}
+setInterval(uhrTick, 500);
+
+function vermuten() {
+  panel.innerHTML = `<h2>${P.w("Was glaubst du?")}</h2>`;
+  ["A", "B"].forEach(f => {
+    const box = P.el("div", "stimme", `<div class="reihe"><span class="lbl">${P.w("Fla-sche " + f)}</span></div>`);
+    WAHL.forEach(w => {
+      const b = P.knopf(`<span>${P.w(w.t)}</span><span class="zahl">${Z.stimmen[f][w.k]}</span>`);
+      b.setAttribute("aria-label", `Flasche ${f}: ${P.ohne(w.t)} – ${Z.stimmen[f][w.k]} Stimmen`);
+      b.addEventListener("click", () => { Z.stimmen[f][w.k]++; sichern(); vermuten(); panel.querySelectorAll(".stimme")[f === "A" ? 0 : 1].querySelectorAll("button")[WAHL.indexOf(w)].focus(); });
+      box.appendChild(b);
+    });
+    panel.appendChild(box);
+  });
+  panel.appendChild(P.el("div", "hinweis", "Jedes Antippen zählt eine Stimme. Zurücksetzen mit „Neu“."));
+}
+function beobachten() {
+  panel.innerHTML = `<h2>${P.w("Wir be-o-bach-ten.")}</h2><div class="reihe zeit"><span class="lbl">Zeit</span></div><div class="uhr" aria-live="off"></div>
+    <div class="reihe uhrknoepfe"></div><div class="streifen uhrtext"></div><h2 style="margin-top:6px">${P.w("Er-geb-nis ein-tra-gen")}</h2>`;
+  const g = P.gruppe("", [20, 25, 30].map(m => ({ wert: m, text: m + " Min." })), Z.minuten, v => { Z.minuten = v; if (!Z.ende) Z.rest = null; sichern(); uhrTick(); });
+  panel.querySelector(".zeit").appendChild(g);
+  const start = P.knopf(Z.ende ? "Pause" : "Start", () => {
+    if (Z.ende) { Z.rest = Math.max(0, Z.ende - Date.now()); Z.ende = null; } else { Z.ende = Date.now() + restZeit(); Z.rest = null; }
+    sichern(); beobachten();
+  }, "haupt");
+  const zur = P.knopf("Zurücksetzen", () => { Z.ende = null; Z.rest = null; sichern(); beobachten(); });
+  panel.querySelector(".uhrknoepfe").append(start, zur);
+  ["A", "B"].forEach(f => {
+    const r = P.el("div", "reihe", `<span class="lbl">${P.w("Fla-sche " + f)}</span>`);
+    [["gross", "groß"], ["klein", "klein"]].forEach(([k, t]) => {
+      const b = P.knopf(`Ballon ${t}`); b.setAttribute("aria-pressed", Z.ergebnis[f] === k);
+      b.addEventListener("click", () => { Z.ergebnis[f] = Z.ergebnis[f] === k ? null : k; sichern(); beobachten(); });
+      r.appendChild(b);
+    });
+    panel.appendChild(r);
+  });
+  uhrTick();
+}
+function meiste(st) { const m = Math.max(st.gross, st.klein, st.weiss); if (!m) return "–"; return WAHL.filter(w => st[w.k] === m).map(w => P.w(w.t)).join("<br>"); }
+function vergleichen() {
+  panel.innerHTML = `<h2>${P.w("Wir ver-glei-chen.")}</h2><table class="tab"><tr><th></th><th>${P.w("Wir glau-ben")}</th><th>${P.w("Er-geb-nis")}</th></tr>
+    ${["A", "B"].map(f => `<tr><th>${f}</th><td>${meiste(Z.stimmen[f])}</td><td>${Z.ergebnis[f] ? P.w(Z.ergebnis[f] === "gross" ? "Der Bal-lon ist groß." : "Der Bal-lon ist klein.") : "noch nicht eingetragen"}</td></tr>`).join("")}</table>
+    <div class="streifen"></div><div class="reihe knoepfe"></div>`;
+  const st = panel.querySelector(".streifen");
+  const fertig = Z.ergebnis.A && Z.ergebnis.B;
+  if (!fertig) P.melde(st, "", "Tragt zu-erst das Er-geb-nis ein (Teil 2).");
+  else if (Z.ergebnis.A === "gross" && Z.ergebnis.B === "klein") P.melde(st, "ok", ["Die He-fe macht Luft.", "Mit Zu-cker wird der Bal-lon groß."]);
+  else P.melde(st, "", "Ver-gleicht die Fla-schen. Was ist an-ders?");
+  if (fertig) panel.querySelector(".knoepfe").appendChild(P.knopf("Noch einmal zeigen", () => {
+    const a = groesse(Z.ergebnis.A), b = groesse(Z.ergebnis.B);
+    P.anim(3000, p => zeigeFlaschen(a * p, b * p));
+  }, "haupt"));
+}
+const PHASEN = { vermuten, beobachten, vergleichen };
+function zeige() {
+  P.stop(); PHASEN[Z.phase]();
+  // Erst nach dem Eintragen zeigt das Bild ein Ergebnis
+  const e = Z.phase === "vergleichen" && Z.ergebnis.A && Z.ergebnis.B;
+  zeigeFlaschen(e ? groesse(Z.ergebnis.A) : 0, e ? groesse(Z.ergebnis.B) : 0);
+  kopf.auftrag({ vermuten: "Was pas-siert mit dem Bal-lon?", beobachten: "Wir war-ten und schau-en ge-nau.", vergleichen: "Was ha-ben wir ge-dacht? Was ist pas-siert?" }[Z.phase],
+    Z.phase === "vermuten" ? "Ich glau-be, …" : "");
+}
+const phase = P.gruppe("", [{ wert: "vermuten", text: "1 Vermuten" }, { wert: "beobachten", text: "2 Beobachten" }, { wert: "vergleichen", text: "3 Vergleichen" }], Z.phase, v => { Z.phase = v; sichern(); zeige(); });
+const kopf = P.kopf({ titel: "Hefe-Versuch", onNeu: () => { Z = leer(); sichern(); phase.setze("vermuten"); zeige(); }, leiste: [mini, phase] });
+zeige(); uhrTick();
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Satzbaukasten „Der Pilz hat …“ – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.bahn{position:absolute;left:40px;width:1520px;border:3px dashed var(--ink);border-radius:16px;background:var(--feld)}
+.bahn .fest{position:absolute;left:12px;top:9px;display:flex;gap:12px}
+.chip,.bs{display:inline-flex;align-items:center;height:70px;padding:0 18px;border:3px solid var(--ink);border-radius:12px;background:#fff;font-size:32px;font-weight:700;white-space:nowrap}
+.chip{background:#e9eef0;border-color:#8d9892}
+.punkt{position:absolute;font-size:44px;font-weight:700;line-height:70px;pointer-events:none}
+.bs{box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.bs.c-hut,.bs.c-stiel,.bs.c-myzel,.bs.c-lamellen{background:#fff}
+.farben .bs[class*="c-"]{background:var(--cbg);border-color:var(--c)}
+.bahn .mk{right:-14px;top:-16px}
+.lehrkraft{position:absolute;left:44px;top:866px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Satzbaukasten „Der Pilz hat …“",
+ teile: [
+  { h: "Worum geht es?", text: "Sätze über den Pilz bauen und dabei den Artikel richtig setzen: „Der Pilz hat einen Hut und einen Stiel.“ – „Der Hut ist oben.“" },
+  { h: "So geht es", punkte: [
+    "Bausteine aus der Ablage in die Satzbahnen ziehen. Ein Baustein kann zwischen zwei andere geschoben werden. Zurück in die Ablage ziehen entfernt ihn.",
+    "Ohne Ziehen: Baustein antippen, dann die Satzbahn antippen – der Baustein kommt ans Ende.",
+    "**Prüfen** kontrolliert jede Satzbahn. Ist ein Artikel falsch, steht darunter klein ein Hinweis für die Lehrkraft, z. B. „Hut ist männlich: der Hut → einen Hut.“",
+    "**Vorlesen** liest die Sätze mit der Sprachausgabe des Geräts vor (nur wenn das Gerät eine deutsche Stimme hat)." ] },
+  { h: "Stufen", punkte: [
+    "**Stufe 1**: Artikel und Nomen sind ein Baustein („einen Hut“).",
+    "**Stufe 2**: Artikel und Nomen sind getrennt („einen“ + „Hut“).",
+    "**Stufe 3**: Beide Bahnen sind frei, alle Wörter liegen in der Ablage." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const SIL = { einen: "ei-nen", Myzel: "My-zel", Lamellen: "La-mel-len", oben: "o-ben", unten: "un-ten", über: "ü-ber", unter: "un-ter", Erde: "Er-de" };
+const silbig = s => s.split(" ").map(w => { const m = w.match(/^(.*?)([.!?,]?)$/); return (SIL[m[1]] || m[1]) + m[2]; }).join(" ");
+const ORTE = ["o-ben", "un-ten", "ü-ber der Er-de", "un-ter der Er-de"];
+const FARBE = { Hut: "c-hut", Stiel: "c-stiel", Myzel: "c-myzel", Lamellen: "c-lamellen" };
+const POOL = {
+  1: ["ei-nen Hut", "ei-nen Stiel", "ein My-zel", "La-mel-len", "und", "und"].concat(ORTE),
+  2: ["ei-nen", "ei-nen", "ein", "ein", "Hut", "Stiel", "My-zel", "La-mel-len", "und", "und"].concat(ORTE),
+  3: ["Der", "Der", "Das", "Pilz", "Hut", "Stiel", "My-zel", "hat", "ist", "ei-nen", "ei-nen", "ein", "La-mel-len", "und"].concat(ORTE),
+};
+const NOMEN = { Hut: { art: "einen", lk: "Hut ist männlich: der Hut → einen Hut." }, Stiel: { art: "einen", lk: "Stiel ist männlich: der Stiel → einen Stiel." },
+  Myzel: { art: "ein", lk: "Myzel ist sächlich: das Myzel → ein Myzel." }, Lamellen: { art: "", lk: "Lamellen ist Mehrzahl: die Lamellen → Lamellen (ohne ein)." } };
+const WO = { Hut: ["oben", "über der Erde"], Stiel: ["über der Erde"], Myzel: ["unten", "unter der Erde"] };
+const AB = { x: 40, w: 1520 };
+
+let stufe = 1, bausteine = [], subjekt = "Hut";
+const bahnen = [0, 1].map(i => {
+  const el = P.el("div", "bahn"); el.setAttribute("aria-label", "Satzbahn " + (i + 1)); S.appendChild(el);
+  const fest = P.el("div", "fest"); el.appendChild(fest);
+  const punkt = P.el("div", "punkt", "."); S.appendChild(punkt);
+  return { el, fest, punkt, teile: [], i };
+});
+const ablage = P.blk(AB.x, 0, AB.w, 0, "ablage"); ablage.appendChild(P.el("div", "titel", "Bau-stei-ne".replace(/-/g, "")));
+const satz = P.streifen(P.blk(40, 778, 1520));
+const lk = P.blk(44, 866, 1500, 0, "lehrkraft"); lk.setAttribute("aria-live", "polite");
+
+const zieh = P.zieher({
+  ziele: () => bahnen.filter(b => !b.el.hidden), ablage, nah: 20,
+  lege(t, b) {
+    raus(t);
+    const r = P.rect(t.el), q = P.rect(b.el), cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    let idx = b.teile.length;
+    if (cx > q.x && cx < q.x + q.w && cy > q.y - 20 && cy < q.y + q.h + 20)   // gezogen: an der Stelle einfügen
+      idx = b.teile.filter(u => { const s = P.rect(u.el), uy = s.y + s.h / 2; return uy < cy - 40 || (Math.abs(uy - cy) <= 40 && s.x + s.w / 2 < cx); }).length;
+    b.teile.splice(idx, 0, t); t.bahn = b;
+    ordne(); markenWeg();
+  },
+  zurueck(t) { raus(t); ordne(); markenWeg(); },
+});
+bahnen.forEach(b => zieh.zielbar(b));
+function raus(t) { if (t.bahn) t.bahn.teile.splice(t.bahn.teile.indexOf(t), 1); t.bahn = null; }
+
+function ordne() {
+  bahnen.forEach(b => {
+    if (b.el.hidden) { b.punkt.hidden = true; return; }
+    const bx = 40, by = parseFloat(b.el.style.top), h = parseFloat(b.el.style.height);
+    let x = bx + 12 + (b.fest.children.length ? b.fest.offsetWidth + 12 : 0), y = by + 9;
+    b.teile.forEach(t => { const w = t.el.offsetWidth; if (x + w > bx + 1500 && y + 160 <= by + h) { x = bx + 12; y += 80; } P.setze(t.el, x, y); x += w + 12; });
+    b.punkt.hidden = !b.teile.length; P.setze(b.punkt, x - 6, y);
+  });
+  const ay = parseFloat(ablage.style.top);
+  let x = AB.x + 16, y = ay + 46;
+  bausteine.filter(t => !t.bahn).sort((a, b) => a.platz - b.platz).forEach(t => {
+    const w = t.el.offsetWidth; if (x + w > AB.x + AB.w - 16) { x = AB.x + 16; y += 82; }
+    P.setze(t.el, x, y); x += w + 14;
+  });
+}
+function layout() {
+  const frei = stufe === 3;
+  const h1 = 172, h2 = frei ? 172 : 90;
+  bahnen[0].el.style.top = "176px"; bahnen[0].el.style.height = h1 + "px";
+  bahnen[1].el.style.top = 176 + h1 + 18 + "px"; bahnen[1].el.style.height = h2 + "px";
+  const ay = 176 + h1 + 18 + h2 + 18; ablage.style.top = ay + "px"; ablage.style.height = 766 - ay + "px";
+  bahnen[0].fest.innerHTML = frei ? "" : `<span class="chip">${P.w("Der Pilz")}</span><span class="chip">hat</span>`;
+  bahnen[1].fest.innerHTML = frei ? "" : `<span class="chip">${P.w(subjekt === "Myzel" ? "Das My-zel" : "Der " + subjekt)}</span><span class="chip">ist</span>`;
+}
+function neu() {
+  zieh.waehle(null);
+  bausteine.forEach(t => t.el.remove());
+  subjekt = P.wahl(["Hut", "Myzel"]);
+  layout();
+  bausteine = P.mischen(POOL[stufe]).map((txt, i) => {
+    const nom = Object.keys(FARBE).find(n => P.ohne(txt).endsWith(n));
+    const el = P.el("div", "bs" + (nom ? " " + FARBE[nom] : ""), P.w(txt)); S.appendChild(el);
+    const t = { el, txt, platz: i, bahn: null }; zieh.ziehbar(t); return t;
+  });
+  bahnen.forEach(b => b.teile = []);
+  markenWeg(); P.melde(satz, "", ""); ordne();
+}
+function markenWeg() { bahnen.forEach(b => P.marke(b.el, null)); lk.textContent = ""; }
+const text = b => (stufe === 3 ? [] : b.i === 0 ? ["Der Pilz", "hat"] : [subjekt === "Myzel" ? "Das Myzel" : "Der " + subjekt, "ist"]).concat(b.teile.map(t => P.ohne(t.txt))).join(" ");
+
+// ---------- Prüfen ----------
+function nomenListe(rest) {   // "einen Hut und einen Stiel"
+  if (!rest) return { ok: false, m: "Der Satz ist noch nicht fer-tig." };
+  const teile = rest.split(" und ");
+  for (const t of teile) {
+    const w = t.split(" "), nom = w[w.length - 1], n = NOMEN[nom];
+    if (!n || w.length > 2 || (w.length === 2 && !["ein", "einen"].includes(w[0]))) return { ok: false, m: "Lies den Satz noch ein-mal ge-nau." };
+    const art = w.length === 2 ? w[0] : "";
+    if (art !== n.art) return { ok: false, m: art ? "Noch nicht. Schau auf das klei-ne Wort." : "Da fehlt noch ein klei-nes Wort.", lk: n.lk };
+  }
+  if (new Set(teile).size < teile.length) return { ok: false, m: "Ein Wort ist dop-pelt." };
+  return { ok: true };
+}
+function bewerte(s) {
+  if (!s) return null;
+  let m;
+  if ((m = s.match(/^Der Pilz hat ?(.*)$/))) { const r = nomenListe(m[1].trim()); return r.ok ? { ok: true, satz: s + "." } : r; }
+  if (/^Das Pilz/.test(s)) return { ok: false, m: "Noch nicht. Schau auf das klei-ne Wort.", lk: "Pilz ist männlich: der Pilz." };
+  if ((m = s.match(/^(Der|Das) (Hut|Stiel|Myzel) ist ?(.*)$/))) {
+    const [, art, nom, ort] = m;
+    if (art !== (nom === "Myzel" ? "Das" : "Der")) return { ok: false, m: "Noch nicht. Schau auf das klei-ne Wort.", lk: nom === "Myzel" ? "Myzel ist sächlich: das Myzel." : nom + " ist männlich: der " + nom + "." };
+    if (!ort) return { ok: false, m: "Der Satz ist noch nicht fer-tig." };
+    if (!["oben", "unten", "über der Erde", "unter der Erde"].includes(ort)) return { ok: false, m: "Lies den Satz noch ein-mal ge-nau." };
+    return WO[nom].includes(ort) ? { ok: true, satz: s + "." } : { ok: false, m: `Noch nicht. Wo ist ${nom === "Myzel" ? "das My-zel" : "der " + nom}?` };
+  }
+  return { ok: false, m: "Lies den Satz noch ein-mal ge-nau." };
+}
+function pruefen() {
+  const erg = bahnen.map(b => b.el.hidden || (stufe === 3 && !b.teile.length) ? null : bewerte(text(b)));
+  if (erg.every(e => !e)) { P.melde(satz, "noch", "Le-ge zu-erst Wör-ter in die Bahn."); return; }
+  erg.forEach((e, i) => P.marke(bahnen[i].el, e ? (e.ok ? "ok" : "noch") : null));
+  const falsch = erg.find(e => e && !e.ok);
+  if (falsch) { P.melde(satz, "noch", falsch.m); lk.textContent = falsch.lk ? "Für die Lehrkraft: " + falsch.lk : ""; }
+  else { P.melde(satz, "ok", ["Rich-tig!"].concat(erg.filter(Boolean).map(e => silbig(e.satz)))); lk.textContent = ""; }
+}
+function vorlesen() {
+  const s = bahnen.filter(b => !b.el.hidden && b.teile.length).map(b => text(b) + ".").join(" ");
+  P.vorlesen(s || "Lege zuerst Wörter in die Bahn.");
+}
+
+const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "satz-stufe"); stufe = stufenWahl.wert;
+const leiste = [stufenWahl];
+if (P.kannVorlesen()) leiste.push(P.knopf("Vorlesen", vorlesen));
+P.kopf({ titel: "Der Pilz hat …", auftrag: "Baue Sät-ze.", say: "Der Pilz hat ei-nen Hut.", onNeu: neu, onPruefen: pruefen, leiste,
+  woerter: ["der Hut → ei-nen Hut", "der Stiel → ei-nen Stiel", "das My-zel → ein My-zel", "die La-mel-len → La-mel-len", "o-ben", "un-ten"] });
+// Silbenschrift ein/aus ändert die Breite der Bausteine
+new MutationObserver(() => ordne()).observe(S, { attributes: true, attributeFilter: ["class"] });
+neu();
+</script>
+</body>
+</html>
