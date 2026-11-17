@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Unser Pilzbox-Tagebuch – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.zeitleiste{position:absolute;left:96px;top:176px;width:1408px;height:640px;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;scroll-behavior:smooth;
+  user-select:none;-webkit-user-select:none;scrollbar-width:thin}
+.zeitleiste .reihe{position:relative;display:flex;gap:28px;padding:10px 14px 30px;min-width:100%;height:100%;align-items:flex-start}
+.zeitleiste .linie{position:absolute;left:0;right:0;top:46px;height:6px;background:#c9a227;border-radius:3px}
+.eintrag{position:relative;flex:none;width:340px;background:#fff;border:3px solid var(--ink);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;cursor:default;margin-top:20px}
+.eintrag .datum{align-self:center;background:#fffdf3;border:3px solid var(--ink);border-radius:12px;padding:2px 14px;font-size:24px;font-weight:700;margin-top:-34px}
+.eintrag .foto{width:310px;height:232px;border-radius:10px;overflow:hidden;background:#eef2ee;display:grid;place-items:center;color:var(--soft);font-size:20px;border:2px solid #cfd6d1}
+.eintrag .foto img{width:100%;height:100%;object-fit:cover;display:block}
+.eintrag .text{font-size:30px;font-weight:700;line-height:1.35;min-height:84px}
+.eintrag .weg{align-self:flex-end;min-height:48px;font-size:18px;padding:0 14px;border-width:2px}
+.eintrag.gewaehlt{outline:7px solid #5e2f91;outline-offset:2px}
+.vergleich .eintrag{cursor:pointer}
+.pfeilknopf{position:absolute;top:430px;width:64px;height:120px;font-size:44px;padding:0}
+.hinweis{position:absolute;left:96px;top:828px;width:1408px;font-size:19px;color:var(--soft)}
+.status{position:absolute;left:96px;top:854px;width:1408px;font-size:20px;font-weight:700;color:var(--ok)}
+.status.noch{color:var(--noch)}
+/* Dialog „Neuer Eintrag“ */
+.dlg{gap:14px;padding:22px 30px}
+.dlg h2{margin:0;font-size:34px}
+.dlg .zeile{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.dlg .lbl{font-size:22px;font-weight:700;color:var(--soft);min-width:140px}
+.dlg input[type=date],.dlg input[type=text]{font-family:var(--font);font-size:26px;padding:8px 12px;border:3px solid var(--ink);border-radius:12px;min-height:56px}
+.dlg input[type=text]{flex:1}
+.chip{font-family:var(--font);font-size:27px;font-weight:700;min-height:58px;padding:0 16px;border:3px solid var(--ink);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed="true"]{background:#e3f2e8;border-color:var(--ok)}
+.vorschau{width:200px;height:150px;border-radius:10px;overflow:hidden;border:2px solid #cfd6d1;background:#eef2ee;display:grid;place-items:center;color:var(--soft);font-size:18px}
+.vorschau img{width:100%;height:100%;object-fit:cover}
+.warn{font-size:22px;font-weight:700;color:var(--noch);background:var(--nochbg);border:2px solid var(--nochrand);border-radius:10px;padding:6px 12px}
+.dlg .knoepfe{display:flex;gap:14px;justify-content:flex-end;margin-top:auto}
+/* Vergleichen */
+.vgl{flex-direction:row;gap:26px;align-items:stretch}
+.vgl .seite{flex:1;display:flex;flex-direction:column;gap:10px;align-items:center}
+.vgl .seite .foto{width:100%;height:390px;border-radius:12px;overflow:hidden;background:#eef2ee;display:grid;place-items:center;color:var(--soft)}
+.vgl .seite .foto img{width:100%;height:100%;object-fit:contain}
+.vgl .seite .text{font-size:32px;font-weight:700;text-align:center}
+.vgl .seite .datum{font-size:28px;font-weight:700}
+.vglfuss{position:absolute;left:30px;right:30px;bottom:20px;display:flex;gap:16px;align-items:center}
+.vglfuss .say{font-size:28px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Unser Pilzbox-Tagebuch",
+ ziehen: false,
+ neu: "**Neu** schließt offene Fenster, beendet das Vergleichen und springt zum neuesten Eintrag. Es löscht nichts.",
+ teile: [
+  { h: "Worum geht es?", text: "Ein wachsendes Tafelbild für das Beobachtungsritual: Jede Beobachtung der Pilzbox bekommt eine Karte mit Datum, Foto und Satz. So lässt sich über die Wochen vergleichen." },
+  { h: "Neuer Eintrag", punkte: [
+    "**Neuer Eintrag** öffnet ein großes Feld: Datum (heute, änderbar), Foto der Box aufnehmen oder auswählen, Satzanfang und Wort antippen – oder einen eigenen Satz eintippen (Lehrkraft).",
+    "Fotos werden automatisch verkleinert. **Keine Fotos von Kindern, keine Namen.**",
+    "Ein Eintrag lässt sich mit **Löschen** entfernen (zweimal tippen zur Sicherheit)." ] },
+  { h: "Vergleichen", text: "Schalter **Vergleichen** an, dann zwei Karten antippen: Beide erscheinen groß nebeneinander mit dem Satzmuster „Am … war …, heute ist …“." },
+  { h: "Speichern", punkte: [
+    "Die Einträge bleiben **nur in diesem Browser auf diesem Gerät** (IndexedDB). Es wird nichts ins Internet geschickt.",
+    "**Sichern** lädt alles als Datei herunter (mit Fotos). **Laden** holt eine gesicherte Datei zurück – z. B. auf einem anderen Rechner oder nach dem Löschen des Browserspeichers.",
+    "Der Beispiel-Eintrag „Tag 14: Weißer Flaum auf der Erde.“ kann gelöscht werden." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const ANFAENGE = ["Ich se-he …", "Jetzt ist das My-zel …", "Neu ist …", "Wir ha-ben … ge-ern-tet."];
+const WOERTER = ["weiß", "mehr", "grö-ßer", "klei-ne Ku-geln", "Pil-ze", "ü-ber-all"];
+const heute = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const datumText = iso => { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "long" }); };
+const kurzDatum = iso => { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.getDate() + "." + (d.getMonth() + 1) + "."; };
+const neueId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+// ---------------- Speicher (IndexedDB, sonst nur im Arbeitsspeicher) ----------------
+const DB = { db: null, mem: [], meta: {} };
+function idb(req) { return new Promise((res, rej) => { req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); }); }
+async function oeffneDB() {
+  try {
+    if (!window.indexedDB) throw new Error("kein IndexedDB");
+    const r = indexedDB.open("pilze-tagebuch", 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore("eintraege", { keyPath: "id" }); r.result.createObjectStore("meta"); };
+    DB.db = await idb(r);
+  } catch (e) { DB.db = null; }
+}
+const tx = (store, art) => DB.db.transaction(store, art).objectStore(store);
+async function alle() { return DB.db ? idb(tx("eintraege", "readonly").getAll()) : DB.mem.slice(); }
+async function speichere(e) { if (DB.db) await idb(tx("eintraege", "readwrite").put(e)); else { DB.mem = DB.mem.filter(x => x.id !== e.id); DB.mem.push(e); } }
+async function loesche(id) { if (DB.db) await idb(tx("eintraege", "readwrite").delete(id)); else DB.mem = DB.mem.filter(x => x.id !== id); }
+async function metaHol(k) { return DB.db ? idb(tx("meta", "readonly").get(k)) : DB.meta[k]; }
+async function metaSetz(k, v) { if (DB.db) await idb(tx("meta", "readwrite").put(v, k)); else DB.meta[k] = v; }
+
+// ---------------- Aufbau ----------------
+const zl = P.el("div", "zeitleiste", '<div class="reihe"><div class="linie"></div></div>'); S.appendChild(zl);
+zl.setAttribute("role", "list"); zl.setAttribute("aria-label", "Einträge im Tagebuch");
+const reihe = zl.firstChild;
+const links = P.knopf("‹", () => zl.scrollBy({ left: -700 }), "pfeilknopf"); links.setAttribute("aria-label", "Nach links blättern"); P.setze(links, 22, 430);
+const rechts = P.knopf("›", () => zl.scrollBy({ left: 700 }), "pfeilknopf"); rechts.setAttribute("aria-label", "Nach rechts blättern"); P.setze(rechts, 1514, 430);
+S.append(links, rechts);
+const hinweis = P.el("div", "hinweis", "Wird nur in diesem Browser auf diesem Gerät gespeichert. Keine Namen, keine Fotos von Kindern."); S.appendChild(hinweis);
+const status = P.el("div", "status"); status.setAttribute("aria-live", "polite"); S.appendChild(status);
+const melde = (t, noch) => { status.textContent = t; status.classList.toggle("noch", !!noch); };
+// Mausrad blättert waagerecht
+zl.addEventListener("wheel", e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { zl.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+// Mit der Maus am Hintergrund ziehen blättert ebenfalls
+let wisch = null;
+zl.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse" || e.target.closest("button")) return; wisch = { x: e.clientX, s: zl.scrollLeft }; zl.style.scrollBehavior = "auto"; });
+addEventListener("pointermove", e => { if (wisch) zl.scrollLeft = wisch.s - (e.clientX - wisch.x) / P.faktor(); });
+addEventListener("pointerup", () => { if (wisch) { wisch = null; zl.style.scrollBehavior = ""; } });
+
+const textHTML = e => e.silbig ? P.w(e.satz) : P.esc(e.satz);
+let eintraege = [], vergleich = false, auswahl = [];
+async function zeichne(zumEnde) {
+  eintraege = (await alle()).sort((a, b) => (a.datum + a.erstellt).localeCompare(b.datum + b.erstellt));
+  reihe.querySelectorAll(".eintrag,.leer").forEach(n => n.remove());
+  if (!eintraege.length) reihe.appendChild(P.el("p", "leer", P.w("Noch kein Ein-trag. Tip-pe auf „Neu-er Ein-trag“.")));
+  eintraege.forEach(e => {
+    const k = P.el("div", "eintrag", `<div class="datum">${P.esc(datumText(e.datum))}</div>
+      <div class="foto">${e.foto ? `<img alt="Foto der Pilzbox am ${P.esc(datumText(e.datum))}" src="${e.foto}">` : "kein Foto"}</div><div class="text">${textHTML(e)}</div>`);
+    k.setAttribute("role", "listitem"); k.dataset.id = e.id; if (auswahl.includes(e.id)) k.classList.add("gewaehlt");
+    const weg = P.knopf("Löschen", null, "weg"); k.appendChild(weg);
+    let sicher = 0;
+    weg.addEventListener("click", async ev => {
+      ev.stopPropagation();
+      if (!sicher) { sicher = setTimeout(() => { sicher = 0; weg.textContent = "Löschen"; }, 4000); weg.textContent = "Wirklich löschen?"; return; }
+      clearTimeout(sicher); await loesche(e.id); melde("Eintrag gelöscht."); zeichne();
+    });
+    k.addEventListener("click", () => waehle(e.id));
+    k.tabIndex = 0; k.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target === k) waehle(e.id); });
+    reihe.appendChild(k);
+  });
+  if (zumEnde) requestAnimationFrame(() => { zl.scrollLeft = zl.scrollWidth; });
+}
+
+// ---------------- Neuer Eintrag ----------------
+const dlg = P.tafelauf({ x: 150, y: 150, w: 1300, h: 730, cls: "dlg" });
+dlg.el.setAttribute("aria-label", "Neuer Eintrag");
+dlg.el.innerHTML = `<h2>Neuer Eintrag</h2>
+  <div class="zeile"><span class="lbl">Datum</span><input type="date" class="datum"></div>
+  <div class="zeile"><span class="lbl">Foto</span><div class="vorschau">kein Foto</div>
+    <div style="display:flex;flex-direction:column;gap:10px"><span class="knoepfe-foto"></span><span class="warn">Keine Fotos von Kindern.</span></div>
+    <input type="file" accept="image/*" capture="environment" class="datei" hidden></div>
+  <div class="zeile"><span class="lbl">Satzanfang</span><span class="anfaenge zeile"></span></div>
+  <div class="zeile"><span class="lbl">Wort</span><span class="woerter zeile"></span></div>
+  <div class="zeile"><span class="lbl">Eigener Satz</span><input type="text" class="frei" maxlength="120" placeholder="nur Lehrkraft – ersetzt den Satz oben"></div>
+  <div class="streifen satzvorschau"></div>
+  <div class="knoepfe"></div>`;
+const $ = s => dlg.el.querySelector(s);
+const datei = $(".datei"), vorschau = $(".vorschau");
+let foto = null, anfang = ANFAENGE[0], wort = "";
+$(".knoepfe-foto").append(P.knopf("Foto aufnehmen oder auswählen", () => datei.click(), "klein"), " ", P.knopf("Foto entfernen", () => { foto = null; zeigeVorschau(); }, "klein"));
+const chips = (ziel, liste, setze) => liste.map(t => { const b = P.el("button", "chip", P.w(t)); b.type = "button"; b.addEventListener("click", () => { setze(t); aktualisiere(); }); $(ziel).appendChild(b); b.wert = t; return b; });
+const aChips = chips(".anfaenge", ANFAENGE, t => anfang = t), wChips = chips(".woerter", WOERTER, t => wort = wort === t ? "" : t);
+$(".frei").addEventListener("input", aktualisiere);
+const satzJetzt = () => { const f = $(".frei").value.trim(); return f ? { satz: f, silbig: false } : { satz: anfang.replace("…", wort || "…"), silbig: true }; };
+function aktualisiere() {
+  aChips.forEach(b => b.setAttribute("aria-pressed", b.wert === anfang)); wChips.forEach(b => b.setAttribute("aria-pressed", b.wert === wort));
+  const s = satzJetzt(), sv = $(".satzvorschau"); sv.innerHTML = s.silbig ? P.w(s.satz) : P.esc(s.satz);
+}
+function zeigeVorschau() { vorschau.innerHTML = foto ? `<img alt="Vorschau" src="${foto}">` : "kein Foto"; }
+datei.addEventListener("change", async () => {
+  const f = datei.files[0]; datei.value = ""; if (!f) return;
+  try { foto = await verkleinere(f, 1200); zeigeVorschau(); } catch (e) { melde("Das Foto konnte nicht gelesen werden.", true); }
+});
+function verkleinere(f, max) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", .82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(); }; img.src = url;
+  });
+}
+$(".knoepfe").append(P.knopf("Abbrechen", () => dlg.zu()), P.knopf("Speichern", async () => {
+  const s = satzJetzt();
+  if (s.silbig && !wort && !/Wir ha-ben/.test(anfang) && s.satz.includes("…")) { melde("Bitte noch ein Wort wählen oder einen eigenen Satz schreiben.", true); return; }
+  const e = { id: neueId(), datum: $(".datum").value || heute(), foto, satz: (t => /[.!?]$/.test(t) ? t : t + ".")(s.satz.replace("…", "").replace(/\s+\./, ".").trim()), silbig: s.silbig, erstellt: new Date().toISOString() };
+  await speichere(e); dlg.zu(); melde("Eintrag gespeichert."); zeichne(true);
+}, "haupt"));
+function neuerEintrag() {
+  $(".datum").value = heute(); foto = null; zeigeVorschau(); anfang = ANFAENGE[0]; wort = ""; $(".frei").value = ""; aktualisiere(); melde(""); dlg.zeige();
+}
+
+// ---------------- Vergleichen ----------------
+const vgl = P.tafelauf({ x: 60, y: 150, w: 1480, h: 730, cls: "vgl" });
+vgl.el.setAttribute("aria-label", "Zwei Einträge vergleichen");
+function waehle(id) {
+  if (!vergleich) return;
+  auswahl = auswahl.includes(id) ? auswahl.filter(x => x !== id) : auswahl.concat(id).slice(-2);
+  reihe.querySelectorAll(".eintrag").forEach(k => k.classList.toggle("gewaehlt", auswahl.includes(k.dataset.id)));
+  if (auswahl.length === 2) zeigeVergleich();
+}
+function zeigeVergleich() {
+  const [a, b] = auswahl.map(id => eintraege.find(e => e.id === id)).sort((x, y) => x.datum.localeCompare(y.datum));
+  const seite = e => `<div class="seite"><div class="datum">${P.esc(datumText(e.datum))}</div><div class="foto">${e.foto ? `<img alt="Foto vom ${P.esc(datumText(e.datum))}" src="${e.foto}">` : "kein Foto"}</div><div class="text">${textHTML(e)}</div></div>`;
+  vgl.el.innerHTML = seite(a) + seite(b) + `<div class="vglfuss"><span class="say hilfe"><span class="lbl">Sprich:</span>${P.w(`Am ${kurzDatum(a.datum)} war …, heu-te ist …`)}</span></div>`;
+  const zu = P.knopf("Schließen", () => { vgl.zu(); auswahl = []; zeichne(); }, "haupt"); zu.style.marginLeft = "auto";
+  vgl.el.querySelector(".vglfuss").appendChild(zu); vgl.el.style.paddingBottom = "100px";
+  vgl.zeige();
+}
+
+// ---------------- Sichern und Laden ----------------
+async function sichern() {
+  const daten = { art: "pilzbox-tagebuch", version: 1, gesichert: new Date().toISOString(), eintraege: await alle() };
+  const blob = new Blob([JSON.stringify(daten)], { type: "application/json" }), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `pilzbox-tagebuch-${heute()}.json`; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  melde(`Gesichert: ${daten.eintraege.length} Einträge als Datei.`);
+}
+const ladeDatei = P.el("input"); ladeDatei.type = "file"; ladeDatei.accept = ".json,application/json"; ladeDatei.hidden = true; document.body.appendChild(ladeDatei);
+ladeDatei.addEventListener("change", async () => {
+  const f = ladeDatei.files[0]; ladeDatei.value = ""; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || d.art !== "pilzbox-tagebuch" || !Array.isArray(d.eintraege)) throw new Error();
+    let n = 0;
+    for (const e of d.eintraege) {
+      if (!e || typeof e.id !== "string" || typeof e.satz !== "string") continue;
+      await speichere({ id: e.id, datum: String(e.datum || heute()).slice(0, 10), foto: typeof e.foto === "string" && e.foto.startsWith("data:image/") ? e.foto : null,
+        satz: e.satz.slice(0, 200), silbig: !!e.silbig, erstellt: String(e.erstellt || "") }); n++;
+    }
+    melde(`Geladen: ${n} Einträge.`); zeichne(true);
+  } catch (e) { melde("Diese Datei ist keine Sicherung des Pilzbox-Tagebuchs.", true); }
+});
+
+// ---------------- Start ----------------
+const vKnopf = P.schalter("Vergleichen", false, v => { vergleich = v; auswahl = []; zeichne(); S.classList.toggle("vergleich", v);
+  kopf.auftrag(v ? "Tip-pe zwei Kar-ten an." : "", v ? "" : "Ich se-he …"); });
+const kopf = P.kopf({ titel: "Unser Pilzbox-Tagebuch", auftrag: "", say: "Ich se-he …",
+  onNeu: () => { dlg.zu(); vgl.zu(); if (vergleich) vKnopf.click(); zeichne(true); },
+  leiste: [P.knopf("Neuer Eintrag", neuerEintrag, "haupt"), vKnopf, P.knopf("Sichern", sichern), P.knopf("Laden", () => ladeDatei.click())],
+  woerter: ["die Pilz-box", "das My-zel", "der Flaum", "weiß", "grö-ßer", "die Pil-ze", "ge-ern-tet"] });
+(async () => {
+  await oeffneDB();
+  if (!DB.db) melde("Speichern ist in diesem Browser nicht möglich (z. B. privates Fenster). Mit „Sichern“ bleiben die Einträge als Datei erhalten.", true);
+  if (!(await metaHol("start"))) {
+    if (!(await alle()).length) await speichere({ id: "beispiel", datum: heute(), foto: null, satz: "Tag 14: Wei-ßer Flaum auf der Er-de.", silbig: true, erstellt: "" });
+    await metaSetz("start", true);
+  }
+  zeichne(true);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Lupe: Was ist versteckt? – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.pilzbild{position:absolute;left:300px;top:168px;width:520px;height:700px;touch-action:none;cursor:crosshair}
+.pilzbild svg{width:100%;height:100%;display:block}
+.lupe{position:absolute;width:260px;height:260px;border-radius:50%;z-index:30;touch-action:none;cursor:grab}
+.lupe .glas{position:absolute;inset:0;border-radius:50%;overflow:hidden;border:10px solid #1d2320;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.lupe .glas svg{position:absolute;display:block}
+.lupe .griff{position:absolute;left:212px;top:212px;width:110px;height:34px;background:#7a4a2a;border:4px solid #1d2320;border-radius:16px;transform:rotate(45deg);transform-origin:0 50%;z-index:-1}
+.lupe .glanz{position:absolute;left:34px;top:30px;width:60px;height:30px;border-radius:50%;background:rgba(255,255,255,.45);transform:rotate(-30deg);pointer-events:none}
+.lupe.drag{cursor:grabbing}
+.lupe:focus-visible{outline:5px solid var(--ok);outline-offset:6px}
+.liste{position:absolute;left:1180px;top:176px;width:390px;background:var(--tray);border:2px solid var(--trayrand);border-radius:16px;padding:16px 22px}
+.liste h2{margin:0 0 8px;font-size:26px;color:var(--soft)}
+.liste ul{list-style:none;margin:0;padding:0}
+.liste li{display:flex;align-items:center;gap:16px;font-size:32px;font-weight:700;min-height:66px}
+.liste .kh{width:40px;height:40px;border:3px solid var(--ink);border-radius:8px;display:grid;place-items:center;background:#fff;flex:none;font-size:28px;color:#fff}
+.liste li.da .kh{background:var(--ok);border-color:var(--ok)}
+.liste li.da .kh::after{content:"✓"}
+.liste li:not(.da){color:var(--soft)}
+.liste li:not(.da) .s{color:var(--soft)!important}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Lupe: Was ist versteckt?",
+ ziehen: false,
+ teile: [
+  { h: "Worum geht es?", text: "Schrittweise entdecken, was man am Pilz nicht sofort sieht: das Myzel in der Erde, die Lamellen unter dem Hut und die Sporen." },
+  { h: "So geht es", punkte: [
+    "Die runde **Lupe** mit dem Finger über das Bild ziehen. In der Lupe wird das Versteckte sichtbar und größer.",
+    "Ohne Ziehen: auf eine Stelle im Bild tippen – die Lupe springt dorthin. Mit der Tastatur: Lupe anwählen und mit den Pfeiltasten bewegen.",
+    "Wird ein Teil zum ersten Mal entdeckt, erscheint ein Satz und ein Haken in der Entdecker-Liste.",
+    "**Alles zeigen** deckt das ganze Bild auf." ] },
+  { h: "Ohne Hilfen", text: "Mit **Hilfen** aus erscheinen keine Sätze. Die Kinder beschreiben selbst, was sie sehen: „Ich sehe …“." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const BX = 300, BY = 168, BW = 520, SK = BW / 300, ZOOM = 1.8, R = 120;   // R = Innenradius der Lupe
+const TEILE = [
+  { k: "hut",      wort: "der Hut",       satz: "O-ben ist der Hut." },
+  { k: "stiel",    wort: "der Stiel",     satz: "Der Stiel trägt den Hut." },
+  { k: "myzel",    wort: "das My-zel",    satz: "Un-ter der Er-de ist das My-zel." },
+  { k: "lamellen", wort: "die La-mel-len", satz: "Un-ter dem Hut sind La-mel-len." },
+  { k: "sporen",   wort: "die Spo-ren",   satz: "Aus den La-mel-len fal-len Spo-ren." },
+];
+// Wo liegt welcher Teil? (Pilz-Koordinaten 0..300 × 0..404)
+function teilBei(x, y) {
+  if (y >= 340 && y <= 402 && x >= 14 && x <= 288) return "myzel";
+  if (y > 161 && y <= 208 && x >= 52 && x <= 248) return "lamellen";
+  if (y > 208 && y < 338 && x >= 126 && x <= 174) return "stiel";
+  if (y > 208 && y < 338 && x >= 60 && x <= 240) return "sporen";
+  if (y >= 40 && y <= 162 && ((x - 150) / 108) ** 2 + ((y - 162) / 118) ** 2 <= 1) return "hut";
+  return null;
+}
+const VOLL = P.pilz({ erde: true, unterseite: "lamellen", sporen: true, tief: true });
+const VERDECKT = P.pilz({ erde: true, myzel: false, unterseite: "schatten", unten: "#5d4b3b", tief: true });
+
+// ---------- Aufbau ----------
+const bild = P.el("div", "pilzbild"); P.setze(bild, BX, BY); S.appendChild(bild);
+bild.setAttribute("role", "img"); bild.setAttribute("aria-label", "Ein Pilz. Die Erde und die Unterseite des Hutes sind verdeckt.");
+const lupe = P.el("div", "lupe", `<div class="griff"></div><div class="glas">${VOLL}<div class="glanz"></div></div>`);
+lupe.tabIndex = 0; lupe.setAttribute("role", "button"); lupe.setAttribute("aria-label", "Lupe – mit den Pfeiltasten bewegen");
+S.appendChild(lupe);
+const lsvg = lupe.querySelector(".glas svg");
+lsvg.style.width = BW * ZOOM + "px"; lsvg.style.height = 404 * SK * ZOOM + "px";
+
+const liste = P.el("div", "liste", `<h2>${P.w("Das ha-be ich ent-deckt:")}</h2><ul></ul>`); S.appendChild(liste);
+const zeilen = {};
+TEILE.forEach(t => { const li = P.el("li", "", `<span class="kh" aria-hidden="true"></span>${P.w(t.wort)}`); liste.querySelector("ul").appendChild(li); zeilen[t.k] = li; });
+const satz = P.streifen(P.blk(860, 768, 710, 0, "hilfe"));
+const alles = P.knopf("Alles zeigen", () => zeigeAlles());
+
+let lx = 1010, ly = 470, gefunden = new Set(), aufgedeckt = false;
+function setzeLupe(x, y) {
+  lx = Math.max(130, Math.min(1470, x)); ly = Math.max(170, Math.min(770, y));
+  P.setze(lupe, lx - 130, ly - 130);
+  const bx = lx - BX, by = ly - BY;                       // Lage im Bild
+  lsvg.style.left = (R - bx * ZOOM) + "px"; lsvg.style.top = (R - by * ZOOM) + "px";
+  const k = teilBei(bx / SK, by / SK);
+  if (k && !gefunden.has(k)) entdecke(k);
+}
+function entdecke(k) {
+  gefunden.add(k); zeilen[k].classList.add("da");
+  P.melde(satz, "ok", TEILE.find(t => t.k === k).satz);
+  if (gefunden.size === TEILE.length) P.nach(1600, () => P.melde(satz, "ok", "Du hast al-les ent-deckt!"));
+}
+function zeigeAlles() {
+  aufgedeckt = true; bild.innerHTML = VOLL;
+  TEILE.forEach(t => { gefunden.add(t.k); zeilen[t.k].classList.add("da"); });
+  bild.setAttribute("aria-label", "Ein Pilz mit Hut, Stiel, Lamellen, fallenden Sporen und dem Myzel in der Erde.");
+  P.melde(satz, "ok", "Jetzt siehst du al-les.");
+}
+function neu() {
+  aufgedeckt = false; gefunden = new Set(); bild.innerHTML = VERDECKT;
+  Object.values(zeilen).forEach(z => z.classList.remove("da"));
+  P.melde(satz, "", "");
+  setzeLupe(1010, 470);
+}
+
+// Lupe ziehen (Maus, Finger, Stift)
+let zug = null;
+lupe.addEventListener("pointerdown", e => {
+  if (zug || (e.pointerType === "mouse" && e.button !== 0)) return;
+  e.preventDefault(); try { lupe.setPointerCapture(e.pointerId); } catch (_) {}
+  const p = P.punkt(e.clientX, e.clientY); zug = { id: e.pointerId, dx: p.x - lx, dy: p.y - ly }; lupe.classList.add("drag");
+});
+lupe.addEventListener("pointermove", e => { if (!zug || e.pointerId !== zug.id) return; const p = P.punkt(e.clientX, e.clientY); setzeLupe(p.x - zug.dx, p.y - zug.dy); });
+const ende = e => { if (zug && e.pointerId === zug.id) { zug = null; lupe.classList.remove("drag"); } };
+lupe.addEventListener("pointerup", ende); lupe.addEventListener("pointercancel", ende);
+// Antippen im Bild: Lupe springt dorthin
+bild.addEventListener("pointerdown", e => { if (zug) return; const p = P.punkt(e.clientX, e.clientY); setzeLupe(p.x, p.y); });
+lupe.addEventListener("keydown", e => {
+  const d = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[e.key];
+  if (d) { e.preventDefault(); setzeLupe(lx + d[0], ly + d[1]); }
+});
+
+P.kopf({ titel: "Lupe: Was ist versteckt?", auftrag: "Zie-he die Lu-pe ü-ber den Pilz.", say: "Ich se-he …",
+  onNeu: neu, leiste: [alles], woerter: ["der Hut", "der Stiel", "das My-zel", "die La-mel-len", "die Spo-ren", "die Er-de", "un-ter", "o-ben"] });
+neu();
+</script>
+</body>
+</html>

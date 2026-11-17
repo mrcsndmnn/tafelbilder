@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Vom Sporen-Korn zum Pilz – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.slot{position:absolute;border:3px dashed var(--ink);border-radius:14px;background:var(--feld)}
+.slot.jetzt{box-shadow:0 0 0 7px #5e2f91;z-index:4}
+.nr{position:absolute;z-index:8;width:50px;height:50px;border-radius:50%;background:var(--ink);color:#fff;font-size:28px;font-weight:700;display:grid;place-items:center}
+.pfeil{position:absolute;font-size:30px;font-weight:700;color:var(--soft);width:50px;text-align:center}
+.ek{background:#fff;border:3px solid var(--ink);border-radius:12px;display:flex;align-items:center;gap:14px;padding:4px 14px 4px 4px;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.ek .eb{flex:none;width:156px;height:100px;border-radius:8px;overflow:hidden;border:2px solid #cfd6d1}
+.ek .eb svg{width:100%;height:100%;display:block}
+.ek .t{font-size:25px;font-weight:700;line-height:1.25;white-space:normal}
+.ek.nurtext{padding:4px 18px}
+.ek.nurtext .t{font-size:28px}
+.ek.nurbild{padding:4px;justify-content:center}
+.ek.nurbild .eb{width:100%;height:100%;border:none}
+.kreis{position:absolute;left:0;top:0;width:1600px;height:900px;pointer-events:none}
+.mitte{position:absolute;left:350px;top:420px;width:420px}
+.mitte .streifen{font-size:30px;min-height:90px}
+.erz{position:absolute;left:830px;top:300px;width:740px}
+.erz .streifen{font-size:34px;min-height:150px}
+.erz .streifen b{font-weight:700}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Vom Sporen-Korn zum Pilz",
+ teile: [
+  { h: "Worum geht es?", text: "Die Entwicklung eines Pilzes in die richtige Reihenfolge bringen und mit Zeitwörtern erzählen: Zuerst … Dann … Danach … Zum Schluss …" },
+  { h: "So geht es", punkte: [
+    "Die Karten aus der Ablage in die nummerierten Felder der Zeitleiste ziehen (1 ist der Anfang).",
+    "**Prüfen** markiert richtige Felder grün. Stimmt alles, wird der Knopf **Erzählen** aktiv: Er hebt Bild für Bild hervor und zeigt „Zuerst …“, „Dann …“, „Danach …“, „Zum Schluss …“." ] },
+  { h: "Stufen und Kreislauf", punkte: [
+    "**Stufe 1**: 4 Karten (Sporen, Myzel, kleiner Pilz, reifer Pilz) mit Bild und Satz. **Stufe 2**: alle 6 Karten mit Bild und Satz. **Stufe 3**: nur Sätze ordnen – die Bilder kommen, wenn alles stimmt.",
+    "**Kreislauf**: Die Zeitleiste wird zum Kreis. Der Pfeil von der letzten Karte führt zurück zum Anfang: Die neuen Sporen fallen wieder auf die Erde. Im Kreislauf werden immer Bildkarten gelegt; der Satz zur angetippten Karte steht in der Mitte." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const REST = ["fal-len die Spo-ren auf die Er-de.", "kei-men die Spo-ren. Es wach-sen dün-ne Fä-den, die Hy-phen.",
+  "wach-sen die Hy-phen zu-sam-men. Das ist das My-zel.", "wächst aus dem My-zel ein klei-ner Pilz.",
+  "wird der Pilz grö-ßer.", "ist der Pilz reif. Er streut neu-e Spo-ren aus."];
+const BILD = P.STUFEN.map((s, i) => P.entwicklung(i, P.ohne(s)));
+let stufe = 1, kreis = false, slots = [], karten = [], geloest = false, erzLauf = 0;
+
+const ablage = P.blk(820, 166, 750, 726, "ablage");
+const kreisSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); kreisSvg.setAttribute("class", "kreis"); kreisSvg.setAttribute("viewBox", "0 0 1600 900"); S.appendChild(kreisSvg);
+const mitte = P.blk(350, 430, 420, 0, "mitte"); const mSatz = P.streifen(mitte);
+const erz = P.blk(830, 300, 740, 0, "erz"); const eSatz = P.streifen(erz); erz.hidden = true;
+const deko = [];   // Nummern und Pfeile
+
+const zieh = P.zieher({
+  ziele: () => slots, ablage, nah: 30,
+  lege(k, sl) {
+    if (sl.karte && sl.karte !== k) { const alt = sl.karte; alt.slot = null; if (k.slot) { k.slot.karte = alt; alt.slot = k.slot; } }
+    else if (k.slot) k.slot.karte = null;
+    sl.karte = k; k.slot = sl; ordne(); markenWeg();
+    if (kreis) P.melde(mSatz, "", P.STUFEN[k.i]);
+  },
+  zurueck(k) { if (k.slot) k.slot.karte = null; k.slot = null; ordne(); markenWeg(); },
+  onWahl(k) { if (k && kreis) P.melde(mSatz, "", P.STUFEN[k.i]); },
+});
+
+function auswahl() { return stufe === 1 ? [0, 2, 3, 5] : [0, 1, 2, 3, 4, 5]; }
+function karteHTML(i) {
+  const text = stufe === 3 && !geloest;
+  if (kreis) return `<div class="eb">${BILD[i]}</div>`;
+  return (text ? "" : `<div class="eb">${BILD[i]}</div>`) + `<div class="t">${P.w(P.STUFEN[i])}</div>`;
+}
+function baue() {
+  zieh.waehle(null); P.stop(); erzLauf++; zieh.sperre = false;
+  slots.forEach(s => s.el.remove()); karten.forEach(k => k.el.remove()); deko.forEach(d => d.remove()); deko.length = 0;
+  geloest = false; erz.hidden = true; erzKnopf.disabled = true;
+  const reihe = auswahl(), n = reihe.length;
+  kreisSvg.innerHTML = ""; mitte.hidden = !kreis; P.melde(mSatz, "", kreis ? "Tip-pe ei-ne Kar-te an." : "");
+  // Felder
+  slots = reihe.map((_, pos) => {
+    const el = P.el("div", "slot"); S.appendChild(el); el.setAttribute("aria-label", "Feld " + (pos + 1));
+    const s = { el, pos, karte: null };
+    if (kreis) {
+      const a = -Math.PI / 2 + pos * 2 * Math.PI / n; s.a = a;
+      s.w = 210; s.h = 144; s.x = 560 + 380 * Math.cos(a) - 105; s.y = 530 + 270 * Math.sin(a) - 72;
+    } else {
+      const rh = n === 6 ? 120 : 172; s.w = 700; s.h = 112; s.x = 100; s.y = (n === 6 ? 172 : 190) + pos * rh;
+    }
+    P.setze(el, s.x, s.y); el.style.width = s.w + "px"; el.style.height = s.h + "px";
+    const nr = P.el("div", "nr", String(pos + 1)); S.appendChild(nr); deko.push(nr);
+    if (kreis) P.setze(nr, s.x - 18, s.y - 18); else P.setze(nr, 36, s.y + 31);
+    if (!kreis && pos < n - 1) { const pf = P.el("div", "pfeil", "↓"); P.setze(pf, 36, s.y + 82 + (n === 6 ? 0 : 26)); S.appendChild(pf); deko.push(pf); }
+    zieh.zielbar(s); return s;
+  });
+  if (kreis) zeichneKreis(n);
+  // Karten
+  karten = P.mischen(reihe).map((i, platz) => {
+    const el = P.el("div", "ek" + (kreis ? " nurbild" : stufe === 3 ? " nurtext" : ""), karteHTML(i));
+    el.setAttribute("aria-label", P.ohne(P.STUFEN[i]));
+    el.style.width = (kreis ? 200 : 690) + "px"; el.style.height = (kreis ? 134 : 104) + "px";
+    S.appendChild(el); const k = { el, i, platz, slot: null }; zieh.ziehbar(k); return k;
+  });
+  ablage.style.left = (kreis ? 1080 : 820) + "px"; ablage.style.width = (kreis ? 490 : 750) + "px";
+  ablage.style.height = (kreis ? 480 : 726) + "px";
+  ordne(); markenWeg();
+}
+function zeichneKreis(n) {
+  let g = `<defs><marker id="sp" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="context-stroke"/></marker></defs>`;
+  for (let i = 0; i < n; i++) {
+    const a1 = -Math.PI / 2 + i * 2 * Math.PI / n, a2 = a1 + 2 * Math.PI / n, d = .16 + (n === 4 ? .18 : 0);
+    const p = a => [560 + 380 * Math.cos(a), 530 + 270 * Math.sin(a)];
+    const [x1, y1] = p(a1 + d), [x2, y2] = p(a2 - d), [xm, ym] = p((a1 + a2) / 2);
+    const zur = i === n - 1;
+    g += `<path d="M${x1} ${y1} Q${xm * 1.1 - 56} ${ym * 1.1 - 53} ${x2} ${y2}" fill="none" stroke="${zur ? "#5e2f91" : "#8d9892"}" stroke-width="${zur ? 9 : 7}" stroke-linecap="round" marker-end="url(#sp)"/>`;
+  }
+  kreisSvg.innerHTML = g;
+}
+function ordne() {
+  const frei = karten.filter(k => !k.slot).sort((a, b) => a.platz - b.platz);
+  karten.forEach(k => { if (k.slot) P.setze(k.el, k.slot.x + (k.slot.w - parseFloat(k.el.style.width)) / 2, k.slot.y + (k.slot.h - parseFloat(k.el.style.height)) / 2); });
+  frei.forEach(k => {
+    if (kreis) P.setze(k.el, 1105 + (k.platz % 2) * 230, 190 + Math.floor(k.platz / 2) * 150);
+    else P.setze(k.el, 850, 176 + k.platz * 119);
+  });
+}
+function markenWeg() { slots.forEach(s => P.marke(s.el, null)); }
+function pruefen() {
+  const reihe = auswahl(); let alle = true;
+  slots.forEach(s => { const ok = s.karte && s.karte.i === reihe[s.pos]; P.marke(s.el, ok ? "ok" : s.karte ? "noch" : null); if (!ok) alle = false; });
+  if (alle) {
+    geloest = true; erzKnopf.disabled = false;
+    if (stufe === 3 && !kreis) karten.forEach(k => { k.el.classList.remove("nurtext"); k.el.innerHTML = karteHTML(k.i); });
+    zeigeErz(P.LOB + " Tip-pe auf „Er-zäh-len“.", "ok");
+  } else if (!kreis) zeigeErz(slots.some(s => !s.karte) ? "Le-ge zu-erst al-le Kar-ten." : P.NOCH, "noch");
+  else P.melde(mSatz, "noch", slots.some(s => !s.karte) ? "Le-ge zu-erst al-le Kar-ten." : P.NOCH);
+  if (alle && kreis) P.melde(mSatz, "ok", "Der Kreis ist ge-schlos-sen: Die neu-en Spo-ren fal-len wie-der auf die Er-de.");
+}
+function zeigeErz(text, art) { if (kreis) return; erz.hidden = false; P.melde(eSatz, art, text); }
+async function erzaehlen() {
+  const lauf = ++erzLauf, reihe = auswahl(), n = reihe.length;
+  zieh.sperre = true;
+  for (let pos = 0; pos < n; pos++) {
+    if (lauf !== erzLauf) return;
+    slots.forEach(s => s.el.classList.toggle("jetzt", s.pos === pos));
+    const wort = pos === 0 ? "Zu-erst" : pos === n - 1 ? "Zum Schluss" : pos % 2 ? "Dann" : "Da-nach";
+    const t = wort + " " + REST[reihe[pos]];
+    if (kreis) P.melde(mSatz, "", t); else { erz.hidden = false; P.melde(eSatz, "", t); }
+    const erstes = (kreis ? mSatz : eSatz).querySelector(".sw"); if (erstes) erstes.style.textDecoration = "underline";
+    await P.warte(3600);
+  }
+  if (lauf !== erzLauf) return;
+  slots.forEach(s => s.el.classList.remove("jetzt")); zieh.sperre = false;
+  if (kreis) P.melde(mSatz, "ok", "Und dann be-ginnt al-les von vorn.");
+}
+const erzKnopf = P.knopf("Erzählen", () => erzaehlen());
+const stufenWahl = P.stufen(v => { stufe = v; baue(); }, "entw-stufe"); stufe = stufenWahl.wert;
+const kreisKnopf = P.schalter("Kreislauf", false, v => { kreis = v; baue(); });
+P.kopf({ titel: "Vom Sporen-Korn zum Pilz", auftrag: "", say: "Zu-erst … Dann … Zum Schluss …",
+  onNeu: baue, onPruefen: pruefen, leiste: [stufenWahl, kreisKnopf, erzKnopf],
+  woerter: ["die Spo-ren", "die Hy-phen", "das My-zel", "der Pilz", "fal-len", "kei-men", "wach-sen", "reif", "Zu-erst", "Dann", "Da-nach", "Zum Schluss"] });
+baue();
+</script>
+</body>
+</html>

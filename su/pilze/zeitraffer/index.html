@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Zeitraffer: So wächst ein Pilz – Pilze</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.gross{position:absolute;left:60px;top:172px;width:680px;height:510px;border:3px solid var(--ink);border-radius:16px;overflow:hidden}
+.gross svg{width:100%;height:100%;display:block}
+.verb{position:absolute;left:790px;top:420px;width:400px;border:3px dashed var(--ink);border-radius:16px;padding:14px 20px;text-align:center}
+.verb .lbl{font-size:22px;color:var(--soft);font-weight:700}
+.verb .wort{font-size:56px;font-weight:700;min-height:80px}
+.symbol{position:absolute;width:104px;height:78px;border:3px solid #cfd6d1;border-radius:10px;overflow:hidden;background:#fff;padding:0;cursor:pointer}
+.symbol svg{width:100%;height:100%;display:block}
+.symbol.aktiv{border-color:#5e2f91;box-shadow:0 0 0 3px #5e2f91}
+.spur{position:absolute;left:150px;top:788px;width:1300px;height:24px;border-radius:12px;background:#e3e9e5;border:3px solid var(--ink);touch-action:none;cursor:pointer}
+.spur .voll{position:absolute;left:0;top:0;bottom:0;border-radius:10px;background:#c9a227}
+.rast{position:absolute;top:772px;width:6px;height:56px;margin-left:-3px;background:var(--ink);border-radius:3px;pointer-events:none}
+.griff{position:absolute;top:760px;width:80px;height:80px;margin-left:-40px;border-radius:50%;background:#fff;border:6px solid var(--ink);box-shadow:0 4px 12px rgba(0,0,0,.25);touch-action:none;cursor:grab;z-index:5}
+.griff::after{content:"";position:absolute;inset:18px;border-radius:50%;background:#c98a4a}
+.griff:focus-visible{outline:5px solid var(--ok);outline-offset:4px}
+.gesperrt .griff,.gesperrt .spur,.gesperrt .symbol{cursor:not-allowed}
+.gesperrt .griff::after{background:#b9c2bc}
+.lehrkraft{position:absolute;left:790px;top:620px;width:780px}
+.zahl{position:absolute;left:1220px;top:420px;width:350px;font-size:26px;color:var(--soft);font-weight:700}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Zeitraffer: So wächst ein Pilz",
+ ziehen: false,
+ teile: [
+  { h: "Worum geht es?", text: "Wie aus einer Spore ein Pilz wird – im Zeitraffer. So wird sichtbar, was in der Erde passiert." },
+  { h: "So geht es", punkte: [
+    "Den runden Griff des **Schiebereglers** nach rechts ziehen: Das Bild verändert sich Schritt für Schritt. Beim Loslassen rastet der Regler an der nächsten Stufe ein.",
+    "Ohne Ziehen: eines der kleinen Bilder über dem Regler antippen. Mit der Tastatur: Griff anwählen, Pfeiltasten links/rechts.",
+    "**Abspielen** läuft in etwa 12 Sekunden durch, **Pause** hält an.",
+    "Der Satzstreifen zeigt den Satz zur Stufe, daneben steht das passende Verb: fallen, keimen, wachsen, reifen." ] },
+  { h: "Was kommt als Nächstes?", text: "In diesem Modus ist der Regler gesperrt. Die Kinder sagen voraus, was als Nächstes passiert, dann **Weiter** antippen." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script>
+const P = Pilz, S = P.buehne();
+const VERB = ["fal-len", "kei-men", "wach-sen", "wach-sen", "wach-sen", "rei-fen"];
+const TX = 150, TW = 1300, schritt = TW / 5;
+let t = 0, stufe = -1, raten = false, spielt = false, token = 0;
+
+const gross = P.el("div", "gross"); S.appendChild(gross); gross.setAttribute("role", "img");
+const satz = P.streifen(P.blk(790, 180, 780));
+const verb = P.el("div", "verb", `<div class="lbl">Was pas-siert?</div><div class="wort" aria-live="polite"></div>`); S.appendChild(verb);
+verb.querySelector(".lbl").innerHTML = P.w("Was pas-siert?");
+const nummer = P.el("div", "zahl"); S.appendChild(nummer);
+S.appendChild(P.el("div", "lehrkraft", "Für die Lehrkraft: In unserer Pilzbox dauert das ca. 3–4 Wochen."));
+const symbole = P.STUFEN.map((s, k) => {
+  const b = P.el("button", "symbol", P.entwicklung(k)); b.type = "button"; b.setAttribute("aria-label", "Stufe " + (k + 1) + ": " + P.ohne(s));
+  P.setze(b, TX + k * schritt - 52, 690); S.appendChild(b);
+  b.addEventListener("click", () => { if (!raten) gleite(k, 600); });
+  const r = P.el("div", "rast"); r.style.left = TX + k * schritt + "px"; S.appendChild(r);
+  return b;
+});
+const spur = P.el("div", "spur", '<div class="voll"></div>'); S.appendChild(spur);
+const griff = P.el("div", "griff"); griff.tabIndex = 0; griff.setAttribute("role", "slider");
+griff.setAttribute("aria-label", "Zeit"); griff.setAttribute("aria-valuemin", "1"); griff.setAttribute("aria-valuemax", "6"); S.appendChild(griff);
+
+function setze(neu) {
+  t = Math.max(0, Math.min(5, neu));
+  gross.innerHTML = P.entwicklung(t);
+  griff.style.left = TX + t * schritt + "px"; spur.firstChild.style.width = t * schritt + "px";
+  const k = Math.round(t);
+  if (k !== stufe) {
+    stufe = k;
+    P.melde(satz, "", P.STUFEN[k]);
+    verb.querySelector(".wort").innerHTML = P.w(VERB[k]);
+    nummer.textContent = `Stufe ${k + 1} von 6`;
+    symbole.forEach((b, i) => b.classList.toggle("aktiv", i === k));
+    griff.setAttribute("aria-valuenow", k + 1); griff.setAttribute("aria-valuetext", P.ohne(P.STUFEN[k]));
+    gross.setAttribute("aria-label", P.ohne(P.STUFEN[k]));
+  }
+}
+function halt() { token++; spielt = false; spielKnopf.textContent = "Abspielen"; }
+function gleite(ziel, dauer, fertig) {
+  halt(); const mein = token, von = t;
+  P.anim(dauer, p => { if (mein === token) setze(von + (ziel - von) * (1 - (1 - p) ** 2)); }, () => { if (mein === token && fertig) fertig(); });
+}
+function abspielen() {
+  if (spielt) { halt(); P.stop(); return; }
+  if (t >= 5) setze(0);
+  const von = t; halt(); spielt = true; spielKnopf.textContent = "Pause"; const mein = token;
+  P.anim((5 - von) / 5 * 12000, p => { if (mein === token) setze(von + (5 - von) * p); }, () => { if (mein === token) halt(); });
+}
+// Ziehen am Regler
+let zug = null;
+const posVon = e => (P.punkt(e.clientX, e.clientY).x - TX) / schritt;
+[griff, spur].forEach(el => {
+  el.addEventListener("pointerdown", e => {
+    if (raten || zug || (e.pointerType === "mouse" && e.button !== 0)) return;
+    e.preventDefault(); halt(); P.stop(); try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    zug = { id: e.pointerId, el }; setze(posVon(e));
+  });
+  el.addEventListener("pointermove", e => { if (zug && zug.id === e.pointerId) setze(posVon(e)); });
+  const los = e => { if (!zug || zug.id !== e.pointerId) return; zug = null; gleite(Math.round(t), 250); };
+  el.addEventListener("pointerup", los); el.addEventListener("pointercancel", los);
+});
+griff.addEventListener("keydown", e => {
+  if (raten) return;
+  const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key];
+  if (d) { e.preventDefault(); gleite(Math.max(0, Math.min(5, Math.round(t) + d)), 500); }
+  if (e.key === "Home") gleite(0, 500); if (e.key === "End") gleite(5, 500);
+});
+
+const spielKnopf = P.knopf("Abspielen", abspielen);
+const weiter = P.knopf("Weiter", () => {
+  const k = Math.round(t);
+  if (k >= 5) { gleite(0, 800); return; }
+  weiter.disabled = true;
+  gleite(k + 1, 1500, () => { weiter.disabled = false; weiter.textContent = Math.round(t) >= 5 ? "Von vorn" : "Weiter"; });
+}, "haupt");
+weiter.hidden = true;
+const rKnopf = P.schalter("Was kommt als Nächstes?", false, v => {
+  raten = v; halt(); P.stop(); S.classList.toggle("gesperrt", v);
+  gleite(Math.round(t), 300);
+  weiter.hidden = !v; spielKnopf.hidden = v; weiter.disabled = false; weiter.textContent = "Weiter";
+  kopf.auftrag(v ? "Was kommt als Nächs-tes?" : "Schie-be den Reg-ler.", v ? "" : "Zu-erst … Dann …");
+  griff.setAttribute("aria-disabled", v);
+});
+function neu() { halt(); setze(0); }
+const kopf = P.kopf({ titel: "Zeitraffer: So wächst ein Pilz", auftrag: "Schie-be den Reg-ler.", say: "Zu-erst … Dann …", onNeu: neu, leiste: [spielKnopf, weiter, rKnopf],
+  woerter: ["die Spo-ren", "die Hy-phen", "das My-zel", "der Pilz", "fal-len", "kei-men", "wach-sen", "rei-fen"] });
+neu();
+</script>
+</body>
+</html>
