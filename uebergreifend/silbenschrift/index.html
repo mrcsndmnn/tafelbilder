@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Silbenschrift-Editor</title>
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/hinweise.css">
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<style>
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --tool:#2f7d7a; --tool-bg:#e0f2f1;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --tool:#7fd0cb; --tool-bg:#1d3331; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{max-width:none;margin:0 0 20px}
+h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
+.unter{margin:0 0 20px;color:var(--soft);max-width:70ch}
+.karte{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 20px;margin-top:18px}
+.karte h2{margin:0 0 10px;font-size:22px;display:flex;align-items:center;gap:10px}
+.karte h2 .nr{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--tool);color:#fff;font-size:19px;flex:none}
+textarea{width:100%;font-family:var(--font);font-size:22px;line-height:1.45;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 14px;resize:vertical}
+textarea:focus{outline:3px solid var(--accent);outline-offset:1px}
+.hinweis{color:var(--soft);font-size:16px;margin:6px 0 0}
+.zeile{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.zeile .lbl{font-weight:700;color:var(--soft);margin-right:2px}
+button.k{font-family:var(--font);font-size:19px;font-weight:700;min-height:48px;padding:0 18px;border:2px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+button.k:hover{border-color:var(--accent)}
+button.k.haupt{background:var(--tool);border-color:var(--tool);color:#fff}
+@media (prefers-color-scheme: dark){button.k.haupt{color:#10201f}}
+button.k[aria-pressed="true"]{background:var(--tool-bg);border-color:var(--tool)}
+button.k:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.trenner{width:2px;height:32px;background:var(--line)}
+/* Ergebnis: immer auf Weiß, damit Blau und Rot gut lesbar sind */
+.ergebnis{background:#fff;color:#1d2320;border:3px solid #1d2320;border-radius:14px;padding:22px 26px;min-height:120px;font-family:var(--font);font-weight:700;line-height:1.7;
+  font-size:var(--gr,40px);overflow-wrap:anywhere;margin-top:14px}
+.ergebnis:empty::before{content:"Hier erscheint der Text in Silbenschrift.";color:#8d9892;font-weight:400;font-size:20px}
+.ergebnis.ohne-boegen .s::after{display:none}
+.ergebnis.ohne-boegen .s{padding-bottom:0}
+.ergebnis.ohne-farben .s.a,.ergebnis.ohne-farben .s.b{color:#1d2320}
+.ergebnis .zl{display:block;min-height:1em}
+/* Vollbild für die Tafel */
+.ergebnis:fullscreen{border:none;border-radius:0;padding:4vh 5vw;overflow:auto;font-size:calc(var(--gr,40px) * 1.6)}
+.ergebnis:-webkit-full-screen{border:none;border-radius:0;padding:4vh 5vw;overflow:auto}
+@media print{
+  body{background:#fff}
+  .zurueck-zeile,h1,.unter,.karte>*:not(.ergebnis),.karte.eingabe,.karte.pruefen,footer,.hw-knopf{display:none!important}
+  .karte{border:none;padding:0;margin:0}
+  .ergebnis{border:none;padding:0}
+}
+footer{margin-top:40px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <h1>Silbenschrift-Editor</h1>
+  <p class="unter">Text eintippen, auf „In Silbenschrift umwandeln“ drücken – fertig. Die Silben werden automatisch gefunden und können danach von Hand korrigiert werden.</p>
+
+  <section class="karte eingabe">
+    <h2><span class="nr">1</span>Text eingeben</h2>
+    <label class="vh" for="text" style="position:absolute;left:-9999px">Text</label>
+    <textarea id="text" rows="5" spellcheck="true" lang="de" placeholder="Zum Beispiel: Liebe Kinder, heute backen wir einen Kuchen."></textarea>
+    <div class="zeile">
+      <button type="button" class="k haupt" id="umwandeln">In Silbenschrift umwandeln</button>
+      <button type="button" class="k" id="beispiel">Beispiel</button>
+      <button type="button" class="k" id="leeren">Leeren</button>
+    </div>
+  </section>
+
+  <section class="karte pruefen">
+    <h2><span class="nr">2</span>Silben prüfen und korrigieren</h2>
+    <label for="silbig" style="position:absolute;left:-9999px">Text mit Silbengrenzen</label>
+    <textarea id="silbig" rows="4" spellcheck="false" lang="de" placeholder="Hier stehen die Wörter mit Silbengrenzen, z. B. Lie-be Kin-der."></textarea>
+    <p class="hinweis">Ein Bindestrich <b>-</b> ist eine Silbengrenze. Bindestrich setzen oder löschen – die Silbenschrift unten ändert sich sofort.
+      Ein echter Bindestrich im Wort (z. B. „Mathe‐Arbeit“) erscheint hier als <b>‐</b> und bleibt erhalten.</p>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">3</span>Silbenschrift</h2>
+    <div class="zeile">
+      <span class="lbl">Größe</span>
+      <span id="groessen"></span>
+      <span class="trenner"></span>
+      <button type="button" class="k" id="boegen" aria-pressed="true">Bögen</button>
+      <button type="button" class="k" id="farben" aria-pressed="true">Farben</button>
+      <span class="trenner"></span>
+      <button type="button" class="k haupt" id="vollbild">Vollbild für die Tafel</button>
+      <button type="button" class="k" id="drucken">Drucken</button>
+    </div>
+    <div class="ergebnis silben" id="ergebnis" aria-live="polite"></div>
+  </section>
+
+  <footer>Die Silbentrennung läuft komplett im Browser, der Text wird nirgendwohin geschickt. Der zuletzt eingegebene Text bleibt nur in diesem Browser gespeichert.
+    <br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
+</div>
+<script src="../../gemeinsam/silben.js"></script>
+<script src="trennmuster-de.js"></script>
+<script src="silbentrennung.js"></script>
+<script src="../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+  titel: "Silbenschrift-Editor",
+  teile: [
+    { h: "So geht es", punkte: [
+      "**1** Text in das obere Feld tippen (oder einfügen).",
+      "**In Silbenschrift umwandeln** trennt alle Wörter automatisch in Silben.",
+      "**2** Im mittleren Feld stehen die Wörter mit Bindestrichen (z. B. „Lie-be Kin-der“). Ist eine Trennung falsch, einfach Bindestrich setzen oder löschen – das Ergebnis passt sich sofort an.",
+      "**3** Unten steht der Text in Silbenschrift: blaue und rote Silben, jedes Wort beginnt blau, unter jeder Silbe ein Bogen." ] },
+    { h: "Darstellung", punkte: [
+      "**Größe** stellt die Schrift größer oder kleiner.",
+      "**Bögen** und **Farben** lassen sich einzeln abschalten.",
+      "**Vollbild für die Tafel** zeigt nur den Text, groß auf dem ganzen Bildschirm. Mit **Esc** zurück.",
+      "**Drucken** druckt nur den Text in Silbenschrift." ] },
+    { h: "Gut zu wissen", punkte: [
+      "Die automatische Trennung ist sehr zuverlässig, aber nicht fehlerfrei – besonders bei Namen und Fremdwörtern lohnt ein Blick.",
+      "Für Lese-Silben werden auch einzelne Vokale abgetrennt, z. B. „O-ben“, „A-bend“, „Ra-di-o“.",
+      "Absätze (Zeilenumbrüche) bleiben erhalten." ] },
+  ],
+}, document.querySelector(".zurueck-zeile"));
+
+const $ = id => document.getElementById(id);
+const text = $("text"), silbig = $("silbig"), erg = $("ergebnis");
+const laden = (k, std) => { try { const v = localStorage.getItem("silbeneditor-" + k); return v === null ? std : JSON.parse(v); } catch (e) { return std; } };
+const merken = (k, v) => { try { localStorage.setItem("silbeneditor-" + k, JSON.stringify(v)); } catch (e) {} };
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+function zeige() {
+  const t = silbig.value;
+  erg.innerHTML = t.trim() ? t.split("\n").map(z => `<span class="zl">${z.trim() ? silben(esc(z)) : ""}</span>`).join("") : "";
+  merken("silbig", t);
+}
+function umwandeln() {
+  silbig.value = Silbentrennung.trenne(text.value);
+  merken("text", text.value); zeige();
+}
+$("umwandeln").addEventListener("click", umwandeln);
+text.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); umwandeln(); } });
+silbig.addEventListener("input", zeige);
+$("beispiel").addEventListener("click", () => { text.value = "Liebe Kinder,\nheute ist ein schöner Tag. Am Abend gehen wir mit der Familie in den Wald und suchen Eicheln."; umwandeln(); });
+$("leeren").addEventListener("click", () => { text.value = ""; silbig.value = ""; merken("text", ""); zeige(); text.focus(); });
+
+// Größe
+const GR = [["S", 28], ["M", 40], ["L", 56], ["XL", 76]];
+let gr = laden("groesse", 40);
+const grKn = GR.map(([n, px]) => { const b = document.createElement("button"); b.type = "button"; b.className = "k"; b.textContent = n; b.setAttribute("aria-label", "Schriftgröße " + n);
+  b.onclick = () => { gr = px; setzeGr(); }; $("groessen").appendChild(b); $("groessen").append(" "); return [px, b]; });
+function setzeGr() { erg.style.setProperty("--gr", gr + "px"); grKn.forEach(([px, b]) => b.setAttribute("aria-pressed", px === gr)); merken("groesse", gr); }
+// Bögen und Farben
+[["boegen", "ohne-boegen"], ["farben", "ohne-farben"]].forEach(([id, cls]) => {
+  const b = $(id); let an = laden(id, true);
+  const setze = () => { b.setAttribute("aria-pressed", an); erg.classList.toggle(cls, !an); merken(id, an); };
+  b.onclick = () => { an = !an; setze(); }; setze();
+});
+$("vollbild").addEventListener("click", () => { if (erg.requestFullscreen) erg.requestFullscreen().catch(() => {}); else if (erg.webkitRequestFullscreen) erg.webkitRequestFullscreen(); });
+$("drucken").addEventListener("click", () => window.print());
+
+text.value = laden("text", ""); silbig.value = laden("silbig", "");
+setzeGr(); zeige();
+</script>
+</body>
+</html>

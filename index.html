@@ -19,6 +19,7 @@
   --deutsch:#b0552f; --deutsch-bg:#f8e9e2;
   --mathe:#2f6fb0;   --mathe-bg:#e4eef8;
   --su:#7a4fa8;      --su-bg:#efe7f7;
+  --ueber:#2f7d7a;   --ueber-bg:#e0f2f1;
   --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif;
   color-scheme:light;
 }
@@ -27,6 +28,7 @@
   --deutsch:#e89a78; --deutsch-bg:#3a2820;
   --mathe:#7fb0e6;   --mathe-bg:#1e2c3b;
   --su:#b99ae0;      --su-bg:#2c2338;
+  --ueber:#7fd0cb;   --ueber-bg:#1d3331;
   color-scheme:dark;
 }}
 *{box-sizing:border-box}
@@ -87,6 +89,7 @@ footer a{color:inherit}
 .f-deutsch{--fc:var(--deutsch);--fbg:var(--deutsch-bg)}
 .f-mathe{--fc:var(--mathe);--fbg:var(--mathe-bg)}
 .f-su{--fc:var(--su);--fbg:var(--su-bg)}
+.f-uebergreifend{--fc:var(--ueber);--fbg:var(--ueber-bg)}
 .sr{position:absolute;left:-9999px}
 @media (prefers-reduced-motion: reduce){a.tile{transition:none}a.tile:hover{transform:none}.fkopf .pfeil{transition:none}}
 </style>
@@ -123,12 +126,12 @@ footer a{color:inherit}
 <script>
 // ============================================================
 //  EINTRÄGE – hier neue Tafelbilder ergänzen
-//  fach:  "deutsch", "mathe" oder "su" (weitere unten in FAECHER anlegen)
+//  fach:  "deutsch", "mathe", "su" oder "uebergreifend" (weitere unten in FAECHER anlegen)
 //  klasse: eine Stufe aus KLASSEN, z. B. "Klasse 3" – oder mehrere: ["SEP 2","SEP 3"]
 //          "übergreifend" erscheint bei jedem Klassen-Filter mit
 //  url:   Pfad zum Ordner im Repository, z. B. "su/pilze/aufbau/"
 // ============================================================
-const FAECHER = { deutsch:"Deutsch", mathe:"Mathematik", su:"Sachunterricht" };
+const FAECHER = { deutsch:"Deutsch", mathe:"Mathematik", su:"Sachunterricht", uebergreifend:"Übergreifend" };
 // Reihenfolge der Klassen-Filter (ein Knopf erscheint, sobald es dazu ein Material gibt)
 const KLASSEN = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3", "Klasse 4", "übergreifend"];
 
@@ -261,6 +264,10 @@ const EINTRAEGE = [
     titel:"Genau oder gerundet? Das Schulfest",
     beschreibung:"Karten aus Schulfest und Alltag sortieren: Darf ich runden oder muss es genau sein? Mit Begründungen und Signalwörtern.",
     url:"mathe/runden/schulfest/" },
+  { fach:"uebergreifend", thema:"Silbenschrift", art:"Werkzeug", klasse:"übergreifend",
+    titel:"Silbenschrift-Editor",
+    beschreibung:"Text eintippen und per Knopfdruck automatisch in Silbenschrift umwandeln (blau/rot mit Bögen). Silben von Hand korrigierbar, Vollbild für die Tafel, Drucken.",
+    url:"uebergreifend/silbenschrift/" },
 ];
 // ============================================================
 
