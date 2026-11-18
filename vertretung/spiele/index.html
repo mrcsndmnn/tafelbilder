@@ -100,7 +100,7 @@ footer a{color:inherit}
       <li><b>Chorantworten bevorzugen:</b> Bei „Was versteckt sich da?“, „Was fehlt?“, „Reimt sich das?“ und „Silben-Sortierer“ antworten alle gleichzeitig.</li>
       <li><b>Drankommen fair gestalten:</b> Das Namensrad zieht jedes Kind genau einmal, bevor jemand erneut drankommt. Der Joker „Freund fragen“ nimmt den Druck.</li>
       <li><b>Klasse gegen Lehrkraft:</b> Sterne für die Klasse sammeln (Stern oben antippen), die Eule bekommt einen Punkt, wenn es zu laut wird. Am Ende „Endstand feiern“.</li>
-      <li><b>Klang</b> ist anfangs aus (Lautsprecher oben). Es gibt nie Fehlertöne. <b>Vorlesen</b> klappt, wenn das Gerät eine deutsche Stimme hat – sonst ist der Knopf ausgeblendet.</li>
+      <li><b>Ton</b> ist anfangs aus (durchgestrichener Lautsprecher oben in jedem Spiel). Eingeschaltet gibt es sanfte Klänge und die Spiele lesen Wörter und Sätze automatisch vor. Es gibt nie Fehlertöne. Der Lautsprecher am Satzstreifen liest auf Wunsch einmal vor – das klappt, wenn das Gerät eine deutsche Stimme hat, sonst ist der Knopf ausgeblendet.</li>
       <li>Jedes Spiel hat oben einen Knopf „?“ mit einer kurzen Anleitung.</li>
     </ul>
   </details>
@@ -118,7 +118,7 @@ const sitz = { hol: (k, std) => { try { const v = sessionStorage.getItem("vs-" +
 const svg = id => `<svg viewBox="0 0 200 200" aria-hidden="true">${B[id]()}</svg>`;
 const SPIELE = [
   ["versteckt", "Was versteckt sich da?", "raster", "ganze Klasse"], ["was-fehlt", "Was fehlt?", "eule_schlaeft", "ganze Klasse"],
-  ["reime", "Reimt sich das?", "laut", "ganze Klasse"], ["silben", "Silben-Sortierer", "klatschen", "ganze Klasse"],
+  ["reime", "Reimt sich das?", "maus", "ganze Klasse"], ["silben", "Silben-Sortierer", "klatschen", "ganze Klasse"],
   ["gluecksrad", "Glücksrad mit Aufträgen", "rad", "Drankommen"], ["wer-bin-ich", "Wer bin ich?", "vorhang", "Drankommen"],
   ["wimmelbild", "Wimmelbild", "lupe", "Drankommen"], ["klasse-gegen-lehrkraft", "Klasse gegen Lehrkraft", "stern", "Rahmenspiel"],
 ];

@@ -14,7 +14,7 @@
     hallo: { titel: "Hallo!", pfad: "hallo/", bild: "winken" },
     versteckt: { titel: "Was versteckt sich da?", pfad: "versteckt/", bild: "raster", art: "ganze Klasse" },
     "was-fehlt": { titel: "Was fehlt?", pfad: "was-fehlt/", bild: "eule_schlaeft", art: "ganze Klasse" },
-    reime: { titel: "Reimt sich das?", pfad: "reime/", bild: "laut", art: "ganze Klasse" },
+    reime: { titel: "Reimt sich das?", pfad: "reime/", bild: "maus", art: "ganze Klasse" },
     silben: { titel: "Silben-Sortierer", pfad: "silben/", bild: "klatschen", art: "ganze Klasse" },
     gluecksrad: { titel: "Glücksrad mit Aufträgen", pfad: "gluecksrad/", bild: "rad", art: "Drankommen" },
     "wer-bin-ich": { titel: "Wer bin ich?", pfad: "wer-bin-ich/", bild: "vorhang", art: "Drankommen" },
@@ -66,11 +66,13 @@
     document.querySelectorAll(".sprich").forEach(b => b.hidden = !stimme); };
   if ("speechSynthesis" in window) { suche(); try { speechSynthesis.addEventListener("voiceschanged", suche); } catch (e) {} }
   V.kannSprechen = () => !!stimme;
-  V.sprich = (text, tempo = .85) => {
+  // Automatisches Vorlesen nur, wenn „Ton“ an ist. Der Lautsprecher-Knopf am Satzstreifen liest immer vor (V.vorlesen).
+  V.sprich = (text, tempo = .85) => { if (V.klangAn()) V.vorlesen(text, tempo); };
+  V.vorlesen = (text, tempo = .85) => {
     if (!stimme) return;
     try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(V.ohne(String(text).replace(/…/g, ""))); u.lang = "de-DE"; u.rate = tempo; u.voice = stimme; speechSynthesis.speak(u); } catch (e) {}
   };
-  V.sprichKnopf = (textFn, cls) => { const b = V.knopf(V.bild("laut"), () => V.sprich(textFn()), "sym sprich" + (cls ? " " + cls : "")); b.setAttribute("aria-label", "Vorlesen"); b.hidden = !stimme; return b; };
+  V.sprichKnopf = (textFn, cls) => { const b = V.knopf(V.bild("laut"), () => V.vorlesen(textFn()), "sym sprich" + (cls ? " " + cls : "")); b.setAttribute("aria-label", "Vorlesen"); b.hidden = !stimme; return b; };
 
   // ---------------- Klang (standardmäßig aus, nie Fehlertöne) ----------------
   let ctx = null;
@@ -256,9 +258,9 @@
         "Die kleinen Bilder oben zeigen den **Ablauf** der Stunde. Antippen wechselt zum Spiel, erledigte Spiele haben einen Haken.",
         "**Stern / Eule**: Punktestand „Klasse gegen Lehrkraft“. Antippen gibt einen Punkt. Korrigieren und Zurücksetzen auf der Seite „Klasse gegen Lehrkraft“.",
         "**Hand**: Ruhesignal „Hand hoch – Ohren auf!“ (bildschirmfüllend, Antippen schließt).",
-        "**Lautsprecher-Knopf oben**: Klang an oder aus (sanfter Ton bei richtig, nie Fehlertöne). **Vollbild** für das Smartboard.",
+        "**Lautsprecher-Knopf oben**: Ton an oder aus – gilt für die Klänge (sanfter Ton bei richtig, nie Fehlertöne) und für das automatische Vorlesen. Beim ersten Öffnen ist der Ton aus (durchgestrichener Lautsprecher). **Vollbild** für das Smartboard.",
         "Unten: **Satzmuster** und **Hilfe** ein- oder ausblenden, **Weiter** zur nächsten Runde, **Neu starten** beginnt das Spiel von vorn.",
-        "Gelesen werden kann alles auch mit dem Lautsprecher-Knopf am Satzstreifen (nur wenn das Gerät eine deutsche Stimme hat)." ] }]) }, "knopf sym"));
+        "Der Lautsprecher-Knopf **am Satzstreifen** liest den Satz einmal vor – auch wenn der Ton oben aus ist (nur wenn das Gerät eine deutsche Stimme hat)." ] }]) }, "knopf sym"));
     }
     k.appendChild(V.el("div", "titel", (sp.bild ? V.bild(sp.bild) : "") + `<span>${V.esc(titel)}</span>`));
     k.appendChild(ablaufLeiste(id, wurzel));
@@ -266,8 +268,11 @@
     k.appendChild(punkteAnzeige());
     const ruhe = V.knopf(V.bild("hand"), () => V.ruhe(), "sym"); ruhe.setAttribute("aria-label", "Ruhesignal"); ruhe.title = "Ruhesignal";
     const klang = V.knopf(V.bild("laut"), null, "sym"); klang.setAttribute("aria-label", "Klang"); klang.title = "Klang an oder aus";
-    const setzeKlang = () => { const an = V.klangAn(); klang.setAttribute("aria-pressed", an); klang.style.opacity = an ? 1 : .45; };
-    klang.addEventListener("click", () => { V.merken("klang", !V.klangAn()); setzeKlang(); V.klang("richtig"); }); setzeKlang();
+    // Ton an/aus: Klänge und automatisches Vorlesen. Aus = durchgestrichener Lautsprecher.
+    const AUS = '<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M30 76 H64 L108 40 V160 L64 124 H30 Z" fill="#cfd6d1" stroke="#1d2320" stroke-width="6" stroke-linejoin="round"/><path d="M128 70 L180 130 M180 70 L128 130" stroke="#d9822b" stroke-width="12" stroke-linecap="round"/></svg>';
+    const setzeKlang = () => { const an = V.klangAn(); klang.setAttribute("aria-pressed", an); klang.innerHTML = an ? V.bild("laut") : AUS;
+      klang.setAttribute("aria-label", an ? "Ton ist an – antippen zum Ausschalten" : "Ton ist aus – antippen zum Einschalten"); klang.title = an ? "Ton an (antippen: aus)" : "Ton aus (antippen: an)"; };
+    klang.addEventListener("click", () => { const an = !V.klangAn(); V.merken("klang", an); setzeKlang(); if (an) V.klang("richtig"); else { try { speechSynthesis.cancel(); } catch (e) {} } }); setzeKlang();
     const voll = V.knopf('<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 15 V6 H15 M25 6 H34 V15 M34 25 V34 H25 M15 34 H6 V25" fill="none" stroke="#1d2320" stroke-width="4" stroke-linecap="round"/></svg>',
       () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} }, "sym");
     voll.setAttribute("aria-label", "Vollbild"); voll.title = "Vollbild";

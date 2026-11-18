@@ -126,7 +126,7 @@ function feier() {
 function start() { runde = 0; sterne = 0; neueRunde(); }
 const stufenWahl = V.gruppe("", [{ wert: 1, text: "Reimt sich das?" }, { wert: 2, text: "Reim finden" }, { wert: 3, text: "Reimkette" }], 1, v => { stufe = v; start(); }, "reime-stufe");
 stufe = stufenWahl.wert;
-const vorlesen = V.knopf("Vorlesen", () => jetzt && V.sprich(jetzt.b && stufe === 1 ? `${nomen(jetzt.a)} … ${nomen(jetzt.b)}` : nomen(jetzt.a)), "sprich");
+const vorlesen = V.knopf("Vorlesen", () => jetzt && V.vorlesen(jetzt.b && stufe === 1 ? `${nomen(jetzt.a)} … ${nomen(jetzt.b)}` : nomen(jetzt.a)), "sprich");
 vorlesen.hidden = !V.kannSprechen();
 const r = V.rahmen({ id: "reime", titel: "Reimt sich das?", onWeiter: neueRunde, onNeu: start, extra: [stufenWahl, vorlesen],
   onHilfe: () => { if (jetzt && feld.querySelector(".karte-r")) zeichne(false); } });
