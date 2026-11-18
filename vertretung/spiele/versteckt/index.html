@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Was versteckt sich da? – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.bildfeld{position:absolute;left:110px;top:104px;width:620px;height:620px;border:4px solid var(--ink);border-radius:22px;overflow:hidden;background:#fff}
+.bildfeld .bild{position:absolute;inset:20px}
+.bildfeld .bild svg{width:100%;height:100%}
+.kacheln{position:absolute;inset:0;display:grid;gap:4px;background:transparent}
+.kachel{border:none;border-radius:6px;font-family:var(--font);font-size:56px;font-weight:700;color:#1d2320;cursor:pointer;transition:opacity .35s,transform .35s;touch-action:manipulation}
+.kachel.auf{opacity:0;transform:scale(.85)}
+.kachel:focus-visible{outline:5px solid var(--wahl);outline-offset:-6px}
+.panel{position:absolute;left:790px;top:104px;width:770px;height:620px;display:flex;flex-direction:column;gap:18px}
+.themen{display:flex;flex-wrap:wrap;gap:10px}
+.themen .knopf{font-size:22px;padding:0 14px;min-height:56px}
+.zeile{display:flex;gap:14px;flex-wrap:wrap}
+.ablage{flex:1;border:3px dashed var(--line);border-radius:20px;display:flex;align-items:center;justify-content:center;gap:20px;padding:16px}
+.ablage .bk{width:220px;height:250px}
+.ablage .bk .wort{font-size:26px}
+.ablage .gross{width:380px;height:380px}
+.ablage .gross .wort{font-size:42px}
+.ablage .tipp{font-size:24px;color:var(--soft);text-align:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Was versteckt sich da?",
+ teile: [
+  { h: "Worum geht es?", text: "Wortschatz und Artikel: Ein Bild liegt unter bunten Kacheln. Nach und nach aufdecken und raten – alle sprechen im Satzmuster." },
+  { h: "So geht es", punkte: [
+    "Eine **Kachel antippen** deckt sie auf (noch einmal antippen deckt sie wieder zu). Die Kinder raten: „Ich glaube, das ist ein …“",
+    "**Wer wählt?** dreht das Namensrad: Das gezogene Kind sagt, welche Kachel als Nächstes aufgeht.",
+    "**Auflösen** deckt alles auf und zeigt die Wortkarte mit Artikelfarbe (der blau, die rot, das grün). Satz: „Das ist der …“",
+    "**Weiter** zeigt ein neues Bild (nie zweimal hintereinander dasselbe).",
+    "**Hilfe**: Drei Bildkarten zur Auswahl, eine davon ist richtig.",
+    "**Raster** unten: 2 × 2 (leicht), 3 × 3, 4 × 3 (schwer). **Thema** rechts oben." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+const PASTELL = ["#f7d8e3", "#d8ecf7", "#e2f3e0", "#fdf0c9", "#ead9f5", "#fde2cf"];
+let thema = V.laden("versteckt-thema", "tiere"), raster = V.laden("versteckt-raster", "4x3"), jetzt = null, geloest = false;
+
+const feld = V.el("div", "bildfeld", '<div class="bild"></div><div class="kacheln"></div>'); S.appendChild(feld);
+const bild = feld.querySelector(".bild"), kacheln = feld.querySelector(".kacheln");
+const panel = V.el("div", "panel", '<div class="themen" role="group" aria-label="Thema"></div><div class="zeile"></div><div class="ablage" aria-live="polite"></div>'); S.appendChild(panel);
+const ablage = panel.querySelector(".ablage");
+const themen = Object.entries(I.THEMEN).concat([["alle", "Gemischt"]]).map(([k, t]) => {
+  const b = V.knopf(t, () => { thema = k; V.merken("versteckt-thema", k); themen.forEach(x => x.setAttribute("aria-pressed", x === b)); neu(); });
+  b.setAttribute("aria-pressed", k === thema); panel.querySelector(".themen").appendChild(b); return b;
+});
+panel.querySelector(".zeile").append(V.knopf("Auflösen", () => aufloesen(), "haupt"), V.knopf("Wer wählt?", () => V.namensrad({ titel: "Wer wählt die nächste Kachel?" })));
+
+function neu() {
+  jetzt = V.ziehe(V.woerter(thema), "versteckt"); geloest = false;
+  bild.innerHTML = V.bild(jetzt, V.wort(jetzt).ganz);
+  const [sp, ze] = raster.split("x").map(Number);
+  kacheln.style.gridTemplateColumns = `repeat(${sp},1fr)`; kacheln.style.gridTemplateRows = `repeat(${ze},1fr)`;
+  kacheln.innerHTML = "";
+  for (let i = 0; i < sp * ze; i++) {
+    const k = V.el("button", "kachel", String(i + 1)); k.type = "button"; k.style.background = PASTELL[(i + Math.floor(i / sp)) % PASTELL.length];
+    k.setAttribute("aria-label", "Kachel " + (i + 1)); k.addEventListener("click", () => k.classList.toggle("auf"));
+    kacheln.appendChild(k);
+  }
+  const art = V.wort(jetzt).art;
+  r.satz(`Ich glau-be, das ist ${art === "die" ? "ei-ne" : "ein"} …`);
+  zeigeAblage();
+}
+function zeigeAblage() {
+  if (geloest) { ablage.innerHTML = `<div class="gross">${V.karte(jetzt)}</div>`; ablage.firstChild.firstChild.classList.add("gross"); return; }
+  if (r.hilfe) {
+    const andere = V.mische(V.woerter(thema === "alle" ? "alle" : thema).filter(k => k !== jetzt)).slice(0, 2);
+    ablage.innerHTML = V.mische([jetzt, ...andere]).map(k => V.karte(k)).join("");
+  } else ablage.innerHTML = `<div class="tipp">${V.w("Tip-pe ei-ne Ka-chel an.")}<br>${V.w("Was ver-steckt sich da?")}</div>`;
+}
+function aufloesen() {
+  geloest = true; kacheln.querySelectorAll(".kachel").forEach(k => k.classList.add("auf"));
+  const w = V.wort(jetzt); r.satz(`Das ist ${w.art} ${w.silben}.`); zeigeAblage(); V.lob();
+  V.sprich(`Das ist ${w.ganz}.`);
+}
+const rasterWahl = V.gruppe("Raster", [{ wert: "2x2", text: "2 × 2" }, { wert: "3x3", text: "3 × 3" }, { wert: "4x3", text: "4 × 3" }], raster, v => { raster = v; neu(); }, "versteckt-raster");
+raster = rasterWahl.wert;
+const r = V.rahmen({ id: "versteckt", titel: "Was versteckt sich da?", onWeiter: neu, onNeu: neu, onHilfe: zeigeAblage, extra: [rasterWahl] });
+neu();
+</script>
+</body>
+</html>

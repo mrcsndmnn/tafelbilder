@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Vertretungsspiele SEP 3</title>
+<meta name="description" content="Acht Spiel-Tafelbilder für Vertretungsstunden in der SEP 3 – sofort einsetzbar, mit Namensrad und Ablauf-Planer.">
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<style>
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --tool:#2f7d7a; --tool-bg:#e0f2f1; --wahl:#5e2f91;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --tool:#7fd0cb; --tool-bg:#1d3331; --wahl:#c4a3ec; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1150px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{max-width:none;margin:0 0 20px}
+h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
+.unter{margin:0;color:var(--soft);max-width:70ch}
+h2{font-size:24px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+h2 .nr{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--tool);color:#fff;font-size:19px;flex:none}
+.karte{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 20px;margin-top:20px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+a.kachel{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;transition:border-color .15s,transform .15s}
+a.kachel:hover{border-color:var(--tool);transform:translateY(-2px)}
+a.kachel:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.kachel .sym{width:96px;height:96px;border-radius:18px;background:#fff;display:grid;place-items:center;border:2px solid var(--line)}
+.kachel .sym svg{width:78px;height:78px}
+.kachel strong{font-size:19px;line-height:1.25}
+.kachel .tag{font-size:14px;font-weight:700;color:var(--tool);background:var(--tool-bg);border-radius:8px;padding:1px 8px}
+.kachel .dauer{font-size:14px;color:var(--soft)}
+textarea{width:100%;font-family:var(--font);font-size:20px;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 14px;resize:vertical}
+.zeile{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+button.k{font-family:var(--font);font-size:18px;font-weight:700;min-height:48px;padding:0 16px;border:2px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+button.k.haupt{background:var(--tool);border-color:var(--tool);color:#fff}
+@media (prefers-color-scheme: dark){button.k.haupt{color:#10201f}}
+.namen{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.namen span{font-size:24px;font-weight:700;background:#fff;color:#1d2320;border:3px solid var(--wahl);border-radius:14px;padding:4px 14px}
+.hinweis{color:var(--soft);font-size:15px;margin:6px 0 0}
+.wahl{display:flex;flex-wrap:wrap;gap:10px}
+.wahl button{display:flex;align-items:center;gap:8px;font-family:var(--font);font-size:17px;font-weight:700;border:2px solid var(--line);border-radius:12px;background:#fff;color:#1d2320;padding:6px 12px;cursor:pointer;min-height:56px;position:relative}
+.wahl button svg{width:40px;height:40px}
+.wahl button[aria-pressed="true"]{border-color:var(--wahl);box-shadow:0 0 0 3px var(--wahl)}
+.wahl button .pos{position:absolute;right:-8px;top:-10px;width:26px;height:26px;border-radius:50%;background:var(--wahl);color:#fff;font-size:15px;display:grid;place-items:center}
+.plan{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;min-height:64px}
+.plan .st{display:flex;align-items:center;gap:6px;background:#fff;color:#1d2320;border:2px solid var(--line);border-radius:12px;padding:4px 10px;font-weight:700;font-size:16px}
+.plan .st svg{width:40px;height:40px}
+.plan .pf{color:var(--soft);font-size:22px}
+details{margin-top:20px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 20px}
+summary{font-size:20px;font-weight:700;cursor:pointer}
+details li{margin:4px 0}
+footer{margin-top:40px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+@media (prefers-reduced-motion: reduce){a.kachel{transition:none}a.kachel:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <h1>Vertretungsspiele SEP 3</h1>
+  <p class="unter">Spiel-Tafelbilder für Vertretungsstunden: ohne Vorbereitung, auch in einer fremden Klasse. Sprachförderung mit Wortschatz, Artikeln, Satzmustern, Reimen und Silben.</p>
+
+  <section class="karte">
+    <h2><span class="nr">1</span>Namen eingeben (freiwillig)</h2>
+    <label for="namen" style="position:absolute;left:-9999px">Namen der Kinder</label>
+    <textarea id="namen" rows="3" placeholder="Ein Name pro Zeile oder durch Komma getrennt"></textarea>
+    <div class="zeile"><button type="button" class="k haupt" id="namenOk">Namen übernehmen</button><button type="button" class="k" id="namenWeg">Namen löschen</button></div>
+    <div class="namen" id="namenListe" aria-live="polite"></div>
+    <p class="hinweis">Namen bleiben nur in diesem Tab und werden beim Schließen gelöscht. Sie werden nirgendwohin geschickt. Ohne Namen zeigt das Namensrad die Zahlen 1 bis 10.</p>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">2</span>Ablauf planen</h2>
+    <div class="zeile" style="margin-top:0"><button type="button" class="k" id="v45">Vorschlag 45 Minuten</button><button type="button" class="k" id="v90">Vorschlag 90 Minuten</button><button type="button" class="k" id="leer">Ablauf leeren</button></div>
+    <p class="hinweis">2 bis 4 Spiele in der gewünschten Reihenfolge antippen. „Hallo“ am Anfang und „Tschüss“ am Ende kommen automatisch dazu. Der Ablauf erscheint oben in jedem Spiel.</p>
+    <div class="wahl" id="wahl" style="margin-top:10px"></div>
+    <div class="plan" id="plan" aria-live="polite"></div>
+    <div class="zeile"><button type="button" class="k haupt" id="starten">Stunde starten</button></div>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">3</span>Alle Spiele</h2>
+    <div class="grid" id="kacheln"></div>
+  </section>
+
+  <details>
+    <summary>Info für Lehrkräfte</summary>
+    <ul>
+      <li><b>Ruhesignal einführen:</b> Zu Beginn einmal üben – Knopf mit der Hand oben rechts, alle zeigen „Hand hoch, Ohren auf!“.</li>
+      <li><b>Satzmuster modellieren statt korrigieren:</b> Die Antwort des Kindes im richtigen Satz wiederholen („Ja, das ist die Katze.“).</li>
+      <li><b>Chorantworten bevorzugen:</b> Bei „Was versteckt sich da?“, „Was fehlt?“, „Reimt sich das?“ und „Silben-Sortierer“ antworten alle gleichzeitig.</li>
+      <li><b>Drankommen fair gestalten:</b> Das Namensrad zieht jedes Kind genau einmal, bevor jemand erneut drankommt. Der Joker „Freund fragen“ nimmt den Druck.</li>
+      <li><b>Klasse gegen Lehrkraft:</b> Sterne für die Klasse sammeln (Stern oben antippen), die Eule bekommt einen Punkt, wenn es zu laut wird. Am Ende „Endstand feiern“.</li>
+      <li><b>Klang</b> ist anfangs aus (Lautsprecher oben). Es gibt nie Fehlertöne. <b>Vorlesen</b> klappt, wenn das Gerät eine deutsche Stimme hat – sonst ist der Knopf ausgeblendet.</li>
+      <li>Jedes Spiel hat oben einen Knopf „?“ mit einer kurzen Anleitung.</li>
+    </ul>
+  </details>
+
+  <footer>Gebaut für das Smartboard (Bühne 1600 × 900). Tipp: Mit F11 oder dem Vollbild-Knopf auf Vollbild schalten. Alle Bilder sind selbst gezeichnet.
+    <br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
+</div>
+<script src="gemeinsam/inhalte.js"></script>
+<script src="gemeinsam/bilder.js"></script>
+<script src="../../gemeinsam/silben.js"></script>
+<script>
+const B = SPIELBILDER;
+const sitz = { hol: (k, std) => { try { const v = sessionStorage.getItem("vs-" + k); return v === null ? std : JSON.parse(v); } catch (e) { return std; } },
+  setz: (k, v) => { try { sessionStorage.setItem("vs-" + k, JSON.stringify(v)); } catch (e) {} }, weg: k => { try { sessionStorage.removeItem("vs-" + k); } catch (e) {} } };
+const svg = id => `<svg viewBox="0 0 200 200" aria-hidden="true">${B[id]()}</svg>`;
+const SPIELE = [
+  ["versteckt", "Was versteckt sich da?", "raster", "ganze Klasse"], ["was-fehlt", "Was fehlt?", "eule_schlaeft", "ganze Klasse"],
+  ["reime", "Reimt sich das?", "laut", "ganze Klasse"], ["silben", "Silben-Sortierer", "klatschen", "ganze Klasse"],
+  ["gluecksrad", "Glücksrad mit Aufträgen", "rad", "Drankommen"], ["wer-bin-ich", "Wer bin ich?", "vorhang", "Drankommen"],
+  ["wimmelbild", "Wimmelbild", "lupe", "Drankommen"], ["klasse-gegen-lehrkraft", "Klasse gegen Lehrkraft", "stern", "Rahmenspiel"],
+];
+const EXTRA = { hallo: ["Hallo!", "winken"], tschuess: ["Tschüss!", "daumen_hoch"] };
+const info = id => { const s = SPIELE.find(x => x[0] === id); return s ? [s[1], s[2]] : EXTRA[id]; };
+document.getElementById("kacheln").innerHTML = [["hallo", "Hallo! Kennenlernen", "winken", "Einstieg"]].concat(SPIELE, [["tschuess", "Tschüss! Daumenfeedback", "daumen_hoch", "Abschluss"]]).map(([id, t, b, art], i) => `
+  <a class="kachel" href="${id}/"><span class="sym">${svg(b)}</span><strong>${t}</strong><span class="tag">${art}</span>
+    <span class="dauer">${art === "Rahmenspiel" ? "die ganze Stunde" : art === "Einstieg" || art === "Abschluss" ? "ca. 5 Min." : "ca. 10–15 Min."}</span></a>`).join("");
+
+// Namen
+const feld = document.getElementById("namen"), liste = document.getElementById("namenListe");
+function zeigeNamen() { const n = sitz.hol("namen", []); liste.innerHTML = n.map(x => `<span>${x.replace(/[&<>"]/g, "")}</span>`).join(""); if (!feld.value && n.length) feld.value = n.join("\n"); }
+document.getElementById("namenOk").onclick = () => {
+  const n = [...new Set(feld.value.split(/[\n,;]+/).map(x => x.trim()).filter(Boolean))].slice(0, 40);
+  sitz.setz("namen", n); sitz.weg("gezogen"); zeigeNamen();
+};
+document.getElementById("namenWeg").onclick = () => { sitz.weg("namen"); sitz.weg("gezogen"); feld.value = ""; zeigeNamen(); };
+zeigeNamen();
+
+// Ablauf
+let auswahl = sitz.hol("ablauf", []).filter(x => x !== "hallo" && x !== "tschuess");
+const wahl = document.getElementById("wahl"), plan = document.getElementById("plan");
+function zeigePlan() {
+  wahl.innerHTML = ""; SPIELE.filter(s => s[0] !== "klasse-gegen-lehrkraft").forEach(([id, t, b]) => {
+    const btn = document.createElement("button"); btn.type = "button"; const pos = auswahl.indexOf(id);
+    btn.setAttribute("aria-pressed", pos >= 0); btn.innerHTML = svg(b) + t + (pos >= 0 ? `<span class="pos">${pos + 1}</span>` : "");
+    btn.onclick = () => { auswahl = pos >= 0 ? auswahl.filter(x => x !== id) : auswahl.concat(id).slice(0, 4); speichern(); zeigePlan(); };
+    wahl.appendChild(btn);
+  });
+  const ganz = auswahl.length ? ["hallo", ...auswahl, "tschuess"] : [];
+  plan.innerHTML = ganz.length ? ganz.map(id => { const [t, b] = info(id); return `<span class="st">${svg(b)}${t}</span>`; }).join('<span class="pf">→</span>') : '<span class="hinweis">Noch kein Ablauf geplant.</span>';
+}
+function speichern() { sitz.setz("ablauf", auswahl.length ? ["hallo", ...auswahl, "tschuess"] : []); sitz.weg("erledigt"); }
+document.getElementById("v45").onclick = () => { auswahl = ["versteckt", "reime", "gluecksrad"]; speichern(); zeigePlan(); };
+document.getElementById("v90").onclick = () => { auswahl = ["versteckt", "reime", "gluecksrad", "wer-bin-ich"]; speichern(); zeigePlan(); };
+document.getElementById("leer").onclick = () => { auswahl = []; speichern(); zeigePlan(); };
+document.getElementById("starten").onclick = () => { if (!auswahl.length) { auswahl = ["versteckt", "reime", "gluecksrad"]; speichern(); } location.href = "hallo/"; };
+zeigePlan();
+</script>
+</body>
+</html>

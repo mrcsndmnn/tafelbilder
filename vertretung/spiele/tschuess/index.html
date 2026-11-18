@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Tschüss! – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.frage{position:absolute;left:0;right:0;top:110px;text-align:center;font-size:52px;font-weight:700}
+.daumen3{position:absolute;left:60px;right:60px;top:200px;display:flex;gap:40px;justify-content:center}
+.daumen3 button{width:420px;height:440px;border:5px solid var(--ink);border-radius:30px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:var(--font)}
+.daumen3 button svg{width:260px;height:260px}
+.daumen3 .t{font-size:38px;font-weight:700}
+.daumen3 .z{font-size:30px;font-weight:700;color:var(--soft)}
+.daumen3 .hoch{border-color:#5cb85c;background:#f0f9ef}
+.daumen3 .mitte{border-color:#f2b52c;background:#fffaeb}
+.daumen3 .runter{border-color:#d9822b;background:#fff4ea}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Tschüss! – Daumenfeedback",
+ teile: [
+  { h: "So geht es", punkte: [
+    "Frage: „Wie hat dir die Stunde gefallen?“ Alle zeigen gleichzeitig mit dem Daumen: hoch, Mitte oder runter.",
+    "Antippen eines großen Daumens zählt mit (z. B. Anzahl der Kinder). Das ist freiwillig.",
+    "**Endstand feiern** zeigt das Ergebnis von „Klasse gegen Lehrkraft“ mit Konfetti." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne();
+S.appendChild(V.el("div", "frage", V.w("Wie hat dir die Stun-de ge-fal-len?")));
+const box = V.el("div", "daumen3"); S.appendChild(box);
+const zahlen = { hoch: 0, mitte: 0, runter: 0 };
+const T = { hoch: "Gut!", mitte: "Es geht.", runter: "Nicht so gut." };
+Object.keys(zahlen).forEach(k => {
+  const b = V.el("button", k, `${V.bild("daumen_" + k)}<div class="t">${V.w(T[k])}</div><div class="z"></div>`); b.type = "button";
+  b.addEventListener("click", () => { zahlen[k]++; b.querySelector(".z").textContent = zahlen[k]; V.leuchte(b); });
+  b.setAttribute("aria-label", V.ohne(T[k])); box.appendChild(b);
+});
+const r = V.rahmen({ id: "tschuess", titel: "Tschüss!", ohneHilfe: true, satz: "Die Stun-de war …",
+  onNeu: () => { Object.keys(zahlen).forEach(k => zahlen[k] = 0); box.querySelectorAll(".z").forEach(z => z.textContent = ""); },
+  extra: [V.knopf(V.bild("stern") + "Endstand feiern", () => V.feier(), "haupt")] });
+</script>
+</body>
+</html>

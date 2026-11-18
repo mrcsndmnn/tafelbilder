@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Klasse gegen Lehrkraft – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.regeln{position:absolute;left:60px;right:60px;top:104px;display:flex;gap:30px;justify-content:center}
+.regel{width:440px;height:240px;border:4px solid var(--ink);border-radius:22px;background:#fffdf3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.regel svg{width:140px;height:140px}
+.regel .t{font-size:36px;font-weight:700}
+.seite{position:absolute;top:370px;width:700px;height:440px;border:4px solid var(--ink);border-radius:26px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px}
+.seite.k{left:60px;background:#fffbe6}
+.seite.l{left:840px;background:#f6efe6}
+.seite .kopfz{display:flex;align-items:center;gap:16px;font-size:40px;font-weight:700}
+.seite .kopfz svg{width:96px;height:96px}
+.seite .zahl{font-size:140px;font-weight:700;line-height:1}
+.seite .reihe{display:flex;gap:16px}
+.seite .reihe .knopf{min-width:150px;font-size:30px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Klasse gegen Lehrkraft",
+ teile: [
+  { h: "Worum geht es?", text: "Ein Rahmen für die ganze Stunde, kein eigenes Spiel: Die Klasse sammelt gemeinsam Sterne. Die Lehrkraft (Eule) bekommt einen Punkt, wenn es zu laut wird oder Regeln nicht eingehalten werden. Die Klasse gewinnt gemeinsam – Konkurrenz zwischen Kindern gibt es nicht." },
+  { h: "So geht es", punkte: [
+    "Zu Beginn die drei Regeln zeigen und gemeinsam sprechen: „Wir hören zu. Wir melden uns. Wir helfen uns.“",
+    "**+1** und **−1** ändern den Stand. Der Stand gilt in allen Spielen (oben in der Kopfleiste: Stern und Eule antippen) und bleibt beim Wechsel erhalten.",
+    "**Stundenende** zeigt den Endbildschirm mit Konfetti: „Die Klasse hat gewonnen!“ – bei Gleichstand „Unentschieden“.",
+    "**Zurücksetzen** (zweimal tippen) setzt beide auf 0." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+const regeln = V.el("div", "regeln", I.REGELN.map(([b, t]) => `<div class="regel">${V.bild(b)}<div class="t">${V.w(t)}</div></div>`).join("")); S.appendChild(regeln);
+const seite = (wer, bild, name) => {
+  const el = V.el("div", "seite " + wer, `<div class="kopfz">${V.bild(bild)}${V.w(name)}</div><div class="zahl" aria-live="polite"></div><div class="reihe"></div>`);
+  el.querySelector(".reihe").append(V.knopf("+1", () => { V.punkt(wer); V.leuchte(el); if (wer === "k") V.lob(); }, "haupt"), V.knopf("−1", () => V.punkt(wer, -1)));
+  S.appendChild(el); return el;
+};
+const sk = seite("k", "stern", "Klas-se"), sl = seite("l", "eule", "Lehr-kraft");
+const zeig = () => { const p = V.punkte(); sk.querySelector(".zahl").textContent = p.k; sl.querySelector(".zahl").textContent = p.l; };
+document.addEventListener("punkte", zeig); zeig();
+
+let sicher = 0;
+const zurueck = V.knopf("Zurücksetzen", () => {
+  if (!sicher) { zurueck.textContent = "Wirklich zurücksetzen?"; sicher = setTimeout(() => { sicher = 0; zurueck.textContent = "Zurücksetzen"; }, 4000); return; }
+  clearTimeout(sicher); sicher = 0; zurueck.textContent = "Zurücksetzen";
+  V.sitzung.setz("punkte", { k: 0, l: 0 }); document.dispatchEvent(new CustomEvent("punkte", { detail: { k: 0, l: 0 } }));
+});
+const stundenende = () => V.feier();
+V.rahmen({ id: "klasse-gegen-lehrkraft", titel: "Klasse gegen Lehrkraft", ohneSatz: true, ohneHilfe: true,
+  extra: [V.knopf("Stundenende", stundenende, "haupt"), zurueck] });
+</script>
+</body>
+</html>

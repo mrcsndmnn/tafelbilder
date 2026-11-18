@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Reimt sich das? – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.feld{position:absolute;left:20px;right:20px;top:96px;height:636px}
+.karte-r{position:absolute;padding:0;background:none;border:none;font-family:var(--font);cursor:default}
+.karte-r .bk{width:100%;height:100%}
+button.karte-r{cursor:pointer}
+button.karte-r:hover .bk{background:#f7faf8}
+.hilfewort{position:absolute;left:0;right:0;bottom:-2px;text-align:center;font-size:40px;font-weight:700;color:var(--ink)}
+.hilfewort mark{background:#ffe066;border-radius:8px;padding:0 4px;color:var(--ink)}
+.und{position:absolute;font-size:80px;font-weight:700;color:var(--soft)}
+.daumen{position:absolute;width:360px;height:118px;font-size:30px;gap:14px}
+.daumen svg{width:84px;height:84px}
+.zaehler{position:absolute;right:10px;top:0;font-size:26px;font-weight:700;color:var(--soft)}
+.feier{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.feier .sterne{display:flex;gap:10px}
+.feier .sterne svg{width:110px;height:110px}
+.feier .text{font-size:56px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Reimt sich das?",
+ teile: [
+  { h: "Worum geht es?", text: "Reime hören. Alle Kinder antworten gleichzeitig mit dem Daumen – niemand muss allein vor die Klasse." },
+  { h: "Stufe 1: Reimt sich das?", punkte: [
+    "Zwei Bilder erscheinen. Die Lehrkraft spricht beide Wörter (oder der Lautsprecher-Knopf liest sie vor).",
+    "Alle zeigen gleichzeitig Daumen hoch oder runter. Dann tippt die Lehrkraft auf **Daumen hoch** oder **Daumen runter** am Board.",
+    "Nach 10 Paaren gibt es einen Feier-Bildschirm." ] },
+  { h: "Stufe 2 und 3", punkte: [
+    "**Reim finden**: Ein Bild links, drei Bilder rechts – eines reimt sich. Das passende Bild antippen.",
+    "**Reimkette**: Die Kinder nennen selbst einen Reim (auch Unsinnswörter sind erlaubt). Für jeden Reim vergibt die Lehrkraft mit **Stern** einen Stern für die Klasse." ] },
+  { h: "Hilfe", text: "Zeigt die Wörter und hebt das Reimende farbig hervor (H**aus** – M**aus**)." },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE, RUNDEN = 10;
+let stufe = 1, runde = 0, jetzt = null, beantwortet = false, sterne = 0;
+const feld = V.el("div", "feld"); S.appendChild(feld);
+const nomen = id => V.ohne(V.wort(id).silben);
+// Wort mit hervorgehobenem Reimende
+function reimwort(id) {
+  const w = nomen(id), e = I.REIMENDE[id];
+  if (!e || !w.toLowerCase().endsWith(e)) return V.esc(w);
+  return V.esc(w.slice(0, w.length - e.length)) + "<mark>" + V.esc(w.slice(-e.length)) + "</mark>";
+}
+function karte(id, x, y, w, h, onTap) {
+  const el = V.el(onTap ? "button" : "div", "karte-r", V.karte(id, { wort: !r.hilfe }));
+  if (onTap) { el.type = "button"; el.addEventListener("click", () => onTap(el)); el.setAttribute("aria-label", V.wort(id).ganz); }
+  V.setze(el, x, y); el.style.width = w + "px"; el.style.height = h + "px";
+  if (r.hilfe) el.querySelector(".bk").insertAdjacentHTML("beforeend", `<div class="hilfewort">${reimwort(id)}</div>`), el.querySelector(".bild").style.paddingBottom = "50px";
+  feld.appendChild(el); return el;
+}
+function zaehler() { feld.appendChild(V.el("div", "zaehler", stufe === 3 ? `Sterne: ${sterne}` : `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`)); }
+function satzReim(a, b, reimt) { return `${V.wort(a).silben} und ${V.wort(b).silben} rei-men sich${reimt ? "" : " nicht"}.`; }
+
+function neueRunde() {
+  if (stufe !== 3 && runde >= RUNDEN) return feier();
+  runde++;
+  const [a, reim, nicht] = V.ziehe(I.REIME, "reime-" + stufe);
+  if (stufe === 1) { const reimt = Math.random() < .5; jetzt = { a, b: reimt ? reim : nicht, reimt }; }
+  else if (stufe === 2) jetzt = { a, b: reim, wahl: V.mische([reim, nicht, V.mische(Object.keys(I.REIMENDE).filter(k => I.REIMENDE[k] !== I.REIMENDE[a] && k !== nicht))[0]]) };
+  else jetzt = { a };
+  zeichne(true);
+}
+// Runde zeichnen (auch beim Ein- und Ausschalten der Hilfe)
+function zeichne(vorlesen) {
+  beantwortet = false; feld.innerHTML = "";
+  const { a, b } = jetzt;
+  if (stufe === 1) {
+    karte(a, 190, 20, 440, 440); karte(b, 950, 20, 440, 440);
+    const und = V.el("div", "und", "?"); V.setze(und, 768, 170); feld.appendChild(und);
+    const hoch = V.knopf(V.bild("daumen_hoch") + "Reimt sich", () => antwort(true), "daumen"), runter = V.knopf(V.bild("daumen_runter") + "Reimt sich nicht", () => antwort(false), "daumen");
+    V.setze(hoch, 400, 490); V.setze(runter, 840, 490); feld.append(hoch, runter);
+    r.satz(`${V.wort(a).silben} und ${V.wort(b).silben} rei-men sich …`);
+    if (vorlesen) V.sprich(`${nomen(a)} … ${nomen(b)}`);
+  } else if (stufe === 2) {
+    karte(a, 40, 60, 440, 440);
+    jetzt.wahl.forEach((id, i) => karte(id, 600 + i * 330, 110, 300, 340, el => tippe(id, el)));
+    r.satz(`${V.wort(a).silben} und … rei-men sich.`);
+    if (vorlesen) V.sprich(nomen(a));
+  } else {
+    karte(a, 530, 20, 500, 500);
+    const st = V.knopf(V.bild("stern") + "Stern für den Reim", () => { sterne++; V.punkt("k"); V.lob("Su-per ge-reimt!"); feld.querySelector(".zaehler").textContent = `Sterne: ${sterne}`; }, "daumen");
+    st.style.width = "380px"; V.setze(st, 590, 540); feld.appendChild(st);
+    r.satz(`${V.wort(a).silben} reimt sich auf …`);
+    if (vorlesen) V.sprich(nomen(a));
+  }
+  zaehler();
+}
+function antwort(ja) {
+  if (beantwortet) return; beantwortet = true;
+  const { a, b, reimt } = jetzt;
+  if (ja === reimt) V.lob(); else V.noch("Hör noch mal gut hin.");
+  r.satz(satzReim(a, b, reimt)); V.sprich(V.ohne(satzReim(a, b, reimt)));
+  feld.querySelectorAll(".karte-r .bk").forEach(k => V.leuchte(k));
+}
+function tippe(id, el) {
+  if (beantwortet) return;
+  if (id === jetzt.b) { beantwortet = true; V.lob(); V.leuchte(el.querySelector(".bk")); r.satz(satzReim(jetzt.a, id, true)); V.sprich(V.ohne(satzReim(jetzt.a, id, true))); }
+  else { V.noch(); }
+}
+function feier() {
+  feld.innerHTML = "";
+  const f = V.el("div", "feier", `<div class="sterne">${V.bild("stern").repeat(5)}</div><div class="text">${V.w("Su-per! Ihr habt 10 Rei-me ge-schafft!")}</div>`);
+  f.style.cssText = "position:absolute;left:0;right:0;top:60px";
+  f.appendChild(V.knopf("Noch einmal", () => start(), "haupt")); feld.appendChild(f); V.klang("fertig"); r.satz("");
+}
+function start() { runde = 0; sterne = 0; neueRunde(); }
+const stufenWahl = V.gruppe("", [{ wert: 1, text: "Reimt sich das?" }, { wert: 2, text: "Reim finden" }, { wert: 3, text: "Reimkette" }], 1, v => { stufe = v; start(); }, "reime-stufe");
+stufe = stufenWahl.wert;
+const vorlesen = V.knopf("Vorlesen", () => jetzt && V.sprich(jetzt.b && stufe === 1 ? `${nomen(jetzt.a)} … ${nomen(jetzt.b)}` : nomen(jetzt.a)), "sprich");
+vorlesen.hidden = !V.kannSprechen();
+const r = V.rahmen({ id: "reime", titel: "Reimt sich das?", onWeiter: neueRunde, onNeu: start, extra: [stufenWahl, vorlesen],
+  onHilfe: () => { if (jetzt && feld.querySelector(".karte-r")) zeichne(false); } });
+start();
+</script>
+</body>
+</html>

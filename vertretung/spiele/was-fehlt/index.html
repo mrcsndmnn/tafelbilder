@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Was fehlt? – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.einst{position:absolute;left:24px;right:24px;top:96px;height:64px;display:flex;gap:26px;align-items:center}
+.platz-k{position:absolute;transition:left .6s ease,top .6s ease}
+.platz-k .bk{width:100%;height:100%}
+.platz-k.fehlt .bk{visibility:hidden}
+.platz-k .loch{position:absolute;inset:0;border:4px dashed var(--soft);border-radius:20px;display:grid;place-items:center;font-size:120px;font-weight:700;color:var(--soft);background:#fafbfa}
+.platz-k .loch svg{position:absolute;inset:30px;width:calc(100% - 60px);height:calc(100% - 60px);filter:brightness(0);opacity:.18}
+.platz-k.zurueck .bk{animation:zurueck .7s ease-out}
+@keyframes zurueck{from{transform:translateY(-500px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.vorhang{position:absolute;left:20px;right:20px;top:96px;height:640px;border-radius:20px;background:#2b3a55;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:35;cursor:pointer;color:#fff}
+.vorhang svg{width:300px;height:300px}
+.vorhang .t{font-size:60px;font-weight:700}
+.vorhang .t .s.a,.vorhang .t .s.b{color:#fff}
+.vorhang .t .s::after{border-color:#fff!important}
+.vorhang .zzz{font-size:40px;color:#cfd8e3}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Was fehlt?",
+ teile: [
+  { h: "Worum geht es?", text: "Wortschatz und Gedächtnis: Bilder anschauen und benennen, Augen zu – welches Bild fehlt jetzt?" },
+  { h: "So geht es", punkte: [
+    "Alle Bilder gemeinsam benennen: „Das ist der Hund …“",
+    "**Augen zu!** zeigt einen Vorhang mit schlafender Eule (3 Sekunden, Antippen geht schneller). Danach fehlt eine Karte – an ihrem Platz steht ein Fragezeichen.",
+    "Die Kinder sagen: „Der Hund fehlt.“ **Zeigen** lässt die Karte zurückfliegen.",
+    "**Weiter** legt neue Karten aus.",
+    "Oben: **Anzahl** (4, 6 oder 8 Karten) und **Niveau**: eine Karte fehlt, zwei Karten fehlen, oder **Profi**: Die Karten tauschen zusätzlich den Platz.",
+    "**Hilfe** zeigt den Umriss (Schatten) der fehlenden Karte." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+let anzahl = 6, niveau = "eins", karten = [], fehlen = [], phase = "schauen";
+const einst = V.el("div", "einst"); S.appendChild(einst);
+const feld = V.blk(0, 0, 1600, 900); feld.style.pointerEvents = "none";
+const plaetze = n => { // Raster: 4 → 4×1, 6 → 3×2, 8 → 4×2
+  const sp = n === 6 ? 3 : 4, ze = n === 4 ? 1 : 2, w = n === 4 ? 340 : 290, h = n === 4 ? 400 : 270, gx = 30, gy = 24;
+  const x0 = (1600 - sp * w - (sp - 1) * gx) / 2, y0 = 178 + (550 - ze * h - (ze - 1) * gy) / 2;
+  return Array.from({ length: n }, (_, i) => ({ x: x0 + (i % sp) * (w + gx), y: y0 + Math.floor(i / sp) * (h + gy), w, h }));
+};
+function neu() {
+  V.stop(); phase = "schauen"; fehlen = [];
+  const pool = V.woerter("alle");
+  const ids = V.mische(pool).slice(0, anzahl), pl = plaetze(anzahl);
+  feld.innerHTML = "";
+  karten = ids.map((id, i) => {
+    const el = V.el("div", "platz-k", V.karte(id)); el.style.pointerEvents = "auto";
+    V.setze(el, pl[i].x, pl[i].y); el.style.width = pl[i].w + "px"; el.style.height = pl[i].h + "px"; feld.appendChild(el);
+    return { id, el, platz: i };
+  });
+  augenKnopf.disabled = false; zeigKnopf.disabled = true;
+  r.satz("Das ist …");
+}
+function augenZu() {
+  if (phase !== "schauen") return;
+  phase = "zu"; augenKnopf.disabled = true;
+  const v = V.el("div", "vorhang", `${V.bild("eule_schlaeft")}<div class="t">${V.w("Au-gen zu!")}</div><div class="zzz">z z z</div>`);
+  v.setAttribute("role", "button"); v.setAttribute("aria-label", "Vorhang – antippen zum Öffnen"); S.appendChild(v); V.klang("gong");
+  let offen = false;
+  const auf = () => {
+    if (offen) return; offen = true; v.remove();
+    const zahl = niveau === "zwei" ? 2 : 1;
+    fehlen = V.mische(karten).slice(0, zahl);
+    if (niveau === "profi") { // Plätze der übrigen Karten tauschen
+      const pl = plaetze(anzahl), rest = karten.filter(k => !fehlen.includes(k)), freiePlaetze = V.mische(rest.map(k => k.platz));
+      rest.forEach((k, i) => { k.platz = freiePlaetze[i]; V.setze(k.el, pl[k.platz].x, pl[k.platz].y); });
+    }
+    fehlen.forEach(k => { k.el.classList.add("fehlt"); const l = V.el("div", "loch", (r.hilfe ? V.bild(k.id) : "") + "?"); k.el.appendChild(l); });
+    phase = "fehlt"; zeigKnopf.disabled = false;
+    r.satz(zahl === 2 ? "… und … feh-len." : "… fehlt.");
+  };
+  v.addEventListener("click", auf); V.nach(3000, auf);
+}
+function zeigen() {
+  if (phase !== "fehlt") return;
+  phase = "gezeigt"; zeigKnopf.disabled = true;
+  fehlen.forEach(k => { k.el.classList.remove("fehlt"); k.el.querySelector(".loch").remove(); k.el.classList.add("zurueck"); V.leuchte(k.el.querySelector(".bk")); });
+  const gross = s => s[0].toUpperCase() + s.slice(1), w = fehlen.map(k => V.wort(k.id));
+  r.satz(w.length === 2 ? `${gross(w[0].art)} ${w[0].silben} und ${w[1].art} ${w[1].silben} feh-len.` : `${gross(w[0].art)} ${w[0].silben} fehlt.`);
+  V.sprich(w.length === 2 ? `${gross(w[0].ganz)} und ${w[1].ganz} fehlen.` : `${gross(w[0].ganz)} fehlt.`);
+  V.lob();
+}
+const augenKnopf = V.knopf(V.bild("eule_schlaeft") + "Augen zu!", augenZu, "haupt");
+const zeigKnopf = V.knopf("Zeigen", zeigen);
+einst.append(V.gruppe("Anzahl", [4, 6, 8].map(n => ({ wert: n, text: String(n) })), 6, v => { anzahl = v; neu(); }, "fehlt-anzahl"),
+  V.gruppe("Niveau", [{ wert: "eins", text: "1 fehlt" }, { wert: "zwei", text: "2 fehlen" }, { wert: "profi", text: "Profi: Plätze tauschen" }], "eins", v => { niveau = v; neu(); }, "fehlt-niveau"));
+anzahl = V.laden("fehlt-anzahl", 6); niveau = V.laden("fehlt-niveau", "eins");
+const r = V.rahmen({ id: "was-fehlt", titel: "Was fehlt?", onWeiter: neu, onNeu: neu, extra: [augenKnopf, zeigKnopf],
+  onHilfe: an => fehlen.forEach(k => { const l = k.el.querySelector(".loch"); if (l) l.innerHTML = (an ? V.bild(k.id) : "") + "?"; }) });
+neu();
+</script>
+</body>
+</html>

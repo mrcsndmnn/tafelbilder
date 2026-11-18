@@ -1,0 +1,119 @@
+/* =====================================================================
+   Vertretungsspiele – gemeinsame Gestaltung (Bühne 1600 × 900, skaliert)
+   ===================================================================== */
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  /* Artikelfarben – hier an das Farbsystem der Klasse anpassen */
+  --der:#1f5fbf; --die:#c8322c; --das:#2f8a3e;
+  --room:#dfe5e0; --stage:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#cfd6d1; --feld:#f3f6f2;
+  --ok:#2f7d4f; --okbg:#e8f5ec; --noch:#a85a00; --nochrand:#d9822b; --nochbg:#fff3e0; --wahl:#5e2f91;
+  --s1:#1f5fbf; --s2:#c8322c;
+  --font:"Andika","Comic Sans MS","Segoe UI",sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--room:#141816}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);overflow:hidden;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));user-select:none;-webkit-user-select:none}
+#fit{position:relative;width:100%;height:100%}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;background:var(--stage);border-radius:18px;box-shadow:0 6px 30px rgba(0,0,0,.18);transform-origin:0 0;overflow:hidden}
+.blk{position:absolute}
+[hidden]{display:none!important}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Knöpfe ---------- */
+.knopf{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:64px;min-width:64px;padding:0 20px;font-family:var(--font);font-size:24px;font-weight:700;
+  color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:14px;cursor:pointer;text-decoration:none;touch-action:manipulation;white-space:nowrap;line-height:1.1}
+.knopf:hover{background:#f1f5f2}
+.knopf.haupt{background:var(--ink);color:#fff}
+.knopf.haupt:hover{background:#38423d}
+.knopf[aria-pressed="true"]{background:#e3f2e8;border-color:var(--ok)}
+.knopf:disabled{opacity:.35;cursor:default}
+.knopf.sym{padding:0;width:64px}
+.knopf svg{width:42px;height:42px;flex:none}
+.knopf .box{width:26px;height:26px;border:3px solid var(--ink);border-radius:6px;display:inline-grid;place-items:center;font-size:20px;line-height:1}
+.knopf[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.knopf[aria-pressed="true"] .box::after{content:"✓"}
+.knopf:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:5px solid var(--ok);outline-offset:3px}
+.gruppe{display:flex;align-items:center;gap:8px}
+.gruppe .glabel{font-size:22px;font-weight:700;color:var(--soft)}
+.gruppe .knopf{padding:0 14px}
+
+/* ---------- Kopfleiste ---------- */
+.kopf{position:absolute;left:20px;right:20px;top:12px;height:68px;display:flex;align-items:center;gap:16px;z-index:40}
+.kopf .titel{display:flex;align-items:center;gap:10px;font-size:32px;font-weight:700;white-space:nowrap;min-width:0}
+.kopf .titel svg{width:52px;height:52px;flex:none}
+.ablauf{display:flex;gap:6px;align-items:center;margin-left:8px}
+.ablauf a{position:relative;width:54px;height:54px;border:3px solid var(--line);border-radius:12px;background:#fff;display:grid;place-items:center}
+.ablauf a svg{width:40px;height:40px}
+.ablauf a.jetzt{border-color:var(--wahl);box-shadow:0 0 0 3px var(--wahl)}
+.ablauf a.erledigt{opacity:.55}
+.ablauf a.erledigt::after{content:"✓";position:absolute;right:-8px;top:-10px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;font-size:16px;font-weight:700;display:grid;place-items:center}
+.kopf .platz{flex:1}
+.punkte{display:flex;gap:6px}
+.punkte .knopf{padding:0 12px;font-size:28px;gap:6px}
+.punkte .knopf svg{width:38px;height:38px}
+.punkte .knopf.plus{animation:plus .5s}
+@keyframes plus{40%{transform:scale(1.18)}}
+
+/* ---------- Fußleiste und Satzstreifen ---------- */
+.fuss{position:absolute;left:20px;right:20px;bottom:12px;height:68px;display:flex;align-items:center;gap:14px;z-index:40}
+.fuss .platz{flex:1}
+.satzstreifen{position:absolute;left:20px;right:20px;top:740px;height:78px;border:3px solid var(--ink);border-radius:16px;background:#fffdf3;display:flex;align-items:center;gap:16px;padding:0 10px 0 22px;z-index:30}
+.satzstreifen .text{flex:1;font-size:36px;font-weight:700;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:14px}
+.satzstreifen .luecke{display:inline-grid;place-items:center;min-width:90px;height:58px;border:3px dashed var(--soft);border-radius:12px;background:#fff;vertical-align:middle}
+.satzstreifen .luecke svg{width:52px;height:52px}
+.satzstreifen.aus{visibility:hidden}
+
+/* ---------- Bildkarte ---------- */
+.bk{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#fff;border:4px solid var(--ink);border-radius:20px;padding:10px;overflow:hidden}
+.bk .bild{flex:1;min-height:0;width:100%;display:grid;place-items:center}
+.bk .bild svg{width:100%;height:100%;max-height:100%}
+.bk .wort{font-size:32px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.art{display:inline-block;color:#fff;border-radius:10px;padding:0 10px;font-weight:700;line-height:1.35}
+.art.der{background:var(--der)} .art.die{background:var(--die)} .art.das{background:var(--das)}
+.bk.der{border-color:var(--der)} .bk.die{border-color:var(--die)} .bk.das{border-color:var(--das)}
+
+/* ---------- Rückmeldung ---------- */
+.meldung{position:absolute;left:50%;top:96px;transform:translateX(-50%);z-index:70;font-size:44px;font-weight:700;padding:10px 34px;border-radius:20px;border:4px solid var(--ok);background:var(--okbg);color:var(--ok);
+  pointer-events:none;animation:melden 1.8s ease-out forwards;white-space:nowrap}
+.meldung.noch{border-color:var(--nochrand);background:var(--nochbg);color:var(--noch)}
+.silben .meldung .s.a,.silben .meldung .s.b{color:inherit}
+@keyframes melden{0%{opacity:0;transform:translateX(-50%) scale(.7)}15%{opacity:1;transform:translateX(-50%) scale(1.05)}25%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+.leuchten{animation:leuchten 1s ease-out}
+@keyframes leuchten{30%{box-shadow:0 0 0 14px rgba(47,125,79,.35)}}
+
+/* ---------- Überlagerungen (Namensrad, Ruhesignal …) ---------- */
+.schicht{position:absolute;inset:0;z-index:90;background:rgba(29,35,32,.45);display:grid;place-items:center}
+.schicht .tafel{background:#fffdf6;border:4px solid var(--ink);border-radius:26px;box-shadow:0 18px 50px rgba(0,0,0,.3);padding:26px 32px}
+.ruhe{background:#fffdf6;cursor:pointer}
+.ruhe .inhalt{display:flex;flex-direction:column;align-items:center;gap:20px}
+.ruhe .bilder{display:flex;gap:60px}
+.ruhe .bilder svg{width:300px;height:300px}
+.ruhe .text{font-size:64px;font-weight:700}
+.ruhe .klein{font-size:24px;color:var(--soft)}
+.namensrad{display:flex;gap:34px;align-items:center;width:1240px;height:680px}
+.namensrad .nr-rad{width:600px;height:620px;flex:none}
+.namensrad .nr-rad svg{width:600px;height:620px;overflow:visible}
+.namensrad .nr-dreh{transform-origin:300px 320px;transition:transform 2.6s cubic-bezier(.17,.84,.24,1)}
+.namensrad .nr-rechts{flex:1;display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+.namensrad .nr-name{font-size:76px;font-weight:700;min-height:100px;color:var(--wahl)}
+.namensrad .nr-joker{display:flex;align-items:center;gap:16px;font-size:30px;font-weight:700;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:10px 18px}
+.namensrad .nr-joker svg{width:80px;height:80px}
+.namensrad .nr-info{font-size:22px;color:var(--soft)}
+.namensrad .nr-zeile{display:flex;gap:14px;flex-wrap:wrap}
+
+.ende{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center}
+.ende .gross{font-size:72px;font-weight:700}
+.ende .stand{display:flex;gap:40px;align-items:center;font-size:64px;font-weight:700}
+.ende .stand svg{width:110px;height:110px}
+.konfetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:4px;animation:fallen 2.6s ease-in forwards;z-index:95}
+@keyframes fallen{to{transform:translateY(980px) rotate(720deg);opacity:.6}}
+@media (prefers-reduced-motion: reduce){.konfetti{display:none}}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .meldung{opacity:1}
+}

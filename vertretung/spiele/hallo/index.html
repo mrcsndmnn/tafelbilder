@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Hallo! – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.links{position:absolute;left:40px;top:110px;width:520px;height:610px;border:4px solid var(--ink);border-radius:26px;background:#faf7ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.links svg{width:200px;height:200px}
+.links .name{font-size:80px;font-weight:700;color:var(--wahl);min-height:100px;text-align:center}
+.rechts{position:absolute;left:600px;top:110px;width:960px;height:610px;display:flex;flex-direction:column;gap:18px}
+.rechts .titel{font-size:34px;font-weight:700}
+.kats{display:flex;gap:12px}
+.wahl{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;flex:1}
+.wahl button{padding:0;border:none;background:none;cursor:pointer;font-family:var(--font)}
+.wahl .bk{width:100%;height:100%;border-color:var(--line)}
+.wahl button[aria-pressed="true"] .bk{border-color:var(--wahl);box-shadow:0 0 0 6px rgba(94,47,145,.3)}
+.wahl .bk .wort{font-size:34px}
+.satzstreifen .text .bildchen svg{width:60px;height:60px;vertical-align:middle}
+.satzstreifen .text .nm{color:var(--wahl)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Hallo! – Kennenlernen",
+ teile: [
+  { h: "So geht es", punkte: [
+    "Die Lehrkraft stellt sich zuerst mit dem Satzmuster vor: „Ich heiße … Ich mag …“",
+    "**Wer ist dran?** dreht das Namensrad (Namen auf der Startseite eintragen). Das gezogene Kind tippt ein Bild an und sagt den Satz.",
+    "Bilder gibt es zu **Tieren, Essen, Farben und Sport**.",
+    "Ohne Namen zeigt das Rad die Zahlen 1 bis 10." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+let name = "", mag = null, kat = Object.keys(I.MAG)[0];
+const links = V.el("div", "links", `${V.bild("winken")}<div class="name" aria-live="polite"></div>`); S.appendChild(links);
+links.appendChild(V.knopf("Wer ist dran?", async () => { const n = await V.namensrad(); if (n) { name = n; mag = null; zeige(); } }, "haupt"));
+const rechts = V.el("div", "rechts", `<div class="titel">${V.w("Ich mag …")}</div><div class="kats" role="group" aria-label="Thema"></div><div class="wahl"></div>`); S.appendChild(rechts);
+const kats = Object.keys(I.MAG).map(k => { const b = V.knopf(V.w(k), () => { kat = k; zeige(); }); rechts.querySelector(".kats").appendChild(b); return [k, b]; });
+function zeige() {
+  links.querySelector(".name").textContent = name || "…";
+  kats.forEach(([k, b]) => b.setAttribute("aria-pressed", k === kat));
+  const w = rechts.querySelector(".wahl"); w.innerHTML = "";
+  I.MAG[kat].forEach(([bild, wort]) => {
+    const b = V.el("button", "", `<div class="bk"><div class="bild">${V.bild(bild)}</div><div class="wort">${V.w(wort)}</div></div>`); b.type = "button";
+    b.setAttribute("aria-pressed", !!mag && mag[0] === bild); b.setAttribute("aria-label", V.ohne(wort));
+    b.addEventListener("click", () => { mag = [bild, wort]; zeige(); V.sprich(`Ich heiße ${name || "…"}. Ich mag ${V.ohne(wort)}.`); });
+    w.appendChild(b);
+  });
+  const nm = name ? `<span class="nm">${V.esc(name)}.</span>` : '<span class="luecke"></span><span>.</span>';
+  const mg = mag ? `<span class="bildchen">${V.bild(mag[0])}</span> ${V.w(mag[1] + ".")}` : '<span class="luecke"></span>';
+  r.satzHTML(`${V.w("Ich hei-ße")} ${nm} ${V.w("Ich mag")} ${mg}`, `Ich heiße ${name}. Ich mag ${mag ? V.ohne(mag[1]) : ""}.`);
+}
+const r = V.rahmen({ id: "hallo", titel: "Hallo! Ich heiße …", ohneHilfe: true, onWeiter: async () => { const n = await V.namensrad(); if (n) { name = n; mag = null; zeige(); } },
+  onNeu: () => { name = ""; mag = null; zeige(); } });
+zeige();
+</script>
+</body>
+</html>

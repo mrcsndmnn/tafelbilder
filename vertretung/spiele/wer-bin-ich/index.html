@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Wer bin ich? – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.buehne{position:absolute;left:50px;top:104px;width:520px;height:520px;border:4px solid var(--ink);border-radius:24px;overflow:hidden;background:#fff}
+.buehne .bild{position:absolute;inset:20px}
+.buehne .bild svg{width:100%;height:100%}
+.buehne .tuch{position:absolute;top:0;bottom:0;width:50%;background:#c8322c;transition:transform 1s ease;
+  background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 14px,transparent 14px 44px)}
+.buehne .tuch.l{left:0;border-right:3px solid #8e211b}
+.buehne .tuch.r{right:0;border-left:3px solid #8e211b}
+.buehne.offen .tuch.l{transform:translateX(-100%)}
+.buehne.offen .tuch.r{transform:translateX(100%)}
+.buehne .stange{position:absolute;left:0;right:0;top:0;height:22px;background:#a86d35;border-bottom:3px solid var(--ink);z-index:2}
+.loesung{position:absolute;left:50px;top:636px;width:520px;text-align:center;font-size:44px;font-weight:700;min-height:60px}
+.hinweise{position:absolute;left:620px;top:104px;width:940px;display:flex;flex-direction:column;gap:14px}
+.hinweis{display:flex;align-items:center;gap:22px;border:3px solid var(--line);border-radius:18px;padding:8px 16px;background:#fff;min-height:110px}
+.hinweis.neu{animation:hinein .5s ease-out}
+@keyframes hinein{from{opacity:0;transform:translateX(40px)}}
+.hinweis .nr{width:48px;height:48px;border-radius:50%;background:var(--wahl);color:#fff;font-size:28px;font-weight:700;display:grid;place-items:center;flex:none}
+.hinweis svg{width:90px;height:90px;flex:none}
+.hinweis .t{font-size:38px;font-weight:700}
+.hinweis.leer{border-style:dashed;color:var(--soft);font-size:28px;justify-content:center}
+.auswahl{position:absolute;left:620px;top:560px;width:940px;display:flex;gap:18px;align-items:center}
+.auswahl .lbl{font-size:24px;font-weight:700;color:var(--soft)}
+.auswahl button{width:170px;height:170px;padding:0;border:none;background:none;cursor:pointer}
+.auswahl .bk{width:100%;height:100%;padding:6px}
+.bausteine{display:flex;flex-direction:column;gap:16px}
+.bausteine .b{font-size:42px;font-weight:700;border:3px solid var(--ink);border-radius:16px;padding:14px 22px;background:#fffdf3}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Wer bin ich?",
+ teile: [
+  { h: "Worum geht es?", text: "Hörverstehen und Beschreiben: Hinter dem Vorhang ist ein Tier oder ein Gegenstand versteckt. Hinweis für Hinweis raten." },
+  { h: "Raten", punkte: [
+    "**Nächster Hinweis** deckt nacheinander bis zu 4 Hinweise auf – mit Bild und Satz, der vorgelesen wird: „Ich habe lange Ohren.“",
+    "Die Klasse rät nach jedem Hinweis: „Du bist ein Hase.“ Erweiterung: „Ich glaube, du bist …, weil …“",
+    "**Auflösen** zieht den Vorhang auf.",
+    "**Hilfe (leicht)**: Nach dem 2. Hinweis erscheinen 3 Bildkarten zur Auswahl. Die richtige antippen." ] },
+  { h: "Rollentausch", punkte: [
+    "Ein Kind beschreibt selbst. **Geheime Karte** zeigt hinter dem Vorhang kurz ein Bild (nur das Kind schaut hin, die Klasse macht die Augen zu).",
+    "Das Kind beschreibt mit den Satzbausteinen „Ich habe … / Ich kann … / Ich wohne …“. **Auflösen** zeigt das Bild." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+let modus = "raten", jetzt = null, schritt = 0, geloest = false;
+const buehne = V.el("div", "buehne", '<div class="bild"></div><div class="stange"></div><div class="tuch l"></div><div class="tuch r"></div>'); S.appendChild(buehne);
+const bild = buehne.querySelector(".bild");
+const loesung = V.el("div", "loesung"); loesung.setAttribute("aria-live", "polite"); S.appendChild(loesung);
+const hinweise = V.el("div", "hinweise"); hinweise.setAttribute("aria-live", "polite"); S.appendChild(hinweise);
+const auswahl = V.el("div", "auswahl"); S.appendChild(auswahl);
+const ein = id => V.wort(id).art === "die" ? "ei-ne" : "ein";
+
+function neu() {
+  V.stop(); geloest = false; schritt = 0; buehne.classList.remove("offen"); loesung.innerHTML = ""; auswahl.innerHTML = ""; hinweise.innerHTML = "";
+  if (modus === "raten") {
+    jetzt = V.ziehe(Object.keys(I.RAETSEL), "wer");
+    bild.innerHTML = V.bild(jetzt, V.wort(jetzt).ganz);
+    hinweise.appendChild(V.el("div", "hinweis leer", V.w("Tip-pe auf „Nächs-ter Hin-weis“.")));
+    r.satz("Du bist ein …"); naechster.hidden = false; geheim.hidden = true;
+  } else {
+    jetzt = V.ziehe(V.woerter("tiere").concat(["banane", "sonne", "schere", "ball", "auto"]), "wer-rolle");
+    bild.innerHTML = V.bild(jetzt, V.wort(jetzt).ganz);
+    hinweise.appendChild(V.el("div", "bausteine", ["Ich ha-be …", "Ich kann …", "Ich woh-ne …", "Ich bin …"].map(t => `<div class="b">${V.w(t)}</div>`).join("")));
+    r.satz("Ich glau-be, du bist …, weil …"); naechster.hidden = true; geheim.hidden = false;
+  }
+}
+function naechsterHinweis() {
+  if (modus !== "raten" || geloest) return;
+  const h = I.RAETSEL[jetzt];
+  if (schritt >= h.length) { aufloesen(); return; }
+  if (!schritt) hinweise.innerHTML = "";
+  const [sym, satz] = h[schritt++];
+  const el = V.el("div", "hinweis neu", `<span class="nr">${schritt}</span>${V.bild(sym || "fragezeichen")}<span class="t">${V.w(satz)}</span>`);
+  hinweise.appendChild(el); V.sprich(satz);
+  if (schritt === 2 && r.hilfe) zeigeAuswahl();
+  if (schritt >= h.length) naechster.textContent = "Auflösen";
+}
+function zeigeAuswahl() {
+  const andere = V.mische(Object.keys(I.RAETSEL).filter(k => k !== jetzt)).slice(0, 2);
+  auswahl.innerHTML = `<span class="lbl">${V.w("Wer bin ich?")}</span>`;
+  V.mische([jetzt, ...andere]).forEach(id => {
+    const b = V.el("button", "", V.karte(id)); b.type = "button"; b.setAttribute("aria-label", V.wort(id).ganz);
+    b.addEventListener("click", () => { if (id === jetzt) aufloesen(); else V.noch(); }); auswahl.appendChild(b);
+  });
+}
+function aufloesen() {
+  geloest = true; buehne.classList.add("offen"); auswahl.innerHTML = "";
+  loesung.innerHTML = `${V.wortHTML(jetzt)}`;
+  r.satz(`Du bist ${ein(jetzt)} ${V.wort(jetzt).silben}.`);
+  V.sprich(`Du bist ${V.ohne(ein(jetzt))} ${V.ohne(V.wort(jetzt).silben)}.`); V.lob();
+  naechster.textContent = "Nächster Hinweis";
+}
+function geheimeKarte() {
+  buehne.classList.add("offen");
+  V.nach(3000, () => { if (!geloest) buehne.classList.remove("offen"); });
+}
+const naechster = V.knopf("Nächster Hinweis", naechsterHinweis, "haupt");
+const geheim = V.knopf("Geheime Karte (3 Sek.)", geheimeKarte, "haupt");
+const aufKnopf = V.knopf("Auflösen", aufloesen);
+const modusWahl = V.gruppe("", [{ wert: "raten", text: "Raten" }, { wert: "rolle", text: "Rollentausch" }], "raten", v => { modus = v; naechster.textContent = "Nächster Hinweis"; neu(); }, "wer-modus");
+modus = modusWahl.wert;
+const r = V.rahmen({ id: "wer-bin-ich", titel: "Wer bin ich?", onWeiter: () => { naechster.textContent = "Nächster Hinweis"; neu(); }, onNeu: neu,
+  onHilfe: an => { if (an && modus === "raten" && schritt >= 2 && !geloest) zeigeAuswahl(); if (!an) auswahl.innerHTML = ""; },
+  extra: [modusWahl, naechster, geheim, aufKnopf] });
+neu();
+</script>
+</body>
+</html>

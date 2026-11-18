@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Glücksrad mit Aufträgen – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.rad{position:absolute;left:40px;top:96px;width:560px;height:600px;padding:0;border:none;background:none;cursor:pointer;touch-action:manipulation}
+.rad svg{width:560px;height:600px;display:block;overflow:visible}
+.rad .dreh{transform-origin:280px 316px;transition:transform 3s cubic-bezier(.17,.84,.24,1)}
+.radknopf{position:absolute;left:170px;top:660px;width:300px}
+.panel{position:absolute;left:640px;top:100px;width:920px;height:628px;display:flex;flex-direction:column;gap:16px}
+.wer{display:flex;align-items:center;gap:18px;border:3px solid var(--line);border-radius:18px;padding:10px 16px;background:#faf7ff}
+.wer .lbl{font-size:28px;font-weight:700;color:var(--soft)}
+.wer .name{font-size:52px;font-weight:700;color:var(--wahl);flex:1;min-height:64px}
+.auftrag{flex:1;border:4px solid var(--ink);border-radius:24px;background:#fffdf3;display:flex;gap:24px;align-items:center;padding:20px 26px}
+.auftrag .bild{width:250px;height:250px;flex:none;border:3px solid var(--line);border-radius:18px;background:#fff}
+.auftrag .bild svg{width:100%;height:100%}
+.auftrag .text{font-size:46px;font-weight:700;line-height:1.5}
+.auftrag .kat{font-size:24px;color:var(--soft);font-weight:700;margin-bottom:4px}
+.auftrag .leer{font-size:30px;color:var(--soft)}
+.hilfen{display:flex;gap:16px;height:170px}
+.hilfen .bk{width:180px;height:170px}
+.hilfen .bk .wort{font-size:22px}
+.kat-knopf svg{width:40px;height:40px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Glücksrad mit Aufträgen",
+ teile: [
+  { h: "Worum geht es?", text: "Drankommen mit Spaß: Wortschatz, Hören und Bewegung. Das Namensrad sorgt für Fairness, der Joker „Freund fragen“ nimmt den Druck." },
+  { h: "So geht es", punkte: [
+    "**Wer?** dreht das Namensrad. Gezogene Namen werden grau, bis alle einmal dran waren.",
+    "**Was?** (oder das Rad antippen) dreht das Auftragsrad. Der Auftrag erscheint groß mit Bild und Satz und wird vorgelesen.",
+    "Auftragsarten: **Sprechen** (Sprechblase), **Bewegen** (Hampelmann), **Klatschen und Hören** (Hände), **Joker** (Stern). Die Knöpfe unten schalten Arten ab oder zu.",
+    "Joker „Stern für die Klasse!“ gibt automatisch einen Stern.",
+    "**Leicht**: einfache Aufträge mit Bildauswahl als Antwort-Hilfe. **Schwer**: zusätzliche Aufträge, ohne Bildauswahl (die Hilfe kann trotzdem eingeschaltet werden)." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE, K = I.KATEGORIEN;
+let aktiv = V.laden("rad-kat", Object.keys(K)).filter(k => K[k]); if (!aktiv.length) aktiv = Object.keys(K);
+let niveau = V.laden("rad-niveau", "leicht"), felder = [], winkel = 0, laeuft = false, jetzt = null;
+
+const rad = V.el("button", "rad"); rad.type = "button"; rad.setAttribute("aria-label", "Auftragsrad drehen"); S.appendChild(rad);
+const radKnopf = V.knopf("Was? Rad drehen", () => drehen(), "haupt radknopf"); S.appendChild(radKnopf);
+const panel = V.el("div", "panel", `<div class="wer"><span class="lbl">Wer?</span><span class="name" aria-live="polite"></span></div>
+  <div class="auftrag" aria-live="polite"></div><div class="hilfen"></div>`); S.appendChild(panel);
+const name = panel.querySelector(".name"), auftrag = panel.querySelector(".auftrag"), hilfen = panel.querySelector(".hilfen");
+panel.querySelector(".wer").appendChild(V.knopf("Wer? Namensrad", async () => { const n = await V.namensrad(); if (n) name.textContent = n; }));
+
+function zeichneRad() {
+  const ohne = aktiv.filter(k => k !== "joker"), liste = [];
+  if (!ohne.length) for (let i = 0; i < 8; i++) liste.push("joker");
+  else { for (let i = 0; liste.length < (aktiv.includes("joker") ? 7 : 8); i++) liste.push(ohne[i % ohne.length]); if (aktiv.includes("joker")) liste.splice(3, 0, "joker"); }
+  felder = liste;
+  const n = 8, R = 260, cx = 280, cy = 316, pt = (a, r) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  let g = "";
+  felder.forEach((k, i) => {
+    const a1 = i * Math.PI / 4, a2 = (i + 1) * Math.PI / 4, [x1, y1] = pt(a1, R), [x2, y2] = pt(a2, R), [bx, by] = pt((a1 + a2) / 2, R * .64);
+    g += `<path d="M${cx} ${cy} L${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2} Z" fill="${K[k].farbe}" stroke="#1d2320" stroke-width="5"/>
+      <svg x="${bx - 40}" y="${by - 40}" width="80" height="80" viewBox="0 0 200 200">${SPIELBILDER[K[k].bild]()}</svg>`;
+  });
+  rad.innerHTML = `<svg viewBox="0 0 560 600" aria-hidden="true"><g class="dreh" style="transform:rotate(${winkel}deg)">${g}<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1d2320" stroke-width="8"/></g>
+    <circle cx="${cx}" cy="${cy}" r="34" fill="#fff" stroke="#1d2320" stroke-width="6"/><path d="M${cx - 28} 16 L${cx + 28} 16 L${cx} 76 Z" fill="#5e2f91" stroke="#1d2320" stroke-width="5" stroke-linejoin="round"/></svg>`;
+  if (!V.bewegt) rad.querySelector(".dreh").style.transition = "none";
+}
+function drehen() {
+  if (laeuft) return;
+  laeuft = true; radKnopf.disabled = true;
+  const i = V.zufall(0, 7), mitte = (i + .5) * 45 + V.zufall(-15, 15);
+  winkel = winkel - (winkel % 360) + 360 * 4 + (360 - mitte);
+  rad.querySelector(".dreh").style.transform = `rotate(${winkel}deg)`;
+  auftrag.innerHTML = `<div class="leer">${V.w("Das Rad dreht sich …")}</div>`; hilfen.innerHTML = ""; r.satz("");
+  V.nach(V.bewegt ? 3100 : 50, () => { laeuft = false; radKnopf.disabled = false; zeige(felder[i]); });
+}
+function zeige(kat) {
+  const pool = I.AUFTRAEGE.filter(a => a.kat === kat && (niveau === "schwer" || !a.schwer));
+  jetzt = V.ziehe(pool, "auftrag-" + kat);
+  auftrag.innerHTML = `<div class="bild">${V.bild(jetzt.bild)}</div><div><div class="kat">${V.ohne(K[kat].name)}</div><div class="text">${V.w(jetzt.text)}</div></div>`;
+  V.leuchte(auftrag); zeigeHilfen();
+  r.satz(jetzt.satz);
+  V.sprich((name.textContent ? name.textContent + ". " : "") + jetzt.text);
+  if (jetzt.joker === "stern") { V.punkt("k"); V.lob("Ein Stern für die Klas-se!"); } else V.klang("richtig");
+}
+function zeigeHilfen() {
+  hilfen.innerHTML = jetzt && jetzt.hilfe && (niveau === "leicht" || r.hilfe) ? jetzt.hilfe.map(id => V.karte(id)).join("") : "";
+}
+function neu() { name.textContent = ""; jetzt = null; auftrag.innerHTML = `<div class="leer">${V.w("Wer ist dran? Dann dreht das Rad.")}</div>`; hilfen.innerHTML = ""; r.satz(""); }
+rad.addEventListener("click", drehen);
+const katKnoepfe = Object.keys(K).map(k => {
+  const b = V.knopf(V.bild(K[k].bild), () => {
+    const an = !aktiv.includes(k); aktiv = an ? Object.keys(K).filter(x => x === k || aktiv.includes(x)) : aktiv.filter(x => x !== k);
+    if (!aktiv.length) aktiv = [k];
+    katKnoepfe.forEach(x => x.setAttribute("aria-pressed", aktiv.includes(x.dataset.k))); V.merken("rad-kat", aktiv); zeichneRad();
+  }, "sym kat-knopf");
+  b.dataset.k = k; b.setAttribute("aria-pressed", aktiv.includes(k)); b.setAttribute("aria-label", V.ohne(K[k].name)); b.title = V.ohne(K[k].name); return b;
+});
+const niv = V.gruppe("", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer" }], niveau, v => { niveau = v; zeigeHilfen(); }, "rad-niveau");
+niveau = niv.wert;
+const r = V.rahmen({ id: "gluecksrad", titel: "Glücksrad mit Aufträgen", onWeiter: () => { name.textContent = ""; drehen(); }, onNeu: neu, onHilfe: zeigeHilfen, extra: [niv, ...katKnoepfe] });
+zeichneRad(); neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Wimmelbild – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.szene{position:absolute;left:24px;top:100px;width:1040px;height:582px;border:4px solid var(--ink);border-radius:20px;overflow:hidden;background:#fff}
+.szene svg{width:100%;height:100%;display:block}
+.ding{cursor:pointer}
+.ding.blink{animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.ding.treffer{filter:drop-shadow(0 0 10px #2f7d4f)}
+.platz{cursor:pointer}
+.platz circle{fill:rgba(94,47,145,.12);stroke:#5e2f91;stroke-width:5;stroke-dasharray:12 8}
+.platz:hover circle{fill:rgba(94,47,145,.25)}
+.panel{position:absolute;left:1090px;top:100px;width:470px;height:630px;display:flex;flex-direction:column;gap:12px}
+.panel .reihe{display:flex;gap:8px;flex-wrap:wrap}
+.panel .reihe .knopf{font-size:21px;padding:0 12px;min-height:58px}
+.panel .lbl{font-size:20px;font-weight:700;color:var(--soft);margin-top:2px}
+.auftrag{border:4px solid var(--ink);border-radius:20px;background:#fffdf3;padding:14px 18px;font-size:34px;font-weight:700;min-height:120px;display:flex;align-items:center;gap:14px}
+.auftrag svg{width:80px;height:80px;flex:none}
+.symbole{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.symbole div{border:2px solid var(--line);border-radius:12px;text-align:center;font-size:20px;font-weight:700;padding:2px}
+.symbole svg{width:70px;height:70px;display:block;margin:0 auto}
+.praep{background:#5e2f91;color:#fff;border-radius:12px;padding:0 12px}
+.praep .s.a,.praep .s.b{color:#fff!important}
+.praep .s::after{border-color:#fff!important}
+.satzstreifen .text svg.sym{width:64px;height:64px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Wimmelbild",
+ teile: [
+  { h: "Worum geht es?", text: "Präpositionen: auf, unter, neben, in, hinter, vor – und im Niveau „schwer“ auch zwischen. Zwei Szenen: Kinderzimmer und Spielplatz." },
+  { h: "Drei Spielarten", punkte: [
+    "**Finde**: Ein Auftrag erscheint („Wo ist der Ball? Er ist unter dem Bett.“). Das gezogene Kind tippt den Gegenstand an.",
+    "**Sag es**: Ein Gegenstand blinkt. Das Kind beschreibt, wo er ist. **Auflösen** zeigt den Satz.",
+    "**Verstecken**: Die Klasse macht die Augen zu. Die Lehrkraft tippt einen der markierten Plätze an – dort versteckt sich die Katze. Dann sagt die Klasse, wo sie ist. **Auflösen** zeigt den Satz." ] },
+  { h: "Satzstreifen und Hilfe", punkte: [
+    "Im Satz „Die Katze ist unter dem Tisch.“ ist die Präposition farbig hervorgehoben, dazu ein kleines Symbol (Würfel und Ball).",
+    "**Hilfe** blendet alle Präpositions-Symbole als Auswahl ein.",
+    "**Wer?** dreht das Namensrad." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE, B = SPIELBILDER, K = 'stroke="#1d2320" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
+const rr = (x, y, w, h, f, r = 6) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" ${K}/>`;
+// ---------- Szenen: hinten (Hintergrund und Möbel) und vorne (verdeckt Dinge „hinter“ etwas) ----------
+const SZENEN = {
+  zimmer: {
+    hinten: `<rect width="1040" height="582" fill="#f4efe4"/><rect y="440" width="1040" height="142" fill="#d9b88a"/><ellipse cx="560" cy="500" rx="220" ry="36" fill="#9fc3e6" ${K}/>
+      ${rr(470, 70, 170, 130, "#cfe8f7", 4)}<path d="M555 70 V200 M470 135 H640" stroke="#1d2320" stroke-width="5"/>
+      ${rr(20, 240, 26, 200, "#a86d35", 4)}${rr(250, 300, 22, 140, "#a86d35", 4)}${rr(20, 330, 252, 32, "#c98a4a", 4)}${rr(46, 306, 210, 26, "#fff", 8)}
+      <ellipse cx="86" cy="304" rx="40" ry="18" fill="#fff" ${K}/>${rr(118, 304, 138, 28, "#5d9ad6", 6)}
+      ${rr(470, 284, 180, 20, "#c98a4a", 4)}${rr(482, 304, 14, 136, "#a86d35", 3)}${rr(624, 304, 14, 136, "#a86d35", 3)}
+      ${rr(784, 210, 16, 230, "#c98a4a", 4)}${rr(730, 330, 70, 16, "#c98a4a", 4)}${rr(736, 346, 12, 94, "#a86d35", 3)}${rr(784, 346, 12, 94, "#a86d35", 3)}
+      ${rr(840, 140, 150, 300, "#e6c79a", 4)}<path d="M840 240 H990 M840 340 H990" stroke="#1d2320" stroke-width="5"/>
+      ${rr(860, 160, 14, 76, "#d8382b", 2)}${rr(878, 168, 14, 68, "#4f86d6", 2)}${rr(896, 160, 14, 76, "#5cb85c", 2)}${rr(940, 356, 34, 80, "#f2b52c", 4)}`,
+    vorne: `${rr(300, 360, 100, 80, "#d8382b", 6)}<path d="M300 380 H400" stroke="#1d2320" stroke-width="5"/>${rr(338, 392, 24, 12, "#f7d33c", 3)}`,
+  },
+  spielplatz: {
+    hinten: `<rect width="1040" height="582" fill="#e3f2fb"/><circle cx="960" cy="70" r="40" fill="#f7d33c" ${K}/><rect y="440" width="1040" height="142" fill="#9bc46a"/>
+      <path d="M300 440 V250 M332 440 V250 M300 290 H332 M300 330 H332 M300 370 H332 M300 410 H332" stroke="#a86d35" stroke-width="8" stroke-linecap="round"/>${rr(296, 246, 60, 14, "#d8382b", 4)}
+      <path d="M350 250 Q380 254 440 340 Q480 400 540 432 L550 418 Q490 386 452 330 Q392 244 356 240 Z" fill="#f2b52c" ${K}/>
+      <path d="M580 440 L610 220 L640 440 M720 440 L750 220 L780 440 M600 222 H760" stroke="#4f86d6" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <path d="M648 222 V356 M692 222 V356" stroke="#1d2320" stroke-width="4"/>${rr(636, 352, 68, 14, "#d8382b", 4)}
+      ${rr(820, 360, 150, 18, "#a86d35", 4)}${rr(820, 320, 150, 14, "#a86d35", 4)}<path d="M834 378 V440 M956 378 V440 M834 334 V360 M956 334 V360" stroke="#7a4e2c" stroke-width="10" stroke-linecap="round"/>
+      ${rr(330, 470, 230, 60, "#e9d39c", 10)}<path d="M330 470 H560" stroke="#a86d35" stroke-width="10"/>`,
+    vorne: `<rect x="112" y="260" width="40" height="180" rx="4" fill="#8a5a33" ${K}/><circle cx="132" cy="200" r="90" fill="#5cb85c" ${K}/><circle cx="72" cy="240" r="50" fill="#5cb85c" ${K}/><circle cx="192" cy="240" r="50" fill="#5cb85c" ${K}/>`,
+  },
+};
+let szene = V.laden("wimmel-szene", "zimmer"), modus = V.laden("wimmel-modus", "finde"), niveau = V.laden("wimmel-niveau", "leicht");
+let belegung = [], ziel = null, versteckModus = false, geloest = false;
+const feld = V.el("div", "szene"); S.appendChild(feld);
+const panel = V.el("div", "panel"); S.appendChild(panel);
+
+const dingSVG = (id, x, y, gr = 82) => `<g class="ding" data-id="${id}" role="button" tabindex="0" aria-label="${V.esc(V.wort(id).ganz)}"><svg x="${x - gr / 2}" y="${y - gr / 2}" width="${gr}" height="${gr}" viewBox="0 0 200 200">${B[id]()}</svg></g>`;
+function zeichne() {
+  const sz = SZENEN[szene], hinten = belegung.filter(b => b.platz.hinten), sonst = belegung.filter(b => !b.platz.hinten);
+  let g = sz.hinten + hinten.map(b => dingSVG(b.id, b.platz.x, b.platz.y)).join("") + sz.vorne + sonst.map(b => dingSVG(b.id, b.platz.x, b.platz.y)).join("");
+  if (versteckModus) g += plaetze().map((p, i) => `<g class="platz" data-i="${i}" role="button" tabindex="0" aria-label="Platz ${i + 1}"><circle cx="${p.x}" cy="${p.y}" r="46"/>
+    <text x="${p.x}" y="${p.y + 12}" text-anchor="middle" font-size="34" font-weight="700" fill="#5e2f91" font-family="Andika,sans-serif">${i + 1}</text></g>`).join("");
+  feld.innerHTML = `<svg viewBox="0 0 1040 582" role="img" aria-label="${I.WIMMEL[szene].name}">${g}</svg>`;
+  feld.querySelectorAll(".ding").forEach(d => { const f = () => tippe(d.dataset.id, d); d.addEventListener("click", f); d.addEventListener("keydown", e => { if (e.key === "Enter") f(); }); });
+  feld.querySelectorAll(".platz").forEach(p => p.addEventListener("click", () => verstecke(+p.dataset.i)));
+  if (modus === "sag" && ziel && !geloest) { const d = feld.querySelector(`.ding[data-id="${ziel.id}"]`); if (d) d.classList.add("blink"); }
+}
+const erlaubt = () => I.WIMMEL[szene].plaetze.filter(p => niveau === "schwer" || !p.schwer);
+let versteckPlaetze = [];
+const plaetze = () => versteckPlaetze;
+const satzVon = b => { const w = V.wort(b.id), gross = w.art[0].toUpperCase() + w.art.slice(1), ort = b.platz.satz || `${I.PRAEP[b.platz.ort]} ${b.platz.bezug}`;
+  return { text: `${gross} ${w.silben} ist ${ort}.`, html: `${V.w(gross)} ${V.w(w.silben)} ${V.w("ist")} <span class="praep">${V.w(ort.split(" ")[0])}</span> ${V.w(ort.split(" ").slice(1).join(" ") + ".")} ${V.bild("p_" + b.platz.ort).replace("<svg", '<svg class="sym"')}` }; };
+const pronomen = id => ({ der: "Er", die: "Sie", das: "Es" }[V.wort(id).art]);
+
+function neu() {
+  V.stop(); geloest = false; versteckModus = false;
+  const dinge = modus === "verstecken" ? ["katze"] : I.WIMMEL[szene].dinge;
+  const pl = V.mische(erlaubt());
+  // nicht zwei Dinge auf Plätze, die sich überdecken (z. B. auf/hinter der Kiste)
+  belegung = [];
+  for (const id of dinge) { const p = pl.find(q => !belegung.some(b => Math.hypot(b.platz.x - q.x, b.platz.y - q.y) < 95)); if (p) { belegung.push({ id, platz: p }); pl.splice(pl.indexOf(p), 1); } }
+  if (modus === "verstecken") { versteckPlaetze = V.mische(erlaubt()).slice(0, 6); belegung = []; versteckModus = true; ziel = null; }
+  else ziel = V.ziehe(belegung, "wimmel-ziel");
+  zeichne(); auftragZeigen();
+}
+function auftragZeigen() {
+  const a = panel.querySelector(".auftrag");
+  if (modus === "finde") {
+    const w = V.wort(ziel.id);
+    a.innerHTML = `${V.bild(ziel.id)}<div>${V.w(`Wo ist ${w.art} ${w.silben}?`)}</div>`;
+    const ort = ziel.platz.satz || `${I.PRAEP[ziel.platz.ort]} ${ziel.platz.bezug}`;
+    r.satzHTML(`${V.w(pronomen(ziel.id) + " ist")} <span class="praep">${V.w(ort.split(" ")[0])}</span> ${V.w(ort.split(" ").slice(1).join(" ") + ".")} ${V.bild("p_" + ziel.platz.ort).replace("<svg", '<svg class="sym"')}`,
+      `Wo ist ${w.ganz}? ${pronomen(ziel.id)} ist ${V.ohne(ort)}.`);
+    V.sprich(`Wo ist ${w.ganz}? ${pronomen(ziel.id)} ist ${V.ohne(ort)}.`);
+  } else if (modus === "sag") {
+    a.innerHTML = `${V.bild(ziel.id)}<div>${V.w(`Wo ist ${V.wort(ziel.id).art} ${V.wort(ziel.id).silben}?`)}</div>`;
+    r.satz(`${V.wort(ziel.id).art[0].toUpperCase() + V.wort(ziel.id).art.slice(1)} ${V.wort(ziel.id).silben} ist …`);
+  } else {
+    a.innerHTML = versteckModus ? `${V.bild("eule_schlaeft")}<div>${V.w("Au-gen zu! Tip-pe ei-nen Platz an.")}</div>` : `${V.bild("katze")}<div>${V.w("Wo ist die Kat-ze?")}</div>`;
+    r.satz(versteckModus ? "" : "Die Kat-ze ist …");
+  }
+}
+function tippe(id, el) {
+  if (modus !== "finde" || geloest) return;
+  if (id === ziel.id) { geloest = true; el.classList.add("treffer"); V.lob(); }
+  else V.noch();
+}
+function verstecke(i) {
+  versteckModus = false; belegung = [{ id: "katze", platz: versteckPlaetze[i] }]; ziel = belegung[0]; zeichne(); auftragZeigen(); V.klang("richtig");
+}
+function aufloesen() {
+  if (!ziel) return;
+  geloest = true; const s = satzVon(ziel); r.satzHTML(s.html, V.ohne(s.text)); V.sprich(V.ohne(s.text));
+  zeichne(); const d = feld.querySelector(`.ding[data-id="${ziel.id}"]`); if (d) d.classList.add("treffer");
+}
+function symbole(an) {
+  const box = panel.querySelector(".symbole");
+  box.innerHTML = an ? Object.keys(I.PRAEP).filter(p => niveau === "schwer" || p !== "zwischen").map(p => `<div>${V.bild("p_" + p)}${V.w(I.PRAEP[p])}</div>`).join("") : "";
+}
+// Bedienfeld
+panel.innerHTML = `<div class="lbl">Szene</div><div class="reihe sz"></div><div class="lbl">Spielart</div><div class="reihe mo"></div><div class="auftrag" aria-live="polite"></div>
+  <div class="reihe kn"></div><div class="symbole"></div>`;
+panel.querySelector(".sz").appendChild(V.gruppe("", [{ wert: "zimmer", text: "Kinderzimmer" }, { wert: "spielplatz", text: "Spielplatz" }], szene, v => { szene = v; neu(); }, "wimmel-szene"));
+panel.querySelector(".mo").appendChild(V.gruppe("", [{ wert: "finde", text: "Finde" }, { wert: "sag", text: "Sag es" }, { wert: "verstecken", text: "Verstecken" }], modus, v => { modus = v; neu(); }, "wimmel-modus"));
+panel.querySelector(".kn").append(V.knopf("Auflösen", aufloesen, "haupt"), V.knopf("Wer?", () => V.namensrad()));
+const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer (mit zwischen)" }], niveau, v => { niveau = v; symbole(r.hilfe); neu(); }, "wimmel-niveau");
+const r = V.rahmen({ id: "wimmelbild", titel: "Wimmelbild", onWeiter: neu, onNeu: neu, onHilfe: symbole, extra: [niv] });
+neu();
+</script>
+</body>
+</html>

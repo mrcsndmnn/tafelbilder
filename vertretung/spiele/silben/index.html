@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Silben-Sortierer – Vertretungsspiele</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.karte-s{position:absolute;width:300px;height:290px;z-index:20;cursor:grab;touch-action:none;transition:left .45s ease,top .45s ease,transform .45s ease,opacity .45s}
+.karte-s .bk{width:100%;height:100%}
+.karte-s.zieht{transition:none;cursor:grabbing;transform:scale(1.05);filter:drop-shadow(0 10px 18px rgba(0,0,0,.3))}
+.karte-s.gewaehlt .bk{outline:7px solid var(--wahl);outline-offset:3px}
+.karte-s.weg{transform:scale(.25);opacity:0}
+.wortzeile{position:absolute;left:0;right:0;top:400px;text-align:center;font-size:56px;font-weight:700;min-height:80px}
+.wortzeile.schritt .s{opacity:0;transition:opacity .3s}
+.wortzeile.schritt .s.da{opacity:1}
+.koerbe{position:absolute;left:24px;right:24px;top:476px;height:256px;display:flex;gap:22px}
+.korb{flex:1;border:4px solid var(--ink);border-radius:24px;background:var(--feld);padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-family:var(--font);touch-action:manipulation}
+.korb:hover{background:#eaf2ec}
+.korb.ziel{background:#e3efe6;box-shadow:0 0 0 6px rgba(47,125,79,.35)}
+.korb .punkte-s{display:flex;gap:12px;height:44px;align-items:center}
+.korb .punkte-s i{width:34px;height:34px;border-radius:50%;background:var(--wahl)}
+.korb .punkte-s .plus{font-size:36px;font-weight:700;color:var(--wahl);font-style:normal}
+.korb .liste{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:24px;font-weight:700;overflow:hidden}
+.korb .liste svg{width:46px;height:46px;vertical-align:middle}
+.start-s{position:absolute;left:650px;top:100px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Silben-Sortierer",
+ teile: [
+  { h: "Worum geht es?", text: "Silben klatschen: Alle sprechen und klatschen das Wort gemeinsam, dann kommt das Bild in den passenden Korb." },
+  { h: "So geht es", punkte: [
+    "Ein Bild erscheint. Alle klatschen und sprechen die Silben: „Ba – na – ne“.",
+    "Das Bild in den Korb mit der richtigen Zahl von Punkten **ziehen** – oder einfach den **Korb antippen**.",
+    "Richtig: Das Bild rutscht in den Korb, das Wort erscheint in Silbenschrift. Danach kommt das nächste Bild.",
+    "**Niveau**: leicht (1 und 2 Silben), mittel (bis 3 Silben), schwer (dazu 4 und mehr Silben, z. B. Ma-ri-en-kä-fer).",
+    "**Silbenkönig**: Das Namensrad wählt ein Kind, das vorklatscht – alle klatschen nach.",
+    "**Hilfe** spricht das Wort langsam in Silben vor und zeigt die Silbenbögen nacheinander." ] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
+<script src="../gemeinsam/spiele.js"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE;
+let niveau = "mittel", jetzt = null, karte = null, koerbe = [], fertig = false;
+const PLATZ = { x: 650, y: 100 };
+const wortzeile = V.el("div", "wortzeile"); wortzeile.setAttribute("aria-live", "polite"); S.appendChild(wortzeile);
+const korbBox = V.el("div", "koerbe"); S.appendChild(korbBox);
+const max = () => niveau === "leicht" ? 2 : niveau === "mittel" ? 3 : 4;
+const zahl = id => Math.min(4, V.silbenzahl(id));
+const ZAHLWORT = { 1: "ei-ne Sil-be", 2: "zwei Sil-ben", 3: "drei Sil-ben", 4: "vier Sil-ben", 5: "fünf Sil-ben" };
+
+function baueKoerbe() {
+  korbBox.innerHTML = "";
+  koerbe = Array.from({ length: max() }, (_, i) => {
+    const n = i + 1, el = V.el("button", "korb");
+    el.type = "button"; el.setAttribute("aria-label", n === 4 ? "Korb: 4 Silben und mehr" : `Korb: ${n} Silbe${n > 1 ? "n" : ""}`);
+    el.innerHTML = `<div class="punkte-s">${"<i></i>".repeat(n)}${n === 4 ? '<span class="plus">+</span>' : ""}</div><div class="liste"></div>`;
+    el.addEventListener("click", () => waehle(n)); korbBox.appendChild(el); return { n, el };
+  });
+}
+function neuesBild() {
+  const pool = Object.keys(I.WOERTER).filter(k => zahl(k) <= max() && (niveau !== "schwer" || true));
+  // bei „schwer“ öfter lange Wörter
+  const lang = pool.filter(k => zahl(k) >= 3);
+  jetzt = niveau === "schwer" && Math.random() < .4 ? V.ziehe(lang, "silben") : V.ziehe(pool, "silben");
+  fertig = false; wortzeile.innerHTML = "";
+  if (karte) karte.remove();
+  karte = V.el("div", "karte-s", V.karte(jetzt, { wort: false })); karte.tabIndex = 0; karte.setAttribute("role", "button");
+  karte.setAttribute("aria-label", V.wort(jetzt).ganz + " – in einen Korb ziehen"); V.setze(karte, PLATZ.x, PLATZ.y); S.appendChild(karte);
+  ziehbar(karte);
+  r.satz(`${V.wort(jetzt).silben} hat … Sil-ben.`);
+  if (r.hilfe) hilfeZeigen();
+}
+function waehle(n) {
+  if (fertig || !jetzt) return;
+  const soll = zahl(jetzt);
+  if (n !== soll) { V.noch("Klatsch noch mal."); zurueck(); return; }
+  fertig = true;
+  const k = koerbe[n - 1], ziel = V.rect(k.el);
+  V.setze(karte, ziel.x + ziel.w / 2 - 150, ziel.y + 20); karte.classList.add("weg");
+  k.el.querySelector(".liste").insertAdjacentHTML("beforeend", `<span>${V.bild(jetzt)}</span>`);
+  V.leuchte(k.el);
+  wortzeile.classList.remove("schritt"); wortzeile.innerHTML = V.w(V.wort(jetzt).silben);
+  const echte = V.silbenzahl(jetzt);
+  r.satz(`${V.wort(jetzt).silben} hat ${ZAHLWORT[echte]}.`);
+  V.lob(); V.sprich(V.wort(jetzt).silben.replace(/-/g, " – "), .7);
+  V.nach(2600, neuesBild);
+}
+function zurueck() { if (karte) { karte.classList.remove("gewaehlt"); V.setze(karte, PLATZ.x, PLATZ.y); } }
+// Ziehen mit Maus, Finger oder Stift
+function ziehbar(el) {
+  let zug = null;
+  el.addEventListener("pointerdown", e => {
+    if (fertig || (e.pointerType === "mouse" && e.button !== 0)) return;
+    e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    zug = { id: e.pointerId, x0: e.clientX, y0: e.clientY, l: parseFloat(el.style.left), t: parseFloat(el.style.top), los: false };
+  });
+  el.addEventListener("pointermove", e => {
+    if (!zug || e.pointerId !== zug.id) return;
+    const f = V.faktor(), dx = (e.clientX - zug.x0) / f, dy = (e.clientY - zug.y0) / f;
+    if (!zug.los && Math.hypot(dx, dy) < 10) return;
+    zug.los = true; el.classList.add("zieht"); V.setze(el, zug.l + dx, zug.t + dy);
+    const k = ueber(); koerbe.forEach(x => x.el.classList.toggle("ziel", x === k));
+  });
+  const ende = e => {
+    if (!zug || e.pointerId !== zug.id) return; const los = zug.los; zug = null; el.classList.remove("zieht");
+    koerbe.forEach(x => x.el.classList.remove("ziel"));
+    if (!los) return;   // nur angetippt: Korb antippen genügt
+    const k = ueber(); if (k) waehle(k.n); else zurueck();
+  };
+  el.addEventListener("pointerup", ende); el.addEventListener("pointercancel", ende);
+  el.addEventListener("keydown", e => { const n = +e.key; if (n >= 1 && n <= max()) waehle(n); });
+}
+function ueber() {
+  const r1 = V.rect(karte), cx = r1.x + r1.w / 2, cy = r1.y + r1.h / 2;
+  return koerbe.find(k => { const q = V.rect(k.el); return cx > q.x - 20 && cx < q.x + q.w + 20 && cy > q.y - 60 && cy < q.y + q.h; });
+}
+function hilfeZeigen() {
+  if (!jetzt || fertig) return;
+  const teile = V.wort(jetzt).silben.split("-");
+  wortzeile.classList.add("schritt"); wortzeile.innerHTML = V.w(V.wort(jetzt).silben);
+  const s = wortzeile.querySelectorAll(".s");
+  s.forEach(x => x.classList.remove("da"));
+  teile.forEach((t, i) => V.nach(300 + i * 900, () => { if (s[i]) s[i].classList.add("da"); }));
+  V.sprich(teile.join(" – "), .6);
+}
+const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "mittel", text: "mittel" }, { wert: "schwer", text: "schwer" }], "mittel", v => { niveau = v; start(); }, "silben-niveau");
+niveau = niv.wert;
+const koenig = V.knopf(V.bild("klatschen") + "Silbenkönig", () => V.namensrad({ titel: "Wer klatscht vor?" }));
+function start() { V.stop(); baueKoerbe(); neuesBild(); }
+const r = V.rahmen({ id: "silben", titel: "Silben-Sortierer", onWeiter: neuesBild, onNeu: start, extra: [niv, koenig],
+  onHilfe: an => { if (an) hilfeZeigen(); else if (!fertig) wortzeile.innerHTML = ""; } });
+start();
+</script>
+</body>
+</html>
