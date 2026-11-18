@@ -76,7 +76,11 @@
 
   // ---------------- Klang (standardmäßig aus, nie Fehlertöne) ----------------
   let ctx = null;
-  V.klangAn = () => V.laden("klang", false);
+  // Ton (Klänge + automatisches Vorlesen): gilt nur für diese Sitzung, jeder neue Tab startet stumm.
+  // Eigener Name „ton“, damit eine alte Einstellung „klang“ aus früheren Versionen nicht mehr wirkt.
+  V.klangAn = () => V.sitzung.hol("ton", false) === true;
+  V.setzeTon = an => { V.sitzung.setz("ton", !!an); if (!an) { try { speechSynthesis.cancel(); } catch (e) {} } };
+  try { localStorage.removeItem("vs-klang"); } catch (e) {}
   V.klang = art => {
     if (!V.klangAn()) return;
     try {
@@ -258,7 +262,7 @@
         "Die kleinen Bilder oben zeigen den **Ablauf** der Stunde. Antippen wechselt zum Spiel, erledigte Spiele haben einen Haken.",
         "**Stern / Eule**: Punktestand „Klasse gegen Lehrkraft“. Antippen gibt einen Punkt. Korrigieren und Zurücksetzen auf der Seite „Klasse gegen Lehrkraft“.",
         "**Hand**: Ruhesignal „Hand hoch – Ohren auf!“ (bildschirmfüllend, Antippen schließt).",
-        "**Lautsprecher-Knopf oben**: Ton an oder aus – gilt für die Klänge (sanfter Ton bei richtig, nie Fehlertöne) und für das automatische Vorlesen. Beim ersten Öffnen ist der Ton aus (durchgestrichener Lautsprecher). **Vollbild** für das Smartboard.",
+        "**Lautsprecher-Knopf oben**: Ton an oder aus – gilt für die Klänge (sanfter Ton bei richtig, nie Fehlertöne) und für das automatische Vorlesen. In jedem neuen Tab ist der Ton zuerst aus (durchgestrichener Lautsprecher). **Vollbild** für das Smartboard.",
         "Unten: **Satzmuster** und **Hilfe** ein- oder ausblenden, **Weiter** zur nächsten Runde, **Neu starten** beginnt das Spiel von vorn.",
         "Der Lautsprecher-Knopf **am Satzstreifen** liest den Satz einmal vor – auch wenn der Ton oben aus ist (nur wenn das Gerät eine deutsche Stimme hat)." ] }]) }, "knopf sym"));
     }
@@ -272,7 +276,8 @@
     const AUS = '<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M30 76 H64 L108 40 V160 L64 124 H30 Z" fill="#cfd6d1" stroke="#1d2320" stroke-width="6" stroke-linejoin="round"/><path d="M128 70 L180 130 M180 70 L128 130" stroke="#d9822b" stroke-width="12" stroke-linecap="round"/></svg>';
     const setzeKlang = () => { const an = V.klangAn(); klang.setAttribute("aria-pressed", an); klang.innerHTML = an ? V.bild("laut") : AUS;
       klang.setAttribute("aria-label", an ? "Ton ist an – antippen zum Ausschalten" : "Ton ist aus – antippen zum Einschalten"); klang.title = an ? "Ton an (antippen: aus)" : "Ton aus (antippen: an)"; };
-    klang.addEventListener("click", () => { const an = !V.klangAn(); V.merken("klang", an); setzeKlang(); if (an) V.klang("richtig"); else { try { speechSynthesis.cancel(); } catch (e) {} } }); setzeKlang();
+    klang.addEventListener("click", () => { const an = !V.klangAn(); V.setzeTon(an); setzeKlang(); if (an) V.klang("richtig"); }); setzeKlang();
+    if (!V.klangAn()) { try { speechSynthesis.cancel(); } catch (e) {} }
     const voll = V.knopf('<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 15 V6 H15 M25 6 H34 V15 M34 25 V34 H25 M15 34 H6 V25" fill="none" stroke="#1d2320" stroke-width="4" stroke-linecap="round"/></svg>',
       () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} }, "sym");
     voll.setAttribute("aria-label", "Vollbild"); voll.title = "Vollbild";
