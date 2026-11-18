@@ -39,6 +39,8 @@ button.k.haupt{background:var(--tool);border-color:var(--tool);color:#fff}
 button.k[aria-pressed="true"]{background:var(--tool-bg);border-color:var(--tool)}
 button.k:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .trenner{width:2px;height:32px;background:var(--line)}
+.status{font-weight:700;color:var(--accent);margin:8px 0 0;min-height:1.5em}
+.status.fehler{color:#a85a00}
 /* Ergebnis: immer auf Weiß, damit Blau und Rot gut lesbar sind */
 .ergebnis{background:#fff;color:#1d2320;border:3px solid #1d2320;border-radius:14px;padding:22px 26px;min-height:120px;font-family:var(--font);font-weight:700;line-height:1.7;
   font-size:var(--gr,40px);overflow-wrap:anywhere;margin-top:14px}
@@ -52,7 +54,7 @@ button.k:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .ergebnis:-webkit-full-screen{border:none;border-radius:0;padding:4vh 5vw;overflow:auto}
 @media print{
   body{background:#fff}
-  .zurueck-zeile,h1,.unter,.karte>*:not(.ergebnis),.karte.eingabe,.karte.pruefen,footer,.hw-knopf{display:none!important}
+  .zurueck-zeile,h1,.unter,.karte>*:not(.ergebnis),.karte.eingabe,.karte.pruefen,.karte.speichern,footer,.hw-knopf{display:none!important}
   .karte{border:none;padding:0;margin:0}
   .ergebnis{border:none;padding:0}
 }
@@ -100,12 +102,29 @@ footer a{color:inherit}
     <div class="ergebnis silben" id="ergebnis" aria-live="polite"></div>
   </section>
 
+  <section class="karte speichern">
+    <h2><span class="nr">4</span>Speichern</h2>
+    <div class="zeile">
+      <button type="button" class="k" data-format="pdf">PDF</button>
+      <button type="button" class="k" data-format="png">Bild (PNG)</button>
+      <button type="button" class="k" data-format="jpg">Bild (JPG)</button>
+      <span class="trenner"></span>
+      <button type="button" class="k" data-format="docx">Word – Text zum Bearbeiten</button>
+      <button type="button" class="k" data-format="docx-bild">Word – als Bild mit Bögen</button>
+    </div>
+    <p class="hinweis">Gespeichert wird genau so, wie es oben eingestellt ist (Größe, Bögen, Farben). Die Datei entsteht auf diesem Gerät, nichts wird ins Internet geschickt.<br>
+      <b>Word – Text zum Bearbeiten:</b> farbige Silben, die man in Word weiter bearbeiten kann. Word kann keine Bögen unter Buchstaben zeichnen, deshalb steht unter jeder Silbe ein kurzer Strich.
+      <b>Word – als Bild:</b> sieht genau aus wie hier, mit Bögen, ist aber nicht mehr bearbeitbar.</p>
+    <p class="status" id="status" aria-live="polite"></p>
+  </section>
+
   <footer>Die Silbentrennung läuft komplett im Browser, der Text wird nirgendwohin geschickt. Der zuletzt eingegebene Text bleibt nur in diesem Browser gespeichert.
     <br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
 </div>
 <script src="../../gemeinsam/silben.js"></script>
 <script src="trennmuster-de.js"></script>
 <script src="silbentrennung.js"></script>
+<script src="export.js"></script>
 <script src="../../gemeinsam/hinweise.js"></script>
 <script>
 Hinweise.einbauen({
@@ -121,6 +140,12 @@ Hinweise.einbauen({
       "**Bögen** und **Farben** lassen sich einzeln abschalten.",
       "**Vollbild für die Tafel** zeigt nur den Text, groß auf dem ganzen Bildschirm. Mit **Esc** zurück.",
       "**Drucken** druckt nur den Text in Silbenschrift." ] },
+    { h: "Speichern", punkte: [
+      "**PDF**: A4-Seiten zum Drucken oder Weitergeben, mit Bögen. Lange Texte gehen auf mehrere Seiten.",
+      "**Bild (PNG / JPG)**: zum Einfügen in Präsentationen oder Arbeitsblätter.",
+      "**Word – Text zum Bearbeiten**: farbige Silben in Word. Statt Bögen steht unter jeder Silbe ein kurzer Strich, weil Word keine Bögen zeichnen kann.",
+      "**Word – als Bild mit Bögen**: sieht aus wie im Editor, lässt sich in Word aber nicht mehr bearbeiten.",
+      "Gespeichert wird mit den Einstellungen von oben (Größe, Bögen, Farben)." ] },
     { h: "Gut zu wissen", punkte: [
       "Die automatische Trennung ist sehr zuverlässig, aber nicht fehlerfrei – besonders bei Namen und Fremdwörtern lohnt ein Blick.",
       "Für Lese-Silben werden auch einzelne Vokale abgetrennt, z. B. „O-ben“, „A-bend“, „Ra-di-o“.",
@@ -163,6 +188,19 @@ function setzeGr() { erg.style.setProperty("--gr", gr + "px"); grKn.forEach(([px
 });
 $("vollbild").addEventListener("click", () => { if (erg.requestFullscreen) erg.requestFullscreen().catch(() => {}); else if (erg.webkitRequestFullscreen) erg.webkitRequestFullscreen(); });
 $("drucken").addEventListener("click", () => window.print());
+// Speichern als PDF, PNG, JPG oder Word
+const status = $("status");
+document.querySelectorAll("[data-format]").forEach(b => b.addEventListener("click", async () => {
+  if (!silbig.value.trim()) { status.textContent = "Bitte zuerst einen Text eingeben und umwandeln."; status.className = "status fehler"; return; }
+  const alle = document.querySelectorAll("[data-format]"); alle.forEach(x => x.disabled = true);
+  status.className = "status"; status.textContent = "Datei wird erstellt …";
+  try {
+    const name = await SilbenExport.speichere(b.dataset.format, { text: silbig.value, groesse: gr,
+      boegen: !erg.classList.contains("ohne-boegen"), farben: !erg.classList.contains("ohne-farben") });
+    status.textContent = "Gespeichert: " + name + " (im Ordner „Downloads“).";
+  } catch (e) { status.className = "status fehler"; status.textContent = "Das Speichern hat leider nicht geklappt."; }
+  alle.forEach(x => x.disabled = false);
+}));
 
 text.value = laden("text", ""); silbig.value = laden("silbig", "");
 setzeGr(); zeige();

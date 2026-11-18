@@ -75,7 +75,8 @@
   // Echte Bindestriche (z. B. „Mathe-Arbeit“) werden zum Zeichen ‐ (U+2010), damit sie keine Silbengrenze sind.
   function trenne(text) {
     return String(text).replace(/-/g, "‐")
-      .replace(/[A-Za-zÄÖÜäöüß]+/g, w => wortSilben(w).join("-"));
+      .replace(/[A-Za-zÄÖÜäöüß]+/g, w => wortSilben(w).join("-"))
+      .replace(/(\S)\u2010(?=\S)/g, "$1\u2010-");   // nach echtem Bindestrich beginnt eine neue Silbe (eigener Bogen)
   }
   window.Silbentrennung = { trenne, wortSilben };
 })();
