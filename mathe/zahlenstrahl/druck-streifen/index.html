@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>1000er-Streifen – Druckvorlage</title>
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../gemeinsam/druck.css">
+<style>
+.streifen-blk{margin:3mm 0 6mm}
+.streifen-blk .lbl{font-size:11pt;font-weight:700;color:#5d6862}
+.liste{display:flex;flex-wrap:wrap;gap:3mm;margin:0 0 4mm}
+.liste span{border:.35mm solid #000;border-radius:1.5mm;min-width:16mm;height:10mm;display:inline-grid;place-items:center;font-size:15pt;font-weight:700;padding:0 2mm}
+.liste span.bsp{color:#8d9892;border-color:#8d9892}
+.tipp{font-size:12.5pt;margin:0 0 3mm}
+.strahl .s-mark.bsp .m-text{fill:#8d9892}
+.strahl .s-mark.bsp .m-kasten,.strahl .s-mark.bsp .m-linie{stroke:#8d9892}
+.strahl .s-mark.bsp .m-spitze{fill:#8d9892}
+.strahl .s-mark.loes .m-text{fill:#2667c9}
+</style>
+</head>
+<body>
+<script src="../gemeinsam/strahl.js"></script>
+<script src="../gemeinsam/druck.js"></script>
+<script>
+const Z = Strahl, D = Druck;
+const MAX1 = 10;   // Niveau 1: nur 5 Fünfzigerzahlen pro Streifen
+
+// Werte für einen Streifen (0–500 bzw. 500–1000), mit Seiten (oben/unten), nie überlappend
+function verteile(basis, k, niveau, rnd) {
+  const kand = [];
+  for (let v = basis + 5; v < basis + 500; v += 5) {
+    if (v % 100 === 0) continue;
+    if (niveau === 1 ? v % 50 === 0 : niveau === 2 ? v % 10 === 0 : true) kand.push(v);
+  }
+  for (let versuch = 0; versuch < 4000; versuch++) {
+    let l = [];
+    for (const v of Z.mischen(kand, rnd)) { if (l.every(x => Math.abs(x - v) >= 36)) l.push(v); if (l.length === k) break; }   // 36 Einheiten ≈ 12,2 mm
+    if (l.length < k) continue;
+    l.sort((a, b) => a - b);
+    if (niveau === 3 && k >= 3 && l.filter(v => v % 10 === 5).length < Math.ceil(k / 3)) continue;   // genug Zahlen zwischen zwei Strichen
+    const start = rnd() < .5 ? 0 : 1;
+    const seiten = l.map((v, i) => (i + start) % 2 ? "unten" : "oben");
+    // Pfeile von unten nicht durch die Hunderter-Beschriftung
+    if (l.some((v, i) => seiten[i] === "unten" && Math.abs(v - Math.round(v / 100) * 100) < 16)) continue;
+    return l.map((v, i) => ({ v, seite: seiten[i] }));
+  }
+  return [];
+}
+
+function streifen(von, pfeile, art, beispielV) {   // art: "leer" | "aufgabe" | "loesung"
+  const d = document.createElement("div"); d.className = "streifen-blk";
+  const s = D.strahl(d, { von, bis: von + 500, schritt: 10, beschriftung: "hunderter", breite: 182, hoehe: 48, y: 21, L: 6, links: 5, rechts: 7, randLinks: von !== 0 });
+  pfeile.forEach(p => {
+    const bsp = p.v === beispielV;
+    if (art === "leer" && !bsp) return;
+    const zeige = art === "loesung" || bsp;
+    s.markiere({ wert: p.v, seite: p.seite, text: zeige ? p.v : "", kb: 14, kh: 9, abstand: p.seite === "oben" ? 13 : 19.5,
+      klasse: bsp ? "bsp" : art === "loesung" ? "loes" : "" });
+  });
+  return d;
+}
+
+D.start({
+  id: "streifen", titel: "Der 1000er-Streifen",
+  optionen: [
+    { key: "modus", label: "Modus", werte: [{ wert: "ablesen", text: "Ablesen" }, { wert: "einzeichnen", text: "Einzeichnen" }], std: "ablesen" },
+    { key: "anzahl", label: "Pfeile", werte: [{ wert: 8, text: "8" }, { wert: 12, text: "12" }, { wert: 16, text: "16" }], std: 8 },
+  ],
+  info: cfg => (cfg.modus === "ablesen" ? "Ablesen" : "Einzeichnen") + " · " + Math.min(cfg.anzahl, cfg.niveau === 1 ? MAX1 : 99) + " Zahlen",
+  baue(cfg, rnd, loesung) {
+    const n = cfg.niveau, anz = Math.min(cfg.anzahl, n === 1 ? MAX1 : 16);
+    const a = Math.ceil(anz / 2), b = anz - a;
+    const oben = verteile(0, a, n, rnd), unten = verteile(500, b, n, rnd);
+    const alle = oben.concat(unten), bsp = alle.length ? alle[Math.floor(rnd() * alle.length)].v : null;
+    const w = document.createElement("div");
+    const ablesen = cfg.modus === "ablesen";
+    w.insertAdjacentHTML("beforeend", `<p class="b-auftrag">${ablesen ? "Welche Zahl zeigt der Pfeil? Schreibe sie in das Kästchen." : "Zeichne zu jeder Zahl einen Pfeil an die richtige Stelle. Schreibe die Zahl dazu."}
+      Ein Strich bedeutet 10. Das graue Beispiel ist schon gelöst.</p>`);
+    if (n === 3) w.insertAdjacentHTML("beforeend", `<p class="tipp">Tipp: 345 liegt in der Mitte zwischen 340 und 350.</p>`);
+    if (!ablesen) {
+      const zahlen = Z.mischen(alle.map(p => p.v), rnd);
+      w.insertAdjacentHTML("beforeend", `<div class="liste">${zahlen.map(v => `<span class="${v === bsp ? "bsp" : ""}">${v}</span>`).join("")}</div>`);
+    }
+    const art = loesung ? "loesung" : ablesen ? "aufgabe" : "leer";
+    w.appendChild(streifen(0, oben, art, bsp));
+    w.appendChild(streifen(500, unten, art, bsp));
+    if (cfg.anzahl > anz) w.insertAdjacentHTML("beforeend", `<p class="tipp nicht-drucken grau">Hinweis: Auf Niveau 1 gibt es höchstens ${MAX1} Pfeile (nur Fünfzigerzahlen).</p>`);
+    return [w];
+  },
+});
+</script>
+</body>
+</html>

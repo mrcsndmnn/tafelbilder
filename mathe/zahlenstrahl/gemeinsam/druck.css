@@ -1,0 +1,64 @@
+/* =====================================================================
+   Zahlenstrahl bis 1000 – Druckvorlagen (A4 hoch)
+   Bildschirm: Steuerleiste + Vorschau der Blätter im Maßstab.
+   Druck: nur die Blätter, Maße in Millimetern.
+   ===================================================================== */
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+@page{size:A4 portrait;margin:15mm}
+:root{--ink:#1d2320;--soft:#5d6862;--line:#b9c2bc;--ok:#2f7d4f;--room:#e3e8e4;--font:"Andika","Comic Sans MS","Segoe UI",sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font)}
+
+/* ---------- Steuerleiste (wird nicht gedruckt) ---------- */
+.steuer{position:sticky;top:0;z-index:5;background:#fff;border-bottom:2px solid #d5ddd7;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.steuer h1{font-size:22px;margin:0 8px 0 0;flex-basis:100%}
+.steuer .zurueck{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--ink);text-decoration:none;border:2px solid var(--ink);border-radius:10px;padding:6px 12px}
+.steuer .gruppe{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.steuer .glabel{font-weight:700;color:var(--soft);font-size:16px;margin-right:2px}
+.steuer button,.steuer input{font-family:var(--font);font-size:17px}
+.steuer button{min-height:44px;padding:0 14px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
+.steuer button[aria-pressed="true"]{background:#e3f2e8;border-color:var(--ok)}
+.steuer button.haupt{background:var(--ink);color:#fff}
+.steuer button:focus-visible,.steuer input:focus-visible,.steuer a:focus-visible{outline:3px solid var(--ok);outline-offset:2px}
+.steuer input{width:6.5em;min-height:44px;padding:0 10px;border:2px solid var(--ink);border-radius:10px}
+.steuer .klein{font-size:14px;color:var(--soft)}
+.steuer .druckbox{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+
+/* ---------- Vorschau ---------- */
+.vorschau{display:flex;flex-direction:column;align-items:center;gap:10mm;padding:10mm 8px 20mm}
+.blatt{width:210mm;height:297mm;padding:15mm;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);position:relative;overflow:hidden;
+  font-size:15pt;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.blatt .innen{position:relative;height:267mm}
+@media screen and (max-width:860px){.blatt{zoom:.5}}
+@media print{
+  body{background:#fff}
+  .steuer,.nicht-drucken{display:none!important}
+  .vorschau{display:block;padding:0}
+  .blatt{width:auto;height:267mm;padding:0;box-shadow:none;break-after:page;page-break-after:always}
+  .blatt:last-child{break-after:auto;page-break-after:auto}
+}
+
+/* ---------- Blattkopf ---------- */
+.b-kopf{display:flex;gap:8mm;font-size:13pt;margin-bottom:4mm}
+.b-kopf .feld{flex:1;border-bottom:.35mm solid var(--ink);padding-bottom:1mm}
+.b-kopf .feld.kurz{flex:.55}
+.b-titel{display:flex;align-items:baseline;gap:4mm;margin:0 0 2mm}
+.b-titel h2{font-size:19pt;margin:0;flex:1;line-height:1.2}
+.b-titel .sterne{font-size:16pt;letter-spacing:1mm;white-space:nowrap}
+.b-titel .loesung{font-size:13pt;font-weight:700;border:.5mm solid var(--ink);border-radius:2mm;padding:.5mm 2.5mm}
+.b-auftrag{margin:0 0 3mm;font-size:15pt}
+.b-fuss{position:absolute;right:0;bottom:0;font-size:9pt;color:var(--soft)}
+.grau{color:#8d9892}
+.loes{color:#2667c9;font-weight:700}
+
+/* Wortspeicher */
+.wortspeicher{border:.4mm solid var(--ink);border-radius:3mm;padding:2mm 4mm;margin:0 0 4mm;display:flex;gap:6mm;align-items:center}
+.wortspeicher .ws-titel{font-weight:700;font-size:12pt;color:var(--soft)}
+
+/* Strahl im Druck */
+.blatt .strahl .st,.blatt .strahl .s-achse{stroke:#000}
+.blatt .strahl .s-zahl,.blatt .strahl .m-text{fill:#000}
+.blatt .strahl .m-kasten{stroke:#000}
+.blatt .strahl.grau-text .m-text{fill:#8d9892}
+.blatt .strahl .m-text.loes-t{fill:#2667c9}

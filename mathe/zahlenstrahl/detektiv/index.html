@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Strahl-Detektiv – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.frage{display:flex;align-items:center;justify-content:center;gap:16px}
+.frage .t{font-size:34px;font-weight:700;margin-right:8px}
+.frage .knopf{min-width:96px;font-size:32px}
+.frage .knopf.ok{background:#e8f5ec;border-color:#2f7d4f;color:#2f7d4f}
+.frage .knopf.falsch{opacity:.35}
+.satzband{font-size:40px;font-weight:700;text-align:center;color:#5e2f91}
+.aktionen{display:flex;gap:16px;justify-content:center}
+.strahl .s-mark.geg .m-kasten{fill:#f1f3f1}
+.strahl .s-mark.zu{opacity:.55}
+.strahl .zwz{font-weight:700;fill:#5e2f91}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Strahl-Detektiv: Ausschnitte bestimmen",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "Hier sind alle Striche schwarz und gleich lang (nur der Mittelstrich ist länger). So verraten Farbe und Länge nichts.",
+ teile: [
+  { h: "Worum geht es?", text: "Ein Ausschnitt mit 11 Strichen. Aus den bekannten Zahlen herausfinden: Wie groß ist ein Schritt? Dann die gesuchten Zahlen bestimmen." },
+  { h: "So geht es", punkte: [
+    "Zuerst die Frage **„Wie groß ist ein Schritt?“** mit 1, 10 oder 100 beantworten. Bei falscher Wahl kommt ein Tipp: „Zähle die Striche von 340 bis 350.“",
+    "Erst danach werden die Kästchen mit „?“ aktiv: Antippen deckt auf.",
+    "Schalter **Ziffernfeld**: Statt aufzudecken, gibt ein Kind die Zahl selbst ein. **OK** prüft.",
+    "**Springen** (Hilfe): Bögen hüpfen von einer bekannten Zahl zum nächsten gesuchten Strich und zählen mit (+1, +1, …). Die Zwischenzahl erscheint kurz." ] },
+  { h: "Stufen", punkte: [
+    "● Beide Enden beschriftet, ein Strich bedeutet 1 (z. B. 340 … 350).",
+    "●● Ein Strich bedeutet 10. Beide Enden beschriftet (z. B. 400 … 500) oder ein Ende und die Mitte (z. B. 830 und 880, das Ende rechts ist gesucht).",
+    "●●● Nur eine Zahl ist gegeben. Darum steht über dem Strahl: „Ein Strich bedeutet 1.“ bzw. „10.“" ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+let stufe = 1, ziffern = false, A = null, strahl = null, schrittOk = false, marken = [], zf = null, springt = false;
+
+const sWahl = T.stufen(v => { stufe = v; neu(); }, "det-stufe");
+const zKn = T.schalter("Ziffernfeld", T.laden("det-ziffern", false), v => { ziffern = v; T.merken("det-ziffern", v); });
+stufe = sWahl.wert; ziffern = zKn.getAttribute("aria-pressed") === "true";
+T.kopf({ titel: "Strahl-Detektiv: Ausschnitte bestimmen", onNeu: () => neu(), farbenKey: "strahl-farben", farbenStd: true });
+T.leiste(sWahl, zKn);
+
+const frage = T.blk(100, 180, 1400, 70, "frage");
+frage.appendChild(T.el("span", "t", "Wie groß ist ein Schritt?"));
+const sKn = [1, 10, 100].map(w => { const b = T.knopf(String(w), () => schrittWahl(w, b)); frage.appendChild(b); return b; });
+const band = T.blk(100, 272, 1400, 56, "satzband");
+const box = T.blk(50, 300, 1500, 360);
+const akt = T.blk(200, 676, 1200, 64, "aktionen");
+const springKn = T.knopf("Springen", () => springen(), "hilfe");
+akt.append(springKn, T.knopf("Alle aufdecken", () => { schrittOk = true; marken.forEach(m => loese(m)); }), T.knopf("Nächster Ausschnitt →", () => neu(), "haupt"));
+const unten = T.blk(150, 764, 1300, 0); const streifen = T.streifen(unten);
+
+function neu() {
+  T.stop(); zuZiffern(); springt = false; schrittOk = false;
+  const schritt = stufe === 1 ? 1 : stufe === 2 ? 10 : T.wahl([1, 10]);
+  const gegeben = stufe === 1 ? "enden" : stufe === 2 ? T.wahl(["enden", "endeMitte"]) : "eine";
+  A = Z.ausschnittAufgabe({ schritt, gegeben, ausgerichtet: stufe === 1 || (stufe === 2 && gegeben === "enden" && Math.random() < .6), gesucht: T.zufall(2, 3), abstand: 2, abstandG: 1 });
+  sKn.forEach(b => { b.classList.remove("ok", "falsch"); b.disabled = false; });
+  band.textContent = A.eineZahl ? Z.SATZ(schritt) : "";
+  box.innerHTML = "";
+  strahl = Z.zeichneStrahl(box, { von: A.von, bis: A.bis, schritt, einheitlich: true, beschriftung: "keine", farben: false, randLinks: true,
+    breite: 1500, hoehe: 360, y: 190, links: 90, rechts: 90, L: 80, schrift: 40, dicke: 5 });
+  marken = [];
+  A.gegeben.forEach(i => strahl.markiere({ wert: A.wert(i), seite: "unten", text: A.wert(i), linie: "linie", klasse: "geg", abstand: 98, kb: 118, kh: 62 }));
+  A.gesucht.forEach(i => {
+    const m = strahl.markiere({ wert: A.wert(i), seite: "unten", text: "?", linie: "linie", klasse: "leer zu", abstand: 98, kb: 118, kh: 62, onTap: () => tippe(m) });
+    m.wert = A.wert(i); m.i = i; m.setAttribute("role", "button"); m.setAttribute("aria-label", "Gesuchte Zahl"); marken.push(m);
+  });
+  Z.melde(streifen, "muster hilfe", "Ein Strich bedeutet …");
+}
+function schrittWahl(w, b) {
+  if (schrittOk) return;
+  if (w === A.schritt) {
+    schrittOk = true; b.classList.add("ok"); sKn.forEach(x => { if (x !== b) x.disabled = true; });
+    marken.forEach(m => m.classList.remove("zu"));
+    Z.melde(streifen, "ok", `${T.lob()} ${Z.SATZ(w)} Jetzt die Kästchen.`);
+  } else {
+    b.classList.add("falsch");
+    const g = A.gegeben.map(A.wert);
+    Z.melde(streifen, "noch", A.eineZahl ? "Noch nicht. Lies den Satz über dem Strahl." : `Noch nicht. Zähle die Striche von ${g[0]} bis ${g[g.length - 1]}.`);
+  }
+}
+function tippe(m) {
+  if (m.classList.contains("ok") || springt) return;
+  if (!schrittOk) { Z.melde(streifen, "noch", "Zuerst: Wie groß ist ein Schritt?"); return; }
+  if (ziffern) oeffneZiffern(m); else loese(m);
+}
+function loese(m) {
+  if (m.classList.contains("ok")) return;
+  m.setzeText(m.wert); m.classList.remove("leer", "zu"); m.classList.add("ok"); strahl.leuchte(m.wert);
+  if (marken.every(x => x.classList.contains("ok"))) Z.melde(streifen, "ok", `${T.lob()} ${Z.SATZ(A.schritt)} Alle Zahlen gefunden.`);
+}
+
+// ---------- Ziffernfeld ----------
+function zuZiffern() { if (zf) { zf.remove(); zf = null; } }
+function oeffneZiffern(m) {
+  zuZiffern();
+  let eingabe = "";
+  zf = T.el("div", "ziffernfeld"); zf.setAttribute("role", "dialog"); zf.setAttribute("aria-label", "Ziffernfeld");
+  const anz = T.el("div", "anzeige", "&nbsp;"); zf.appendChild(anz);
+  const setz = () => { anz.innerHTML = eingabe || "&nbsp;"; };
+  [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(d => zf.appendChild(T.knopf(String(d), () => { if (eingabe.length < 4) eingabe += d; setz(); })));
+  zf.appendChild(T.knopf("⌫", () => { eingabe = eingabe.slice(0, -1); setz(); }));
+  zf.appendChild(T.knopf("0", () => { if (eingabe.length < 4) eingabe += "0"; setz(); }));
+  zf.appendChild(T.knopf("✕", () => zuZiffern()));
+  const ok = T.knopf("OK", () => {
+    if (!eingabe) return;
+    if (+eingabe === m.wert) { zuZiffern(); loese(m); }
+    else { Z.melde(streifen, "noch", `Noch nicht. ${eingabe} passt hier nicht. Zähle noch einmal.`); eingabe = ""; setz(); }
+  }, "haupt ok");
+  ok.style.gridColumn = "1 / -1"; zf.appendChild(ok);
+  const bx = 50 + m.x;   // Ziffernfeld neben das Kästchen, nicht darüber
+  zf.style.left = (bx < 800 ? bx + 90 : bx - 350) + "px"; zf.style.top = "236px";
+  S.appendChild(zf);
+}
+
+// ---------- Hilfe „Springen“ ----------
+async function springen() {
+  if (springt) return;
+  const offen = marken.filter(m => !m.classList.contains("ok"));
+  if (!offen.length) return;
+  const m = offen[0];
+  // nächste bekannte Stelle (gegeben oder schon gelöst)
+  const bekannt = A.gegeben.concat(marken.filter(x => x.classList.contains("ok")).map(x => x.i));
+  const start = bekannt.reduce((a, b) => Math.abs(b - m.i) < Math.abs(a - m.i) ? b : a);
+  const dir = m.i > start ? 1 : -1, lauf = T.lauf;
+  springt = true;
+  strahl.root.querySelectorAll(".s-bogen, .zwz").forEach(e => e.remove());
+  for (let i = start; i !== m.i; i += dir) {
+    const a = A.wert(i), b = A.wert(i + dir);
+    const g = strahl.bogen(a, b, (dir > 0 ? "+" : "−") + A.schritt, { klasse: "neu", hoehe: 46 });
+    const t = Z.el("text", { x: strahl.x(b), y: strahl.o.y - 132, "text-anchor": "middle", "font-size": 34, class: "zwz" }, strahl.gOben);
+    t.textContent = b;
+    await T.warte(800);
+    if (T.lauf !== lauf) return;
+    t.remove(); void g;
+  }
+  springt = false;
+}
+neu();
+</script>
+</body>
+</html>

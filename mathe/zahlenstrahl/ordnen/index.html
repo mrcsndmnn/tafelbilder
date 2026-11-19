@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Zahlen ordnen am Strahl – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.ablage{border:3px dashed var(--line);border-radius:20px}
+.ablage-text{font-size:22px;color:var(--soft);font-weight:700}
+.linien{position:absolute;left:0;top:0;pointer-events:none;z-index:2;overflow:visible}
+.linien line{stroke:#5d6862;stroke-width:3px;stroke-dasharray:4 5}
+.linien line.fest{stroke:#1d2320;stroke-dasharray:none}
+.zeichen{position:absolute;width:64px;height:64px;border:3px solid #5e2f91;border-radius:12px;background:#fff;color:#5e2f91;font-size:40px;font-weight:700;
+  display:grid;place-items:center;cursor:grab;touch-action:none;z-index:5;padding:0;font-family:var(--font)}
+.zeichen.gewaehlt{background:#efe5f8;box-shadow:0 0 0 5px #d4bdea}
+.zeichen.zieht{cursor:grabbing;z-index:11}
+.vorrat{position:absolute;display:flex;gap:10px;align-items:center}
+.vorrat .knopf{width:64px;padding:0;font-size:40px;color:#5e2f91;border-color:#5e2f91}
+.vorrat .lbl{font-size:20px;color:var(--soft);font-weight:700;width:120px;line-height:1.2}
+.aktionen{display:flex;gap:16px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Zahlen ordnen am Strahl",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "**Farben** färbt die Hunderterstriche grün.",
+ teile: [
+  { h: "Worum geht es?", text: "Größenvergleich durch grobes Einordnen: Wo ungefähr liegt die Zahl? Genaues Ablesen ist nicht nötig." },
+  { h: "So geht es", punkte: [
+    "Die Karten aus der Ablage auf den Strahl **ziehen**. Oder: Karte antippen, dann die Stelle auf dem Strahl antippen.",
+    "Es gibt kein Einrasten. **Prüfen** schaut nur, ob die Karte im richtigen Hunderter-Abschnitt liegt (z. B. 480 zwischen 400 und 500).",
+    "Eine Karte zurück in die Ablage ziehen legt sie zurück.",
+    "**Ordnen**: Die Karten gleiten in eine Reihe über dem Strahl, von der kleinsten zur größten. Jede Karte ist mit ihrer genauen Stelle verbunden. Satz: „305 ist kleiner als 350.“",
+    "**Hilfe**: Vergleichszeichen-Kärtchen < und > rechts unten. Antippen legt ein Kärtchen dazu, das man zwischen die Karten ziehen kann." ] },
+  { h: "Stufen", punkte: [
+    "● 4 Karten, weit auseinander (z. B. 120, 480, 910).",
+    "●● 5 Karten in verschiedenen Hundertern.",
+    "●●● Karten nah beieinander mit denselben Ziffern (z. B. 350, 305, 530, 503)." ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+const NS = "http://www.w3.org/2000/svg";
+const SX = 50, SY = 330, LY = 190;          // Lage des Strahls auf der Bühne; Linie bei SY + LY
+const KB = 120, KH = 76;
+let stufe = 1, karten = [], gewaehlt = null, geordnet = false, strahl;
+
+const sWahl = T.stufen(v => { stufe = v; neu(); }, "ordnen-stufe"); stufe = sWahl.wert;
+T.kopf({ titel: "Zahlen ordnen am Strahl", onNeu: () => neu(), farbenKey: "strahl-farben", farbenStd: true });
+const pruefKn = T.knopf("Prüfen", () => pruefen()), ordKn = T.knopf("Ordnen", () => ordnen(), "haupt");
+const akt = T.el("div", "aktionen"); akt.append(pruefKn, ordKn, T.knopf("Neue Karten →", () => neu()));
+T.leiste(sWahl, akt);
+
+const box = T.blk(SX, SY, 1500, 300);
+strahl = Z.zeichneStrahl(box, { von: 0, bis: 1000, schritt: 100, beschriftung: "hunderter", breite: 1500, hoehe: 300, y: LY, links: 60, rechts: 80, L: 90, schrift: 34, dicke: 5,
+  antippbar: w => { if (gewaehlt && gewaehlt.v != null) legeAuf(gewaehlt, w); } });
+const ablage = T.blk(40, 664, 1180, 112, "ablage");
+const ablText = T.blk(60, 640, 400, 26, "ablage-text"); ablText.textContent = "Ablage";
+const linien = document.createElementNS(NS, "svg"); linien.setAttribute("class", "linien"); linien.setAttribute("width", 1600); linien.setAttribute("height", 900);
+S.appendChild(linien);
+const vorrat = T.blk(1240, 674, 340, 90, "vorrat hilfe");
+vorrat.innerHTML = '<span class="lbl">Vergleichs&shy;zeichen</span>';
+["<", ">"].forEach(z => vorrat.appendChild(T.knopf(z === "<" ? "&lt;" : "&gt;", () => neuesZeichen(z))));
+vorrat.querySelectorAll(".knopf")[0].setAttribute("aria-label", "Kärtchen kleiner als"); vorrat.querySelectorAll(".knopf")[1].setAttribute("aria-label", "Kärtchen größer als");
+const unten = T.blk(150, 790, 1300, 0); const streifen = T.streifen(unten);
+
+const xVon = w => SX + strahl.x(w);
+const linieY = SY + LY;
+
+// ---------- Zahlen nach Stufe ----------
+function zahlen() {
+  const ohne100 = h => h * 100 + T.zufall(1, 99);
+  if (stufe === 1) {
+    for (;;) { const h = T.mischen([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4).sort((a, b) => a - b); if (h.every((x, i) => !i || x - h[i - 1] >= 2)) return T.mischen(h.map(ohne100)); }
+  }
+  if (stufe === 2) return T.mischen(T.mischen([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 5).map(ohne100));
+  // Stufe 3: dieselben Ziffern, nah beieinander
+  if (Math.random() < .5) { const [a, b] = T.mischen([1, 2, 3, 4, 5, 6, 7, 8, 9]); return T.mischen([a * 100 + b, a * 100 + b * 10, b * 100 + a, b * 100 + a * 10]); }
+  const [a, b, c] = T.mischen([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  return T.mischen([[a, b, c], [a, c, b], [b, a, c], [b, c, a], [c, a, b], [c, b, a]].map(([x, y, z]) => x * 100 + y * 10 + z)).slice(0, 5);
+}
+
+// ---------- Karten ----------
+function neu() {
+  T.stop(); geordnet = false; gewaehlt = null;
+  karten.forEach(k => k.el.remove()); S.querySelectorAll(".zeichen").forEach(z => z.remove());
+  const l = zahlen(), abst = 1180 / l.length;
+  karten = l.map((v, i) => {
+    const el = T.el("button", "zkarte", String(v)); el.type = "button"; el.setAttribute("aria-label", "Karte " + v);
+    const k = { v, el, wert: null, slot: { x: 40 + abst * (i + .5) - KB / 2, y: 664 + (112 - KH) / 2 } };
+    S.appendChild(el); beweglich(el, k); setze(k, k.slot.x, k.slot.y);
+    return k;
+  });
+  zeichneLinien(); pruefKn.disabled = false; ordKn.disabled = false;
+  Z.melde(streifen, "", "Lege die Karten auf den Strahl. Wo ungefähr liegt die Zahl?");
+}
+const setze = (k, x, y) => { k.el.style.left = x + "px"; k.el.style.top = y + "px"; k.x = x; k.y = y; };
+function legeAuf(k, w) {
+  if (geordnet) return;
+  w = Math.max(0, Math.min(1000, w));
+  k.wert = w; k.el.classList.remove("ok", "noch", "gewaehlt"); gewaehlt = null;
+  // nicht über andere Karten legen: bei Überlappung eine Etage höher
+  const x = xVon(w) - KB / 2;
+  let ebene = 0;
+  while (ebene < 3 && karten.some(o => o !== k && o.wert != null && o.ebene === ebene && Math.abs(o.x - x) < KB + 6)) ebene++;
+  k.ebene = ebene;
+  setze(k, x, linieY - 70 - KH - ebene * (KH + 12));
+  zeichneLinien();
+}
+function zurAblage(k) { k.wert = null; k.ebene = null; k.el.classList.remove("ok", "noch", "gewaehlt"); setze(k, k.slot.x, k.slot.y); zeichneLinien(); }
+function zeichneLinien() {
+  linien.innerHTML = "";
+  karten.forEach(k => {
+    if (geordnet) { const l = document.createElementNS(NS, "line"); Object.entries({ x1: k.x + KB / 2, y1: k.y + KH, x2: xVon(k.v), y2: linieY - 8, class: "fest" }).forEach(([a, b]) => l.setAttribute(a, b)); linien.appendChild(l); }
+    else if (k.wert != null) { const l = document.createElementNS(NS, "line"); Object.entries({ x1: k.x + KB / 2, y1: k.y + KH, x2: k.x + KB / 2, y2: linieY - 8 }).forEach(([a, b]) => l.setAttribute(a, b)); linien.appendChild(l); }
+  });
+}
+
+// Ziehen oder Antippen-Antippen (für Karten und Vergleichszeichen)
+function buehnenPunkt(e) { const r = S.getBoundingClientRect(), s = r.width / 1600; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; }
+function beweglich(el, k) {
+  let start = null, ab = null, bewegt = false;
+  el.addEventListener("pointerdown", e => {
+    if (e.button > 0 || geordnet && k.v != null) return;
+    e.preventDefault(); start = buehnenPunkt(e); ab = { x: k.x, y: k.y }; bewegt = false;
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  el.addEventListener("pointermove", e => {
+    if (!start) return;
+    const p = buehnenPunkt(e);
+    if (!bewegt && Math.hypot(p.x - start.x, p.y - start.y) < 8) return;
+    bewegt = true; el.classList.add("zieht");
+    setze(k, ab.x + p.x - start.x, ab.y + p.y - start.y); if (k.v != null) linien.innerHTML = "";
+  });
+  const ende = e => {
+    if (!start) return;
+    const p = buehnenPunkt(e); start = null; el.classList.remove("zieht");
+    if (!bewegt) { waehle(k); return; }
+    if (k.v == null) return;      // Vergleichszeichen bleiben, wo sie losgelassen werden
+    const mx = k.x + KB / 2, my = k.y + KH / 2;
+    if (my > 620) zurAblage(k);
+    else if (my > 150) legeAuf(k, strahl.w(mx - SX));
+    else setze(k, ab.x, ab.y);
+    void p;
+  };
+  el.addEventListener("pointerup", ende);
+  el.addEventListener("pointercancel", () => { start = null; el.classList.remove("zieht"); setze(k, ab.x, ab.y); zeichneLinien(); });
+}
+function waehle(k) {
+  if (geordnet && k.v != null) return;
+  const an = gewaehlt !== k;
+  [...karten, ...zeichenListe].forEach(o => o.el.classList.remove("gewaehlt"));
+  gewaehlt = an ? k : null;
+  if (an) { k.el.classList.add("gewaehlt"); if (k.v != null) Z.melde(streifen, "", `Karte ${k.v}: Tippe jetzt auf den Strahl.`); }
+}
+// Antippen der Ablage legt die gewählte Karte zurück; Antippen der Bühne setzt ein gewähltes Zeichen
+ablage.addEventListener("click", () => { if (gewaehlt && gewaehlt.v != null && gewaehlt.wert != null) zurAblage(gewaehlt); });
+S.addEventListener("click", e => {
+  if (!gewaehlt || gewaehlt.v != null || e.target.closest(".zeichen, .knopf")) return;
+  const p = buehnenPunkt(e); setze(gewaehlt, p.x - 32, p.y - 32); gewaehlt.el.classList.remove("gewaehlt"); gewaehlt = null;
+});
+
+// ---------- Vergleichszeichen (Hilfe) ----------
+let zeichenListe = [];
+function neuesZeichen(z) {
+  const el = T.el("button", "zeichen", z === "<" ? "&lt;" : "&gt;"); el.type = "button"; el.setAttribute("aria-label", z === "<" ? "kleiner als" : "größer als");
+  const k = { v: null, el }; S.appendChild(el); zeichenListe.push(k);
+  const n = S.querySelectorAll(".zeichen").length;
+  setze(k, 1410 + ((n - 1) % 2) * 76, 178 + Math.floor((n - 1) / 2) % 3 * 76); beweglich(el, k);
+}
+
+// ---------- Prüfen und Ordnen ----------
+function pruefen() {
+  const offen = karten.filter(k => k.wert == null);
+  if (offen.length) { Z.melde(streifen, "noch", `Lege zuerst alle Karten auf den Strahl. Es ${offen.length === 1 ? "fehlt noch 1 Karte" : "fehlen noch " + offen.length + " Karten"}.`); return; }
+  let falsch = 0;
+  karten.forEach(k => {
+    const ok = Math.floor(k.v / 100) === Math.min(9, Math.floor(k.wert / 100));
+    k.el.classList.toggle("ok", ok); k.el.classList.toggle("noch", !ok); if (!ok) falsch++;
+  });
+  if (!falsch) Z.melde(streifen, "ok", `${T.lob()} Alle Karten liegen im richtigen Abschnitt. Jetzt „Ordnen“.`);
+  else {
+    const k = karten.find(x => x.el.classList.contains("noch")), h = Math.floor(k.v / 100) * 100;
+    Z.melde(streifen, "noch", `Noch nicht ganz. ${k.v} liegt zwischen ${h} und ${h + 100}.`);
+  }
+}
+function ordnen() {
+  if (geordnet) return;
+  geordnet = true; gewaehlt = null;
+  const sortiert = [...karten].sort((a, b) => a.v - b.v), n = sortiert.length, abst = 180, x0 = 800 - (n - 1) * abst / 2;
+  linien.innerHTML = "";
+  sortiert.forEach((k, i) => { k.el.classList.add("gleiten"); k.el.classList.remove("gewaehlt"); setze(k, x0 + i * abst - KB / 2, 196); });
+  T.nach(850, () => { karten.forEach(k => k.el.classList.remove("gleiten")); zeichneLinien(); });
+  pruefKn.disabled = true; ordKn.disabled = true;
+  // engstes Paar für den Satz
+  let p = 0; for (let i = 1; i < n - 1; i++) if (sortiert[i + 1].v - sortiert[i].v < sortiert[p + 1].v - sortiert[p].v) p = i;
+  Z.melde(streifen, "ok", [`Von klein nach groß: ${sortiert.map(k => k.v).join(", ")}.`, `${sortiert[p].v} ist kleiner als ${sortiert[p + 1].v}.`]);
+}
+neu();
+</script>
+</body>
+</html>

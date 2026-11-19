@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Zahlenstrahl-Lupe – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.pfad{display:flex;align-items:center;gap:6px}
+.pfad .sep{font-size:30px;color:var(--soft);padding:0 2px}
+.wahl-rect{fill:#ffe066;opacity:.55}
+.tz{position:absolute;width:72px;height:72px;border:3px solid var(--ink);background:#fff;display:grid;place-items:center;font-size:28px;font-weight:700;
+  transition:left .7s ease,top .7s ease,background .3s;z-index:4}
+.tz.da{background:#fff4c2}
+.tipp{font-size:26px;color:var(--soft);text-align:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Zahlenstrahl-Lupe",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "**Farben** färbt die Striche: langer Strich Hunderter grün, mittlerer Strich Zehner rot, kurzer Strich Einer blau. Ohne Farben reicht die Länge.",
+ teile: [
+  { h: "Worum geht es?", text: "Was bedeutet ein Strich? Die Einteilung des Strahls wird zum Gesprächsthema: 100, 10 oder 1." },
+  { h: "So geht es", punkte: [
+    "Start: Strahl von 0 bis 1000. Satz: „Ein Strich bedeutet 100.“",
+    "Einen **Abschnitt antippen** (z. B. zwischen 300 und 400). Er wird gelb. **Lupe** vergrößert ihn: Jetzt sieht man Zehnerstriche.",
+    "Noch einmal: Abschnitt antippen, **Lupe** – jetzt Einerstriche (z. B. 340 bis 350).",
+    "Oben die **Pfad-Anzeige** „0–1000 › 300–400 › 340–350“: Antippen geht zurück.",
+    "**Wie bei der 1000er-Tafel** (nur bei Einerstrichen): Eine Zeile der Tafel gleitet Feld für Feld auf die Striche. Die Tafel beginnt bei 1, der Strahl bei 0.",
+    "**Hilfen**: Sprungbögen „+100“, „+10“, „+1“ und die Frage „Was ist gleich? Was ist anders?“" ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+const STUFEN = [100, 10, 1];
+let pfad = [{ von: 0, bis: 1000, schritt: 100 }], wahl = null, laeuft = false, tafelAn = false;
+
+// ---------- Aufbau ----------
+const pfadBox = T.el("div", "pfad"); pfadBox.setAttribute("role", "navigation"); pfadBox.setAttribute("aria-label", "Pfad");
+const lupeKn = T.knopf('<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M18.5 18.5 L27 27" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>Lupe', () => lupe(), "haupt");
+const tafelKn = T.knopf("Wie bei der 1000er-Tafel", () => tafel());
+T.kopf({ titel: "Zahlenstrahl-Lupe: Was bedeutet ein Strich?", onNeu: () => { pfad = pfad.slice(0, 1); zeige(); }, farbenKey: "strahl-farben", farbenStd: true,
+  onHilfen: () => { if (laeuft) return; strahl.root.querySelectorAll(".s-bogen").forEach(b => b.remove()); if (T.hilfen() && !tafelAn) boegen(); } });
+const knBox = T.el("div", "gruppe"); knBox.append(lupeKn, tafelKn);
+T.leiste(pfadBox, knBox);
+
+const satz = T.blk(100, 186, 1400, 70, "zs-satz"); satz.setAttribute("aria-live", "polite");
+const box = T.blk(50, 360, 1500, 300);
+const tipp = T.blk(100, 650, 1400, 50, "tipp");
+const hinweis = T.blk(150, 720, 1300, 0); const streifen = T.streifen(hinweis);
+const impuls = T.blk(100, 250, 1400, 44, "zs-impuls hilfe"); impuls.textContent = "Was ist gleich? Was ist anders?";
+let strahl, zellen = [];
+
+const OPT = { breite: 1500, hoehe: 300, y: 150, links: 60, rechts: 70, L: 90, schrift: 34, dicke: 5 };
+const ansicht = () => pfad[pfad.length - 1];
+const txt = a => `${a.von}–${a.bis}`;
+
+function zeichne(von, bis, schritt, mitHilfe = true) {
+  box.innerHTML = "";
+  strahl = Z.zeichneStrahl(box, Object.assign({}, OPT, { von, bis, schritt, beschriftung: schritt === 100 ? "hunderter" : schritt === 10 ? "zehner" : "alle",
+    antippbar: w => tippe(w) }));
+  return strahl;
+}
+function zeige() {
+  T.stop(); laeuft = false; wahl = null; tafelWeg();
+  const a = ansicht();
+  zeichne(a.von, a.bis, a.schritt);
+  if (T.hilfen()) boegen();
+  satz.textContent = Z.SATZ(a.schritt);
+  // Pfad-Anzeige
+  pfadBox.innerHTML = "";
+  pfad.forEach((p, i) => {
+    if (i) pfadBox.appendChild(T.el("span", "sep", "›"));
+    const b = T.knopf(txt(p), () => { if (laeuft) return; pfad = pfad.slice(0, i + 1); zeige(); }, "klein");
+    b.setAttribute("aria-pressed", i === pfad.length - 1); b.setAttribute("aria-label", "Zurück zu " + txt(p)); pfadBox.appendChild(b);
+  });
+  lupeKn.disabled = true; lupeKn.hidden = a.schritt === 1;
+  tafelKn.hidden = a.schritt !== 1;
+  tipp.textContent = a.schritt === 1 ? "Ein Strich bedeutet 1. Die Zahlen stehen an jedem Strich." : "Tippe einen Abschnitt an. Dann drücke „Lupe“.";
+  Z.melde(streifen, "", "");
+}
+function boegen() {
+  const a = ansicht();
+  for (let v = a.von; v < a.bis; v += a.schritt) strahl.bogen(v, v + a.schritt, "+" + a.schritt, { klasse: "hilfe" });
+}
+function tippe(w) {
+  const a = ansicht(); if (laeuft || a.schritt === 1) return;
+  const k = Math.max(0, Math.min(9, Math.floor((w - a.von) / a.schritt)));
+  wahl = a.von + k * a.schritt;
+  markiere(wahl, wahl + a.schritt);
+  lupeKn.disabled = false;
+  tipp.textContent = `Du hast den Abschnitt ${wahl} bis ${wahl + a.schritt} gewählt. Jetzt „Lupe“ drücken.`;
+}
+function markiere(a, b) {
+  strahl.root.querySelectorAll(".wahl-rect").forEach(r => r.remove());
+  const r = Z.el("rect", { class: "wahl-rect", x: strahl.x(a), y: OPT.y - OPT.L * .6, width: strahl.x(b) - strahl.x(a), height: OPT.L * 1.2, rx: 8 });
+  strahl.root.insertBefore(r, strahl.root.firstChild);
+}
+// Lupe: Abschnitt dehnt sich auf die volle Breite (ca. 0,8 s)
+function lupe() {
+  const a = ansicht(); if (wahl == null || laeuft || a.schritt === 1) return;
+  const ziel = { von: wahl, bis: wahl + a.schritt, schritt: a.schritt / 10 };
+  laeuft = true; lupeKn.disabled = true;
+  const t0 = performance.now(), dauer = T.bewegt ? 800 : 0;
+  const schritt = now => {
+    const t = dauer ? Math.min(1, (now - t0) / dauer) : 1, e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const von = a.von + (ziel.von - a.von) * e, bis = a.bis + (ziel.bis - a.bis) * e;
+    zeichne(von, bis, a.schritt); markiere(ziel.von, ziel.bis);
+    if (t < 1) requestAnimationFrame(schritt);
+    else { pfad.push(ziel); zeige(); strahl.root.querySelectorAll(".st").forEach(s => s.classList.add("leuchtet")); }
+  };
+  requestAnimationFrame(schritt);
+}
+
+// Eine Zeile der 1000er-Tafel gleitet Feld für Feld auf die Striche
+function tafelWeg() { impuls.hidden = false; zellen.forEach(z => z.remove()); zellen = []; tafelAn = false; tafelKn.setAttribute("aria-pressed", "false"); }
+async function tafel() {
+  if (tafelAn) { tafelWeg(); Z.melde(streifen, "", ""); if (T.hilfen()) boegen(); return; }
+  const a = ansicht(); tafelAn = true; tafelKn.setAttribute("aria-pressed", "true");
+  strahl.root.querySelectorAll(".s-bogen").forEach(b => b.remove());
+  const lauf = T.lauf;
+  const x0 = (1600 - 10 * 72) / 2;
+  for (let i = 0; i < 10; i++) {
+    const v = a.von + i + 1, z = T.el("div", "tz", String(v));
+    z.style.left = x0 + i * 72 + "px"; z.style.top = "296px"; S.appendChild(z); zellen.push(z);
+  }
+  Z.melde(streifen, "muster", [`Das ist eine Zeile der 1000er-Tafel: ${a.von + 1} bis ${a.bis}.`]); impuls.hidden = true;
+  await T.warte(900);
+  for (let i = 0; i < 10; i++) {
+    if (T.lauf !== lauf || !tafelAn) return;
+    const v = a.von + i + 1, z = zellen[i];
+    z.style.left = 50 + strahl.x(v) - 36 + "px"; z.style.top = 360 + OPT.y - OPT.L / 2 - 92 + "px"; z.classList.add("da");
+    strahl.leuchte(v, 900);
+    await T.warte(450);
+  }
+  if (T.lauf !== lauf) return;
+  Z.melde(streifen, "muster", [`Jedes Feld liegt auf seinem Strich: ${a.von + 1} auf ${a.von + 1} … ${a.bis} auf ${a.bis}.`,
+    `Die Tafel beginnt bei 1, der Strahl bei 0. Der Strich ${a.von} hat hier kein Feld.`]);
+}
+
+zeige();
+</script>
+</body>
+</html>

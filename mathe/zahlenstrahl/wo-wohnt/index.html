@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Wo wohnt die Zahl? – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.leiste{gap:16px}
+.auftrag{text-align:center}
+.auftrag .frage{font-size:34px;font-weight:700;color:var(--soft)}
+.auftrag .zs-gross{font-size:96px}
+.aktionen{display:flex;gap:16px;justify-content:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Wo wohnt die Zahl?",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "**Farben** färbt die Striche: langer Strich Hunderter grün, mittlerer Strich Zehner rot, kurzer Strich Einer blau. Ohne Farben reicht die Länge.",
+ teile: [
+  { h: "Worum geht es?", text: "Zahlen am Strahl ablesen und zeigen – als tägliche Kurzübung oder als Partneraufgabe „Einer nennt, der andere zeigt“." },
+  { h: "Modus", punkte: [
+    "**Ablesen**: Ein Pfeil zeigt auf einen Strich. Die Klasse nennt die Zahl. Das Kästchen antippen deckt auf. Dann **Nächste Zahl**.",
+    "**Zeigen**: Oben steht eine Zahl. Ein Kind zieht den lila Zeiger an die Stelle (oder tippt auf den Strahl). **Prüfen** sagt, ob es stimmt, oder wie viele Striche es noch sind.",
+    "**Partner**: Wie „Zeigen“, aber ohne Zahl. Ein Kind nennt eine Zahl, das andere zeigt. Der Zeiger zeigt dann die Zahl an, an der er steht." ] },
+  { h: "Auswahl oben", punkte: [
+    "**Bereich**: 0–100 (ein Strich bedeutet 1), 0–1000 (ein Strich bedeutet 10, wie der gebastelte Streifen) oder ein Ausschnitt um eine Zahl.",
+    "**2 Zeilen** (nur bei 0–1000): Der Strahl wird geteilt in 0–500 und 500–1000, wie der Streifen.",
+    "**Stufe**: ● nur Zehnerzahlen (bei 0–1000 nur Hunderterzahlen), ●● Zahlen auf den Fünfer- bzw. Fünfzigerstrichen, ●●● beliebige Zahlen.",
+    "**Hilfen**: Satzmuster unten." ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+let bereich = "1000", zweiZeilen = false, modus = "ablesen", stufe = 1, ziel = 0, vorher = [], strahlen = [], zeiger = [], aktiv = 0, mark = null, geprueft = false;
+
+// ---------- Aufbau ----------
+const bWahl = T.gruppe("Bereich", [{ wert: "100", text: "0–100" }, { wert: "1000", text: "0–1000" }, { wert: "aus", text: "Ausschnitt" }], "1000",
+  v => { bereich = v; zz.hidden = v !== "1000"; neu(); }, "wo-bereich");
+const zz = T.schalter("2 Zeilen", T.laden("wo-zwei", false), v => { zweiZeilen = v; T.merken("wo-zwei", v); neu(); });
+const mWahl = T.gruppe("", [{ wert: "ablesen", text: "Ablesen" }, { wert: "zeigen", text: "Zeigen" }, { wert: "partner", text: "Partner" }], "ablesen",
+  v => { modus = v; neu(); }, "wo-modus");
+const sWahl = T.stufen(v => { stufe = v; neu(); }, "wo-stufe");
+bereich = bWahl.wert; modus = mWahl.wert; stufe = sWahl.wert; zweiZeilen = zz.getAttribute("aria-pressed") === "true"; zz.hidden = bereich !== "1000";
+const bz = T.el("div", "gruppe"); bz.append(bWahl, zz);
+T.kopf({ titel: "Wo wohnt die Zahl?", onNeu: () => { vorher = []; neu(); }, farbenKey: "strahl-farben", farbenStd: true });
+T.leiste(bz, mWahl, sWahl);
+
+const auftrag = T.blk(300, 172, 1000, 150, "auftrag"); auftrag.setAttribute("aria-live", "polite");
+const box = T.blk(30, 300, 1540, 440);
+const akt = T.blk(300, 700, 1000, 70, "aktionen");
+const pruefKn = T.knopf("Prüfen", () => pruefen(), "haupt");
+const weiterKn = T.knopf("Nächste Zahl →", () => neu(), "haupt");
+akt.append(pruefKn, weiterKn);
+const unten = T.blk(150, 786, 1300, 0); const streifen = T.streifen(unten);
+
+// ---------- Zahlen nach Stufe ----------
+function kandidaten(von, bis, schritt) {
+  const l = [];
+  for (let v = von + schritt; v < bis; v += schritt) {
+    if (bereich === "1000") { if (stufe === 1 ? v % 100 === 0 : stufe === 2 ? v % 50 === 0 && v % 100 !== 0 : true) l.push(v); }
+    else { if (stufe === 1 ? v % 10 === 0 : stufe === 2 ? v % 5 === 0 && v % 10 !== 0 : true) l.push(v); }
+  }
+  return l;
+}
+function waehleZiel() {
+  let l;
+  if (bereich === "100") l = kandidaten(0, 100, 1);
+  else if (bereich === "1000") l = kandidaten(0, 1000, 10);
+  else { l = []; for (let v = 11; v < 990; v++) if (stufe === 1 ? v % 10 === 0 : stufe === 2 ? v % 5 === 0 && v % 10 !== 0 : v % 5 !== 0) l.push(v); }
+  const frei = l.filter(v => !vorher.includes(v));
+  const z = T.wahl(frei.length ? frei : l);
+  vorher.push(z); if (vorher.length > Math.min(6, l.length - 1)) vorher.shift();
+  return z;
+}
+
+// ---------- Strahl(en) ----------
+function bauen() {
+  box.innerHTML = ""; strahlen = []; zeiger = [];
+  let zeilen;
+  if (bereich === "100") zeilen = [{ von: 0, bis: 100, schritt: 1, beschriftung: "zehner" }];
+  else if (bereich === "1000") zeilen = zweiZeilen ? [{ von: 0, bis: 500, schritt: 10, beschriftung: "hunderter" }, { von: 500, bis: 1000, schritt: 10, beschriftung: "hunderter" }]
+    : [{ von: 0, bis: 1000, schritt: 10, beschriftung: "hunderter" }];
+  else { const a = Math.max(0, Math.min(970, Math.floor(ziel / 10) * 10 - 10 * (ziel % 10 === 0 ? T.zufall(1, 2) : T.zufall(0, 2)))); zeilen = [{ von: a, bis: a + 30, schritt: 1, beschriftung: "zehner" }]; }
+  const hoch = zeilen.length === 1 ? 400 : 196;
+  zeilen.forEach((z, i) => {
+    const d = T.el("div"); d.style.height = hoch + "px"; box.appendChild(d);
+    const s = Z.zeichneStrahl(d, Object.assign({ breite: 1540, hoehe: hoch, y: zeilen.length === 1 ? 250 : 104, links: 50, rechts: 70, L: zeilen.length === 1 ? 84 : 70,
+      schrift: 32, dicke: 5, antippbar: w => tippe(i, w) }, z));
+    strahlen.push(s);
+  });
+}
+const zeile = w => strahlen.findIndex(s => w >= s.o.von && w <= s.o.bis);
+
+function neu() {
+  T.stop(); geprueft = false; mark = null;
+  ziel = waehleZiel();
+  bauen();
+  Z.melde(streifen, "", "");
+  pruefKn.hidden = modus === "ablesen"; pruefKn.disabled = false;
+  if (modus === "ablesen") {
+    auftrag.innerHTML = `<div class="frage">Welche Zahl wohnt hier?</div>`;
+    const s = strahlen[Math.max(0, zeile(ziel))];
+    mark = s.markiere({ wert: ziel, seite: "oben", text: "?", klasse: "leer", onTap: () => aufdecken() });
+    mark.setAttribute("role", "button"); mark.setAttribute("aria-label", "Kästchen aufdecken");
+    zeigeMuster("Der Pfeil zeigt auf …");
+  } else {
+    auftrag.innerHTML = modus === "zeigen" ? `<div class="frage">Zeige die Zahl:</div><div class="zs-gross">${ziel}</div>`
+      : `<div class="frage">Ein Kind nennt eine Zahl. Das andere zeigt sie.</div>`;
+    strahlen.forEach((s, i) => {
+      const z = Z.zeiger(s, { wert: s.o.von, label: "Zeiger ziehen", zahlZeigen: false,
+        onBewegt: () => { geprueft = false; z.g.classList.remove("ok"); if (modus === "partner") z.zahlZeigen(true); },
+        onAbgelegt: () => abgelegt() });
+      z.zeige(i === 0); zeiger.push(z);
+    });
+    aktiv = 0;
+    zeigeMuster(modus === "zeigen" ? `Die Zahl ${ziel} wohnt hier.` : "Die Zahl … wohnt hier.");
+  }
+}
+function zeigeMuster(t) { Z.melde(streifen, "muster hilfe", t); }
+
+function tippe(i, w) {
+  if (modus === "ablesen") return;
+  zeiger.forEach((z, k) => z.zeige(k === i)); aktiv = i;
+  zeiger[i].setze(w); abgelegt();
+}
+function abgelegt() {
+  if (modus === "partner") { const w = zeiger[aktiv].wert; zeiger[aktiv].zahlZeigen(true); Z.melde(streifen, "ok", `Der Zeiger steht bei ${Math.round(w)}.`); }
+}
+function aufdecken() {
+  if (!mark || mark.classList.contains("ok")) return;
+  mark.setzeText(ziel); mark.classList.remove("leer"); mark.classList.add("ok");
+  const s = strahlen[Math.max(0, zeile(ziel))]; s.leuchte(ziel);
+  Z.melde(streifen, "ok", `Der Pfeil zeigt auf ${ziel}.`);
+}
+function pruefen() {
+  if (modus === "partner") { abgelegt(); return; }
+  const z = zeiger[aktiv], w = z.wert, schritt = strahlen[aktiv].o.schritt;
+  if (w === ziel) {
+    z.g.classList.add("ok"); z.zahlZeigen(true); strahlen[aktiv].leuchte(ziel);
+    Z.melde(streifen, "ok", `${T.lob()} Die Zahl ${ziel} wohnt hier.`);
+    return;
+  }
+  const d = Math.round((ziel - w) / schritt), n = Math.abs(d), richtung = d > 0 ? "rechts" : "links";
+  const zeileZiel = zeile(ziel);
+  if (zeileZiel !== aktiv && strahlen.length > 1) {
+    Z.melde(streifen, "noch", `Noch nicht. ${ziel} wohnt in der ${zeileZiel === 0 ? "oberen" : "unteren"} Zeile.`);
+  } else Z.melde(streifen, "noch", `${n <= 3 ? "Fast!" : "Noch nicht."} Noch ${n === 1 ? "1 Strich" : n + " Striche"} weiter nach ${richtung}.`);
+}
+neu();
+</script>
+</body>
+</html>

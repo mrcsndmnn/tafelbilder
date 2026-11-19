@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Ausschnitte bestimmen – Druckvorlage</title>
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../gemeinsam/druck.css">
+<style>
+.aufgaben{display:grid;grid-template-columns:1fr 1fr;column-gap:8mm}
+.aufg{height:33mm;position:relative;padding-left:7mm}
+.aufg .nr{position:absolute;left:0;top:4.5mm;font-weight:700;font-size:13pt}
+.aufg .satz{font-size:13pt;height:5.5mm;line-height:5.5mm}
+.aufg .satz b{font-weight:700}
+.aufg .luecke{display:inline-block;width:14mm;border-bottom:.3mm solid #000;text-align:center}
+.beispiel{display:flex;gap:6mm;align-items:flex-start;border:.3mm dashed #8d9892;border-radius:3mm;padding:1.5mm 3mm 0;margin:0 0 4mm}
+.beispiel .lbl{font-size:12pt;font-weight:700;color:#8d9892;padding-top:5mm;width:22mm}
+.beispiel .aufg{padding-left:0}
+.ws-k{border:.3mm solid #000;border-radius:2mm;padding:1mm 3mm;font-size:13pt}
+</style>
+</head>
+<body>
+<script src="../gemeinsam/strahl.js"></script>
+<script src="../gemeinsam/druck.js"></script>
+<script>
+const Z = Strahl, D = Druck;
+const SCHRITT = { "1": "Schritt 1", "10": "Schritt 10", "gemischt": "Schritt gemischt" };
+const GEG = { enden: "beide Enden", endeMitte: "Ende und Mitte", eine: "eine Zahl" };
+
+// Ein Ausschnitt: 11 Striche auf 70 mm, Mittelstrich länger
+function ausschnitt(A, nr, art) {   // art: "aufgabe" | "loesung" | "beispiel"
+  const d = document.createElement("div"); d.className = "aufg";
+  if (nr) d.insertAdjacentHTML("beforeend", `<span class="nr">${nr})</span>`);
+  const oben = document.createElement("div"); oben.className = "satz";
+  if (A.eineZahl) oben.innerHTML = `<b>${Z.SATZ(A.schritt)}</b>`;
+  d.appendChild(oben);
+  const s = D.strahl(d, { von: A.von, bis: A.bis, schritt: A.schritt, einheitlich: true, beschriftung: "keine", farben: false, randLinks: true,
+    breite: 78, hoehe: 22, y: 4.5, links: 3, rechts: 5 });
+  const grau = art === "beispiel";
+  A.gegeben.forEach(i => {
+    const t = Z.el("text", { x: s.x(A.wert(i)), y: 13.6, "text-anchor": "middle", "font-size": 4.9, class: "s-zahl" + (grau ? " gz" : "") }, s.root);
+    t.textContent = A.wert(i); if (grau) t.setAttribute("style", "fill:#8d9892");
+  });
+  A.gesucht.forEach(i => {
+    const x = s.x(A.wert(i));
+    Z.el("line", { x1: x, y1: 6.2, x2: x, y2: 8.3, stroke: "#000", "stroke-width": .3 }, s.root);
+    Z.el("rect", { x: x - 7, y: 8.3, width: 14, height: 9, rx: 1, fill: "#fff", stroke: "#000", "stroke-width": .3 }, s.root);
+    if (art !== "aufgabe") {
+      const t = Z.el("text", { x, y: 14.6, "text-anchor": "middle", "font-size": 4.9, "font-weight": 700, style: `fill:${grau ? "#8d9892" : "#2667c9"}` }, s.root);
+      t.textContent = A.wert(i);
+    }
+  });
+  if (!A.eineZahl) {
+    const u = document.createElement("div"); u.className = "satz";
+    u.innerHTML = `Ein Strich bedeutet <span class="luecke">${art === "aufgabe" ? "&nbsp;" : `<span class="${grau ? "grau" : "loes"}">${A.schritt}</span>`}</span>.`;
+    d.appendChild(u);
+  }
+  return d;
+}
+
+D.start({
+  id: "ausschnitte", titel: "Zahlenstrahl: Ausschnitte bestimmen",
+  optionen: [
+    { key: "schritt", label: "Schritt", werte: [{ wert: "1", text: "1" }, { wert: "10", text: "10" }, { wert: "gemischt", text: "gemischt" }], std: "gemischt" },
+    { key: "gegeben", label: "Gegeben", werte: [{ wert: "enden", text: "beide Enden" }, { wert: "endeMitte", text: "ein Ende und Mitte" }, { wert: "eine", text: "nur eine Zahl" }], std: "enden" },
+  ],
+  info: cfg => `${SCHRITT[cfg.schritt]} · ${GEG[cfg.gegeben]}`,
+  baue(cfg, rnd, loesung) {
+    const n = cfg.niveau, anzahl = n === 1 ? 6 : n === 2 ? 8 : 9;
+    const schritt = () => cfg.schritt === "gemischt" ? (rnd() < .5 ? 1 : 10) : +cfg.schritt;
+    const neu = () => Z.ausschnittAufgabe({ schritt: schritt(), gegeben: cfg.gegeben, ausgerichtet: n === 1 || (n === 2 && rnd() < .5), gesucht: n === 3 ? 3 : 2, abstand: 3, abstandG: 2, rnd });
+    const w = document.createElement("div");
+    w.insertAdjacentHTML("beforeend", `<p class="b-auftrag">Wie groß ist ein Schritt? Schreibe die fehlenden Zahlen in die Kästchen.</p>`);
+    if (n === 1) w.insertAdjacentHTML("beforeend", `<div class="wortspeicher"><span class="ws-titel">Wortspeicher</span><span class="ws-k">Ein Strich bedeutet 1.</span><span class="ws-k">Ein Strich bedeutet 10.</span></div>`);
+    const bsp = document.createElement("div"); bsp.className = "beispiel";
+    bsp.insertAdjacentHTML("beforeend", '<span class="lbl">Beispiel</span>'); bsp.appendChild(ausschnitt(neu(), "", "beispiel"));
+    w.appendChild(bsp);
+    const g = document.createElement("div"); g.className = "aufgaben";
+    const buchst = "abcdefghi";
+    const liste = [];
+    for (let i = 0; i < anzahl; i++) {
+      let A; for (let k = 0; k < 20; k++) { A = neu(); if (!liste.some(x => x.von === A.von && x.schritt === A.schritt)) break; }
+      liste.push(A); g.appendChild(ausschnitt(A, buchst[i], loesung ? "loesung" : "aufgabe"));
+    }
+    w.appendChild(g);
+    return [w];
+  },
+});
+</script>
+</body>
+</html>

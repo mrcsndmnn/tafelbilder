@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Was steht in der Mitte? – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.buehne3d{perspective:2400px}
+.haelfte{position:absolute;top:0;height:100%;overflow:hidden}
+.haelfte.re{transform-origin:0 50%;transition:transform 1.2s ease-in-out;transform-style:preserve-3d}
+.haelfte.re.zu{transform:rotateY(-180deg)}
+.falz{position:absolute;top:110px;width:16px;height:180px;margin-left:-8px;border-radius:8px;background:#ffe066;box-shadow:0 0 24px 10px #ffe066;opacity:0;transition:opacity .4s}
+.falz.an{opacity:1}
+.ueberlage{position:absolute;inset:0;overflow:visible}
+.schaetz{cursor:grab;touch-action:none}
+.schaetz .sz-strich{stroke:#5e2f91;stroke-width:6px;stroke-linecap:round}
+.schaetz .sz-kasten{fill:#fff;stroke:#5e2f91;stroke-width:4px}
+.schaetz .sz-text{fill:#5e2f91;font-weight:700;font-size:40px;font-family:var(--font)}
+.schaetz .sz-griff{fill:transparent}
+.schaetz.zieht{cursor:grabbing}
+.schaetz:focus-visible .sz-kasten{stroke-width:8px}
+.mitte-echt .me-strich{stroke:#2f7d4f;stroke-width:7px;stroke-linecap:round}
+.mitte-echt .me-kasten{fill:#e8f5ec;stroke:#2f7d4f;stroke-width:4px}
+.mitte-echt .me-text{fill:#2f7d4f;font-weight:700;font-size:44px;font-family:var(--font)}
+.aktionen{display:flex;gap:16px;justify-content:center}
+.frage{font-size:40px;font-weight:700;text-align:center}
+.unterfrage{font-size:26px;color:var(--soft);text-align:center}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Was steht in der Mitte?",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "**Farben** färbt die Striche: langer Strich Hunderter grün, mittlerer Strich Zehner rot, kurzer Strich Einer blau.",
+ teile: [
+  { h: "Worum geht es?", text: "Halbieren und Schätzen am Strahl: Wo ist die Mitte zwischen zwei Zahlen, und welche Zahl steht dort?" },
+  { h: "So geht es", punkte: [
+    "Der Strahl hat nur zwei beschriftete Enden. Der lila Mittelstrich mit Kästchen „?“ ist verschiebbar.",
+    "**Erst schätzen**: Ein Kind zieht den Mittelstrich dorthin, wo es die Mitte vermutet (oder tippt auf den Strahl). Die Klasse überlegt, welche Zahl im Kästchen steht.",
+    "**Falten**: Der Strahl klappt in der Mitte zusammen, die Enden liegen aufeinander. Die Faltstelle leuchtet auf und zeigt die Zahl.",
+    "Danach erscheinen alle Striche zum Nachzählen. **Nächste Aufgabe** wählt neue Enden." ] },
+  { h: "Stufen", punkte: [
+    "● Hunderter-Enden mit Abstand 100 (z. B. 400 und 500).",
+    "●● Abstand 200 bis 1000 (z. B. 300 und 700, 0 und 1000).",
+    "●●● Zehner-Enden (z. B. 340 und 360)." ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+const NS = "http://www.w3.org/2000/svg";
+let stufe = 1, von = 400, bis = 500, schaetzW = 0, gefaltet = false, laeuft = false, vorher = "";
+const OPT = { breite: 1400, hoehe: 400, y: 230, links: 70, rechts: 90, L: 90, schrift: 40, dicke: 5, beschriftung: "enden" };
+
+const sWahl = T.stufen(v => { stufe = v; neu(); }, "mitte-stufe"); stufe = sWahl.wert;
+T.kopf({ titel: "Was steht in der Mitte?", onNeu: () => neu(), farbenKey: "strahl-farben", farbenStd: true });
+T.leiste(sWahl);
+
+const fr = T.blk(100, 178, 1400, 56, "frage"); fr.textContent = "Was steht in der Mitte?";
+const ufr = T.blk(100, 236, 1400, 40, "unterfrage");
+const buehne = T.blk(100, 270, 1400, 400, "buehne3d");
+const akt = T.blk(200, 690, 1200, 64, "aktionen");
+const faltKn = T.knopf("Falten", () => falten(), "haupt");
+akt.append(faltKn, T.knopf("Nächste Aufgabe →", () => neu()));
+const unten = T.blk(150, 776, 1300, 0); const streifen = T.streifen(unten);
+let li, re, falz, ueber, strahlL, gSchaetz, gEcht;
+
+function ziehe() {
+  for (let i = 0; i < 50; i++) {
+    let a, d;
+    if (stufe === 1) { d = 100; a = T.zufall(0, 9) * 100; }
+    else if (stufe === 2) { d = T.wahl([200, 300, 400, 500, 600, 700, 800, 1000]); a = T.zufall(0, (1000 - d) / 100) * 100; }
+    else { d = T.wahl([20, 40, 60, 80]); a = T.zufall(1, (1000 - d) / 10 - 1) * 10; if (a % 100 === 0 && (a + d) % 100 === 0) continue; }
+    if (a + "-" + d !== vorher) { vorher = a + "-" + d; return [a, a + d]; }
+  }
+  return [400, 500];
+}
+const feinSchritt = () => { const d = bis - von; return d <= 40 ? 1 : d <= 200 ? 10 : 100; };
+
+function bauen(alleStriche) {
+  buehne.innerHTML = "";
+  const opt = Object.assign({}, OPT, { von, bis, schritt: feinSchritt(), randLinks: von !== 0,
+    strichFilter: alleStriche ? null : v => v === von || v === bis });
+  const xm = 70 + (OPT.breite - 70 - 90) / 2;
+  li = T.el("div", "haelfte"); li.style.left = "0"; li.style.width = xm + "px";
+  re = T.el("div", "haelfte re"); re.style.left = xm + "px"; re.style.width = (1400 - xm) + "px";
+  buehne.append(li, re);
+  strahlL = Z.zeichneStrahl(li, opt);
+  const sR = Z.zeichneStrahl(re, opt); sR.svg.style.marginLeft = -xm + "px";
+  falz = T.el("div", "falz"); falz.style.left = xm + "px"; buehne.appendChild(falz);
+  ueber = document.createElementNS(NS, "svg"); ueber.setAttribute("class", "ueberlage"); ueber.setAttribute("viewBox", "0 0 1400 400");
+  ueber.setAttribute("width", 1400); ueber.setAttribute("height", 400); buehne.appendChild(ueber);
+  // Tippfläche: Mittelstrich dorthin setzen
+  const flaeche = document.createElementNS(NS, "rect");
+  Object.entries({ x: 40, y: 150, width: 1300, height: 170, fill: "transparent" }).forEach(([k, v]) => flaeche.setAttribute(k, v));
+  flaeche.addEventListener("pointerdown", e => { if (!gefaltet && !laeuft) setzeSchaetz(wertAus(e)); });
+  ueber.appendChild(flaeche);
+  gEcht = document.createElementNS(NS, "g"); gEcht.setAttribute("class", "mitte-echt"); ueber.appendChild(gEcht);
+  gSchaetz = document.createElementNS(NS, "g"); gSchaetz.setAttribute("class", "schaetz"); gSchaetz.setAttribute("tabindex", "0");
+  gSchaetz.setAttribute("role", "slider"); gSchaetz.setAttribute("aria-label", "Mittelstrich verschieben");
+  const y = OPT.y, L = OPT.L;
+  gSchaetz.innerHTML = `<rect class="sz-griff" x="-70" y="${y - 175}" width="140" height="${L + 185}"/>
+    <line class="sz-strich" x1="0" y1="${y - L * .42}" x2="0" y2="${y + L * .42}"/>
+    <line class="sz-strich" x1="0" y1="${y - 110}" x2="0" y2="${y - L * .42}" style="stroke-width:3px"/>
+    <rect class="sz-kasten" x="-62" y="${y - 170}" width="124" height="60" rx="12"/>
+    <text class="sz-text" x="0" y="${y - 126}" text-anchor="middle">?</text>`;
+  ueber.appendChild(gSchaetz);
+  let zieht = false;
+  gSchaetz.addEventListener("pointerdown", e => { if (gefaltet || laeuft) return; e.preventDefault(); e.stopPropagation(); zieht = true; gSchaetz.classList.add("zieht"); try { gSchaetz.setPointerCapture(e.pointerId); } catch (x) {} });
+  gSchaetz.addEventListener("pointermove", e => { if (zieht) setzeSchaetz(wertAus(e)); });
+  const ende = () => { zieht = false; gSchaetz.classList.remove("zieht"); };
+  gSchaetz.addEventListener("pointerup", ende); gSchaetz.addEventListener("pointercancel", ende);
+  gSchaetz.addEventListener("keydown", e => { if (gefaltet) return; const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (d) { e.preventDefault(); setzeSchaetz(schaetzW + d * (bis - von) / 100); } });
+}
+function wertAus(e) {
+  const p = ueber.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  const q = p.matrixTransform(ueber.getScreenCTM().inverse());
+  return strahlL.w(q.x);
+}
+function setzeSchaetz(w) {
+  schaetzW = Math.max(von, Math.min(bis, w));
+  gSchaetz.setAttribute("transform", `translate(${strahlL.x(schaetzW).toFixed(1)} 0)`);
+}
+function neu() {
+  T.stop(); gefaltet = false; laeuft = false;
+  [von, bis] = ziehe();
+  bauen(false);
+  const d = bis - von, anteil = T.wahl([.18, .25, .32, .68, .75, .82]);
+  setzeSchaetz(von + d * anteil);
+  faltKn.disabled = false;
+  ufr.textContent = "Schätze zuerst: Zieh den lila Mittelstrich in die Mitte.";
+  Z.melde(streifen, "muster hilfe", `In der Mitte zwischen ${von} und ${bis} liegt …`);
+}
+async function falten() {
+  if (gefaltet || laeuft) return;
+  laeuft = true; faltKn.disabled = true;
+  const lauf = T.lauf, m = (von + bis) / 2;
+  ueber.style.visibility = "hidden";
+  re.classList.add("zu");
+  await T.warte(1300); if (T.lauf !== lauf) return;
+  falz.classList.add("an");
+  Z.melde(streifen, "", `Die Enden ${von} und ${bis} liegen aufeinander. Die Faltstelle ist die Mitte.`);
+  await T.warte(1100); if (T.lauf !== lauf) return;
+  re.classList.remove("zu");
+  await T.warte(1250); if (T.lauf !== lauf) return;
+  // Aufgeklappt: alle Striche, Mitte mit Zahl, Schätzung zum Vergleich
+  bauen(true); setzeSchaetz(schaetzW); gefaltet = true; laeuft = false;
+  gSchaetz.querySelectorAll(".sz-kasten, .sz-text, .sz-strich + .sz-strich").forEach(e => e.remove());
+  gSchaetz.style.opacity = ".7"; gSchaetz.removeAttribute("tabindex");
+  const x = strahlL.x(m), y = OPT.y, L = OPT.L;
+  gEcht.innerHTML = `<line class="me-strich" x1="${x}" y1="${y - L * .5}" x2="${x}" y2="${y + L * .5}"/>
+    <line class="me-strich" x1="${x}" y1="${y - 110}" x2="${x}" y2="${y - L * .5}" style="stroke-width:3px"/>
+    <rect class="me-kasten" x="${x - 70}" y="${y - 172}" width="140" height="64" rx="12"/>
+    <text class="me-text" x="${x}" y="${y - 124}" text-anchor="middle">${m}</text>`;
+  ueber.appendChild(gSchaetz);
+  falz.classList.add("an"); setTimeout(() => falz && falz.classList.remove("an"), 1500);
+  const abw = (schaetzW - m) / (bis - von), r = abw > 0 ? "links" : "rechts";
+  const urteil = Math.abs(abw) <= .03 ? "Sehr gut geschätzt!" : Math.abs(abw) <= .1 ? `Gut geschätzt! Die Mitte liegt etwas weiter ${r}.` : `Die Mitte liegt weiter ${r} als geschätzt.`;
+  ufr.textContent = urteil;
+  Z.melde(streifen, "ok", `In der Mitte zwischen ${von} und ${bis} liegt ${m}.`);
+}
+neu();
+</script>
+</body>
+</html>

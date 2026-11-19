@@ -1,0 +1,74 @@
+/* =====================================================================
+   Zahlenstrahl bis 1000 – Gestaltung des Strahls (Tafelbilder und Druck)
+   Strichfarben nach Stellenwert nur mit Klasse „farben“ (Schalter) oder „farbig“.
+   ===================================================================== */
+.strahl-svg{display:block;overflow:visible}
+#stage svg{touch-action:none}   /* Ziehen mit dem Finger: kein Verschieben der Seite */
+.strahl{font-family:"Andika","Comic Sans MS","Segoe UI",sans-serif}
+.strahl .s-achse{stroke:#1d2320;stroke-linecap:round}
+.strahl .s-spitze{fill:#1d2320}
+.strahl .st{stroke:#1d2320;stroke-linecap:round}
+.farben .strahl:not(.schwarz) .st-h,.strahl.farbig .st-h{stroke:#2e8b3e}
+.farben .strahl:not(.schwarz) .st-z,.strahl.farbig .st-z{stroke:#d03a32}
+.farben .strahl:not(.schwarz) .st-e,.strahl.farbig .st-e{stroke:#2667c9}
+.strahl .s-zahl{fill:#1d2320;font-weight:700}
+.strahl .s-tipp{fill:transparent;cursor:pointer;touch-action:none}
+.strahl .st.leuchtet{animation:st-leuchten .8s ease-in-out 2}
+@keyframes st-leuchten{50%{stroke:#e0a100;stroke-width:14px}}
+
+/* Markierungen: Pfeil mit Kästchen */
+.strahl .m-linie{stroke:#1d2320}
+.strahl .m-spitze{fill:#1d2320}
+.strahl .m-kasten{fill:#fff;stroke:#1d2320}
+.strahl .m-text{fill:#1d2320;font-weight:700}
+.strahl .s-mark.tippbar{cursor:pointer}
+.strahl .s-mark.leer .m-kasten{stroke-dasharray:6 5}
+.strahl .s-mark.offen .m-kasten{fill:#fff4c2}
+.strahl .s-mark.ok .m-kasten{fill:#e8f5ec;stroke:#2f7d4f}
+.strahl .s-mark.ok .m-text{fill:#2f7d4f}
+
+/* Sprungbögen */
+.strahl .b-pfad{fill:none;stroke:#5d6862;stroke-linecap:round}
+.strahl .b-spitze{fill:#5d6862}
+.strahl .b-text{fill:#5d6862;font-weight:700}
+.strahl .s-bogen.neu{animation:bogen-ein .35s ease-out}
+@keyframes bogen-ein{from{opacity:0}}
+
+/* Zeiger */
+.strahl .zeiger{cursor:grab;touch-action:none;outline:none}
+.strahl .zeiger.zieht{cursor:grabbing}
+.strahl .zeiger .z-stiel{stroke:#5e2f91;stroke-linecap:round}
+.strahl .zeiger .z-kopf{fill:#5e2f91;stroke:#1d2320;stroke-width:3px;stroke-linejoin:round}
+.strahl .zeiger .z-griff{fill:transparent}
+.strahl .zeiger .z-zahl{fill:#5e2f91;font-weight:700}
+.strahl .zeiger:focus-visible .z-kopf{stroke:#2f7d4f;stroke-width:6px}
+.strahl .zeiger.ok .z-kopf{fill:#2f7d4f}
+.strahl .zeiger.ok .z-stiel{stroke:#2f7d4f}
+.strahl .zeiger.ok .z-zahl{fill:#2f7d4f}
+
+@media (prefers-reduced-motion: reduce){.strahl .st.leuchtet,.strahl .s-bogen.neu{animation:none}.strahl .st.leuchtet{stroke:#e0a100}}
+
+/* ---------- Gemeinsame Bausteine der Tafelbilder ---------- */
+.zs-satz{font-size:40px;font-weight:700;text-align:center}
+.zs-gross{font-size:110px;font-weight:700;line-height:1;text-align:center}
+.zs-impuls{font-size:30px;color:var(--soft,#5d6862);text-align:center}
+.knopf.haupt:disabled{color:var(--ink,#1d2320)}
+.knopf.klein{min-height:56px;font-size:22px;padding:0 16px}
+
+/* Ziffernfeld */
+.ziffernfeld{position:absolute;z-index:20;background:#fff;border:3px solid #1d2320;border-radius:18px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);
+  display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.ziffernfeld .anzeige{grid-column:1/-1;height:72px;border:3px solid #b9c2bc;border-radius:12px;font-size:44px;font-weight:700;display:grid;place-items:center}
+.ziffernfeld .knopf{min-height:72px;padding:0;font-size:32px}
+.ziffernfeld .knopf.ok{grid-column:span 2}
+
+/* Zahlenkarten (Ordnen) */
+.zkarte{position:absolute;width:120px;height:76px;border:4px solid #1d2320;border-radius:14px;background:#fff;font-size:40px;font-weight:700;
+  display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none;z-index:3;font-family:inherit;color:#1d2320;padding:0}
+.zkarte.gewaehlt{background:#fff4c2;border-color:#b8860b;box-shadow:0 0 0 5px #ffe066}
+.zkarte.zieht{cursor:grabbing;z-index:10;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.zkarte.ok{border-color:#2f7d4f;background:#e8f5ec;color:#2f7d4f}
+.zkarte.noch{border-color:#e08a1e;background:#fff3e0;color:#b35c00}
+.zkarte.gleiten{transition:left .8s ease,top .8s ease}
+.zkarte:focus-visible{outline:4px solid #2f7d4f;outline-offset:3px}
+@media (prefers-reduced-motion: reduce){.zkarte.gleiten{transition:none}}

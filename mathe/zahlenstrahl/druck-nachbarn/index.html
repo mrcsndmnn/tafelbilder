@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Nachbarn-Tabelle – Druckvorlage</title>
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../gemeinsam/druck.css">
+<style>
+.nachbar-ws{flex-wrap:wrap;row-gap:1mm}
+.ws-inhalt{display:flex;flex-direction:column;gap:1mm;flex-basis:100%}
+.ws-woerter{display:flex;flex-wrap:wrap;gap:2mm 5mm;font-size:12.5pt}
+.ws-woerter b{font-weight:700}
+table.nb{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:2mm}
+.nb th{font-size:11.5pt;line-height:1.15;font-weight:700;padding:1mm .5mm 1.5mm;vertical-align:bottom;border:.35mm solid #000;background:#f1f3f1}
+.nb th small{display:block;font-weight:400;font-size:10.5pt;color:#333}
+.nb th.zahl{background:#fff4c2}
+.nb td{height:14mm;border:.35mm solid #000;text-align:center;font-size:16pt;font-weight:700}
+.nb td.zahl{border-width:.7mm}
+.nb tr.bsp td{color:#8d9892;font-weight:400}
+.nb tr.bsp td.zahl{color:#8d9892}
+.nb td.loes{color:#2667c9}
+.nb .bsp-lbl{font-size:9pt;display:block;font-weight:700;line-height:1;margin-bottom:-1mm}
+</style>
+</head>
+<body>
+<script src="../gemeinsam/strahl.js"></script>
+<script src="../gemeinsam/druck.js"></script>
+<script>
+const Z = Strahl, D = Druck;
+
+D.start({
+  id: "nachbarn", titel: "Nachbarzahl, Nachbarzehner, Nachbarhunderter",
+  optionen: [
+    { key: "gesucht", label: "Variante „Zahl gesucht“", std: false },
+    { key: "zehner", label: "Zehnerzahlen einmischen", std: false },
+  ],
+  info: cfg => [cfg.gesucht ? "Zahl gesucht" : "", cfg.zehner ? "mit Zehnerzahlen" : ""].filter(Boolean).join(" · "),
+  baue(cfg, rnd, loesung) {
+    const n = cfg.niveau, zeilen = n === 1 ? 8 : n === 2 ? 7 : 6;
+    // Spalten in Strahl-Reihenfolge
+    const sp = [];
+    if (n >= 3) sp.push({ k: "h0", kopf: "Nachbar&shy;hunderter" });
+    if (n >= 2) sp.push({ k: "z0", kopf: "Nachbar&shy;zehner" });
+    sp.push({ k: "v", kopf: "Nachbar&shy;zahl<small>Vorgänger</small>" }, { k: "n", kopf: "Zahl", zahl: true }, { k: "f", kopf: "Nachbar&shy;zahl<small>Nachfolger</small>" });
+    if (n >= 2) sp.push({ k: "z1", kopf: "Nachbar&shy;zehner" });
+    if (n >= 3) sp.push({ k: "h1", kopf: "Nachbar&shy;hunderter" });
+    const werte = z => { const [v, f] = Z.nachbarzahlen(z), [z0, z1] = Z.nachbarzehner(z), [h0, h1] = Z.nachbarhunderter(z); return { v, f, z0, z1, h0, h1, n: z }; };
+
+    const w = document.createElement("div");
+    w.insertAdjacentHTML("beforeend", `<p class="b-auftrag">Fülle die Tabelle aus. Die Spalten stehen in derselben Reihenfolge wie auf dem Zahlenstrahl.</p>`);
+    // Wortspeicher mit Mini-Strahl und gelöstem Beispiel 347
+    const ws = document.createElement("div"); ws.className = "wortspeicher nachbar-ws";
+    const strBox = document.createElement("div");
+    const s = D.strahl(strBox, { von: 340, bis: 350, schritt: 1, beschriftung: "enden", breite: 78, hoehe: 22, y: 11, links: 6, rechts: 6, randLinks: true });
+    s.markiere({ wert: 347, seite: "oben", kasten: false, abstand: 6.5 });
+    const t = Z.el("text", { x: s.x(347), y: 3.6, "text-anchor": "middle", "font-size": 4.2, "font-weight": 700 }, s.root); t.textContent = "347";
+    [346, 348].forEach(v => { const u = Z.el("text", { x: s.x(v), y: 18.2, "text-anchor": "middle", "font-size": 3.2 }, s.root); u.textContent = v; });
+    ws.innerHTML = '<span class="ws-titel">Wort&shy;speicher</span>'; ws.appendChild(strBox);
+    const woerter = [`<span><b>Nachbarzahl</b> davor = Vorgänger: 346</span>`, `<span><b>Nachbarzahl</b> danach = Nachfolger: 348</span>`];
+    if (n >= 2) woerter.push(`<span><b>Nachbarzehner</b>: 340 und 350</span>`);
+    if (n >= 3) woerter.push(`<span><b>Nachbarhunderter</b>: 300 und 400</span>`);
+    ws.insertAdjacentHTML("beforeend", `<div class="ws-inhalt"><div class="ws-woerter">${woerter.join("")}</div>${n >= 2 ? '<div class="ws-woerter" style="font-size:11pt">Ist die Zahl selbst ein Zehner (z. B. 70), dann gilt der Zehner davor und danach: 60 und 80.</div>' : ""}</div>`);
+    w.appendChild(ws);
+
+    // Tabelle
+    const kopf = "<tr>" + sp.map(c => `<th class="${c.zahl ? "zahl" : ""}">${c.kopf}</th>`).join("") + "</tr>";
+    const bsp = werte(347);
+    let rows = `<tr class="bsp">` + sp.map((c, i) => `<td class="${c.zahl ? "zahl" : ""}">${i === 0 ? '<span class="bsp-lbl">Beispiel</span>' : ""}${bsp[c.k]}</td>`).join("") + "</tr>";
+    const genutzt = [347];
+    for (let r = 0; r < zeilen; r++) {
+      const z = Z.zufallszahl(n, { zehnerzahlen: cfg.zehner, rnd, ausser: genutzt }); genutzt.push(z);
+      const W = werte(z);
+      // Variante „Zahl gesucht“: in etwa jeder dritten Zeile ist ein Nachbar gegeben, nicht die Zahl
+      const gegeben = cfg.gesucht && r % 3 === 1 ? (rnd() < .5 ? "v" : "f") : "n";
+      rows += "<tr>" + sp.map(c => {
+        const geg = c.k === gegeben;
+        return `<td class="${c.zahl ? "zahl" : ""}${!geg && loesung ? " loes" : ""}">${geg || loesung ? W[c.k] : ""}</td>`;
+      }).join("") + "</tr>";
+    }
+    w.insertAdjacentHTML("beforeend", `<table class="nb">${kopf}${rows}</table>`);
+    return [w];
+  },
+});
+</script>
+</body>
+</html>

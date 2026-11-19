@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Die Nachbarn der Zahl – Zahlenstrahl bis 1000</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.feldsvg{overflow:visible}
+.nb .k-rand{fill:#fff;stroke:#1d2320;stroke-width:4px}
+.nb.frage .k-rand{fill:#fff;stroke-dasharray:10 7}
+.nb.frage{cursor:pointer}
+.nb.frage:hover .k-rand{fill:#f6f8f6}
+.nb.zahl .k-rand{stroke-width:7px;fill:#fff4c2}
+.nb.auf .k-rand{fill:#e8f5ec;stroke:#2f7d4f}
+.nb.auf .k-wert{fill:#2f7d4f}
+.nb .k-wert{font-size:52px;font-weight:700;fill:#1d2320}
+.nb .k-name{font-size:21px;font-weight:700;fill:#5d6862}
+.nb .k-unter{font-size:19px;fill:#5d6862}
+.nb .k-linie{stroke:#8d9892;stroke-width:2.5px;stroke-dasharray:3 5}
+.nb.auf .k-linie{stroke:#2f7d4f;stroke-dasharray:none}
+.nb:focus-visible .k-rand{stroke:#2f7d4f;stroke-width:7px}
+.nb text{font-family:var(--font)}
+.aktionen{display:flex;gap:16px;justify-content:center}
+#stage .streifen{font-size:26px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Die Nachbarn der Zahl",
+ start: "**Start** führt zur Startseite mit allen Tafelbildern und Druckvorlagen zum Zahlenstrahl.",
+ farben: "**Farben** färbt die Striche: langer Strich Hunderter grün, mittlerer Strich Zehner rot, kurzer Strich Einer blau. Ohne Farben reicht die Länge.",
+ teile: [
+  { h: "Worum geht es?", text: "Nachbarzahl, Nachbarzehner und Nachbarhunderter am Strahl finden. Die Kästchen stehen in derselben Reihenfolge wie auf dem Strahl." },
+  { h: "So geht es", punkte: [
+    "**Aufdecken**: Die Zahl ist gegeben. Ein Kästchen mit „?“ antippen deckt es auf. Der passende Strich leuchtet kurz auf.",
+    "**Zahl gesucht**: Die Nachbarn sind gegeben, die Zahl in der Mitte ist gesucht.",
+    "Die feine Linie verbindet jedes Kästchen mit seinem Strich.",
+    "Die Nachbarzahl davor heißt **Vorgänger**, die Nachbarzahl danach heißt **Nachfolger**.",
+    "**Alle aufdecken** zeigt alles. **Nächste Zahl** wählt eine neue Zahl." ] },
+  { h: "Auswahl oben", punkte: [
+    "**Stufe**: ● nur Nachbarzahlen, ●● dazu die Nachbarzehner, ●●● dazu die Nachbarhunderter (mit einem zweiten Strahl in Zehnerschritten).",
+    "**Zehnerzahlen üben**: Es kommen gezielt Zahlen wie 70 oder 340. Hinweis (Hilfe): „70 ist selbst ein Zehner. Die Nachbarzehner sind 60 und 80.“",
+    "**Hilfen**: Satzmuster unten und die Hinweise zu Zehnerzahlen." ] },
+ ],
+};
+</script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/strahl.js"></script>
+<script>
+const T = Tafel, Z = Strahl, S = T.buehne();
+let modus = "aufdecken", stufe = 1, zehner = false, n = 347, vorher = [], kaesten = [], s1 = null, s2 = null, zmark = null;
+
+const mWahl = T.gruppe("", [{ wert: "aufdecken", text: "Aufdecken" }, { wert: "gesucht", text: "Zahl gesucht" }], "aufdecken", v => { modus = v; neu(); }, "nb-modus");
+const zKn = T.schalter("Zehnerzahlen üben", T.laden("nb-zehner", false), v => { zehner = v; T.merken("nb-zehner", v); vorher = []; neu(); });
+const sWahl = T.stufen(v => { stufe = v; neu(true); }, "nb-stufe");
+modus = mWahl.wert; stufe = sWahl.wert; zehner = zKn.getAttribute("aria-pressed") === "true";
+T.kopf({ titel: "Die Nachbarn der Zahl", onNeu: () => neu(true), farbenKey: "strahl-farben", farbenStd: true });
+T.leiste(mWahl, zKn, sWahl);
+
+const NS = "http://www.w3.org/2000/svg";
+const feld = T.blk(0, 166, 1600, 560);
+const svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "feldsvg"); svg.setAttribute("viewBox", "0 0 1600 560");
+svg.setAttribute("width", 1600); svg.setAttribute("height", 560); feld.appendChild(svg);
+const akt = T.blk(300, 714, 1000, 64, "aktionen");
+akt.append(T.knopf("Alle aufdecken", () => kaesten.forEach(k => aufdecken(k, true))), T.knopf("Nächste Zahl →", () => neu(), "haupt"));
+const unten = T.blk(150, 788, 1300, 0); const streifen = T.streifen(unten);
+
+const NAME = { nh: "Nachbarhunderter", nz: "Nachbarzehner", nb: "Nachbarzahl", zahl: "Zahl" };
+
+function neu(stufeNeu) {
+  T.stop();
+  n = Z.zufallszahl(stufe, { zehnerzahlen: zehner, ausser: vorher });
+  vorher.push(n); if (vorher.length > 8) vorher.shift();
+  zeichne();
+}
+function zeichne() {
+  svg.innerHTML = ""; kaesten = [];
+  const [v, f] = Z.nachbarzahlen(n), [z0, z1] = Z.nachbarzehner(n), [h0, h1] = Z.nachbarhunderter(n);
+  // Strahl oben: Zehnerbereich mit Einerstrichen
+  const y1 = stufe === 3 ? 140 : 170, y2 = 452, kY = stufe === 3 ? 292 : 390;
+  s1 = Z.zeichneStrahl(svg, { von: z0, bis: z1, schritt: 1, beschriftung: "zehner", breite: 1600, y: y1, links: 80, rechts: 90, L: 80, schrift: 32, dicke: 5, randLinks: true });
+  zmark = s1.markiere({ wert: n, seite: "oben", text: modus === "gesucht" ? "?" : n, kb: 110, kh: 52, abstand: 112, klasse: modus === "gesucht" ? "leer" : "" });
+  if (stufe === 3) {
+    s2 = Z.zeichneStrahl(svg, { von: h0, bis: h1, schritt: 10, beschriftung: "hunderter", breite: 1600, y: y2, links: 80, rechts: 90, L: 80, schrift: 32, dicke: 5, randLinks: true });
+    s2.markiere({ wert: n, seite: "oben", kasten: false, abstand: 70 });
+  } else s2 = null;
+
+  // Kästchen in Strahl-Reihenfolge
+  const liste = [];
+  if (stufe >= 3) liste.push({ art: "nh", wert: h0, strahl: s2 });
+  if (stufe >= 2) liste.push({ art: "nz", wert: z0, strahl: s1 });
+  liste.push({ art: "nb", wert: v, strahl: s1, unter: "Vorgänger" }, { art: "zahl", wert: n, strahl: s1 }, { art: "nb", wert: f, strahl: s1, unter: "Nachfolger" });
+  if (stufe >= 2) liste.push({ art: "nz", wert: z1, strahl: s1 });
+  if (stufe >= 3) liste.push({ art: "nh", wert: h1, strahl: s2 });
+  const B = 186, H = 84, abst = 214, x0 = 800 - (liste.length - 1) * abst / 2;
+  liste.forEach((k, i) => {
+    const cx = x0 + i * abst, g = document.createElementNS(NS, "g");
+    const gegeben = modus === "gesucht" ? k.art !== "zahl" : k.art === "zahl";
+    g.setAttribute("class", "nb " + (k.art === "zahl" ? "zahl " : "") + (gegeben ? "" : "frage"));
+    // Linie zum Strich (vom Kästchen nach oben bzw. bei Nachbarhundertern nach unten)
+    const nachUnten = k.strahl === s2, so = k.strahl.o;
+    const sx = k.strahl.x(k.wert), beschr = k.strahl.labels.has(k.wert);
+    const sy = nachUnten ? so.y - so.L * .5 - 8 : so.y + so.L / 2 + (beschr ? so.schrift * 1.35 : 6);
+    const ky = nachUnten ? kY + H / 2 + (k.unter ? 30 : 8) : kY - H / 2 - 34;
+    const li = document.createElementNS(NS, "line");
+    li.setAttribute("x1", cx); li.setAttribute("y1", ky); li.setAttribute("x2", sx); li.setAttribute("y2", sy); li.setAttribute("class", "k-linie"); g.appendChild(li);
+    g.insertAdjacentHTML("beforeend", `<text class="k-name" x="${cx}" y="${kY - H / 2 - 10}" text-anchor="middle">${NAME[k.art]}</text>
+      <rect class="k-rand" x="${cx - B / 2}" y="${kY - H / 2}" width="${B}" height="${H}" rx="14"/>
+      <text class="k-wert" x="${cx}" y="${kY + 18}" text-anchor="middle">${gegeben ? k.wert : "?"}</text>
+      ${k.unter ? `<text class="k-unter" x="${cx}" y="${kY + H / 2 + 24}" text-anchor="middle">${k.unter}</text>` : ""}`);
+    if (!gegeben) {
+      g.setAttribute("tabindex", "0"); g.setAttribute("role", "button"); g.setAttribute("aria-label", NAME[k.art] + (k.unter ? " (" + k.unter + ")" : "") + " aufdecken");
+      g.addEventListener("click", () => aufdecken(k));
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); aufdecken(k); } });
+    }
+    k.g = g; k.offen = gegeben; svg.appendChild(g); kaesten.push(k);
+  });
+  // Hinweise zu Zehner- und Hunderterzahlen (Hilfe)
+  const t = [];
+  if (stufe >= 2 && n % 10 === 0) t.push(`${n} ist selbst ein Zehner. Die Nachbarzehner sind ${z0} und ${z1}.`);
+  if (stufe >= 3 && n % 100 === 0) t.push(`${n} ist selbst ein Hunderter. Die Nachbarhunderter sind ${h0} und ${h1}.`);
+  Z.melde(streifen, t.length ? "noch hilfe" : "", t);
+}
+function aufdecken(k, still) {
+  if (k.offen) return;
+  k.offen = true; k.g.classList.remove("frage"); k.g.classList.add("auf");
+  k.g.querySelector(".k-wert").textContent = k.wert; k.g.removeAttribute("tabindex"); k.g.removeAttribute("role");
+  if (k.art === "zahl" && zmark) { zmark.setzeText(n); zmark.classList.remove("leer"); }
+  if (!still) k.strahl.leuchte(k.wert);
+  if (kaesten.every(x => x.offen)) fertig();
+}
+function fertig() {
+  const [v, f] = Z.nachbarzahlen(n), [z0, z1] = Z.nachbarzehner(n), [h0, h1] = Z.nachbarhunderter(n);
+  const s = [];
+  if (stufe === 2) s.push(`Die Zahl ${n} liegt zwischen ${z0} und ${z1}.`);
+  if (stufe === 3) s.push(`Die Zahl ${n} liegt zwischen ${z0} und ${z1} – und zwischen ${h0} und ${h1}.`);
+  s.push(`Die Nachbarzahl davor heißt Vorgänger. Der Vorgänger von ${n} ist ${v}.`);
+  if (stufe === 1) s.push(`Die Nachbarzahl danach heißt Nachfolger. Der Nachfolger von ${n} ist ${f}.`);
+  Z.melde(streifen, "muster hilfe", s);
+}
+neu();
+</script>
+</body>
+</html>

@@ -171,7 +171,7 @@
 
   // ---------------- Kopfleiste ----------------
   // Links „Start“ und Titel, rechts eigene Schalter, „Farben“, „Hilfen“, „Neu“
-  T.kopf = ({ titel, onNeu, extra = [], onHilfen }) => {
+  T.kopf = ({ titel, onNeu, extra = [], onHilfen, farbenKey = "farben", farbenStd = false, onFarben }) => {
     const k = T.el("div", "kopf");
     const start = T.el("a", "knopf start", '<span aria-hidden="true">←</span> Start'); start.href = "../";
     k.append(start);
@@ -188,9 +188,9 @@
     k.appendChild(T.el("h1", "", titel));
     const re = T.el("div", "rechts");
     extra.forEach(x => re.appendChild(x));
-    const farben = T.laden("farben", false);
+    const farben = T.laden(farbenKey, farbenStd);
     T.S.classList.toggle("farben", farben);
-    re.appendChild(T.schalter("Farben", farben, v => { T.S.classList.toggle("farben", v); T.merken("farben", v); }));
+    re.appendChild(T.schalter("Farben", farben, v => { T.S.classList.toggle("farben", v); T.merken(farbenKey, v); if (onFarben) onFarben(v); }));
     re.appendChild(T.schalter("Hilfen", true, v => { T.S.classList.toggle("hilfen-aus", !v); if (onHilfen) onHilfen(v); }));
     re.appendChild(T.knopf("Neu", () => { T.stop(); onNeu(); }, "haupt"));
     k.appendChild(re);
