@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Stundenkarte – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.sk-kopf{display:flex;align-items:baseline;gap:4mm;margin-bottom:3mm}
+.sk-kopf h2{font-size:20pt;margin:0;flex:1}
+.sk-kopf .sterne{font-size:14pt}
+.felder{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm 8mm;font-size:12.5pt;margin-bottom:5mm}
+.felder span{border-bottom:.35mm solid #000;padding-bottom:1mm;min-height:7mm}
+.felder .fuell{font-weight:700}
+table.ablauf{width:100%;border-collapse:collapse;font-size:12pt;margin-bottom:5mm}
+.ablauf th{text-align:left;font-size:10.5pt;color:#5d6862;border-bottom:.4mm solid #000;padding:1mm 1.5mm}
+.ablauf td{border-bottom:.25mm solid #b9c2bc;padding:1.2mm 1.5mm;vertical-align:middle}
+.ablauf td.b svg{width:13mm;height:13mm;display:block}
+.ablauf td.nr{font-weight:700;font-size:14pt;width:8mm}
+.ablauf td.min{width:16mm;white-space:nowrap}
+.ablauf td.url{font-size:9pt;color:#333;word-break:break-all;width:62mm}
+.ablauf tr.ab td{background:#f3f6f2}
+.ablauf strong{font-size:13pt}
+.ablauf .art{font-size:9.5pt;color:#5d6862;display:block}
+h3{font-size:13pt;margin:4mm 0 2mm}
+ul.liste{margin:0;padding-left:6mm;font-size:12pt}
+ul.liste li{margin:.6mm 0}
+.check{list-style:none;padding-left:0}
+.check li::before{content:"☐ ";font-size:13pt}
+.zwei{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+.leerhinweis{border:.4mm dashed #8d9892;border-radius:3mm;padding:6mm;font-size:13pt;color:#5d6862}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const V = Spiele, D = Druck, SP = V.SPIELE, G = V.GENERATOREN;
+const VORLAGEN = {
+  deutsch: ["hallo", "blitzlesen", "bildergeschichte", "tschuess"],
+  mathe: ["hallo", "einmaleins-rakete", "uhr-werkstatt", "tschuess"],
+  bingo: ["hallo", "rechen-bingo", "uhr-werkstatt", "tschuess"],
+  su: ["hallo", "wer-wohnt-wo", "was-fehlt", "tschuess"],
+  spiele: ["hallo", "versteckt", "reime", "gluecksrad", "tschuess"],
+};
+const MIN = id => id === "hallo" || id === "tschuess" ? 5 : SP[id].gen ? 10 : 15;
+const adresse = p => new URL("../../" + p, location.href).href;
+
+D.start({
+  id: "stundenkarte", titel: "Stundenkarte", nr: "G-V1", schrift: false, mitLoesung: false, ohneKopf: true,
+  optionen: [
+    { key: "ablauf", label: "Ablauf", std: "gespeichert", werte: [{ wert: "gespeichert", text: "wie auf der Startseite" }, { wert: "deutsch", text: "Deutsch" },
+      { wert: "mathe", text: "Mathe" }, { wert: "bingo", text: "Mathe mit Bingo" }, { wert: "su", text: "Sachunterricht" }, { wert: "spiele", text: "Sprachspiele" }] },
+    { key: "klasse", label: "Klasse (freiwillig)", eingabe: "text", std: "" },
+  ],
+  hinweis: "Name der Lehrkraft und Niveau kommen von der Startseite (nur in diesem Tab gespeichert).",
+  baue(cfg) {
+    const liste = (cfg.ablauf === "gespeichert" ? V.ablauf() : VORLAGEN[cfg.ablauf]).filter(id => SP[id]);
+    const lk = D.sitzung("lehrkraft", "");
+    let h = `<div class="sk-kopf"><h2>Stundenkarte Vertretung</h2><span class="sterne">${D.sterne(cfg.niveau)} ${D.NIVEAU[cfg.niveau]}</span></div>
+      <div class="felder"><span>Klasse: <b class="fuell">${D.esc(cfg.klasse || "")}</b></span><span>Datum:</span><span>Stunde:</span>
+      <span style="grid-column:span 3">Vertretung durch: <b class="fuell">${D.esc(lk)}</b></span></div>`;
+    if (!liste.length) {
+      h += `<div class="leerhinweis">Noch kein Ablauf geplant. Bitte auf der Startseite des Vertretungsbaukastens einen Ablauf wählen – oder links eine Vorlage (Deutsch, Mathe, Sachunterricht, Sprachspiele).</div>`;
+      return [h];
+    }
+    // Ablauf: Einstieg am Board → Arbeitsblatt → Abschluss am Board
+    const zeilen = []; let summe = 0;
+    liste.forEach(id => {
+      zeilen.push({ id, bild: SP[id].bild, titel: SP[id].titel, art: id === "hallo" ? "Einstieg am Board" : id === "tschuess" ? "Abschluss am Board" : "Tafelbild" + (SP[id].nr ? " " + SP[id].nr : ""), min: MIN(id), url: adresse(SP[id].pfad) });
+      if (SP[id].gen) zeilen.push({ ab: true, bild: G[SP[id].gen].bild, titel: "Arbeitsblatt: " + G[SP[id].gen].titel, art: "Still- oder Partnerarbeit", min: 10, url: adresse("generatoren/" + SP[id].gen + "/") });
+    });
+    zeilen.forEach(z => summe += z.min);
+    h += `<table class="ablauf"><tr><th></th><th></th><th>Was?</th><th>Minuten</th><th>Adresse</th></tr>` +
+      zeilen.map((z, i) => `<tr class="${z.ab ? "ab" : ""}"><td class="nr">${i + 1}</td><td class="b">${D.bild(z.bild)}</td><td><strong>${D.esc(z.titel)}</strong><span class="art">${z.art}</span></td>
+        <td class="min">ca. ${z.min}</td><td class="url">${D.esc(z.url)}</td></tr>`).join("") +
+      `<tr><td></td><td></td><td><strong>Zusammen</strong></td><td class="min"><b>ca. ${summe}</b></td><td class="url">Startseite mit Cockpit: ${D.esc(adresse(""))}</td></tr></table>`;
+    // Kopien
+    const gens = [...new Set(liste.map(id => SP[id].gen).filter(Boolean))];
+    h += `<div class="zwei"><div><h3>Kopien</h3><ul class="liste">` +
+      (gens.length ? gens.map(g => `<li>${G[g].titel} (${G[g].nr}): 1 × pro Kind${g === "bingo" ? " – Klassensatz, jede Karte anders" : ""}, Lösung 1 ×</li>`).join("") : "<li>keine Arbeitsblätter nötig</li>") +
+      `<li>Rückmeldezettel (G-V2): 1 ×</li></ul></div>
+      <div><h3>Vorbereitung in 5 Minuten</h3><ul class="liste check"><li>Smartboard an, Startseite öffnen (Vollbild: F11)</li><li>Niveau wählen, Namen eingeben (freiwillig)</li>
+      <li>Ablauf planen, Cockpit starten</li><li>Kopien bereitlegen</li><li>Am Ende: Rückmeldezettel ausfüllen</li></ul></div></div>
+      <h3>Notizen</h3>${D.linien(3, 3, 180)}`;
+    return [h];
+  },
+});
+</script>
+</body>
+</html>

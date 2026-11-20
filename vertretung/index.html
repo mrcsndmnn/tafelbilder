@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Vertretungsbaukasten</title>
+<meta name="description" content="Tafelbilder und Generatoren für Vertretungsstunden in SEP 1–3 und Klasse 3–4: ohne Vorbereitung, sprachfördernd, lehrplannah.">
+<link rel="stylesheet" href="../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../gemeinsam/silben.css">
+<style>
+@font-face{font-family:"Andika";src:url("../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --tool:#2f7d7a; --tool-bg:#e0f2f1; --wahl:#5e2f91;
+  --deutsch:#b3541e; --mathe:#2f6fb0; --su:#2f8a3e; --spiele:#7a4ea8;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --tool:#7fd0cb; --tool-bg:#1d3331; --wahl:#c4a3ec;
+  --deutsch:#f0a070; --mathe:#7fb0e6; --su:#7fcf8c; --spiele:#c4a3ec; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.wrap{max-width:1150px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{max-width:none;margin:0 0 20px}
+h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
+.unter{margin:0;color:var(--soft);max-width:72ch}
+h2{font-size:24px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+h2 .nr{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--tool);color:#fff;font-size:19px;flex:none}
+h3{font-size:20px;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+h3 .punkt{width:14px;height:14px;border-radius:50%;flex:none}
+.karte{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 20px;margin-top:20px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+a.kachel{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;transition:border-color .15s,transform .15s;min-width:0}
+a.kachel:hover{border-color:var(--tool);transform:translateY(-2px)}
+a.kachel:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.kachel .sym{width:84px;height:84px;border-radius:18px;background:#fff;display:grid;place-items:center;border:2px solid var(--line)}
+.kachel .sym svg{width:68px;height:68px}
+.kachel strong{font-size:18px;line-height:1.25}
+.kachel .tag{font-size:13px;font-weight:700;color:var(--tool);background:var(--tool-bg);border-radius:8px;padding:1px 8px}
+.kachel .desc{font-size:14px;color:var(--soft)}
+.kachel.gen .sym{border-style:dashed}
+textarea,input[type=text]{width:100%;font-family:var(--font);font-size:20px;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:8px 14px}
+textarea{resize:vertical}
+.zeile{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.spalten{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.spalten{grid-template-columns:1fr}}
+label.l{font-weight:700;display:block;margin-bottom:4px}
+button.k,a.k{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-size:18px;font-weight:700;min-height:48px;padding:0 16px;border:2px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer;text-decoration:none}
+button.k.haupt,a.k.haupt{background:var(--tool);border-color:var(--tool);color:#fff}
+@media (prefers-color-scheme: dark){button.k.haupt,a.k.haupt{color:#10201f}}
+button.k[aria-pressed="true"]{background:var(--tool-bg);border-color:var(--tool)}
+.namen{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.namen span{font-size:20px;font-weight:700;background:#fff;color:#1d2320;border:3px solid var(--wahl);border-radius:12px;padding:2px 12px}
+.hinweis{color:var(--soft);font-size:15px;margin:6px 0 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px}
+.wahl button{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:16px;font-weight:700;border:2px solid var(--line);border-radius:12px;background:#fff;color:#1d2320;padding:4px 10px;cursor:pointer;min-height:52px;position:relative}
+.wahl button svg{width:36px;height:36px}
+.wahl button[aria-pressed="true"]{border-color:var(--wahl);box-shadow:0 0 0 3px var(--wahl)}
+.wahl button .pos{position:absolute;right:-8px;top:-10px;width:26px;height:26px;border-radius:50%;background:var(--wahl);color:#fff;font-size:15px;display:grid;place-items:center}
+.wahl-gruppe{margin-top:10px}
+.wahl-gruppe .wl{font-size:14px;font-weight:700;color:var(--soft);margin-bottom:4px}
+.plan{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;min-height:56px}
+.plan .st{display:flex;align-items:center;gap:6px;background:#fff;color:#1d2320;border:2px solid var(--line);border-radius:12px;padding:3px 10px;font-weight:700;font-size:16px}
+.plan .st svg{width:36px;height:36px}
+.plan .pf{color:var(--soft);font-size:22px}
+.stern{letter-spacing:2px}
+details{margin-top:20px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 20px}
+summary{font-size:20px;font-weight:700;cursor:pointer}
+details li{margin:4px 0}
+footer{margin-top:40px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+@media (prefers-reduced-motion: reduce){a.kachel{transition:none}a.kachel:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <h1>Vertretungsbaukasten</h1>
+  <p class="unter">Vertretung ohne Vorbereitung, auch in einer fremden Klasse: Tafelbilder für das Smartboard und Generatoren für passende Arbeitsblätter. Einstieg am Board → Arbeitsblatt → Abschluss am Board.</p>
+
+  <section class="karte">
+    <h2><span class="nr">1</span>Vorbereiten (freiwillig)</h2>
+    <div class="spalten">
+      <div>
+        <label class="l" for="lehrkraft">So heiße ich (für die Begrüßung)</label>
+        <input type="text" id="lehrkraft" placeholder="z. B. Frau Muster" maxlength="40" autocomplete="off">
+        <label class="l" style="margin-top:14px">Niveau der Klasse</label>
+        <div class="zeile" style="margin-top:0" id="niveau" role="group" aria-label="Niveau"></div>
+        <p class="hinweis" id="niveauText"></p>
+      </div>
+      <div>
+        <label class="l" for="namen">Namen der Kinder (für das Namensrad)</label>
+        <textarea id="namen" rows="3" placeholder="Ein Name pro Zeile oder durch Komma getrennt"></textarea>
+        <div class="zeile"><button type="button" class="k haupt" id="namenOk">Namen übernehmen</button><button type="button" class="k" id="namenWeg">Namen löschen</button></div>
+        <div class="namen" id="namenListe" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="hinweis">Name, Niveau und Namen bleiben nur in diesem Tab und werden beim Schließen gelöscht. Sie werden nirgendwohin geschickt. Ohne Namen zeigt das Namensrad die Zahlen 1 bis 10.</p>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">2</span>Ablauf planen</h2>
+    <div class="zeile" style="margin-top:0" id="vorschlaege"></div>
+    <p class="hinweis">Oder selbst 2 bis 4 Tafelbilder in der gewünschten Reihenfolge antippen. „Hallo“ am Anfang und „Tschüss“ am Ende kommen automatisch dazu. Der Ablauf erscheint oben in jedem Tafelbild und im Cockpit.</p>
+    <div id="wahl"></div>
+    <div class="plan" id="plan" aria-live="polite"></div>
+    <div class="zeile">
+      <a class="k haupt" href="cockpit/" id="cockpitLink">Stunde starten (Cockpit)</a>
+      <a class="k" href="generatoren/stundenkarte/">Stundenkarte drucken</a>
+      <a class="k" href="generatoren/rueckmeldung/">Rückmeldezettel</a>
+      <button type="button" class="k" id="leer">Ablauf leeren</button>
+    </div>
+    <p class="hinweis" id="kopien"></p>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">3</span>Alle Tafelbilder</h2>
+    <div id="tafeln"></div>
+  </section>
+
+  <section class="karte">
+    <h2><span class="nr">4</span>Generatoren (Arbeitsblätter und Material)</h2>
+    <p class="hinweis" style="margin:0 0 10px">Einstellungen wählen, „Neu mischen“, drucken. Jedes Blatt hat eine Nummer: Gleiche Nummer ergibt das gleiche Blatt. Immer mit Lösungsblatt.</p>
+    <div class="grid" id="generatoren"></div>
+  </section>
+
+  <details>
+    <summary>Info für Lehrkräfte</summary>
+    <ul>
+      <li><b>Niveau:</b> ★ SEP 1–2, ★★ SEP 3 / Klasse 3 Anfang, ★★★ Klasse 3–4. Die Zuordnung ist ein Vorschlag nach den Lehrplänen für die Primarstufe NRW (Ende Schuleingangsphase / Ende Klasse 4). Jedes Tafelbild startet mit dem hier gewählten Niveau und lässt sich dort umstellen.</li>
+      <li><b>Wiederholen statt Neues einführen:</b> Alle Inhalte festigen, was in jeder Klasse der Stufe schon dran war (Silben, Lesen, Einmaleins, Uhrzeit, Tiere).</li>
+      <li><b>Ruhesignal einführen:</b> Zu Beginn einmal üben – Knopf mit der Hand oben rechts, alle zeigen „Hand hoch, Ohren auf!“.</li>
+      <li><b>Satzmuster modellieren statt korrigieren:</b> Die Antwort des Kindes im richtigen Satz wiederholen.</li>
+      <li><b>Chorantworten bevorzugen</b>, Drankommen über das Namensrad (jedes Kind einmal, Joker „Freund fragen“).</li>
+      <li><b>Klasse gegen Lehrkraft:</b> Sterne für die Klasse (Stern oben antippen), Punkt für die Eule, wenn es zu laut wird. Im Cockpit und bei „Tschüss“: Endstand feiern.</li>
+      <li><b>Ton</b> ist in jedem neuen Tab zuerst aus (durchgestrichener Lautsprecher oben). Eingeschaltet gibt es sanfte Klänge und automatisches Vorlesen, nie Fehlertöne.</li>
+      <li><b>Kopien:</b> Die Stundenkarte listet die passenden Arbeitsblätter zum geplanten Ablauf.</li>
+      <li>Jedes Tafelbild hat oben einen Knopf „?“ mit einer kurzen Anleitung.</li>
+    </ul>
+  </details>
+
+  <footer>Gebaut für das Smartboard (Bühne 1600 × 900). Tipp: Mit F11 oder dem Vollbild-Knopf auf Vollbild schalten. Alle Bilder sind selbst gezeichnet.
+    <br><a href="../impressum.html">Impressum</a> · <a href="../datenschutz.html">Datenschutz</a></footer>
+</div>
+<script src="gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../gemeinsam/silben.js"></script>
+<script src="gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, B = SPIELBILDER, SP = V.SPIELE, sitz = V.sitzung;
+const svg = id => `<svg viewBox="0 0 200 200" aria-hidden="true">${B[id]()}</svg>`;
+const esc = V.esc;
+const FACH = [["deutsch", "Deutsch", "--deutsch"], ["mathe", "Mathematik", "--mathe"], ["su", "Sachunterricht", "--su"], ["spiele", "Sprachspiele (Vertretungsspiele SEP 3)", "--spiele"]];
+const fachVon = id => SP[id].fach || "spiele";
+const WAEHLBAR = Object.keys(SP).filter(id => !["hallo", "tschuess", "cockpit", "klasse-gegen-lehrkraft"].includes(id));
+
+// ---------- 1 Vorbereiten ----------
+const lk = document.getElementById("lehrkraft");
+lk.value = sitz.hol("lehrkraft", ""); lk.addEventListener("input", () => sitz.setz("lehrkraft", lk.value.trim()));
+const nivBox = document.getElementById("niveau"), nivText = document.getElementById("niveauText");
+function zeigeNiveau() {
+  nivBox.innerHTML = "";
+  [1, 2, 3].forEach(n => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "k stern"; b.textContent = "★".repeat(n);
+    b.setAttribute("aria-pressed", V.niveau() === n); b.setAttribute("aria-label", "Niveau " + V.NIVEAU[n]);
+    b.onclick = () => { V.setzeNiveau(n); zeigeNiveau(); }; nivBox.appendChild(b);
+  });
+  nivText.textContent = "Gewählt: " + V.NIVEAU[V.niveau()];
+}
+zeigeNiveau();
+const feld = document.getElementById("namen"), liste = document.getElementById("namenListe");
+function zeigeNamen() { const n = V.namen(); liste.innerHTML = n.map(x => `<span>${esc(x)}</span>`).join(""); if (!feld.value && n.length) feld.value = n.join("\n"); }
+document.getElementById("namenOk").onclick = () => {
+  const n = [...new Set(feld.value.split(/[\n,;]+/).map(x => x.trim()).filter(Boolean))].slice(0, 40);
+  sitz.setz("namen", n); sitz.weg ? sitz.weg("gezogen") : sessionStorage.removeItem("vs-gezogen"); zeigeNamen();
+};
+document.getElementById("namenWeg").onclick = () => { sessionStorage.removeItem("vs-namen"); sessionStorage.removeItem("vs-gezogen"); feld.value = ""; zeigeNamen(); };
+zeigeNamen();
+
+// ---------- 2 Ablauf ----------
+let auswahl = V.ablauf().filter(x => WAEHLBAR.includes(x));
+const VORSCHLAEGE = [
+  ["Deutsch-Stunde", ["blitzlesen", "bildergeschichte"]],
+  ["Mathe-Stunde", ["einmaleins-rakete", "uhr-werkstatt"]],
+  ["Mathe-Stunde mit Bingo", ["rechen-bingo", "uhr-werkstatt"]],
+  ["SU-Stunde", ["wer-wohnt-wo", "was-fehlt"]],
+  ["Spiele 45 Minuten", ["versteckt", "reime", "gluecksrad"]],
+  ["Spiele 90 Minuten", ["versteckt", "reime", "gluecksrad", "wer-bin-ich"]],
+];
+const vb = document.getElementById("vorschlaege");
+VORSCHLAEGE.forEach(([t, l]) => { const b = document.createElement("button"); b.type = "button"; b.className = "k"; b.textContent = t; b.onclick = () => { auswahl = [...l]; speichern(); zeigePlan(); }; vb.appendChild(b); });
+const wahl = document.getElementById("wahl"), plan = document.getElementById("plan"), kopien = document.getElementById("kopien");
+function zeigePlan() {
+  wahl.innerHTML = "";
+  FACH.forEach(([f, name]) => {
+    const g = document.createElement("div"); g.className = "wahl-gruppe"; g.innerHTML = `<div class="wl">${name}</div>`;
+    const w = document.createElement("div"); w.className = "wahl";
+    WAEHLBAR.filter(id => fachVon(id) === f).forEach(id => {
+      const btn = document.createElement("button"); btn.type = "button"; const pos = auswahl.indexOf(id);
+      btn.setAttribute("aria-pressed", pos >= 0); btn.innerHTML = svg(SP[id].bild) + SP[id].titel + (pos >= 0 ? `<span class="pos">${pos + 1}</span>` : "");
+      btn.onclick = () => { auswahl = pos >= 0 ? auswahl.filter(x => x !== id) : auswahl.concat(id).slice(0, 4); speichern(); zeigePlan(); };
+      w.appendChild(btn);
+    });
+    g.appendChild(w); wahl.appendChild(g);
+  });
+  const ganz = auswahl.length ? ["hallo", ...auswahl, "tschuess"] : [];
+  plan.innerHTML = ganz.length ? ganz.map(id => `<span class="st">${svg(SP[id].bild)}${SP[id].titel}</span>`).join('<span class="pf">→</span>') : '<span class="hinweis">Noch kein Ablauf geplant.</span>';
+  const gens = [...new Set(auswahl.map(id => SP[id].gen).filter(Boolean))];
+  kopien.innerHTML = gens.length ? "Passende Arbeitsblätter: " + gens.map(g => `<a href="generatoren/${g}/">${V.GENERATOREN[g].titel}</a>`).join(", ") + "." : "";
+}
+function speichern() { sitz.setz("ablauf", auswahl.length ? ["hallo", ...auswahl, "tschuess"] : []); sessionStorage.removeItem("vs-erledigt"); }
+document.getElementById("leer").onclick = () => { auswahl = []; speichern(); zeigePlan(); };
+zeigePlan();
+
+// ---------- 3 Tafelbilder ----------
+const kachel = (href, bild, titel, tags, desc, gen) => `<a class="kachel${gen ? " gen" : ""}" href="${href}"><span class="sym">${svg(bild)}</span><strong>${titel}</strong>${tags}${desc ? `<span class="desc">${desc}</span>` : ""}</a>`;
+document.getElementById("tafeln").innerHTML = `<div class="grid" style="margin-bottom:6px">${kachel("cockpit/", "winken", "Vertretungs-Cockpit", '<span class="tag">Start jeder Stunde</span>', "Begrüßung, Ablauf, Namensrad, Regeln, Timer")}</div>` +
+  FACH.map(([f, name, farbe]) => `<h3><span class="punkt" style="background:var(${farbe})"></span>${name}</h3><div class="grid">` +
+    Object.keys(SP).filter(id => id !== "cockpit" && fachVon(id) === f).map(id => { const s = SP[id];
+      return kachel(s.pfad, s.bild, s.titel, `<span class="tag">${s.nr ? s.nr + " · " : ""}${s.niveau || s.art || (id === "hallo" ? "Einstieg" : id === "tschuess" ? "Abschluss" : "")}</span>`, ""); }).join("") + "</div>").join("");
+
+// ---------- 4 Generatoren ----------
+document.getElementById("generatoren").innerHTML = Object.entries(V.GENERATOREN).map(([k, g]) =>
+  kachel(`generatoren/${k}/`, g.bild, g.titel, `<span class="tag">${g.nr}</span>`, g.text, true)).join("");
+</script>
+</body>
+</html>

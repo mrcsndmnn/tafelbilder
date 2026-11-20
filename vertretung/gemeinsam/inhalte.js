@@ -30,6 +30,9 @@ window.INHALTE = {
     badewanne: ["die", "Ba-de-wan-ne", "extra"], kinderwagen: ["der", "Kin-der-wa-gen", "extra"], apfelsine: ["die", "Ap-fel-si-ne", "extra"],
     wassermelone: ["die", "Was-ser-me-lo-ne", "extra"],
     eimer: ["der", "Ei-mer", "extra"],
+    // Tiere für „Wer wohnt wo?“ (Sachunterricht)
+    fuchs: ["der", "Fuchs", "tiere"], igel: ["der", "I-gel", "tiere"], eichhoernchen: ["das", "Eich-hörn-chen", "tiere"], reh: ["das", "Reh", "tiere"],
+    huhn: ["das", "Huhn", "tiere"], eule: ["die", "Eu-le", "extra"], uhr: ["die", "Uhr", "extra"],
   },
   THEMEN: { tiere: "Tiere", essen: "Essen", schule: "Schule", zuhause: "Zuhause", draussen: "Draußen", kleidung: "Kleidung" },
 

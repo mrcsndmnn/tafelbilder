@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Bingo-Karten – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.karte{margin:0 auto 6mm;width:max-content}
+.karte .kopfz{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.5mm}
+.karte .kopfz b{font-size:22pt;letter-spacing:3mm}
+.karte .kopfz span{font-size:10pt;color:#5d6862}
+.karte table{border-collapse:collapse}
+.karte td{border:.6mm solid #000;text-align:center;vertical-align:middle;padding:0}
+.k3 td{width:38mm;height:31mm}
+.k4 td{width:42mm;height:40mm}
+.karte .zahl{font-size:30pt;font-weight:700}
+.k4 .zahl{font-size:32pt}
+.karte .buchst{font-size:34pt;font-weight:700}
+.karte .wort{font-size:13pt;line-height:1.1}
+.karte td svg{width:20mm;height:20mm;display:block;margin:0 auto 1mm}
+.k4 td svg{width:24mm;height:24mm}
+.schnittlinie{border-top:.35mm dashed #777;margin:2mm 0 6mm;position:relative}
+.schnittlinie::after{content:"✂";position:absolute;left:0;top:-3.6mm;background:#fff;padding-right:1.5mm;font-size:12pt;color:#777}
+table.ruf{width:100%;border-collapse:collapse;font-size:12.5pt}
+.ruf td,.ruf th{border-bottom:.25mm solid #b9c2bc;padding:1.2mm 2mm;text-align:left}
+.ruf th{font-size:10.5pt;color:#5d6862}
+.ruf td.k{width:9mm;font-size:14pt}
+.ruf td.f{font-weight:700;width:30mm}
+.spalten2{columns:2;column-gap:8mm}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/bingo.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const D = Druck, BG = BINGO, A = BG.ARTEN;
+const feld = (art, f) => {
+  if (art === "anlaute") return `<span class="buchst">${f}</span>`;
+  if (art === "woerter") { const w = D.wort(f); return `${D.bild(f)}<span class="wort">${D.w(w.silben)}</span>`; }
+  return `<span class="zahl">${f}</span>`;
+};
+function karte(cfg, rnd) {
+  const n = cfg.groesse, art = cfg.art;
+  const felder = BG.karte(art, n * n, rnd);
+  let h = `<div class="karte k${n}"><div class="kopfz"><b>BINGO</b><span>${A[art].titel}</span></div><table>`;
+  for (let i = 0; i < n; i++) h += "<tr>" + felder.slice(i * n, i * n + n).map(f => `<td>${feld(art, f)}</td>`).join("") + "</tr>";
+  return h + "</table></div>";
+}
+D.start({
+  id: "bingo", titel: "Bingo", nr: "G-Bingo", klassensatz: true,
+  blattTitel: cfg => "Bingo: " + A[cfg.art].titel,
+  optionen: [
+    { key: "art", label: "Inhalt", std: "einmaleins", werte: Object.keys(A).map(k => ({ wert: k, text: A[k].kurz, title: A[k].titel })) },
+    { key: "groesse", label: "Größe", std: 3, werte: [{ wert: 3, text: "3 × 3 (2 Karten pro Blatt)" }, { wert: 4, text: "4 × 4 (1 Karte pro Blatt)" }] },
+  ],
+  auftrag: cfg => ({ symbole: ["stift", "schere"], text: cfg.art === "anlaute" ? "Hör gut zu. Kreu-ze den An-laut an." : cfg.art === "woerter" ? "Hör gut zu. Kreu-ze das Bild an." : "Rech-ne. Kreu-ze das Er-geb-nis an. Ei-ne vol-le Rei-he: Bin-go!" }),
+  hinweis: "Klassensatz: Jedes Blatt hat eine eigene Nummer und andere Karten. Das Lösungsblatt ist die Ruf-Liste für die Lehrkraft (nur einmal). Zum Rechen-Bingo am Board dieselbe Art wählen.",
+  info: cfg => A[cfg.art].kurz,
+  baue(cfg, rnd, loesung, nummer, k) {
+    const art = cfg.art;
+    if (cfg.groesse === 4 && A[art].felder.length < 16) cfg = Object.assign({}, cfg, { groesse: 3 });
+    if (loesung) {
+      if (k > 0) return [];
+      // Ruf-Liste: alle Felder mit einer Beispielaufgabe zum Abhaken
+      const rows = D.mischen(A[art].felder, rnd).map(f => { const a = A[art].aufgabe(f, rnd); return `<tr><td class="k">☐</td><td class="f">${art === "woerter" ? D.ohne(D.wort(f).silben) : f}</td><td>${art === "anlaute" || art === "woerter" ? D.esc(a.sprich) : D.esc(a.zeige) + " = " + f}</td></tr>`; }).join("");
+      return [`<p style="margin:0 0 3mm">Ruf-Liste: von oben nach unten vorlesen und abhaken. Bei „Bingo!“ die Reihe des Kindes mit den Haken vergleichen.</p>
+        <div class="${A[art].felder.length > 24 ? "spalten2" : ""}"><table class="ruf"><tr><th></th><th>Feld</th><th>Aufgabe zum Vorlesen</th></tr>${rows}</table></div>`];
+    }
+    if (cfg.groesse === 4) return [karte(cfg, rnd)];
+    return [karte(cfg, rnd) + '<div class="schnittlinie"></div>' + karte(cfg, rnd)];
+  },
+});
+</script>
+</body>
+</html>

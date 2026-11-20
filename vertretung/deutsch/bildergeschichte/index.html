@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Bildergeschichte ordnen – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:18px}
+.wahlzeile .knopf.sym{width:64px}
+.feldplatz{position:absolute;border:4px dashed var(--line);border-radius:18px;background:#fafbfa}
+.feldplatz .nr{position:absolute;left:-14px;top:-16px;width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center;z-index:6}
+.bildk{position:absolute;padding:0;border:4px solid var(--ink);border-radius:18px;background:#fff;cursor:pointer;overflow:hidden;transition:left .45s ease,top .45s ease,box-shadow .2s;z-index:3;touch-action:manipulation}
+.bildk svg{display:block;width:100%;height:100%}
+.bildk.ok{border-color:var(--ok);box-shadow:0 0 0 5px #bfe3cb}
+.bildk.falsch{border-color:var(--nochrand);box-shadow:0 0 0 5px #fbd9b5}
+.bildk:focus-visible{outline:5px solid var(--wahl);outline-offset:3px}
+.fragekarte{position:absolute;border:4px dashed var(--wahl);border-radius:18px;background:#f6f0fc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:24px;font-weight:700;color:var(--wahl);z-index:2;text-align:center;padding:10px}
+.fragekarte .gross{font-size:80px;line-height:1}
+.anfang{position:absolute;text-align:center;font-size:26px;font-weight:700;line-height:1.25}
+.anfang .ganz{display:block;font-size:21px;font-weight:400;margin-top:2px}
+.ablage-text{position:absolute;font-size:22px;font-weight:700;color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Bildergeschichte ordnen",
+ teile: [
+  { h: "Worum geht es?", text: "Erzählen mit Zeitwörtern: Bilder einer Alltagsgeschichte in die richtige Reihenfolge bringen und dann mit „Zuerst … Dann … Zum Schluss …“ erzählen." },
+  { h: "So geht es", punkte: [
+    "Die Bilder liegen unten durcheinander. Ein **Bild antippen**: Es rutscht in das nächste freie Feld oben. Ein Bild oben antippen legt es zurück.",
+    "**Prüfen**: Richtig liegende Bilder bekommen einen grünen Rahmen, die anderen einen orangen.",
+    "Ist alles richtig, erscheinen unter den Bildern die Satzanfänge. Mit **Hilfe** auch die ganzen Sätze. Ein Bild oben antippen zeigt seinen Satz im Satzstreifen.",
+    "Erzählen lassen: ein Kind pro Bild, über das Namensrad oder im Chor.",
+    "**Weiter**: nächste Geschichte. **Neu starten**: dieselbe Geschichte neu mischen." ] },
+  { h: "Niveau", punkte: [
+    "★ 3 Bilder, ★★ 4 Bilder, ★★★ 5–6 Bilder.",
+    "★★★ mit **Eigener Schluss**: Das letzte Bild ist verdeckt. Die Klasse erfindet einen Schluss. **Schluss zeigen** deckt das Bild auf." ] },
+  { h: "Passendes Arbeitsblatt", punkte: ["Generator **G-D1 Bildergeschichte**: Bilder zum Ausschneiden und Aufkleben, dazu Schreibzeilen mit Satzanfängen."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/geschichten.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne(), GS = GESCHICHTEN;
+let niveau = V.niveau(), gIndex = V.laden("bg-geschichte", 0) % GS.liste.length, schlussAn = V.laden("bg-schluss", true);
+let g, idx = [], karten = [], plaetze = [], belegt = [], geloest = false, verdeckt = false, maße;
+
+// ---------- Auswahl oben ----------
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
+zeile.appendChild(V.el("span", "glabel", "Geschichte")).style.cssText = "font-size:22px;font-weight:700;color:var(--soft)";
+const gKn = GS.liste.map((x, i) => { const b = V.knopf(V.bild(x.bild), () => { gIndex = i; V.merken("bg-geschichte", i); neu(); }, "sym"); b.setAttribute("aria-label", V.ohne(x.titel)); b.title = V.ohne(x.titel); zeile.appendChild(b); return b; });
+const nivWahl = V.niveauWahl(v => { niveau = v; schlussKn.hidden = v !== 3; neu(); }); zeile.appendChild(nivWahl);
+const schlussKn = V.schalter("Eigener Schluss", schlussAn, v => { schlussAn = v; V.merken("bg-schluss", v); neu(); }); zeile.appendChild(schlussKn);
+schlussKn.hidden = niveau !== 3;
+
+const pruefKn = V.knopf("Prüfen", () => pruefen(), "haupt");
+const zeigKn = V.knopf("Schluss zeigen", () => zeigeSchluss());
+const r = V.rahmen({ id: "bildergeschichte", titel: "Bildergeschichte ordnen", satz: "Zu-erst … Dann … Zum Schluss …",
+  onWeiter: () => { gIndex = (gIndex + 1) % GS.liste.length; V.merken("bg-geschichte", gIndex); neu(); }, onNeu: () => neu(),
+  onHilfe: () => zeigeAnfaenge(), extra: [pruefKn, zeigKn] });
+
+function neu() {
+  V.stop(); geloest = false;
+  S.querySelectorAll(".feldplatz, .bildk, .fragekarte, .anfang, .ablage-text").forEach(e => e.remove());
+  g = GS.liste[gIndex]; gKn.forEach((b, i) => b.setAttribute("aria-pressed", i === gIndex));
+  const n = niveau === 1 ? 3 : niveau === 2 ? 4 : g.bilder.length;
+  idx = GS.auswahl(g, n);
+  verdeckt = niveau === 3 && schlussAn;
+  const w = n <= 4 ? 300 : n === 5 ? 262 : 226, h = Math.round(w * 220 / 300), gap = n <= 4 ? 40 : 16;
+  const x0 = 800 - (n * w + (n - 1) * gap) / 2, yP = 176, yA = yP + h + (n <= 4 ? 92 : 104);
+  maße = { w, h, gap, x0, yP, yA };
+  plaetze = idx.map((_, i) => {
+    const p = V.el("div", "feldplatz", `<span class="nr">${i + 1}</span>`); V.setze(p, x0 + i * (w + gap), yP); p.style.width = w + "px"; p.style.height = h + "px"; S.appendChild(p); return p;
+  });
+  belegt = idx.map(() => null);
+  const imSpiel = verdeckt ? idx.slice(0, -1) : idx;
+  const lt = V.el("div", "ablage-text", "Bilder"); V.setze(lt, x0, yA - 34); S.appendChild(lt);
+  // gemischte Ablage (nie schon richtig sortiert)
+  let reihe; do { reihe = V.mische(imSpiel); } while (imSpiel.length > 1 && reihe.every((x, i) => x === imSpiel[i]));
+  const nA = reihe.length, xA = 800 - (nA * w + (nA - 1) * gap) / 2;
+  karten = reihe.map((bi, k) => {
+    const b = V.el("button", "bildk", GS.svg(g, bi)); b.type = "button"; b.style.width = w + "px"; b.style.height = h + "px";
+    b.setAttribute("aria-label", "Bild: " + V.ohne(g.bilder[bi].satz));
+    const karte = { bi, el: b, heim: { x: xA + k * (w + gap), y: yA }, platz: -1 };
+    V.setze(b, karte.heim.x, karte.heim.y); b.addEventListener("click", () => tippe(karte)); S.appendChild(b); return karte;
+  });
+  if (verdeckt) {
+    const f = V.el("div", "fragekarte", `<span class="gross">?</span>${V.w("Wie geht es wei-ter?")}`);
+    const i = idx.length - 1; V.setze(f, x0 + i * (w + gap), yP); f.style.width = w + "px"; f.style.height = h + "px"; S.appendChild(f);
+    belegt[i] = "frage";
+  }
+  zeigKn.hidden = !verdeckt; zeigKn.disabled = true; pruefKn.disabled = false;
+  r.satz("Zu-erst … Dann … Zum Schluss …");
+}
+function tippe(k) {
+  if (geloest) { if (k.platz >= 0) { const s = GS.anfang(k.platz, idx.length) + " " + g.bilder[k.bi].inv; r.satz(s); V.sprich(V.ohne(s)); } return; }
+  k.el.classList.remove("ok", "falsch");
+  if (k.platz >= 0) { belegt[k.platz] = null; k.platz = -1; V.setze(k.el, k.heim.x, k.heim.y); return; }
+  const frei = belegt.findIndex(x => x === null); if (frei < 0) return;
+  belegt[frei] = k; k.platz = frei; V.setze(k.el, maße.x0 + frei * (maße.w + maße.gap), maße.yP);
+  if (belegt.every(x => x !== null)) pruefKn.focus();
+}
+function pruefen() {
+  const zuOrdnen = verdeckt ? idx.length - 1 : idx.length;
+  if (belegt.slice(0, zuOrdnen).some(x => x === null)) { V.noch("Le-ge zu-erst al-le Bil-der."); return; }
+  let alle = true;
+  for (let i = 0; i < zuOrdnen; i++) { const ok = belegt[i].bi === idx[i]; belegt[i].el.classList.toggle("ok", ok); belegt[i].el.classList.toggle("falsch", !ok); if (!ok) alle = false; }
+  if (!alle) { V.noch("Fast! Schau auf die o-ran-gen Bil-der."); return; }
+  geloest = true; S.querySelector(".ablage-text")?.remove(); pruefKn.disabled = true; zeigKn.disabled = false; V.lob(); V.punkt("k");
+  zeigeAnfaenge();
+  r.satz(verdeckt ? "Zum Schluss …" : GS.anfang(0, idx.length) + " " + g.bilder[idx[0]].inv);
+}
+function zeigeAnfaenge() {
+  S.querySelectorAll(".anfang").forEach(e => e.remove());
+  if (!geloest) return;
+  idx.forEach((bi, i) => {
+    const offen = belegt[i] !== "frage";
+    const a = V.el("div", "anfang", V.w(GS.anfang(i, idx.length) + " …") + (r.hilfe && offen ? `<span class="ganz">${V.w(GS.anfang(i, idx.length) + " " + g.bilder[bi].inv)}</span>` : ""));
+    V.setze(a, maße.x0 + i * (maße.w + maße.gap) - 6, maße.yP + maße.h + 8); a.style.width = maße.w + 12 + "px"; S.appendChild(a);
+  });
+}
+function zeigeSchluss() {
+  const i = idx.length - 1, bi = idx[i];
+  S.querySelector(".fragekarte")?.remove();
+  const b = V.el("button", "bildk ok", GS.svg(g, bi)); b.type = "button"; b.style.width = maße.w + "px"; b.style.height = maße.h + "px";
+  V.setze(b, maße.x0 + i * (maße.w + maße.gap), maße.yP); S.appendChild(b);
+  const k = { bi, el: b, platz: i }; belegt[i] = k; b.addEventListener("click", () => tippe(k));
+  zeigKn.disabled = true; zeigeAnfaenge();
+  const s = GS.anfang(i, idx.length) + " " + g.bilder[bi].inv; r.satz(s); V.sprich(V.ohne(s));
+}
+neu();
+</script>
+</body>
+</html>

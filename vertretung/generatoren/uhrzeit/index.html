@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Uhrzeit-Blätter – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.uhren{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 3mm}
+.u{display:flex;flex-direction:column;align-items:center;gap:1.5mm;border:.3mm solid #d5ddd7;border-radius:3mm;padding:2mm}
+.u svg{width:33mm;height:33mm}
+.u .t{font-size:12pt;text-align:center;min-height:6mm}
+.u .feld{width:38mm;border-bottom:.35mm solid #000;min-height:8mm;text-align:center;font-size:10.5pt;line-height:1.2;display:grid;align-items:end}
+.u .dig{width:24mm;height:9mm;border:.45mm solid #000;border-radius:1.5mm;display:grid;place-items:center;font-size:14pt;font-weight:700;font-family:"Courier New",monospace}
+.u.bsp{opacity:.55}
+.loes-t{color:#2667c9;font-weight:700}
+.spanne{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6mm 5mm}
+.sp{display:flex;align-items:center;gap:1.5mm;min-width:0;border:.3mm solid #d5ddd7;border-radius:3mm;padding:2mm}
+.sp svg{width:22mm;height:22mm;flex:none}
+.sp .pf{font-size:16pt;color:#5d6862}
+.sp .txt{font-size:11pt;line-height:1.45;white-space:nowrap}
+.sp .l{display:inline-block;min-width:12mm;border-bottom:.35mm solid #000;text-align:center}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/uhr.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const D = Druck, U = Uhr;
+const ART = { ablesen: "Uhren ablesen", zeichnen: "Zeiger einzeichnen", gemischt: "Ablesen und Einzeichnen", spanne: "Zeitspannen" };
+function zeiten(cfg, rnd, n) {
+  const l = [], schon = new Set();
+  for (let i = 0; l.length < n && i < 500; i++) { const z = U.zeit(cfg.niveau, rnd, cfg.genau); const k = z.h + ":" + z.m; if (schon.has(k) && i < 300) continue; schon.add(k); l.push(z); }
+  return l;
+}
+D.start({
+  id: "uhrzeit", titel: "Uhrzeit", nr: "G-M9",
+  blattTitel: cfg => ART[cfg.art],
+  optionen: [
+    { key: "art", label: "Aufgaben", std: "gemischt", werte: Object.entries(ART).map(([w, t]) => ({ wert: w, text: t })) },
+    { key: "antwort", label: "Antwort (beim Ablesen)", std: "worte", werte: [{ wert: "worte", text: "in Worten" }, { wert: "digital", text: "digital" }, { wert: "beides", text: "beides" }] },
+    { key: "genau", label: "Minuten genau (nur ★★★)", schalter: true, std: false },
+  ],
+  auftrag: cfg => ({ symbole: ["lupe", "stift"], text: { ablesen: "Wie spät ist es? Schrei-be die Uhr-zeit auf.", zeichnen: "Zeich-ne die Zei-ger ein: kurz für die Stun-de, lang für die Mi-nu-ten.",
+    gemischt: "Lies die Uhr-zeit ab o-der zeich-ne die Zei-ger ein.", spanne: "Wie viel Zeit ver-geht? Schrei-be die Mi-nu-ten auf." }[cfg.art] }),
+  info: cfg => ART[cfg.art] + (cfg.genau && cfg.niveau === 3 ? " · minutengenau" : ""),
+  baue(cfg, rnd, loes) {
+    if (cfg.niveau !== 3) cfg = Object.assign({}, cfg, { genau: false });
+    if (cfg.art === "spanne") {
+      // Start und Ende auf einem Stück Zeitachse: ★ volle Stunden, ★★ halbe/Viertel, ★★★ 5 Minuten
+      const schritt = cfg.niveau === 1 ? 60 : cfg.niveau === 2 ? 15 : 5;
+      const items = Array.from({ length: 8 }, () => {
+        const s = D.zufall(6, 16, rnd) * 60 + (cfg.niveau === 1 ? 0 : D.zufall(0, 59 / schritt, rnd) * schritt) % 60;
+        const d = cfg.niveau === 1 ? D.zufall(1, 3, rnd) * 60 : D.zufall(1, 8, rnd) * schritt;
+        return [s, s + d, d];
+      });
+      return [`<div class="spanne">${items.map(([a, b, d], i) => { const ha = Math.floor(a / 60), ma = a % 60, hb = Math.floor(b / 60), mb = b % 60, bsp = i === 0;
+        const ein = d >= 60 && d % 60 === 0 ? `${d / 60} Stun${d === 60 ? "de" : "den"}` : `${d} Minuten`;
+        return `<div class="sp" style="${bsp ? "opacity:.55" : ""}"><svg viewBox="0 0 200 200">${U.svg(ha, ma, { dick: 1 })}</svg><span class="pf">→</span><svg viewBox="0 0 200 200">${U.svg(hb, mb)}</svg>
+          <div class="txt">Von ${U.digital(ha, ma)}<br>bis ${U.digital(hb, mb)}<br>sind es<br><span class="l${loes || bsp ? " loes-t" : ""}">${loes || bsp ? ein : "&nbsp;"}</span></div></div>`; }).join("")}</div>`];
+    }
+    const z = zeiten(cfg, rnd, 12);
+    return [`<div class="uhren">${z.map(({ h, m }, i) => {
+      const zeichnen = cfg.art === "zeichnen" || (cfg.art === "gemischt" && i % 2 === 1), bsp = i === 0;
+      if (zeichnen) return `<div class="u${bsp ? " bsp" : ""}"><svg viewBox="0 0 200 200">${U.svg(h, m, { zeiger: loes || bsp })}</svg><div class="t">${D.w(U.textSilben(h, m))}</div></div>`;
+      const w = loes || bsp ? `<span class="loes-t">${U.text(h, m)}</span>` : "", dg = loes || bsp ? `<span class="loes-t">${U.digital(h, m)}</span>` : "";
+      return `<div class="u${bsp ? " bsp" : ""}"><svg viewBox="0 0 200 200">${U.svg(h, m)}</svg>${cfg.antwort !== "digital" ? `<div class="feld">${w}</div>` : ""}${cfg.antwort !== "worte" ? `<div class="dig">${dg || "__:__"}</div>` : ""}</div>`;
+    }).join("")}</div>`];
+  },
+});
+</script>
+</body>
+</html>

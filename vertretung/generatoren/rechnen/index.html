@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Rechenblätter – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:6mm 12mm}
+.paeckchen{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2.5mm 4mm}
+.paeckchen .a{font-size:16pt;line-height:1.85;font-variant-numeric:tabular-nums;white-space:nowrap}
+.l{display:inline-block;min-width:16mm;border-bottom:.35mm solid #000;text-align:center;line-height:1.2}
+.l.loes{color:#2667c9;font-weight:700}
+.mauern{display:grid;grid-template-columns:1fr 1fr;gap:12mm 6mm;justify-items:center;margin-top:4mm}
+.mauer{display:flex;flex-direction:column;align-items:center}
+.mauer .reihe{display:flex}
+.mauer .st{width:19mm;height:13mm;border:.45mm solid #000;margin:-.225mm;display:grid;place-items:center;font-size:14pt;font-weight:700;background:#fff}
+.k4 .st{width:16mm}
+.mauer .st.loes{color:#2667c9}
+.haeuser{display:grid;grid-template-columns:repeat(4,1fr);gap:6mm;justify-items:center}
+.haus{width:38mm}
+.haus .dach{width:0;height:0;border-left:19mm solid transparent;border-right:19mm solid transparent;border-bottom:13mm solid #000;position:relative;margin:0 auto}
+.haus .dach span{position:absolute;left:-7mm;top:4.4mm;width:14mm;text-align:center;color:#fff;font-weight:700;font-size:15pt}
+.haus table{width:38mm;border-collapse:collapse}
+.haus td{border:.45mm solid #000;height:9mm;text-align:center;font-size:14pt;font-weight:700;width:50%}
+.haus td.loes{color:#2667c9}
+.reihen{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm}
+.reihen .r{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2mm 4mm}
+.reihen .r b{display:block;font-size:12pt;color:#5d6862;margin-bottom:1mm}
+.reihen .a{font-size:15pt;line-height:1.75;white-space:nowrap}
+.umkehr .a{font-size:14pt;line-height:2;white-space:nowrap}
+.umkehr .l{min-width:12mm}
+.umkehr .pf{color:#8d9892;margin:0 2mm}
+.bsp{color:#8d9892}
+.bsp .l{border-color:#8d9892}
+.titel2{font-size:12pt;font-weight:700;color:#5d6862;margin:0 0 2mm}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const D = Druck, z = (a, b, rnd) => D.zufall(a, b, rnd);
+const TYP = { paeckchen: "Päckchen", mauern: "Rechenmauern", haeuser: "Zahlenhäuser", reihen: "Einmaleins-Reihen", umkehr: "Umkehraufgaben" };
+const raum = cfg => cfg.raum === "niveau" ? (cfg.niveau === 1 ? 20 : cfg.niveau === 2 ? 100 : 1000) : +cfg.raum;
+const L = (wert, loes, bsp) => `<span class="l${loes && !bsp ? " loes" : ""}">${loes || bsp ? wert : "&nbsp;"}</span>`;
+
+// Plus- oder Minusaufgabe im Zahlenraum, mit oder ohne Übergang
+function aufgabe(op, R, ueber, rnd) {
+  const schritt = R === 1000 ? 10 : 1;          // im 1000er-Raum mit Zehnerzahlen (340 + 250)
+  for (let i = 0; i < 400; i++) {
+    let a = z(1, R / schritt, rnd) * schritt, b = z(1, R / schritt, rnd) * schritt;
+    if (op === "+") { if (a + b > R) continue; } else { if (b > a) [a, b] = [b, a]; if (a === b) continue; }
+    const einer = R === 1000 ? x => (x / 10) % 10 : x => x % 10;
+    const ue = op === "+" ? einer(a) + einer(b) >= 10 : einer(a) < einer(b);
+    if (ueber === "ohne" && ue) continue;
+    if (ueber === "mit" && !ue) continue;
+    if (R <= 20 && (a === 0 || b === 0)) continue;
+    return { a, b, op, erg: op === "+" ? a + b : a - b };
+  }
+  return { a: 5, b: 3, op, erg: op === "+" ? 8 : 2 };
+}
+const opVon = (cfg, rnd) => cfg.op === "plus" ? "+" : cfg.op === "minus" ? "−" : (rnd() < .5 ? "+" : "−");
+
+D.start({
+  id: "rechnen", titel: "Rechenblatt", nr: "G-M3/M4",
+  blattTitel: cfg => TYP[cfg.typ],
+  schrift: true,
+  optionen: [
+    { key: "typ", label: "Aufgabentyp", std: "paeckchen", werte: Object.entries(TYP).map(([w, t]) => ({ wert: w, text: t })) },
+    { key: "op", label: "Rechenart (Päckchen, Mauern)", std: "gemischt", werte: [{ wert: "plus", text: "plus" }, { wert: "minus", text: "minus" }, { wert: "gemischt", text: "gemischt" }] },
+    { key: "raum", label: "Zahlenraum", std: "niveau", werte: [{ wert: "niveau", text: "wie Niveau" }, { wert: "20", text: "bis 20" }, { wert: "100", text: "bis 100" }, { wert: "1000", text: "bis 1000" }] },
+    { key: "ueber", label: "Zehnerübergang (Päckchen)", std: "gemischt", werte: [{ wert: "ohne", text: "ohne" }, { wert: "mit", text: "mit" }, { wert: "gemischt", text: "gemischt" }] },
+    { key: "reihen", label: "Einmaleins", std: "kern", werte: [{ wert: "kern", text: "Kernaufgaben (·1 ·2 ·5 ·10)" }, { wert: "alle", text: "alle Reihen" }, { wert: "schwer", text: "·3 ·4 ·6 ·7 ·8 ·9" }] },
+  ],
+  auftrag: cfg => ({ symbole: ["stift"], text: { paeckchen: "Rech-ne. Schrei-be das Er-geb-nis auf die Li-nie.", mauern: "Zwei Stei-ne ne-ben-ein-an-der er-ge-ben den Stein da-rü-ber.",
+    haeuser: "Die bei-den Zah-len in ei-nem Stock-werk er-ge-ben zu-sam-men die Dach-zahl.", reihen: "Rech-ne die Rei-hen.", umkehr: "Rech-ne die Mal-auf-ga-be. Dann die Ge-teilt-Auf-ga-be." }[cfg.typ] }),
+  info: cfg => TYP[cfg.typ] + (["paeckchen", "mauern", "haeuser"].includes(cfg.typ) ? " · bis " + raum(cfg) : ""),
+  baue(cfg, rnd, loes) {
+    const R = raum(cfg);
+    if (cfg.typ === "paeckchen") {
+      let h = '<div class="r-grid">';
+      for (let p = 0; p < 6; p++) {
+        h += '<div class="paeckchen">';
+        for (let i = 0; i < 5; i++) { const a = aufgabe(opVon(cfg, rnd), R, cfg.ueber, rnd), bsp = p === 0 && i === 0;
+          h += `<div class="a${bsp ? " bsp" : ""}">${a.a} ${a.op} ${a.b} = ${L(a.erg, loes, bsp)}</div>`; }
+        h += "</div>";
+      }
+      return [h + "</div>"];
+    }
+    if (cfg.typ === "mauern") {
+      const stufen = R <= 20 ? 3 : 4, n = 6;
+      let h = '<div class="mauern">';
+      for (let m = 0; m < n; m++) {
+        let unten;
+        for (let t = 0; t < 300; t++) { unten = Array.from({ length: stufen }, () => z(1, Math.max(2, Math.floor(R / (stufen === 3 ? 4 : 8))), rnd)); if (R === 1000) unten = unten.map(x => x * 10);
+          const top = stufen === 3 ? unten[0] + 2 * unten[1] + unten[2] : unten[0] + 3 * unten[1] + 3 * unten[2] + unten[3]; if (top <= R) break; }
+        const reihen = [unten]; while (reihen[0].length > 1) { const r0 = reihen[0]; reihen.unshift(r0.slice(1).map((x, i) => x + r0[i])); }
+        // Minus-Mauern: oben und einige Steine gegeben, unten gesucht
+        const minus = cfg.op === "minus" || (cfg.op === "gemischt" && m % 2 === 1);
+        const gegeben = reihen.map((r, ri) => r.map((_, ci) => minus ? (ri === 0 || (ri === reihen.length - 1 && ci % 2 === 0) || (ri === reihen.length - 2 && ci === 0)) : ri === reihen.length - 1));
+        h += `<div class="mauer k${stufen}">` + reihen.map((r, ri) => `<div class="reihe">${r.map((x, ci) => { const g = gegeben[ri][ci];
+          return `<div class="st${!g && loes ? " loes" : ""}">${g || loes ? x : ""}</div>`; }).join("")}</div>`).join("") + "</div>";
+      }
+      return [h + "</div>"];
+    }
+    if (cfg.typ === "haeuser") {
+      const dachZahlen = R <= 20 ? D.mischen([6, 7, 8, 9, 10, 12, 15, 20], rnd).slice(0, 8) : R <= 100 ? D.mischen([20, 30, 40, 50, 60, 70, 80, 100, 25, 45], rnd).slice(0, 8) : D.mischen([200, 300, 500, 600, 800, 1000, 400, 700], rnd).slice(0, 8);
+      return [`<div class="haeuser">${dachZahlen.map(d => { const st = R === 1000 ? 100 : R === 100 && d % 10 === 0 ? 10 : 1;
+        const links = D.mischen(Array.from({ length: d / st + 1 }, (_, i) => i * st), rnd).slice(0, 5);
+        return `<div class="haus"><div class="dach"><span>${d}</span></div><table>${links.map((a, i) => { const lg = i % 2 === 0;
+          return `<tr><td class="${!lg && loes ? "loes" : ""}">${lg || loes ? a : ""}</td><td class="${lg && loes ? "loes" : ""}">${!lg || loes ? d - a : ""}</td></tr>`; }).join("")}</table></div>`; }).join("")}</div>`];
+    }
+    const reihenListe = cfg.reihen === "kern" ? [2, 5, 10] : cfg.reihen === "schwer" ? D.mischen([3, 4, 6, 7, 8, 9], rnd).slice(0, 3) : D.mischen([2, 3, 4, 5, 6, 7, 8, 9, 10], rnd).slice(0, 3);
+    if (cfg.typ === "reihen") {
+      return [`<div class="reihen">${reihenListe.map(r => `<div class="r"><b>${r}er-Reihe</b>${Array.from({ length: 10 }, (_, i) => i + 1).map(f =>
+        `<div class="a${f === 1 && r === reihenListe[0] ? " bsp" : ""}">${f} · ${r} = ${L(f * r, loes, f === 1 && r === reihenListe[0])}</div>`).join("")}</div>`).join("")}</div>`];
+    }
+    // Umkehraufgaben: 6 · 4 = __ → 24 : 4 = __
+    const paare = []; for (let i = 0; i < 14; i++) { const r = D.wahl(cfg.reihen === "kern" ? [2, 5, 10] : reihenListe, rnd), f = z(2, 10, rnd); paare.push([f, r]); }
+    return [`<div class="r-grid umkehr">${paare.map(([f, r], i) => `<div class="a${i === 0 ? " bsp" : ""}">${f} · ${r} = ${L(f * r, loes, i === 0)}<span class="pf">→</span>${f * r} : ${r} = ${L(f, loes, i === 0)}</div>`).join("")}</div>`];
+  },
+});
+</script>
+</body>
+</html>

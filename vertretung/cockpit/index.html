@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Vertretungs-Cockpit – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/hinweise.css">
+<style>
+.gruss{position:absolute;left:60px;right:60px;top:100px;height:170px;display:flex;align-items:center;gap:36px}
+.gruss svg{width:150px;height:150px;flex:none}
+.gruss .t1{font-size:52px;font-weight:700}
+.gruss .t2{font-size:38px;font-weight:700;color:var(--soft)}
+.gruss .name{color:var(--wahl);font-size:60px;font-weight:700;margin-left:12px}
+.ablaufbox{position:absolute;left:40px;right:40px;top:290px;height:300px;border:3px solid var(--line);border-radius:24px;background:#fbfcfb;padding:16px 20px}
+.ablaufbox .kz{font-size:30px;font-weight:700;margin-bottom:10px}
+.schritte{display:flex;gap:14px;align-items:center;justify-content:center;height:220px}
+.schritt{position:relative;width:200px;height:210px;border:4px solid var(--ink);border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  text-decoration:none;color:var(--ink);padding:8px;text-align:center}
+.schritt svg{width:110px;height:110px}
+.schritt .tt{font-size:21px;font-weight:700;line-height:1.15}
+.schritt .nr{position:absolute;left:-12px;top:-14px;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;font-size:22px;font-weight:700;display:grid;place-items:center}
+.schritt.jetzt{border-color:var(--wahl);box-shadow:0 0 0 6px #d9c8ef}
+.schritt.erledigt{opacity:.5}
+.schritt.erledigt::after{content:"✓";position:absolute;right:-12px;top:-14px;width:40px;height:40px;border-radius:50%;background:var(--ok);color:#fff;font-size:26px;font-weight:700;display:grid;place-items:center}
+.pfeil{font-size:40px;color:var(--soft)}
+.leer{font-size:30px;color:var(--soft);text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.werkzeuge{position:absolute;left:40px;right:40px;top:612px;display:flex;gap:18px;justify-content:center}
+.werkzeug{width:250px;height:190px;flex-direction:column;gap:6px;font-size:26px;border-radius:22px}
+.werkzeug svg{width:96px;height:96px}
+/* Überlagerungen */
+.regelbox{display:flex;gap:30px}
+.regelbox .regel{width:380px;height:330px;border:4px solid var(--ink);border-radius:22px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.regelbox .regel svg{width:180px;height:180px}
+.regelbox .regel .t{font-size:38px;font-weight:700}
+.tafel .kopfzeile{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:38px;font-weight:700;gap:30px}
+.timer{display:flex;gap:40px;align-items:center}
+.timer .ring{width:440px;height:440px;position:relative}
+.timer .ring svg{width:440px;height:440px;transform:rotate(-90deg)}
+.timer .zeit{position:absolute;inset:0;display:grid;place-items:center;font-size:110px;font-weight:700;font-variant-numeric:tabular-nums}
+.timer .rechts{display:flex;flex-direction:column;gap:16px;width:420px}
+.timer .minuten{display:flex;gap:12px;flex-wrap:wrap}
+.timer .ende{font-size:44px;font-weight:700;color:var(--ok);min-height:60px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Vertretungs-Cockpit",
+ teile: [
+  { h: "Worum geht es?", text: "Das Startbild für jede Vertretung: Begrüßung, Ablauf der Stunde mit Bildkarten und alle Werkzeuge für eine fremde Klasse an einem Ort." },
+  { h: "So geht es", punkte: [
+    "Name, Niveau, Namen der Kinder und Ablauf werden auf der **Startseite** eingetragen (Knopf „Start“). Ohne Ablauf zeigt das Cockpit einen Knopf zum Planen.",
+    "**Bildkarten des Ablaufs** antippen öffnet das Tafelbild. Die lila Karte ist als Nächstes dran, erledigte Karten haben einen Haken.",
+    "**Namensrad**: zieht jedes Kind genau einmal. **Regeln**: drei Bildregeln groß zeigen. **Ruhesignal**: „Hand hoch – Ohren auf!“.",
+    "**Timer**: 1, 3, 5 oder 10 Minuten, mit großem Ring. Am Ende ein sanfter Gong (wenn der Ton an ist).",
+    "**Endstand**: Ergebnis von „Klasse gegen Lehrkraft“ feiern." ] },
+ ],
+};
+</script>
+<script src="../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne(), I = INHALTE, SP = V.SPIELE;
+
+// ---------- Begrüßung ----------
+const name = V.sitzung.hol("lehrkraft", "");
+const gruss = V.el("div", "gruss", `${V.bild("winken")}<div><div class="t1">${V.w("Hal-lo, lie-be Klas-se!")}</div>
+  <div class="t2">${name ? V.w("Heu-te bin ich bei euch:") + `<span class="name">${V.esc(name)}</span>` : V.w("Heu-te ma-che ich die Ver-tre-tung bei euch.")}</div></div>`);
+S.appendChild(gruss);
+
+// ---------- Ablauf mit Bildkarten ----------
+const box = V.el("div", "ablaufbox", `<div class="kz">${V.w("So geht die Stun-de:")}</div><div class="schritte"></div>`); S.appendChild(box);
+const schritte = box.querySelector(".schritte");
+const liste = V.ablauf().filter(id => SP[id]), erledigt = new Set(V.sitzung.hol("erledigt", []));
+const naechster = liste.find(id => !erledigt.has(id));
+if (!liste.length) {
+  schritte.innerHTML = `<div class="leer">${V.w("Noch kein Ab-lauf ge-plant.")}</div>`;
+  const a = V.el("a", "knopf haupt", "Ablauf auf der Startseite planen"); a.href = "../#plan"; schritte.firstChild.appendChild(a);
+} else {
+  const breit = liste.length > 6;
+  liste.forEach((id, i) => {
+    if (i) schritte.appendChild(V.el("span", "pfeil", "→"));
+    const a = V.el("a", "schritt" + (id === naechster ? " jetzt" : "") + (erledigt.has(id) ? " erledigt" : ""),
+      `<span class="nr">${i + 1}</span>${V.bild(SP[id].bild)}<span class="tt">${V.esc(SP[id].titel)}</span>`);
+    a.href = "../" + SP[id].pfad; a.setAttribute("aria-label", `${i + 1}. ${SP[id].titel}${erledigt.has(id) ? " (erledigt)" : id === naechster ? " (als Nächstes)" : ""}`);
+    if (breit) { a.style.width = "170px"; }
+    schritte.appendChild(a);
+  });
+}
+
+// ---------- Werkzeuge ----------
+const wz = V.el("div", "werkzeuge"); S.appendChild(wz);
+const werkzeug = (bild, text, fn) => { const b = V.knopf(V.bild(bild) + `<span>${text}</span>`, fn, "werkzeug"); wz.appendChild(b); return b; };
+werkzeug("rad", "Namensrad", () => V.namensrad());
+werkzeug("alle", "Regeln", regeln);
+werkzeug("hand", "Ruhesignal", () => V.ruhe());
+werkzeug("uhr", "Timer", timer);
+werkzeug("stern", "Endstand", () => V.feier());
+
+function schicht(inhalt) {
+  const sch = V.el("div", "schicht"), t = V.el("div", "tafel"); t.appendChild(inhalt); sch.appendChild(t);
+  sch.setAttribute("role", "dialog"); S.appendChild(sch); return sch;
+}
+function regeln() {
+  const d = V.el("div", "", `<div class="kopfzeile"><span>${V.w("Un-se-re Re-geln")}</span></div><div class="regelbox">${I.REGELN.map(([b, t]) => `<div class="regel">${V.bild(b)}<div class="t">${V.w(t)}</div></div>`).join("")}</div>`);
+  const sch = schicht(d); sch.setAttribute("aria-label", "Regeln");
+  const zu = V.knopf("Schließen", () => sch.remove(), "haupt"); d.querySelector(".kopfzeile").appendChild(zu); zu.focus();
+}
+// Timer mit großem Ring
+let tLauf = null;
+function timer() {
+  const R = 190, U = 2 * Math.PI * R;
+  const d = V.el("div", "", `<div class="kopfzeile"><span>Timer</span></div><div class="timer"><div class="ring">
+    <svg viewBox="0 0 440 440" aria-hidden="true"><circle cx="220" cy="220" r="${R}" fill="#fff" stroke="#e3e7e4" stroke-width="34"/>
+    <circle class="bogen" cx="220" cy="220" r="${R}" fill="none" stroke="#2f7d7a" stroke-width="34" stroke-linecap="round" stroke-dasharray="${U}" stroke-dashoffset="0"/></svg>
+    <div class="zeit" role="timer" aria-live="off">0:00</div></div><div class="rechts"><div class="minuten"></div><div class="steuer" style="display:flex;gap:12px"></div><div class="ende" aria-live="polite"></div></div></div>`);
+  const sch = schicht(d); sch.setAttribute("aria-label", "Timer");
+  const zeit = d.querySelector(".zeit"), bogen = d.querySelector(".bogen"), ende = d.querySelector(".ende");
+  let gesamt = 0, rest = 0, pause = true;
+  const zeig = () => { const s = Math.ceil(rest); zeit.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    bogen.setAttribute("stroke-dashoffset", gesamt ? U * (1 - rest / gesamt) : 0); bogen.setAttribute("stroke", rest < 30 && gesamt ? "#d9822b" : "#2f7d7a"); };
+  const stopp = () => { clearInterval(tLauf); tLauf = null; };
+  const start = () => { if (!rest) return; pause = false; pk.textContent = "Pause"; stopp(); let t0 = Date.now(), r0 = rest;
+    tLauf = setInterval(() => { rest = Math.max(0, r0 - (Date.now() - t0) / 1000); zeig();
+      if (!rest) { stopp(); pause = true; pk.textContent = "Start"; ende.innerHTML = V.w("Die Zeit ist um!"); V.klang("gong"); } }, 200); };
+  [1, 3, 5, 10].forEach(m => d.querySelector(".minuten").appendChild(V.knopf(m + " Min.", () => { gesamt = rest = m * 60; ende.textContent = ""; zeig(); start(); })));
+  const pk = V.knopf("Start", () => { if (pause) start(); else { stopp(); pause = true; pk.textContent = "Weiter"; } }, "haupt");
+  d.querySelector(".steuer").append(pk, V.knopf("Schließen", () => { stopp(); sch.remove(); }));
+  zeig();
+}
+
+const weiter = naechster ? () => { location.href = "../" + SP[naechster].pfad; } : null;
+const alle = V.el("a", "knopf", "Alle Tafelbilder"); alle.href = "../";
+V.rahmen({ id: "cockpit", titel: "Vertretungs-Cockpit", ohneSatz: true, ohneHilfe: true, wurzel: "../", onWeiter: weiter, extra: [alle] });
+</script>
+</body>
+</html>

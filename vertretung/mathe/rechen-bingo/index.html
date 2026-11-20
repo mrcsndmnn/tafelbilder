@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Rechen-Bingo – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:20px}
+.aufgabe{position:absolute;left:40px;top:180px;width:860px;height:540px;border:5px solid var(--ink);border-radius:30px;background:#fffdf3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.aufgabe .nr{font-size:30px;font-weight:700;color:var(--soft)}
+.aufgabe .rechnung{font-size:150px;font-weight:700;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.aufgabe .ergebnis{font-size:110px;font-weight:700;color:var(--ok);min-height:120px;line-height:1}
+.aufgabe .ergebnis.zu{color:#cfd6d1}
+.aufgabe .start{font-size:44px;font-weight:700;color:var(--soft);text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.aufgabe .start svg{width:140px;height:140px}
+.aufgabe .punktfeld{display:grid;gap:6px}
+.aufgabe .punktfeld i{width:22px;height:22px;border-radius:50%;background:#4f86d6;display:block}
+.verlauf{position:absolute;left:940px;top:180px;width:620px;height:540px;border:3px solid var(--line);border-radius:24px;background:#fbfcfb;padding:14px 18px}
+.verlauf .kz{font-size:26px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between}
+.verlauf .felder{display:grid;gap:8px}
+.verlauf .f{border:3px solid var(--line);border-radius:12px;background:#fff;display:grid;place-items:center;font-weight:700;color:#9aa39e}
+.verlauf .f.gezogen{background:#e8f5ec;border-color:var(--ok);color:var(--ink)}
+.verlauf .f.letzt{background:#fff4c2;border-color:#b8860b;box-shadow:0 0 0 4px #ffe066}
+.bingo-gross{font-size:150px;font-weight:700;color:var(--wahl);letter-spacing:6px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Rechen-Bingo",
+ teile: [
+  { h: "Worum geht es?", text: "Kopfrechnen automatisieren: Das Board zieht Aufgaben, die Kinder rechnen und kreuzen das Ergebnis auf ihrer Bingo-Karte an." },
+  { h: "Vorbereitung", punkte: ["Bingo-Karten mit dem Generator **G-Bingo** drucken (Klassensatz: jede Karte anders). Dort dieselbe Art wählen wie hier, z. B. „Einmaleins“."] },
+  { h: "So geht es", punkte: [
+    "**Ziehen** zeigt die nächste Aufgabe (jedes Ergebnis kommt nur einmal). Alle rechnen still, dann sagt die Klasse das Ergebnis im Chor: „3 mal 4 ist 12.“",
+    "**Lösung** zeigt das Ergebnis. Wer es auf der Karte hat, kreuzt es an.",
+    "Rechts der **Verlauf**: Alle schon gezogenen Ergebnisse sind grün, das letzte gelb. Damit lässt sich jedes „Bingo!“ leicht prüfen.",
+    "**Bingo!** drücken, wenn ein Kind eine volle Reihe (waagerecht, senkrecht oder schräg) hat. Dann gemeinsam prüfen.",
+    "**Hilfe**: Bei Mal-Aufgaben erscheint ein Punktefeld." ] },
+  { h: "Arten", punkte: ["★ Plus und Minus bis 10. ★★ Plus und Minus bis 20, Einmaleins-Kernaufgaben (·1, ·2, ·5, ·10). ★★★ Kleines Einmaleins, Umkehraufgaben (geteilt)."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/bingo.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne(), BG = BINGO;
+const ARTEN = Object.keys(BG.ARTEN).filter(k => !BG.ARTEN[k].nurDruck);
+const STD = { 1: "plus10", 2: "plus20", 3: "einmaleins" };
+let art = V.laden("bingo-art", STD[V.niveau()]); if (!ARTEN.includes(art)) art = STD[V.niveau()];
+let gezogen = [], jetzt = null, aufgabe = null, offen = false;
+
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
+const aWahl = V.gruppe("Art", ARTEN.map(k => ({ wert: k, text: BG.ARTEN[k].kurz, aria: BG.ARTEN[k].titel })), art, v => { art = v; neu(); }, "bingo-art");
+const nWahl = V.niveauWahl(v => { aWahl.setze(STD[v]); art = STD[v]; neu(); });
+zeile.append(aWahl, nWahl);
+
+const box = V.el("div", "aufgabe"); box.setAttribute("aria-live", "polite"); S.appendChild(box);
+const verlauf = V.el("div", "verlauf", '<div class="kz"><span>Verlauf</span><span class="zahl"></span></div><div class="felder"></div>'); S.appendChild(verlauf);
+
+const ziehKn = V.knopf(V.bild("bingo") + "Ziehen", () => ziehen(), "haupt");
+const loesKn = V.knopf("Lösung", () => loesung());
+const bingoKn = V.knopf("Bingo!", () => bingo());
+const r = V.rahmen({ id: "rechen-bingo", titel: "Rechen-Bingo", satz: "… mal … ist …", onWeiter: () => ziehen(), onNeu: () => neu(),
+  onHilfe: () => { if (aufgabe) zeigeAufgabe(); }, extra: [ziehKn, loesKn, bingoKn] });
+
+function neu() {
+  V.stop(); gezogen = []; jetzt = null; aufgabe = null;
+  box.innerHTML = `<div class="start">${V.bild("bingo")}${V.w("Al-le ha-ben ei-ne Bin-go-Kar-te?")}<br>${V.w("Dann geht es los!")}</div>`;
+  loesKn.disabled = true; ziehKn.disabled = false; zeigeVerlauf();
+  r.satz(art === "plus10" || art === "plus20" ? "… plus … ist …" : art === "umkehr" ? "… ge-teilt durch … ist …" : "… mal … ist …");
+}
+function ziehen() {
+  V.stop();
+  const frei = BG.ARTEN[art].felder.filter(f => !gezogen.includes(f));
+  if (!frei.length) { box.innerHTML = `<div class="start">${V.w("Al-le Auf-ga-ben sind ge-zo-gen.")}</div>`; ziehKn.disabled = true; return; }
+  jetzt = V.ziehe(frei, "bingo"); gezogen.push(jetzt); offen = false;
+  aufgabe = BG.ARTEN[art].aufgabe(jetzt, Math.random);
+  zeigeAufgabe(); zeigeVerlauf(true); loesKn.disabled = false;
+  r.satz(art === "plus10" || art === "plus20" ? "… plus … ist …" : art === "umkehr" ? "… ge-teilt durch … ist …" : "… mal … ist …");
+  V.sprich(aufgabe.zeige.replace("·", "mal").replace(":", "geteilt durch").replace("−", "minus").replace("+", "plus"));
+}
+function punktfeld() {
+  const m = aufgabe.zeige.match(/^(\d+) · (\d+)$/); if (!m) return "";
+  const [a, b] = [+m[1], +m[2]];
+  return `<div class="punktfeld" style="grid-template-columns:repeat(${b},22px)" aria-hidden="true">${"<i></i>".repeat(a * b)}</div>`;
+}
+function zeigeAufgabe() {
+  box.innerHTML = `<div class="nr">Aufgabe ${gezogen.length}</div><div class="rechnung">${aufgabe.zeige} =</div>
+    <div class="ergebnis${offen ? "" : " zu"}">${offen ? jetzt : "?"}</div>${r.hilfe ? punktfeld() : ""}`;
+}
+function loesung() {
+  if (!aufgabe) return; offen = true; zeigeAufgabe(); loesKn.disabled = true;
+  r.satz(aufgabe.satz); V.sprich(aufgabe.sprich);
+}
+function zeigeVerlauf(neuGezogen) {
+  const f = BG.ARTEN[art].felder, sp = f.length > 30 ? 7 : f.length > 12 ? 6 : 4, zeilen = Math.ceil(f.length / sp);
+  const h = Math.min(90, Math.floor((540 - 70 - (zeilen - 1) * 8) / zeilen));
+  const fe = verlauf.querySelector(".felder"); fe.style.gridTemplateColumns = `repeat(${sp},1fr)`;
+  fe.innerHTML = f.map(x => `<div class="f${gezogen.includes(x) ? " gezogen" : ""}${x === jetzt && neuGezogen !== false && jetzt !== null ? " letzt" : ""}" style="height:${h}px;font-size:${Math.round(h * .5)}px">${x}</div>`).join("");
+  verlauf.querySelector(".zahl").textContent = `${gezogen.length} von ${f.length}`;
+}
+function bingo() {
+  V.stop();
+  const sch = V.el("div", "schicht"), t = V.el("div", "tafel ende");
+  t.innerHTML = `<div class="bingo-gross">BINGO!</div><div style="font-size:30px">${V.w("Lies dei-ne Rei-he vor. Wir prü-fen im Ver-lauf.")}</div>
+    <div style="font-size:40px;font-weight:700;max-width:1100px">${[...gezogen].sort((a, b) => a - b).join(" · ")}</div>`;
+  t.appendChild(V.knopf("Weiterspielen", () => sch.remove(), "haupt"));
+  sch.appendChild(t); S.appendChild(sch); V.klang("fertig"); V.punkt("k");
+}
+neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Lese- und Schreibblätter – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.sb-zeile{display:flex;align-items:center;gap:5mm;margin-bottom:5mm}
+.sb-zeile .bild{width:26mm;height:26mm;flex:none;border:.3mm solid #b9c2bc;border-radius:2mm;display:grid;place-items:center}
+.sb-zeile .bild svg{width:23mm;height:23mm}
+.sb-zeile .wort{width:46mm;flex:none;font-size:22pt;font-weight:700}
+.sb-zeile .lin{flex:1}
+.pyramide{display:flex;flex-direction:column;align-items:center;gap:2.6mm;margin:0 0 7mm;padding:3mm 0;border:.35mm solid #b9c2bc;border-radius:3mm;position:relative}
+.pyramide .z{font-size:17pt;font-weight:700;line-height:1.25;display:flex;align-items:center;gap:4mm}
+.pyramide .z .kasten{font-size:12pt;color:#8d9892}
+.pyramide .ich{position:absolute;right:4mm;bottom:2mm;font-size:10pt;color:#5d6862}
+.karten{display:grid;grid-template-columns:repeat(3,58mm);grid-auto-rows:52mm;justify-content:center;border-top:.3mm dashed #777;border-left:.3mm dashed #777;width:max-content;margin:0 auto}
+.karten .k{border-right:.3mm dashed #777;border-bottom:.3mm dashed #777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1mm;padding:2mm;text-align:center}
+.karten .k .t{font-size:20pt;font-weight:700;line-height:1.2}
+.karten .k.satz .t{font-size:14pt}
+.karten .k svg{width:20mm;height:20mm}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/lesen.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const D = Druck, L = LESEN;
+const ART = { schreiben: "Schreibblatt", pyramide: "Lesepyramide", karten: "Lesekarten" };
+const stufe = cfg => cfg.liste === "niveau" ? cfg.niveau : +cfg.liste;
+
+D.start({
+  id: "lesen-schreiben", titel: "Lesen und Schreiben", nr: "G-D4/D5", lineatur: true,
+  blattTitel: cfg => ART[cfg.art],
+  optionen: [
+    { key: "art", label: "Blatt", std: "schreiben", werte: [{ wert: "schreiben", text: "Schreibblatt (Bild + Wort)" }, { wert: "pyramide", text: "Lesepyramide" }, { wert: "karten", text: "Lesekarten zum Ausschneiden" }] },
+    { key: "liste", label: "Wortliste", std: "niveau", werte: [{ wert: "niveau", text: "wie Niveau" }, { wert: "1", text: "lautgetreu" }, { wert: "2", text: "mit sch, ei, au, ie, ck" }, { wert: "3", text: "lange Wörter" }] },
+    { key: "bilder", label: "Bilder auf Lesekarten", schalter: true, std: true },
+  ],
+  auftrag: cfg => cfg.art === "schreiben" ? { symbole: ["lupe", "stift"], text: "Lies das Wort. Sprich und schwin-ge die Sil-ben. Schrei-be das Wort ab." }
+    : cfg.art === "pyramide" ? { symbole: ["lupe"], text: "Lies von o-ben nach un-ten. Lies je-de Zei-le zwei-mal. Kreu-ze an." }
+    : { symbole: ["schere", "lupe"], text: "Schnei-de die Kar-ten aus. Lies sie dei-nem Part-ner vor." },
+  info: cfg => ART[cfg.art],
+  baue(cfg, rnd, loesung) {
+    const st = stufe(cfg);
+    if (cfg.art === "schreiben") {
+      const mitBild = L.woerter[st].filter(w => w[1]);
+      const liste = D.mischen(mitBild.length >= 6 ? mitBild : L.woerter[st], rnd).slice(0, cfg.lineatur === 1 ? 6 : 7);
+      return [liste.map(([w, b], i) => `<div class="sb-zeile"><div class="bild">${b ? D.bild(b) : ""}</div><div class="wort">${D.w(w)}</div>
+        <div class="lin">${D.linien(cfg.lineatur, 1, 94, loesung || (i === 0 && st === 1) ? D.ohne(w) : "")}</div></div>`).join("")];
+    }
+    if (loesung) return [];      // Lesepyramide und Lesekarten brauchen keine Lösung
+    if (cfg.art === "pyramide") {
+      // aus Sätzen wachsen die Zeilen Wort für Wort
+      const saetze = D.mischen(L.saetze[Math.max(1, st)], rnd).slice(0, st === 3 ? 2 : 3);
+      return [saetze.map(s => { const w = s.split(" "); return `<div class="pyramide">${w.map((_, i) => `<div class="z">${D.w(w.slice(0, i + 1).join(" "))}</div>`).join("")}<span class="ich">☐ Ich kann es lesen.</span></div>`; }).join("")];
+    }
+    // Lesekarten: 12 pro Seite (★: Wörter, ★★: Wörter und häufige Wörter, ★★★: Wörter und Sätze)
+    let pool = L.woerter[st].map(([w, b]) => ({ t: w, b }));
+    if (st === 2) pool = pool.concat(L.sicht.map(t => ({ t })));
+    if (st === 3) pool = pool.concat(L.saetze[3].slice(0, 6).map(t => ({ t, satz: true })));
+    const liste = D.mischen(pool, rnd).slice(0, 12);
+    return [`<div class="karten">${liste.map(k => `<div class="k${k.satz ? " satz" : ""}">${cfg.bilder && k.b ? D.bild(k.b) : ""}<span class="t">${D.w(k.t)}</span></div>`).join("")}</div>`];
+  },
+});
+</script>
+</body>
+</html>

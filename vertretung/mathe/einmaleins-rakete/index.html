@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Einmaleins-Rakete – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:14px}
+.wahlzeile .reihe .knopf{min-width:56px;padding:0 8px}
+.bahn{position:absolute;top:172px;width:220px;height:556px;border-radius:24px;background:linear-gradient(#1d2a4a,#3b5a8f 60%,#9cc3e6);overflow:hidden;border:4px solid var(--ink)}
+.bahn.k{left:40px} .bahn.l{left:1340px}
+.bahn .stufe{position:absolute;left:12px;right:12px;height:0;border-top:2px dashed rgba(255,255,255,.35)}
+.bahn .ziel{position:absolute;top:8px;left:0;right:0;text-align:center}
+.bahn .ziel svg{width:70px;height:70px}
+.bahn .rakete{position:absolute;left:55px;width:110px;height:110px;transition:bottom .7s cubic-bezier(.3,1.4,.5,1)}
+.bahn .rakete svg{width:110px;height:110px}
+.bahn .wer{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:6px;font-size:24px;font-weight:700;color:#1d2320;background:rgba(255,255,255,.85);margin:0 10px;border-radius:12px;padding:2px 0}
+.bahn .wer svg{width:36px;height:36px}
+.bahn.sieg{box-shadow:0 0 0 8px #f7c52b}
+.mitte{position:absolute;left:290px;width:1020px;top:172px;height:556px;border:5px solid var(--ink);border-radius:30px;background:#fffdf3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.mitte .rechnung{font-size:170px;font-weight:700;line-height:1;white-space:nowrap}
+.mitte .ergebnis{font-size:120px;font-weight:700;color:var(--ok);line-height:1;min-height:120px}
+.mitte .ergebnis.zu{color:#cfd6d1}
+.mitte .punktfeld{display:flex;flex-direction:column;gap:5px}
+.mitte .punktfeld div{display:flex;gap:5px}
+.mitte .punktfeld i{width:20px;height:20px;border-radius:50%;background:#4f86d6;display:block}
+.mitte .punktfeld i.f{margin-left:12px}
+.mitte .punktfeld div.f{margin-top:10px}
+.mitte .tipp{font-size:26px;color:var(--soft)}
+.mitte.mit-hilfe{gap:8px}
+.mitte.mit-hilfe .rechnung{font-size:110px}
+.mitte.mit-hilfe .ergebnis{font-size:80px;min-height:80px}
+.mitte.mit-hilfe .punktfeld{gap:3px}
+.mitte.mit-hilfe .punktfeld div{gap:3px}
+.mitte.mit-hilfe .punktfeld i{width:14px;height:14px}
+.mitte.mit-hilfe .punktfeld i.f{margin-left:9px}
+.mitte.mit-hilfe .punktfeld div.f{margin-top:7px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Einmaleins-Rakete",
+ teile: [
+  { h: "Worum geht es?", text: "Einmaleins automatisieren als Spiel „Klasse gegen Lehrkraft“: Zwei Raketen fliegen um die Wette – die der Klasse (Stern) und die der Lehrkraft (Eule)." },
+  { h: "So geht es", punkte: [
+    "Eine Aufgabe erscheint. Alle denken still nach, auf ein Zeichen antwortet die Klasse im Chor: „3 mal 4 ist 12.“",
+    "**✓ Richtig**: Die Rakete der Klasse steigt eine Stufe. **✗ Noch nicht**: Die Rakete der Lehrkraft steigt. Danach wird die Lösung gezeigt.",
+    "Wer zuerst oben ist, gewinnt die Runde und bekommt einen Punkt oben in der Kopfleiste (Stern oder Eule).",
+    "**Reihen** oben an- und abwählen. **Kern** wählt die Kernaufgaben ·1, ·2, ·5, ·10 – damit anfangen. **Geteilt** mischt Umkehraufgaben dazu.",
+    "**Hilfe** zeigt ein Punktefeld (in Fünfer-Gruppen) und einen Tipp mit einer Kernaufgabe." ] },
+  { h: "Passendes Arbeitsblatt", punkte: ["Generator **G-M3/M4 Rechenblätter**: Einmaleins-Reihen und Umkehraufgaben."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne();
+const STUFEN = 10, KERN = [1, 2, 5, 10];
+let reihen = V.laden("rakete-reihen", V.niveau() === 3 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : KERN), geteilt = V.laden("rakete-geteilt", V.niveau() === 3);
+let stand = { k: 0, l: 0 }, auf = null, offen = false, vorbei = false;
+
+// ---------- Auswahl ----------
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
+zeile.appendChild(V.el("span", "glabel", "Reihen")).style.cssText = "font-size:22px;font-weight:700;color:var(--soft)";
+const rBox = V.el("div", "gruppe reihe"); zeile.appendChild(rBox);
+const rKn = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => { const b = V.knopf("·" + n, () => { reihen = reihen.includes(n) ? reihen.filter(x => x !== n) : reihen.concat(n).sort((a, c) => a - c); if (!reihen.length) reihen = [n]; merkReihen(); }); b.setAttribute("aria-label", n + "er-Reihe"); rBox.appendChild(b); return b; });
+const kernKn = V.knopf("Kern", () => { reihen = [...KERN]; merkReihen(); });
+const alleKn = V.knopf("Alle", () => { reihen = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; merkReihen(); });
+const gKn = V.schalter("Geteilt", geteilt, v => { geteilt = v; V.merken("rakete-geteilt", v); });
+zeile.append(kernKn, alleKn, gKn);
+function merkReihen() { V.merken("rakete-reihen", reihen); rKn.forEach((b, i) => b.setAttribute("aria-pressed", reihen.includes(i + 1))); }
+merkReihen();
+
+// ---------- Raketenbahnen ----------
+const bahn = (wer, bild, name) => {
+  const b = V.el("div", "bahn " + wer, `<div class="ziel">${V.bild(wer === "k" ? "stern" : "eule")}</div>` +
+    Array.from({ length: STUFEN }, (_, i) => `<div class="stufe" style="bottom:${70 + (i + 1) * 44}px"></div>`).join("") +
+    `<div class="rakete">${V.bild("rakete")}</div><div class="wer">${V.bild(bild)}${name}</div>`);
+  b.setAttribute("aria-label", "Rakete " + name); S.appendChild(b); return b;
+};
+const bK = bahn("k", "stern", "Klasse"), bL = bahn("l", "eule", "Lehrkraft");
+const zeigeRaketen = () => { [[bK, stand.k], [bL, stand.l]].forEach(([b, n]) => { b.querySelector(".rakete").style.bottom = 48 + n * 44 + "px"; b.setAttribute("aria-label", `${b === bK ? "Klasse" : "Lehrkraft"}: Stufe ${n} von ${STUFEN}`); }); };
+
+const mitte = V.el("div", "mitte"); mitte.setAttribute("aria-live", "polite"); S.appendChild(mitte);
+const richtigKn = V.knopf("✓ Richtig", () => werte(true), "haupt");
+const falschKn = V.knopf("✗ Noch nicht", () => werte(false));
+const loesKn = V.knopf("Lösung", () => { offen = true; zeige(); r.satz(auf.satz); V.sprich(auf.sprich); });
+const r = V.rahmen({ id: "einmaleins-rakete", titel: "Einmaleins-Rakete", satz: "… mal … ist …", onWeiter: () => naechste(), onNeu: () => neu(), onHilfe: () => zeige(),
+  extra: [richtigKn, falschKn, loesKn] });
+
+function neueAufgabe() {
+  const n = V.ziehe(reihen, "reihe"), f = V.zufall(1, 10), p = n * f;
+  if (geteilt && Math.random() < .4) return { zeige: `${p} : ${n}`, erg: f, a: f, b: n, satz: `${p} ge-teilt durch ${n} ist ${f}.`, sprich: `${p} geteilt durch ${n} ist ${f}.` };
+  const [a, b] = Math.random() < .5 ? [f, n] : [n, f];
+  return { zeige: `${a} · ${b}`, erg: p, a, b, satz: `${a} mal ${b} ist ${p}.`, sprich: `${a} mal ${b} ist ${p}.` };
+}
+function tipp() {
+  // Stütze über eine Kernaufgabe: 6 · 4 → 5 · 4 = 20, dann plus 1 · 4
+  if (auf.zeige.includes(":") || KERN.includes(auf.a) || KERN.includes(auf.b)) return "";
+  const x = auf.a, y = auf.b, k = [2, 5, 10].sort((p, q) => Math.abs(p - x) - Math.abs(q - x))[0], d = x - k;
+  return `Tipp: ${k} · ${y} = ${k * y}, dann ${d > 0 ? "plus" : "minus"} ${Math.abs(d)} · ${y}`;
+}
+function punktfeld() {
+  const zeilen = auf.a, spalten = auf.b; if (zeilen * spalten > 100) return "";
+  let h = '<div class="punktfeld" aria-hidden="true">';
+  for (let i = 0; i < zeilen; i++) { h += `<div class="${i === 5 ? "f" : ""}">`; for (let j = 0; j < spalten; j++) h += `<i class="${j === 5 ? "f" : ""}"></i>`; h += "</div>"; }
+  return h + "</div>";
+}
+function zeige() {
+  if (!auf) return;
+  mitte.classList.toggle("mit-hilfe", r.hilfe);
+  mitte.innerHTML = `<div class="rechnung">${auf.zeige} =</div><div class="ergebnis${offen ? "" : " zu"}">${offen ? auf.erg : "?"}</div>` +
+    (r.hilfe ? punktfeld() + `<div class="tipp">${tipp()}</div>` : "");
+}
+function naechste() {
+  if (vorbei) { neu(); return; }
+  V.stop(); auf = neueAufgabe(); offen = false; zeige();
+  richtigKn.disabled = falschKn.disabled = false; loesKn.disabled = false;
+  r.satz(auf.zeige.includes(":") ? "… ge-teilt durch … ist …" : "… mal … ist …");
+}
+function werte(ok) {
+  if (!auf || richtigKn.disabled) return;
+  richtigKn.disabled = falschKn.disabled = true;
+  stand[ok ? "k" : "l"]++; zeigeRaketen();
+  offen = true; zeige(); r.satz(auf.satz);
+  if (ok) V.klang("richtig"); else V.sprich(auf.sprich);
+  const sieger = stand.k >= STUFEN ? "k" : stand.l >= STUFEN ? "l" : null;
+  if (sieger) { vorbei = true; V.punkt(sieger); (sieger === "k" ? bK : bL).classList.add("sieg");
+    V.nach(900, () => sieger === "k" ? V.lob("Die Ra-ke-te der Klas-se ist o-ben!") : V.noch("Die Eu-le war schnel-ler. Noch ei-ne Run-de?")); return; }
+  V.nach(1600, naechste);
+}
+function neu() { V.stop(); stand = { k: 0, l: 0 }; vorbei = false; bK.classList.remove("sieg"); bL.classList.remove("sieg"); zeigeRaketen(); naechste(); }
+neu();
+</script>
+</body>
+</html>

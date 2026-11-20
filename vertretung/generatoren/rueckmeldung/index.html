@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Rückmeldezettel – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.zettel{display:flex;flex-direction:column;gap:2.4mm;font-size:12pt;line-height:1.3}
+.zettel.halb{min-height:124mm}
+.zettel h2{font-size:17pt;margin:0}
+.zettel .u{font-size:10pt;color:#5d6862;margin-top:-1.5mm}
+.zettel .felder{display:grid;grid-template-columns:1fr 1fr;gap:2mm 8mm}
+.zettel .felder span{border-bottom:.35mm solid #000;padding-bottom:.8mm;min-height:6.5mm}
+.zettel b.kz{font-size:12.5pt}
+.zettel .haken{display:flex;flex-wrap:wrap;gap:1mm 6mm}
+.zettel .haken span::before{content:"☐ ";font-size:13pt}
+.zettel .haken span.an::before{content:"☑ "}
+.zettel .gesichter{display:flex;gap:10mm;align-items:center}
+.zettel .gesichter span{display:flex;align-items:center;gap:2mm}
+.zettel .gesichter svg{width:10mm;height:10mm}
+.zettel .zeilen div{border-bottom:.3mm solid #8d9892;height:7.5mm}
+.schnittlinie{border-top:.35mm dashed #777;margin:5mm 0;position:relative}
+.schnittlinie::after{content:"✂";position:absolute;left:0;top:-3.6mm;background:#fff;padding-right:1.5mm;font-size:12pt;color:#777}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const V = Spiele, D = Druck, SP = V.SPIELE, G = V.GENERATOREN;
+const gesicht = m => `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="14" cy="16" r="2"/><circle cx="26" cy="16" r="2"/>
+  <path d="${m === 1 ? "M12 25 Q20 32 28 25" : m === 0 ? "M12 27 H28" : "M12 29 Q20 22 28 29"}" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+function zettel(cfg, halb) {
+  const liste = V.ablauf().filter(id => SP[id]), p = V.punkte(), lk = D.sitzung("lehrkraft", "");
+  const gens = [...new Set(liste.map(id => SP[id].gen).filter(Boolean))];
+  const gemacht = liste.map(id => `<span class="an">${D.esc(SP[id].titel)}</span>`).concat(gens.map(g => `<span class="an">Arbeitsblatt: ${D.esc(G[g].titel)}</span>`));
+  const n = halb ? 2 : 4;
+  return `<div class="zettel${halb ? " halb" : ""}">
+    <h2>Rückmeldung zur Vertretungsstunde</h2><div class="u">für die Klassenlehrkraft – bitte keine Namen von Kindern eintragen, nur bei Bedarf handschriftlich</div>
+    <div class="felder"><span>Klasse: <b>${D.esc(cfg.klasse || "")}</b></span><span>Datum / Stunde:</span><span style="grid-column:span 2">Vertretung durch: <b>${D.esc(lk)}</b></span></div>
+    <b class="kz">Das haben wir gemacht:</b>
+    <div class="haken">${gemacht.length ? gemacht.join("") : "<span>Tafelbilder:</span><span>Arbeitsblatt:</span><span>Spiel:</span>"}</div>
+    <div class="zeilen">${"<div></div>".repeat(1)}</div>
+    <div class="gesichter"><b class="kz">So lief es:</b><span>${gesicht(1)} gut</span><span>${gesicht(0)} es ging</span><span>${gesicht(-1)} schwierig</span>
+      ${cfg.punkte && (p.k || p.l) ? `<span style="margin-left:auto">Klasse gegen Lehrkraft: <b>${p.k} : ${p.l}</b></span>` : ""}</div>
+    <b class="kz">Besonderheiten:</b><div class="zeilen">${"<div></div>".repeat(n)}</div>
+    <b class="kz">Nicht geschafft / Material liegt:</b><div class="zeilen">${"<div></div>".repeat(halb ? 1 : 2)}</div>
+  </div>`;
+}
+
+D.start({
+  id: "rueckmeldung", titel: "Rückmeldezettel", nr: "G-V2", schrift: false, mitLoesung: false, ohneKopf: true, niveau: false,
+  optionen: [
+    { key: "pro", label: "Zettel pro Blatt", std: 2, werte: [{ wert: 1, text: "1 (ganze Seite)" }, { wert: 2, text: "2 (halbe Seite)" }] },
+    { key: "punkte", label: "Punktestand „Klasse gegen Lehrkraft“ eintragen", schalter: true, std: true },
+    { key: "klasse", label: "Klasse (freiwillig)", eingabe: "text", std: "" },
+  ],
+  hinweis: "Der Ablauf wird von der Startseite übernommen und ist schon angekreuzt. Es werden keine Namen von Kindern gespeichert oder gedruckt.",
+  baue(cfg) { return [cfg.pro === 2 ? zettel(cfg, true) + '<div class="schnittlinie"></div>' + zettel(cfg, true) : zettel(cfg, false)]; },
+});
+</script>
+</body>
+</html>

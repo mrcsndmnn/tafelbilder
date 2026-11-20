@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Blitzlesen – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:22px}
+.anzeige{position:absolute;left:180px;right:180px;top:200px;height:400px;border:5px solid var(--ink);border-radius:30px;background:#fffdf3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;overflow:hidden}
+.anzeige .text{font-weight:700;text-align:center;line-height:1.35;padding:0 30px}
+.anzeige .text.silbe{font-size:200px}
+.anzeige .text.wort{font-size:150px}
+.anzeige .text.satz{font-size:72px}
+.anzeige .bild svg{width:150px;height:150px}
+.anzeige .zu{font-size:180px;font-weight:700;color:#cfd6d1}
+.anzeige .bereit{font-size:44px;font-weight:700;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:14px}
+.anzeige .bereit svg{width:130px;height:130px}
+.anzeige.blitz{background:#fff8d6;box-shadow:inset 0 0 0 10px #f7c52b}
+.stand{position:absolute;top:620px;left:180px;right:180px;height:96px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.punkte-runde{display:flex;gap:8px}
+.punkte-runde span{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);background:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;color:#fff}
+.punkte-runde span.r{background:var(--ok);border-color:var(--ok)}
+.punkte-runde span.w{background:#e3e7e4;border-color:#b9c2bc;color:#5d6862}
+.punkte-runde span.jetzt{border-color:var(--wahl);box-shadow:0 0 0 4px #d9c8ef}
+.rekord{font-size:30px;font-weight:700;display:flex;align-items:center;gap:10px}
+.rekord svg{width:56px;height:56px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Blitzlesen",
+ teile: [
+  { h: "Worum geht es?", text: "Schnelles Erlesen: Silben, Wörter oder kurze Sätze blitzen kurz auf. Die Klasse liest im Chor. So wächst der Sichtwortschatz." },
+  { h: "So geht es", punkte: [
+    "**Blitz!** zeigt das Wort kurz (Tempo wählbar). Danach steht dort ein „?“. Alle lesen laut im Chor.",
+    "**Hast du's?** zeigt dasselbe noch einmal. **Auflösen** zeigt es dauerhaft (und liest es vor, wenn der Ton an ist).",
+    "**Richtig** gibt einen grünen Punkt, **Weiter** geht ohne Punkt zum Nächsten. Eine Runde hat 10 Wörter.",
+    "Am Ende der Runde: Wie viele hat die Klasse geschafft? Der **Rekord der Klasse** bleibt bis zum Schließen des Tabs gespeichert – so liest die Klasse gegen sich selbst.",
+    "**Hilfe**: Bei Wörtern erscheint das passende Bild (wenn es eines gibt)." ] },
+  { h: "Auswahl oben", punkte: [
+    "**Was?** Silben, Wörter, häufige Wörter (Sichtwortschatz) oder Sätze.",
+    "**Tempo**: langsam (2 Sekunden), mittel (1 Sekunde), schnell (½ Sekunde).",
+    "**Niveau**: ★ lautgetreu, ★★ mit sch, ei, au, ie, ck, ★★★ lange Wörter und Sätze." ] },
+  { h: "Passendes Arbeitsblatt", punkte: ["Generator **G-D4/D5 Lese- und Schreibblätter**: Lesepyramide und Lesekarten."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/lesen.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne(), L = LESEN;
+const RUNDE = 10;
+let niveau = V.niveau(), art = V.laden("blitz-art", "woerter"), tempo = V.laden("blitz-tempo", niveau === 1 ? 2000 : 1000);
+let liste = [], pos = 0, ergebnis = [], jetzt = null, offen = false;
+
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
+const artWahl = V.gruppe("Was?", [{ wert: "silben", text: "Silben" }, { wert: "woerter", text: "Wörter" }, { wert: "sicht", text: "Häufige Wörter" }, { wert: "saetze", text: "Sätze" }], art,
+  v => { art = v; neu(); }, "blitz-art");
+const tWahl = V.gruppe("Tempo", [{ wert: 2000, text: "langsam" }, { wert: 1000, text: "mittel" }, { wert: 500, text: "schnell" }], tempo, v => { tempo = v; }, "blitz-tempo");
+const nWahl = V.niveauWahl(v => { niveau = v; neu(); });
+zeile.append(artWahl, tWahl, nWahl); art = artWahl.wert; tempo = tWahl.wert;
+
+const anz = V.el("div", "anzeige"); anz.setAttribute("aria-live", "polite"); S.appendChild(anz);
+const stand = V.el("div", "stand", '<div class="punkte-runde" aria-label="Runde"></div><div class="rekord"></div>'); S.appendChild(stand);
+const kreise = stand.querySelector(".punkte-runde"), rekordEl = stand.querySelector(".rekord");
+
+const blitzKn = V.knopf(V.bild("blitz") + "Blitz!", () => blitz(), "haupt");
+const nochKn = V.knopf("Hast du's?", () => blitz());
+const aufKn = V.knopf("Auflösen", () => aufloesen());
+const richtigKn = V.knopf("✓ Richtig", () => werte(true));
+const r = V.rahmen({ id: "blitzlesen", titel: "Blitzlesen", satz: "Ich le-se: …", onWeiter: () => werte(false), onNeu: () => neu(), onHilfe: () => { if (offen) zeige(); },
+  extra: [blitzKn, nochKn, aufKn, richtigKn] });
+
+const schluessel = () => `blitz-rekord-${art}-${niveau}`;
+function pool() {
+  if (art === "silben") return L.silben[niveau].map(t => ({ t, klasse: "silbe" }));
+  if (art === "sicht") return L.sicht.map(t => ({ t, klasse: "wort" }));
+  if (art === "saetze") return L.saetze[niveau].map(t => ({ t, klasse: "satz" }));
+  return L.woerter[niveau].map(([t, b]) => ({ t, b, klasse: "wort" }));
+}
+function neu() {
+  V.stop(); const p = V.mische(pool()); liste = []; while (liste.length < RUNDE) liste.push(...V.mische(p)); liste = liste.slice(0, RUNDE);
+  pos = 0; ergebnis = []; naechstes();
+}
+function naechstes() {
+  jetzt = liste[pos]; offen = false;
+  anz.className = "anzeige"; anz.innerHTML = `<div class="bereit">${V.bild("blitz")}${V.w("Fer-tig? Dann: Blitz!")}</div>`;
+  kreiseZeigen(); rekordZeigen(); r.satz("Ich le-se: …");
+  [nochKn, aufKn, richtigKn].forEach(b => b.disabled = true); blitzKn.disabled = false; blitzKn.focus();
+}
+function zeige() {
+  const groesse = jetzt.klasse === "wort" && jetzt.t.replace(/-/g, "").length > 10 ? "satz" : jetzt.klasse;
+  anz.innerHTML = (r.hilfe && jetzt.b ? `<div class="bild">${V.bild(jetzt.b)}</div>` : "") + `<div class="text ${groesse}">${V.w(jetzt.t)}</div>`;
+}
+function blitz() {
+  V.stop(); offen = false; zeige(); anz.classList.add("blitz");
+  [nochKn, aufKn, richtigKn].forEach(b => b.disabled = false); blitzKn.disabled = true;
+  V.nach(tempo, () => { anz.classList.remove("blitz"); anz.innerHTML = '<div class="zu">?</div>'; });
+}
+function aufloesen() {
+  V.stop(); offen = true; anz.classList.remove("blitz"); zeige();
+  r.satz("Ich le-se: " + jetzt.t); V.sprich(V.ohne(jetzt.t));
+}
+function werte(ok) {
+  V.stop(); anz.classList.remove("blitz");
+  if (pos >= RUNDE) { neu(); return; }
+  ergebnis[pos] = ok; if (ok) { V.lob(); V.punkt("k"); }
+  pos++;
+  if (pos < RUNDE) naechstes(); else ende();
+}
+function ende() {
+  const n = ergebnis.filter(Boolean).length, alt = V.sitzung.hol(schluessel(), null);
+  const neuRekord = alt === null || n > alt; if (neuRekord) V.sitzung.setz(schluessel(), n);
+  kreiseZeigen(); rekordZeigen();
+  anz.className = "anzeige"; anz.innerHTML = `<div class="bereit">${V.bild(neuRekord && n ? "stern" : "daumen_hoch")}<div style="font-size:64px;color:var(--ink)">${V.w(`Ihr habt ${n} von ${RUNDE}!`)}</div>
+    ${neuRekord && alt !== null ? V.w("Neu-er Re-kord der Klas-se!") : alt !== null ? V.w(`Re-kord: ${alt}. Noch ei-ne Run-de?`) : V.w("Das ist euer Re-kord.")}</div>`;
+  [nochKn, aufKn, richtigKn].forEach(b => b.disabled = true); blitzKn.disabled = true;
+  r.satz(`Wir ha-ben ${n} von ${RUNDE} ge-le-sen.`);
+}
+function kreiseZeigen() {
+  kreise.innerHTML = Array.from({ length: RUNDE }, (_, i) => `<span class="${ergebnis[i] === true ? "r" : ergebnis[i] === false ? "w" : ""}${i === pos && pos < RUNDE ? " jetzt" : ""}">${ergebnis[i] === true ? "✓" : ergebnis[i] === false ? "–" : ""}</span>`).join("");
+  kreise.setAttribute("aria-label", `Runde: ${ergebnis.filter(Boolean).length} richtig, Wort ${Math.min(pos + 1, RUNDE)} von ${RUNDE}`);
+}
+function rekordZeigen() { const x = V.sitzung.hol(schluessel(), null); rekordEl.innerHTML = x === null ? "" : `${V.bild("stern")}Rekord: ${x} von ${RUNDE}`; }
+neu();
+</script>
+</body>
+</html>

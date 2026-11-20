@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Bildergeschichte – Generator – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<style>
+.schneiden{display:grid;grid-template-columns:repeat(3,54mm);gap:4mm;justify-content:center;margin:0 0 5mm}
+.schneiden .b{width:54mm;height:40mm;border:.35mm dashed #555;padding:1mm}
+.schneiden .b svg,.kleben .b svg,.loes-reihe svg{width:100%;height:100%;display:block}
+.trenner{border-top:.4mm solid #b9c2bc;margin:0 0 4mm}
+.zeile-t{font-size:13pt;font-weight:700;margin:0 0 3mm;display:flex;align-items:center;gap:2mm}
+.zeile-t svg{width:9mm;height:9mm}
+.kleben{display:grid;grid-template-columns:repeat(3,56mm);gap:5mm 4mm;justify-content:center}
+.kleben .feld{position:relative}
+.kleben .b{width:56mm;height:41mm;border:.45mm solid #000;border-radius:2mm;background:#fafbfa}
+.kleben .nr{position:absolute;left:-2.5mm;top:-2.5mm;width:8mm;height:8mm;border-radius:50%;background:#000;color:#fff;font-weight:700;font-size:12pt;display:grid;place-items:center}
+.saetze{display:flex;flex-direction:column}
+.satz-zeile{display:flex;gap:4mm;align-items:flex-start}
+.satz-zeile .nr{width:8mm;height:8mm;border-radius:50%;background:#000;color:#fff;font-weight:700;font-size:12pt;display:grid;place-items:center;flex:none;margin-top:1mm}
+.satz-zeile .mini{width:26mm;height:19mm;flex:none;border:.3mm solid #8d9892}
+.satz-zeile .mini svg{width:100%;height:100%;display:block}
+.satz-zeile .lin{flex:1}
+.loes-reihe{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm 8mm}
+.loes-reihe .z{display:flex;gap:3mm;align-items:flex-start;font-size:13pt}
+.loes-reihe .z .bild{width:44mm;height:32mm;flex:none;border:.3mm solid #8d9892}
+.anfaenge{display:flex;gap:4mm;flex-wrap:wrap;margin:0 0 4mm;font-size:13pt}
+.anfaenge span{border:.3mm solid #000;border-radius:2mm;padding:.5mm 3mm}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/geschichten.js?v=2026112001"></script>
+<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script>
+const D = Druck, GS = GESCHICHTEN;
+const geschichteVon = (cfg, rnd) => cfg.geschichte === "zufall" ? D.wahl(GS.liste, rnd) : GS.liste.find(g => g.id === cfg.geschichte);
+const anzahlVon = (cfg, g) => Math.min(g.bilder.length, cfg.anzahl === "niveau" ? (cfg.niveau === 1 ? 3 : cfg.niveau === 2 ? 4 : 6) : +cfg.anzahl);
+
+D.start({
+  id: "bildergeschichte", titel: "Bildergeschichte", nr: "G-D1", lineatur: true,
+  blattTitel: cfg => "Bildergeschichte" + (cfg.geschichte !== "zufall" ? ": " + D.ohne(GS.liste.find(g => g.id === cfg.geschichte).titel) : ""),
+  optionen: [
+    { key: "geschichte", label: "Geschichte", std: "kakao", werte: GS.liste.map(g => ({ wert: g.id, text: D.ohne(g.titel) })).concat([{ wert: "zufall", text: "zufällig" }]) },
+    { key: "anzahl", label: "Anzahl Bilder", std: "niveau", werte: [{ wert: "niveau", text: "wie Niveau" }, { wert: "3", text: "3" }, { wert: "4", text: "4" }, { wert: "5", text: "5" }, { wert: "6", text: "6" }] },
+    { key: "anfaenge", label: "Satzanfänge vorgeben", schalter: true, std: true },
+  ],
+  auftrag: () => ({ symbole: ["schere", "kleber", "stift"], text: "Schnei-de die Bil-der aus. Kle-be sie in der rich-ti-gen Rei-hen-fol-ge auf. Schrei-be zu je-dem Bild ei-nen Satz." }),
+  hinweis: "Seite 1: Bilder ausschneiden und aufkleben. Seite 2: Sätze schreiben. Die Lösung zeigt die Reihenfolge mit Beispielsätzen.",
+  info: cfg => cfg.anfaenge ? "mit Satzanfängen" : "ohne Satzanfänge",
+  baue(cfg, rnd, loesung) {
+    const g = geschichteVon(cfg, rnd), n = anzahlVon(cfg, g), idx = GS.auswahl(g, n);
+    if (loesung) {
+      return [`<div class="zeile-t">Richtige Reihenfolge mit Beispielsätzen</div><div class="loes-reihe">` +
+        idx.map((bi, i) => `<div class="z"><div class="bild">${GS.svg(g, bi)}</div><div><b>${i + 1}.</b> ${D.w(GS.anfang(i, n) + " " + g.bilder[bi].inv)}</div></div>`).join("") + "</div>"];
+    }
+    let gemischt; do { gemischt = D.mischen(idx, rnd); } while (gemischt.every((x, i) => x === idx[i]));
+    const s1 = `<div class="zeile-t">${D.bild("schere")}${D.w("Aus-schnei-den")}</div><div class="schneiden">${gemischt.map(bi => `<div class="b">${GS.svg(g, bi)}</div>`).join("")}</div>
+      <div class="trenner"></div><div class="zeile-t">${D.bild("kleber")}${D.w("In der rich-ti-gen Rei-hen-fol-ge auf-kle-ben")}</div>
+      <div class="kleben">${idx.map((_, i) => `<div class="feld"><span class="nr">${i + 1}</span><div class="b"></div></div>`).join("")}</div>`;
+    const lin = cfg.lineatur, zeilen = lin === 1 ? (n > 4 ? 1 : 2) : 2, abst = n > 4 ? 3 : 6;
+    const s2 = `<div class="zeile-t">${D.bild("stift")}${D.w("Schrei-be zu je-dem Bild ei-nen Satz.")}</div>` +
+      (cfg.anfaenge ? "" : `<div class="anfaenge">${["Zu-erst", "Dann", "Da-nach", "Zum Schluss"].map(a => `<span>${D.w(a)}</span>`).join("")}</div>`) +
+      `<div class="saetze">${idx.map((_, i) => `<div class="satz-zeile" style="margin-bottom:${abst}mm"><span class="nr">${i + 1}</span><div class="lin">${D.linien(lin, zeilen, 168, cfg.anfaenge ? D.ohne(GS.anfang(i, n)) : "")}</div></div>`).join("")}</div>`;
+    return [s1, s2];
+  },
+});
+</script>
+</body>
+</html>

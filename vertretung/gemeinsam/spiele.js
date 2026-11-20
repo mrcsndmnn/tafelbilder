@@ -2,7 +2,9 @@
    Vertretungsspiele – gemeinsame Bausteine
    Kopfleiste (Ablauf, Punkte, Ruhesignal, Klang, Vollbild), Fußleiste,
    Satzstreifen, Bildkarte, Namensrad, Rückmeldung, Vorlesen, Zufall.
+   Liegt in vertretung/gemeinsam/ und wird von allen Teilen des Vertretungsbaukastens genutzt.
    Benötigt: ../../../gemeinsam/silben.js, inhalte.js, bilder.js
+   Pfade in V.SPIELE gelten ab vertretung/ (Startseite mit Cockpit).
    ===================================================================== */
 (function () {
   "use strict";
@@ -11,17 +13,37 @@
 
   // ---------------- Spiele (für Ablaufleiste und Startseite) ----------------
   V.SPIELE = {
-    hallo: { titel: "Hallo!", pfad: "hallo/", bild: "winken" },
-    versteckt: { titel: "Was versteckt sich da?", pfad: "versteckt/", bild: "raster", art: "ganze Klasse" },
-    "was-fehlt": { titel: "Was fehlt?", pfad: "was-fehlt/", bild: "eule_schlaeft", art: "ganze Klasse" },
-    reime: { titel: "Reimt sich das?", pfad: "reime/", bild: "maus", art: "ganze Klasse" },
-    silben: { titel: "Silben-Sortierer", pfad: "silben/", bild: "klatschen", art: "ganze Klasse" },
-    gluecksrad: { titel: "Glücksrad mit Aufträgen", pfad: "gluecksrad/", bild: "rad", art: "Drankommen" },
-    "wer-bin-ich": { titel: "Wer bin ich?", pfad: "wer-bin-ich/", bild: "vorhang", art: "Drankommen" },
-    wimmelbild: { titel: "Wimmelbild", pfad: "wimmelbild/", bild: "lupe", art: "Drankommen" },
-    "klasse-gegen-lehrkraft": { titel: "Klasse gegen Lehrkraft", pfad: "klasse-gegen-lehrkraft/", bild: "stern", art: "Rahmenspiel" },
-    tschuess: { titel: "Tschüss!", pfad: "tschuess/", bild: "daumen_hoch" },
+    hallo: { titel: "Hallo!", pfad: "spiele/hallo/", bild: "winken" },
+    versteckt: { titel: "Was versteckt sich da?", pfad: "spiele/versteckt/", bild: "raster", art: "ganze Klasse" },
+    "was-fehlt": { titel: "Was fehlt?", pfad: "spiele/was-fehlt/", bild: "eule_schlaeft", art: "ganze Klasse" },
+    reime: { titel: "Reimt sich das?", pfad: "spiele/reime/", bild: "maus", art: "ganze Klasse" },
+    silben: { titel: "Silben-Sortierer", pfad: "spiele/silben/", bild: "klatschen", art: "ganze Klasse" },
+    gluecksrad: { titel: "Glücksrad mit Aufträgen", pfad: "spiele/gluecksrad/", bild: "rad", art: "Drankommen" },
+    "wer-bin-ich": { titel: "Wer bin ich?", pfad: "spiele/wer-bin-ich/", bild: "vorhang", art: "Drankommen" },
+    wimmelbild: { titel: "Wimmelbild", pfad: "spiele/wimmelbild/", bild: "lupe", art: "Drankommen" },
+    "klasse-gegen-lehrkraft": { titel: "Klasse gegen Lehrkraft", pfad: "spiele/klasse-gegen-lehrkraft/", bild: "stern", art: "Rahmenspiel" },
+    tschuess: { titel: "Tschüss!", pfad: "spiele/tschuess/", bild: "daumen_hoch" },
+    // Vertretungsbaukasten (Paket 1 und 2)
+    cockpit: { titel: "Cockpit", pfad: "cockpit/", bild: "winken" },
+    bildergeschichte: { titel: "Bildergeschichte ordnen", pfad: "deutsch/bildergeschichte/", bild: "geschichte", art: "Deutsch", fach: "deutsch", nr: "D1", gen: "bildergeschichte", niveau: "★–★★★" },
+    blitzlesen: { titel: "Blitzlesen", pfad: "deutsch/blitzlesen/", bild: "blitz", art: "Deutsch", fach: "deutsch", nr: "D5", gen: "lesen-schreiben", niveau: "★–★★★" },
+    "rechen-bingo": { titel: "Rechen-Bingo", pfad: "mathe/rechen-bingo/", bild: "bingo", art: "Mathe", fach: "mathe", nr: "M3", gen: "bingo", niveau: "★–★★★" },
+    "einmaleins-rakete": { titel: "Einmaleins-Rakete", pfad: "mathe/einmaleins-rakete/", bild: "rakete", art: "Mathe", fach: "mathe", nr: "M4", gen: "rechnen", niveau: "★★–★★★" },
+    "uhr-werkstatt": { titel: "Uhr-Werkstatt", pfad: "mathe/uhr-werkstatt/", bild: "uhr", art: "Mathe", fach: "mathe", nr: "M9", gen: "uhrzeit", niveau: "★–★★★" },
+    "wer-wohnt-wo": { titel: "Wer wohnt wo?", pfad: "su/wer-wohnt-wo/", bild: "wald", art: "Sachunterricht", fach: "su", nr: "S1", niveau: "★–★★★" },
   };
+  // Generatoren (Druckvorlagen), Pfade ab vertretung/
+  V.GENERATOREN = {
+    stundenkarte: { titel: "Stundenkarte", nr: "G-V1", bild: "geschichte", text: "Ablauf der Stunde auf einer Seite, mit Adressen und Kopierliste." },
+    rueckmeldung: { titel: "Rückmeldezettel", nr: "G-V2", bild: "sprechblase", text: "Kurze Rückmeldung für die Klassenlehrkraft (ohne Kindernamen)." },
+    bingo: { titel: "Bingo-Karten", nr: "G-Bingo", bild: "bingo", text: "Klassensatz: jede Karte anders. Anlaute, Wörter oder Ergebnisse." },
+    bildergeschichte: { titel: "Bildergeschichte", nr: "G-D1", bild: "geschichte", text: "Bilder zum Ausschneiden, Felder zum Aufkleben, Schreibzeilen." },
+    "lesen-schreiben": { titel: "Lese- und Schreibblätter", nr: "G-D4/D5", bild: "buch", text: "Bild + Wort mit Silbenbögen, Lesepyramide, Lesekarten." },
+    rechnen: { titel: "Rechenblätter", nr: "G-M3/M4", bild: "stift", text: "Päckchen, Rechenmauern, Zahlenhäuser, Einmaleins, Umkehraufgaben." },
+    uhrzeit: { titel: "Uhrzeit-Blätter", nr: "G-M9", bild: "uhr", text: "Uhren ablesen, Zeiger einzeichnen, Zeitspannen." },
+  };
+  // Niveau für die ganze Stunde (Startseite), gilt als Vorgabe in allen Tafelbildern
+  V.NIVEAU = { 1: "★ SEP 1–2", 2: "★★ SEP 3 / Klasse 3 Anfang", 3: "★★★ Klasse 3–4" };
 
   // ---------------- Hilfsfunktionen ----------------
   V.el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -131,6 +153,15 @@
       b.addEventListener("click", () => { if (g.wert === o.wert) return; setze(o.wert); onChange(o.wert); }); g.appendChild(b); return b; });
     const setze = w => { kn.forEach((b, i) => b.setAttribute("aria-pressed", optionen[i].wert === w)); g.wert = w; if (key) V.merken(key, w); };
     g.wert = aktiv; g.setze = setze; return g;
+  };
+
+  // ---------------- Niveau ★ / ★★ / ★★★ ----------------
+  V.niveau = () => { const n = V.sitzung.hol("niveau", 2); return [1, 2, 3].includes(n) ? n : 2; };
+  V.setzeNiveau = n => V.sitzung.setz("niveau", n);
+  V.niveauWahl = onChange => {
+    const g = V.gruppe("Niveau", [1, 2, 3].map(i => ({ wert: i, text: "★".repeat(i), aria: "Niveau " + V.NIVEAU[i] })), V.niveau(), v => { V.setzeNiveau(v); onChange(v); });
+    g.classList.add("niveau"); g.querySelectorAll(".knopf").forEach((b, i) => { b.title = V.NIVEAU[i + 1]; });
+    return g;
   };
 
   // ---------------- Punkte „Klasse gegen Lehrkraft“ ----------------
@@ -251,14 +282,14 @@
 
   // ---------------- Kopf- und Fußleiste ----------------
   // id, titel, onWeiter, onNeu, onHilfe(an), extra: Elemente für die Fußleiste, satz: Satzmuster
-  V.rahmen = ({ id, titel, onWeiter, onNeu, onHilfe, extra = [], satz = "", ohneSatz = false, ohneHilfe = false, wurzel = "../" }) => {
+  V.rahmen = ({ id, titel, onWeiter, onNeu, onHilfe, extra = [], satz = "", ohneSatz = false, ohneHilfe = false, wurzel = "../../" }) => {
     const sp = V.SPIELE[id] || {};
     const k = V.el("div", "kopf");
     const start = V.el("a", "knopf", '<span aria-hidden="true">←</span> Start'); start.href = wurzel; k.appendChild(start);
     if (window.Hinweise && window.HINWEISE) {
       const H = window.HINWEISE;
       k.appendChild(window.Hinweise.knopf({ titel: H.titel || titel, teile: H.teile.concat([{ h: "Leisten oben und unten", punkte: [
-        "**Start** führt zur Startseite mit Namen und Ablauf-Planer.",
+        "**Start** führt zur Startseite des Vertretungsbaukastens mit Namen, Ablauf-Planer und Cockpit.",
         "Die kleinen Bilder oben zeigen den **Ablauf** der Stunde. Antippen wechselt zum Spiel, erledigte Spiele haben einen Haken.",
         "**Stern / Eule**: Punktestand „Klasse gegen Lehrkraft“. Antippen gibt einen Punkt. Korrigieren und Zurücksetzen auf der Seite „Klasse gegen Lehrkraft“.",
         "**Hand**: Ruhesignal „Hand hoch – Ohren auf!“ (bildschirmfüllend, Antippen schließt).",

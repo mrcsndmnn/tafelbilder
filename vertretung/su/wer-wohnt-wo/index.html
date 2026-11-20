@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Wer wohnt wo? – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:20px}
+.raeume{position:absolute;left:30px;right:30px;top:170px;height:360px;display:flex;gap:16px;justify-content:center}
+.raum{flex:1;max-width:420px;border:4px solid var(--ink);border-radius:22px;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;background:#fff;font-family:var(--font);padding:0;color:var(--ink)}
+.raum .kz{display:flex;align-items:center;gap:10px;padding:6px 12px;font-size:28px;font-weight:700;background:rgba(255,255,255,.9);border-bottom:3px solid var(--ink)}
+.raum .kz svg{width:58px;height:58px}
+.raum .tiere{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:10px}
+.raum.wald{background:#e6f3e2} .raum.wasser{background:#e0f1fb} .raum.wiese{background:#f1f8e2} .raum.bauernhof{background:#fbebe6} .raum.haus{background:#fdf6e3}
+.raum.ziel{box-shadow:0 0 0 6px #d9c8ef;border-color:var(--wahl)}
+.raum:focus-visible{outline:5px solid var(--wahl);outline-offset:3px}
+.tier{width:110px;height:110px;border:4px solid var(--ink);border-radius:18px;background:#fff;padding:4px;cursor:grab;touch-action:none;display:grid;place-items:center;font-family:var(--font);position:relative}
+.tier svg{width:96px;height:96px}
+.raum .tier{width:84px;height:84px;border-width:3px}
+.raum .tier svg{width:72px;height:72px}
+.tier.gewaehlt{border-color:var(--wahl);box-shadow:0 0 0 6px #d9c8ef}
+.tier.ok{border-color:var(--ok);background:var(--okbg)}
+.tier.falsch{border-color:var(--nochrand);background:var(--nochbg)}
+.tier.zieht{position:fixed;z-index:200;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.ablage{position:absolute;left:30px;right:30px;top:550px;height:170px;border:3px dashed var(--line);border-radius:22px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:10px}
+.ablage .leer{font-size:26px;color:var(--soft)}
+.weil{position:absolute;left:30px;right:30px;top:550px;height:170px;border:4px solid var(--wahl);border-radius:22px;background:#f8f3fd;display:flex;align-items:center;gap:24px;padding:10px 24px}
+.weil svg{width:130px;height:130px;flex:none}
+.weil .t{font-size:34px;font-weight:700;line-height:1.35}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Wer wohnt wo?",
+ teile: [
+  { h: "Worum geht es?", text: "Tiere ihren Lebensräumen zuordnen und im ganzen Satz sagen: „Der Fuchs lebt im Wald.“ ★★★ mit Begründung: „…, weil …“" },
+  { h: "So geht es", punkte: [
+    "Ein **Tier antippen**, dann den **Lebensraum antippen**. Oder das Tier mit dem Finger in den Lebensraum ziehen.",
+    "Ein Tier im Lebensraum antippen holt es zurück in die Ablage (vor dem Prüfen).",
+    "**Prüfen**: Richtig zugeordnete Tiere werden grün, die anderen orange. Manche Tiere passen an zwei Orte (die Ente auch auf den Bauernhof).",
+    "Nach dem Prüfen: Ein Tier antippen zeigt den Satz. Auf ★★★ erscheint der Grund: „Der Fuchs lebt im Wald, weil er dort Mäuse fängt …“",
+    "**Hilfe** zeigt im Satzstreifen das passende Satzmuster mit „weil“." ] },
+  { h: "Niveau", punkte: ["★ drei Lebensräume (Wald, Wasser, Bauernhof), 6 Tiere. ★★ fünf Lebensräume, 10 Tiere. ★★★ wie ★★, dazu die Begründung (Nahrung, Schutz)."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne();
+const RAEUME = {
+  wald: { name: "Wald", bild: "wald", ort: "im Wald" }, wasser: { name: "Was-ser", bild: "teich", ort: "im Was-ser" },
+  wiese: { name: "Wie-se", bild: "wiese", ort: "auf der Wie-se" }, bauernhof: { name: "Bau-ern-hof", bild: "bauernhof", ort: "auf dem Bau-ern-hof" },
+  haus: { name: "Haus", bild: "haus", ort: "im Haus" },
+};
+const TIERE = {
+  fuchs: { r: ["wald"], weil: "er dort Mäu-se fängt und in ei-ner Höh-le wohnt." }, igel: { r: ["wald", "wiese"], weil: "er dort Kä-fer fin-det und im Laub schläft." },
+  eichhoernchen: { r: ["wald"], weil: "es dort Nüs-se fin-det und auf Bäu-me klet-tert." }, reh: { r: ["wald"], weil: "es dort Blät-ter frisst und sich gut ver-ste-cken kann." },
+  eule: { r: ["wald"], weil: "sie dort nachts Mäu-se jagt und in ei-ner Baum-höh-le wohnt." },
+  fisch: { r: ["wasser"], weil: "er nur im Was-ser at-men kann." }, frosch: { r: ["wasser", "wiese"], weil: "er dort Flie-gen fängt und sei-ne Ei-er ins Was-ser legt." },
+  ente: { r: ["wasser", "bauernhof"], weil: "sie dort schwim-men und Pflan-zen fres-sen kann." },
+  hase: { r: ["wiese"], weil: "er dort Gras und Kräu-ter frisst." }, schmetterling: { r: ["wiese"], weil: "er dort Blü-ten fin-det." },
+  marienkaefer: { r: ["wiese"], weil: "er dort Läu-se frisst." }, schnecke: { r: ["wiese"], weil: "sie dort Blät-ter frisst und es feucht ist." },
+  kuh: { r: ["bauernhof"], weil: "der Bau-er sie füt-tert und melkt." }, schaf: { r: ["bauernhof"], weil: "es dort Gras frisst und Wol-le gibt." },
+  schwein: { r: ["bauernhof"], weil: "es dort im Stall wohnt und Fut-ter be-kommt." }, huhn: { r: ["bauernhof"], weil: "es dort Kör-ner pickt und Ei-er legt." },
+  hund: { r: ["haus", "bauernhof"], weil: "er bei sei-ner Fa-mi-lie wohnt und Fut-ter be-kommt." }, katze: { r: ["haus", "bauernhof"], weil: "sie dort Fut-ter und ei-nen war-men Platz hat." },
+};
+const ART = { schwein: "das" }, SILB = { schwein: "Schwein" };
+const wort = id => { const w = INHALTE.WOERTER[id] || [ART[id], SILB[id]]; return { art: w[0], silben: w[1] }; };
+const gross = s => s[0].toUpperCase() + s.slice(1);
+let niveau = V.niveau(), raeume = [], tiere = [], lage = {}, gewaehlt = null, geprueft = false;
+
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile); zeile.appendChild(V.niveauWahl(v => { niveau = v; neu(); }));
+const rBox = V.el("div", "raeume"); S.appendChild(rBox);
+const ablage = V.el("div", "ablage"); S.appendChild(ablage);
+const weilBox = V.el("div", "weil"); weilBox.hidden = true; weilBox.setAttribute("aria-live", "polite"); S.appendChild(weilBox);
+const pruefKn = V.knopf("Prüfen", () => pruefen(), "haupt");
+const r = V.rahmen({ id: "wer-wohnt-wo", titel: "Wer wohnt wo?", satz: "Der … lebt …", onWeiter: () => neu(), onNeu: () => neu(), onHilfe: () => muster(), extra: [pruefKn] });
+
+function muster() { r.satz(r.hilfe || niveau === 3 ? "Der … lebt im Wald, weil …" : "Der … lebt im Wald."); }
+function neu() {
+  V.stop(); geprueft = false; gewaehlt = null; lage = {}; weilBox.hidden = true; ablage.hidden = false; pruefKn.disabled = false;
+  raeume = niveau === 1 ? ["wald", "wasser", "bauernhof"] : Object.keys(RAEUME);
+  const passend = Object.keys(TIERE).filter(t => TIERE[t].r.some(x => raeume.includes(x)) && TIERE[t].r.filter(x => raeume.includes(x)).length >= 1);
+  // aus jedem Lebensraum mindestens ein Tier
+  const anzahl = niveau === 1 ? 6 : 10, wahl = new Set();
+  raeume.forEach(rm => wahl.add(V.ziehe(passend.filter(t => TIERE[t].r[0] === rm && !wahl.has(t)), "t-" + rm)));
+  V.mische(passend.filter(t => !wahl.has(t))).forEach(t => { if (wahl.size < anzahl) wahl.add(t); });
+  tiere = V.mische([...wahl]);
+  rBox.innerHTML = "";
+  raeume.forEach(rm => {
+    const b = V.el("button", "raum " + rm, `<span class="kz">${V.bild(RAEUME[rm].bild)}${V.w(RAEUME[rm].name)}</span><span class="tiere"></span>`); b.type = "button"; b.dataset.r = rm;
+    b.setAttribute("aria-label", "Lebensraum " + V.ohne(RAEUME[rm].name)); b.addEventListener("click", e => { if (!e.target.closest(".tier")) lege(rm); }); rBox.appendChild(b);
+  });
+  zeichneTiere(); muster();
+}
+function tierKnopf(id) {
+  const t = V.el("button", "tier", V.bild(id)); t.type = "button"; t.dataset.t = id; t.setAttribute("aria-label", V.ohne(wort(id).art + " " + wort(id).silben));
+  if (gewaehlt === id) t.classList.add("gewaehlt");
+  if (geprueft && lage[id]) t.classList.add(TIERE[id].r.includes(lage[id]) ? "ok" : "falsch");
+  ziehbar(t, id); return t;
+}
+function zeichneTiere() {
+  ablage.innerHTML = ""; rBox.querySelectorAll(".tiere").forEach(x => x.innerHTML = "");
+  tiere.forEach(id => { const t = tierKnopf(id); if (lage[id]) rBox.querySelector(`.raum[data-r="${lage[id]}"] .tiere`).appendChild(t); else ablage.appendChild(t); });
+  if (!ablage.children.length) ablage.innerHTML = `<span class="leer">${V.w("Al-le Tie-re ha-ben ein Zu-hau-se. Jetzt: Prü-fen!")}</span>`;
+  rBox.querySelectorAll(".raum").forEach(b => b.classList.toggle("ziel", !!gewaehlt));
+}
+function tippe(id) {
+  if (geprueft) { satzFuer(id); return; }
+  if (lage[id]) { delete lage[id]; gewaehlt = null; zeichneTiere(); return; }
+  gewaehlt = gewaehlt === id ? null : id; zeichneTiere();
+}
+function lege(rm, id = gewaehlt) {
+  if (!id || geprueft) return;
+  lage[id] = rm; gewaehlt = null; zeichneTiere();
+  const w = wort(id); r.satz(`${gross(w.art)} ${w.silben} lebt ${RAEUME[rm].ort}.`);
+}
+function ziehbar(el, id) {
+  let start = null, bew = false;
+  el.addEventListener("pointerdown", e => { if (e.button > 0) return; start = { x: e.clientX, y: e.clientY }; bew = false; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+  el.addEventListener("pointermove", e => {
+    if (!start || geprueft) return;
+    if (!bew && Math.hypot(e.clientX - start.x, e.clientY - start.y) < 10) return;
+    bew = true; const f = V.faktor(); el.classList.add("zieht"); el.style.transform = `scale(${f})`; el.style.transformOrigin = "0 0";
+    el.style.left = e.clientX - 55 * f + "px"; el.style.top = e.clientY - 55 * f + "px";
+  });
+  el.addEventListener("pointerup", e => {
+    if (!start) return; start = null;
+    if (!bew) { tippe(id); return; }
+    el.classList.remove("zieht"); el.style.cssText = "";
+    const ziel = document.elementsFromPoint(e.clientX, e.clientY).find(x => x.classList && x.classList.contains("raum"));
+    if (ziel) lege(ziel.dataset.r, id); else { delete lage[id]; zeichneTiere(); }
+  });
+  el.addEventListener("pointercancel", () => { start = null; el.classList.remove("zieht"); el.style.cssText = ""; });
+}
+function pruefen() {
+  const offen = tiere.filter(t => !lage[t]);
+  if (offen.length) { V.noch("Ord-ne zu-erst al-le Tie-re zu."); return; }
+  geprueft = true; gewaehlt = null; zeichneTiere();
+  const falsch = tiere.filter(t => !TIERE[t].r.includes(lage[t]));
+  if (!falsch.length) { V.lob(); V.punkt("k"); pruefKn.disabled = true; }
+  else {
+    V.noch("Fast! Schau auf die o-ran-gen Tie-re.");
+    // falsche Tiere nach kurzer Zeit zurück in die Ablage
+    V.nach(1800, () => { falsch.forEach(t => delete lage[t]); geprueft = false; zeichneTiere(); });
+  }
+  if (niveau === 3 && !falsch.length) { ablage.hidden = true; weilBox.hidden = false; weilBox.innerHTML = `<span class="t">${V.w("Tip-pe ein Tier an: War-um lebt es dort?")}</span>`; }
+}
+function satzFuer(id) {
+  const w = wort(id), rm = lage[id], s = `${gross(w.art)} ${w.silben} lebt ${RAEUME[rm].ort}`;
+  if (niveau === 3 && TIERE[id].r.includes(rm)) {
+    const ganz = `${s}, weil ${TIERE[id].weil}`;
+    weilBox.innerHTML = `${V.bild(id)}<span class="t">${V.w(ganz)}</span>`; r.satz(`${s}, weil …`); V.sprich(V.ohne(ganz));
+  } else { r.satz(s + "."); V.sprich(V.ohne(s + ".")); }
+
+}
+neu();
+</script>
+</body>
+</html>

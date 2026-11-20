@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Uhr-Werkstatt – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:20px}
+.grossuhr{position:absolute;left:70px;top:168px;width:560px;height:560px;touch-action:none}
+.grossuhr svg{width:560px;height:560px;display:block}
+.grossuhr .z-min,.grossuhr .z-std{cursor:grab}
+.grossuhr .griff{fill:transparent;cursor:grab}
+.grossuhr.ok circle:first-child{stroke:var(--ok)}
+.panel{position:absolute;left:700px;right:40px;top:180px;height:540px;display:flex;flex-direction:column;gap:22px;justify-content:center}
+.panel .frage{font-size:46px;font-weight:700}
+.panel .antwort{font-size:64px;font-weight:700;color:var(--ok);min-height:80px}
+.panel .antwort.zu{color:#cfd6d1}
+.panel .digital{font-size:56px;font-weight:700;font-family:"Courier New",monospace;background:#1d2320;color:#7ff0a8;border-radius:14px;padding:4px 22px;align-self:flex-start;letter-spacing:4px}
+.panel .reihe{display:flex;gap:12px;flex-wrap:wrap}
+.panel .reihe .knopf{min-width:120px}
+.panel .klein{font-size:22px;color:var(--soft)}
+/* Tagesablauf */
+.tag-uhren,.tag-bilder{position:absolute;left:40px;right:40px;display:flex;justify-content:center;gap:40px}
+.tag-uhren{top:172px}
+.tag-bilder{top:470px}
+.tu{width:300px;height:280px;display:flex;flex-direction:column;align-items:center;gap:4px;border:4px dashed transparent;border-radius:22px;padding:6px;cursor:pointer;background:none;font-family:var(--font)}
+.tu svg{width:200px;height:200px}
+.tu .ziel{width:100%;height:56px;border:3px dashed var(--line);border-radius:12px;display:grid;place-items:center;font-size:22px;font-weight:700}
+.tu.ok .ziel{border-color:var(--ok);background:var(--okbg)}
+.tu.falsch .ziel{border-color:var(--nochrand);background:var(--nochbg)}
+.tb{width:300px;height:230px;border:4px solid var(--ink);border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:var(--font);color:var(--ink);padding:6px}
+.tb svg{width:120px;height:120px}
+.tb .t{font-size:24px;font-weight:700;text-align:center}
+.tb.gewaehlt{border-color:var(--wahl);box-shadow:0 0 0 6px #d9c8ef}
+.tb.weg{visibility:hidden}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Uhr-Werkstatt",
+ teile: [
+  { h: "Worum geht es?", text: "Uhrzeiten lesen, einstellen und sprechen: „Es ist halb drei.“ Mit großer Analoguhr zum Ziehen." },
+  { h: "Modus", punkte: [
+    "**Ablesen**: Die Uhr zeigt eine Zeit. „Wie spät ist es?“ – die Klasse antwortet, **Auflösen** zeigt die Zeit in Worten und digital.",
+    "**Einstellen**: „Stell halb drei ein.“ Ein Kind zieht den roten Minutenzeiger (der Stundenzeiger läuft mit) oder den schwarzen Stundenzeiger. Die Knöpfe ±5 Min. und ±1 Std. gehen auch. **Prüfen** sagt, ob es stimmt.",
+    "**Tagesablauf**: Vier Bilder aus dem Tag (Aufstehen, Frühstück …) den Uhren zuordnen: Bild antippen, dann die Uhr antippen. **Prüfen**." ] },
+  { h: "Niveau", punkte: ["★ volle und halbe Stunden, ★★ dazu Viertel nach und Viertel vor, ★★★ in Fünf-Minuten-Schritten. Schalter **Minuten genau** (nur ★★★) für jede Minute.",
+    "**Hilfe**: zeigt die Zeit auch digital (8:30) und die Satzhilfe."] },
+  { h: "Passendes Arbeitsblatt", punkte: ["Generator **G-M9 Uhrzeit-Blätter**: Uhren ablesen, Zeiger einzeichnen, Zeitspannen."] },
+ ],
+};
+</script>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
+<script src="../../gemeinsam/uhr.js?v=2026112001"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script>
+const V = Spiele, S = V.buehne(), U = Uhr;
+let niveau = V.niveau(), modus = V.laden("uhr-modus", "ablesen"), genau = V.laden("uhr-genau", false);
+let ziel = { h: 8, m: 0 }, ist = { h: 12, m: 0 }, offen = false;
+
+const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
+const mWahl = V.gruppe("Modus", [{ wert: "ablesen", text: "Ablesen" }, { wert: "einstellen", text: "Einstellen" }, { wert: "tag", text: "Tagesablauf" }], modus, v => { modus = v; neu(); }, "uhr-modus");
+const nWahl = V.niveauWahl(v => { niveau = v; gKn.hidden = v !== 3; neu(); });
+const gKn = V.schalter("Minuten genau", genau, v => { genau = v; V.merken("uhr-genau", v); neu(); }); gKn.hidden = niveau !== 3;
+zeile.append(mWahl, nWahl, gKn); modus = mWahl.wert;
+
+// ---------- Große Uhr ----------
+const uhrBox = V.el("div", "grossuhr"); S.appendChild(uhrBox);
+const panel = V.el("div", "panel"); panel.setAttribute("aria-live", "polite"); S.appendChild(panel);
+const tagU = V.el("div", "tag-uhren"), tagB = V.el("div", "tag-bilder"); S.append(tagU, tagB);
+const pruefKn = V.knopf("Prüfen", () => pruefen(), "haupt");
+const aufKn = V.knopf("Auflösen", () => aufloesen());
+const r = V.rahmen({ id: "uhr-werkstatt", titel: "Uhr-Werkstatt", satz: "Es ist …", onWeiter: () => neu(), onNeu: () => neu(), onHilfe: () => zeigePanel(), extra: [pruefKn, aufKn] });
+
+function zeichneUhr(z, aktiv) {
+  uhrBox.innerHTML = `<svg viewBox="0 0 200 200" role="img" aria-label="Uhr${aktiv ? " zum Einstellen" : ""}">${U.svg(z.h, z.m)}${aktiv ? '<circle class="griff" cx="100" cy="100" r="96"/>' : ""}</svg>`;
+}
+// Ziehen: Winkel bestimmt die Minuten (Stundenzeiger läuft mit) – nahe der Mitte greift man den Stundenzeiger
+let zieht = null;
+uhrBox.addEventListener("pointerdown", e => {
+  if (modus !== "einstellen" || offen) return;
+  const p = punkt(e); const d = Math.hypot(p.x - 100, p.y - 100);
+  const amH = ((ist.h % 12) + ist.m / 60) * Math.PI / 6, hx = 100 + 44 * Math.sin(amH), hy = 100 - 44 * Math.cos(amH);
+  zieht = Math.hypot(p.x - hx, p.y - hy) < 16 || d < 50 ? "std" : "min";
+  try { uhrBox.setPointerCapture(e.pointerId); } catch (x) {}
+  bewege(e);
+});
+uhrBox.addEventListener("pointermove", e => { if (zieht) bewege(e); });
+uhrBox.addEventListener("pointerup", () => { zieht = null; });
+function punkt(e) { const svg = uhrBox.querySelector("svg"), q = svg.createSVGPoint(); q.x = e.clientX; q.y = e.clientY; return q.matrixTransform(svg.getScreenCTM().inverse()); }
+function bewege(e) {
+  const p = punkt(e); let a = Math.atan2(p.x - 100, -(p.y - 100)); if (a < 0) a += 2 * Math.PI;
+  if (zieht === "min") {
+    const schritt = niveau === 3 ? (genau ? 1 : 5) : niveau === 2 ? 15 : 30;
+    let m = Math.round(a / (2 * Math.PI) * 60 / schritt) * schritt % 60;
+    if (ist.m >= 45 && m < 15) ist.h = ist.h % 12 + 1; else if (ist.m < 15 && m >= 45) ist.h = (ist.h + 10) % 12 + 1;
+    ist.m = m;
+  } else { ist.h = Math.round(a / (2 * Math.PI) * 12 - ist.m / 60) % 12 || 12; }
+  zeichneUhr(ist, true); zeigeEinstellung();
+}
+function schiebe(dm, dh) {
+  let t = (ist.h % 12) * 60 + ist.m + dm + dh * 60; t = ((t % 720) + 720) % 720;
+  ist = { h: Math.floor(t / 60) || 12, m: t % 60 }; zeichneUhr(ist, true); zeigeEinstellung();
+}
+
+// ---------- Modi ----------
+function neu() {
+  V.stop(); offen = false; uhrBox.classList.remove("ok");
+  [uhrBox, panel].forEach(e => e.hidden = modus === "tag"); [tagU, tagB].forEach(e => e.hidden = modus !== "tag");
+  pruefKn.hidden = modus === "ablesen"; aufKn.hidden = modus === "tag";
+  pruefKn.disabled = aufKn.disabled = false;
+  if (modus === "tag") return tagNeu();
+  let z; do { z = U.zeit(niveau, Math.random, genau); } while (z.h === ziel.h && z.m === ziel.m);
+  ziel = z;
+  if (modus === "ablesen") zeichneUhr(ziel, false);
+  else { ist = { h: 12, m: 0 }; zeichneUhr(ist, true); }
+  zeigePanel(); r.satz("Es ist …");
+}
+function zeigePanel() {
+  if (modus === "tag") return;
+  if (modus === "ablesen") {
+    panel.innerHTML = `<div class="frage">${V.w("Wie spät ist es?")}</div>
+      <div class="antwort${offen ? "" : " zu"}">${offen ? V.w("Es ist " + U.textSilben(ziel.h, ziel.m) + ".") : "?"}</div>
+      ${offen || r.hilfe ? `<div class="digital">${offen ? U.digital(ziel.h, ziel.m) : "--:--"}</div>` : ""}
+      <div class="klein">${r.hilfe ? V.w("Der kur-ze Zei-ger zeigt die Stun-de. Der lan-ge Zei-ger zeigt die Mi-nu-ten.") : ""}</div>`;
+  } else {
+    panel.innerHTML = `<div class="frage">${V.w("Stell die Uhr auf:")}</div><div class="antwort">${V.w(U.textSilben(ziel.h, ziel.m))}</div>
+      ${r.hilfe ? `<div class="digital">${U.digital(ziel.h, ziel.m)}</div>` : ""}
+      <div class="reihe"></div><div class="klein" id="ist"></div>`;
+    const re = panel.querySelector(".reihe"), sch = niveau === 3 ? (genau ? 1 : 5) : niveau === 2 ? 15 : 30;
+    re.append(V.knopf(`−${sch} Min.`, () => schiebe(-sch, 0)), V.knopf(`+${sch} Min.`, () => schiebe(sch, 0)), V.knopf("−1 Std.", () => schiebe(0, -1)), V.knopf("+1 Std.", () => schiebe(0, 1)));
+    zeigeEinstellung();
+  }
+}
+function zeigeEinstellung() { const el = panel.querySelector("#ist"); if (el && r.hilfe) el.innerHTML = "Die Uhr zeigt jetzt: " + U.text(ist.h, ist.m) + " (" + U.digital(ist.h, ist.m) + ")"; }
+function aufloesen() {
+  if (modus === "ablesen") { offen = true; zeigePanel(); const t = "Es ist " + U.textSilben(ziel.h, ziel.m) + "."; r.satz(t); V.sprich(V.ohne(t)); }
+  else { ist = { ...ziel }; zeichneUhr(ist, true); offen = true; uhrBox.classList.add("ok"); r.satz("Es ist " + U.textSilben(ziel.h, ziel.m) + "."); }
+  aufKn.disabled = true;
+}
+function pruefen() {
+  if (modus === "tag") return tagPruefen();
+  if (ist.h % 12 === ziel.h % 12 && ist.m === ziel.m) {
+    uhrBox.classList.add("ok"); offen = true; V.lob(); V.punkt("k"); const t = "Es ist " + U.textSilben(ziel.h, ziel.m) + "."; r.satz(t); V.sprich(V.ohne(t)); pruefKn.disabled = true;
+  } else V.noch(ist.m !== ziel.m ? "Schau noch mal auf den lan-gen Zei-ger." : "Schau noch mal auf den kur-zen Zei-ger.");
+}
+
+// ---------- Tagesablauf ----------
+const TAG = [
+  { bild: "bett", text: "Ben steht auf.", z: [7, 0], z2: [6, 45], z3: [6, 50] },
+  { bild: "brot", text: "Ben früh-stückt.", z: [7, 30], z2: [7, 15], z3: [7, 10] },
+  { bild: "ranzen", text: "Die Schu-le fängt an.", z: [8, 0], z2: [8, 0], z3: [7, 55] },
+  { bild: "nudel", text: "Ben isst zu Mit-tag.", z: [12, 30], z2: [12, 45], z3: [12, 35] },
+  { bild: "ball", text: "Ben spielt Fuß-ball.", z: [3, 0], z2: [3, 15], z3: [3, 20] },
+  { bild: "pizza", text: "Ben isst zu A-bend.", z: [6, 30], z2: [6, 15], z3: [6, 25] },
+  { bild: "teddy", text: "Ben geht ins Bett.", z: [7, 30], z2: [7, 45], z3: [8, 5] },
+];
+let tagAus = [], gewaehlt = null, zuordnung = {};
+function tagNeu() {
+  // vier Ereignisse in zeitlicher Reihenfolge, ohne doppelte Uhrzeiten
+  let wahl; do { wahl = V.mische(TAG.map((_, i) => i)).slice(0, 4).sort((a, b) => a - b); } while (new Set(wahl.map(i => zeitVon(TAG[i]).join(":"))).size < 4);
+  tagAus = wahl.map(i => TAG[i]); gewaehlt = null; zuordnung = {};
+  tagU.innerHTML = ""; tagB.innerHTML = "";
+  tagAus.forEach((t, i) => {
+    const [h, m] = zeitVon(t);
+    const u = V.el("button", "tu", `<svg viewBox="0 0 200 200" aria-hidden="true">${U.svg(h, m)}</svg><div class="ziel"></div>`); u.type = "button";
+    u.setAttribute("aria-label", `Uhr ${i + 1}: ${U.text(h, m)}`); u.addEventListener("click", () => tippeUhr(i)); tagU.appendChild(u);
+  });
+  V.mische(tagAus.map((_, i) => i)).forEach(i => {
+    const t = tagAus[i], b = V.el("button", "tb", `${V.bild(t.bild)}<span class="t">${V.w(t.text)}</span>`); b.type = "button"; b.dataset.i = i;
+    b.setAttribute("aria-label", V.ohne(t.text)); b.addEventListener("click", () => { tagB.querySelectorAll(".tb").forEach(x => x.classList.toggle("gewaehlt", x === b && gewaehlt !== i)); gewaehlt = gewaehlt === i ? null : i; }); tagB.appendChild(b);
+  });
+  r.satz("Um … Uhr …");
+}
+const zeitVon = t => niveau === 1 ? t.z : niveau === 2 ? t.z2 : t.z3;
+function tippeUhr(u) {
+  const el = tagU.children[u];
+  if (gewaehlt === null) { // Zuordnung lösen
+    const alt = zuordnung[u]; if (alt === undefined) return;
+    delete zuordnung[u]; el.querySelector(".ziel").innerHTML = ""; el.classList.remove("ok", "falsch");
+    tagB.querySelector(`.tb[data-i="${alt}"]`).classList.remove("weg"); return;
+  }
+  if (zuordnung[u] !== undefined) tagB.querySelector(`.tb[data-i="${zuordnung[u]}"]`).classList.remove("weg");
+  Object.keys(zuordnung).forEach(k => { if (zuordnung[k] === gewaehlt) { delete zuordnung[k]; tagU.children[k].querySelector(".ziel").innerHTML = ""; } });
+  zuordnung[u] = gewaehlt; el.classList.remove("ok", "falsch");
+  el.querySelector(".ziel").innerHTML = V.w(tagAus[gewaehlt].text);
+  tagB.querySelector(`.tb[data-i="${gewaehlt}"]`).classList.add("weg"); tagB.querySelector(`.tb[data-i="${gewaehlt}"]`).classList.remove("gewaehlt");
+  const [h, m] = zeitVon(tagAus[gewaehlt]); r.satz(`Um ${U.textSilben(h, m)} … `); gewaehlt = null;
+}
+function tagPruefen() {
+  if (Object.keys(zuordnung).length < tagAus.length) { V.noch("Ord-ne zu-erst al-le Bil-der zu."); return; }
+  let alle = true;
+  tagAus.forEach((_, u) => { const ok = zuordnung[u] === u; tagU.children[u].classList.toggle("ok", ok); tagU.children[u].classList.toggle("falsch", !ok); if (!ok) alle = false; });
+  if (alle) { V.lob(); V.punkt("k"); const t = tagAus[0], [h, m] = zeitVon(t); r.satz(`Um ${U.textSilben(h, m)}: ${t.text}`); }
+  else V.noch("Fast! Schau auf die o-ran-gen Uh-ren.");
+}
+neu();
+</script>
+</body>
+</html>
