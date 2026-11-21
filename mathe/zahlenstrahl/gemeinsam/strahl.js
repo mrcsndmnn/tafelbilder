@@ -270,7 +270,7 @@
   };
 
   /* Ausschnitt mit 11 Strichen (10 Abstände) für Strahl-Detektiv und Druckvorlage A
-     schritt 1|10, gegeben "enden" | "endeMitte" | "eine", ausgerichtet (Anfang auf Zehner bzw. Hunderter),
+     schritt 1|10, gegeben "enden" | "endeMitte" | "zwei" | "eine", ausgerichtet (Anfang auf Zehner bzw. Hunderter),
      gesucht: Anzahl, abstand: kleinster Abstand (in Strichen) zwischen gesuchten Stellen, abstandG: zu gegebenen */
   S.ausschnittAufgabe = ({ schritt = 1, gegeben = "enden", ausgerichtet = true, gesucht = 2, abstand = 1, abstandG = 1, rnd = S.rnd } = {}) => {
     const von = schritt === 1 ? (ausgerichtet ? S.zufall(0, 99, rnd) * 10 : S.zufall(0, 989, rnd))
@@ -278,6 +278,10 @@
     let geg, pflicht = [];
     if (gegeben === "enden") geg = [0, 10];
     else if (gegeben === "endeMitte") { const links = rnd() < .5; geg = links ? [0, 5] : [5, 10]; pflicht = [links ? 10 : 0]; }
+    else if (gegeben === "zwei") {        // zwei Zahlen irgendwo im Ausschnitt (nicht beide Enden): Schritt aus dem Abstand erschließen
+      let i, j; do { i = S.zufall(0, 8, rnd); j = S.zufall(i + 2, 10, rnd); } while ((i === 0 && j === 10) || (i === 0 && j === 5) || (i === 5 && j === 10));
+      geg = [i, j];
+    }
     else geg = [S.wahl([0, 5, 5, 10], rnd)];
     for (let versuch = 0; versuch < 200; versuch++) {
       const ges = [...pflicht];
