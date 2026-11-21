@@ -278,7 +278,11 @@
       laeuft = true; joker.hidden = true; name.textContent = ""; drehKnopf.disabled = true;
       const mitte = (i + .5) * 360 / n + (Math.random() - .5) * (300 / n);
       winkel = winkel - (winkel % 360) + 360 * 4 + (360 - mitte);
-      const d = rad.querySelector(".nr-dreh"); if (!V.bewegt) d.style.transition = "none"; d.style.transform = `rotate(${winkel}deg)`;
+      const d = rad.querySelector(".nr-dreh"); if (!V.bewegt) d.style.transition = "none";
+      // Beim ersten Drehen ist das Rad gerade erst entstanden: erst den Startwinkel vom Browser übernehmen lassen,
+      // sonst springt es ohne Animation direkt ans Ziel
+      void getComputedStyle(d).transform; d.getBoundingClientRect();
+      d.style.transform = `rotate(${winkel}deg)`;
       V.nach(V.bewegt ? 2700 : 50, () => {
         laeuft = false; ergebnis = wahl; gezogen.push(wahl); V.sitzung.setz(schluessel, gezogen);
         name.textContent = wahl; zeichne(); V.klang("richtig"); drehKnopf.disabled = false; drehKnopf.textContent = "Noch mal drehen"; fertigKnopf.disabled = false;
