@@ -6,7 +6,7 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Vertretungsbaukasten</title>
-<meta name="description" content="Tafelbilder und Generatoren für Vertretungsstunden in SEP 1–3 und Klasse 3–4: ohne Vorbereitung, sprachfördernd, lehrplannah.">
+<meta name="description" content="Tafelbilder und Generatoren für Vertretungsstunden in allen Klassen von SEP 1 bis Klasse 4: ohne Vorbereitung, sprachfördernd, lehrplannah.">
 <link rel="stylesheet" href="../gemeinsam/zurueck.css">
 <link rel="stylesheet" href="../gemeinsam/silben.css">
 <style>
@@ -88,9 +88,12 @@ footer a{color:inherit}
       <div>
         <label class="l" for="lehrkraft">So heiße ich (für die Begrüßung)</label>
         <input type="text" id="lehrkraft" placeholder="z. B. Frau Muster" maxlength="40" autocomplete="off">
-        <label class="l" style="margin-top:14px">Niveau der Klasse</label>
+        <label class="l" style="margin-top:14px">Klasse</label>
+        <div class="zeile" style="margin-top:0" id="klasse" role="group" aria-label="Klasse"></div>
+        <label class="l" style="margin-top:14px">Niveau</label>
         <div class="zeile" style="margin-top:0" id="niveau" role="group" aria-label="Niveau"></div>
         <p class="hinweis" id="niveauText"></p>
+        <p class="hinweis">Die Klasse stellt das Niveau passend ein und blendet Tafelbilder aus, die für diese Stufe nicht passen. Das Niveau lässt sich danach noch ändern.</p>
       </div>
       <div>
         <label class="l" for="namen">Namen der Kinder (für das Namensrad)</label>
@@ -99,7 +102,7 @@ footer a{color:inherit}
         <div class="namen" id="namenListe" aria-live="polite"></div>
       </div>
     </div>
-    <p class="hinweis">Name, Niveau und Namen bleiben nur in diesem Tab und werden beim Schließen gelöscht. Sie werden nirgendwohin geschickt. Ohne Namen zeigt das Namensrad die Zahlen 1 bis 10.</p>
+    <p class="hinweis">Name, Klasse, Niveau und Namen bleiben nur in diesem Tab und werden beim Schließen gelöscht. Sie werden nirgendwohin geschickt. Ohne Namen zeigt das Namensrad die Zahlen 1 bis 10.</p>
   </section>
 
   <section class="karte">
@@ -131,6 +134,7 @@ footer a{color:inherit}
   <details>
     <summary>Info für Lehrkräfte</summary>
     <ul>
+      <li><b>Für alle Klassen:</b> Der Baukasten ist für SEP 1 bis Klasse 4 gedacht. Wählen Sie oben die Klasse: Dann passt das Niveau, und Tafelbilder, die für diese Stufe nicht geeignet sind, werden ausgeblendet (z. B. die Einmaleins-Rakete in SEP 1, Reime und Silben in Klasse 4).</li>
       <li><b>Niveau:</b> ★ SEP 1–2, ★★ SEP 3 / Klasse 3 Anfang, ★★★ Klasse 3–4. Die Zuordnung ist ein Vorschlag nach den Lehrplänen für die Primarstufe NRW (Ende Schuleingangsphase / Ende Klasse 4). Jedes Tafelbild startet mit dem hier gewählten Niveau und lässt sich dort umstellen.</li>
       <li><b>Wiederholen statt Neues einführen:</b> Alle Inhalte festigen, was in jeder Klasse der Stufe schon dran war (Silben, Lesen, Einmaleins, Uhrzeit, Tiere).</li>
       <li><b>Ruhesignal einführen:</b> Zu Beginn einmal üben – Knopf mit der Hand oben rechts, alle zeigen „Hand hoch, Ohren auf!“.</li>
@@ -146,15 +150,15 @@ footer a{color:inherit}
   <footer>Gebaut für das Smartboard (Bühne 1600 × 900). Tipp: Mit F11 oder dem Vollbild-Knopf auf Vollbild schalten. Alle Bilder sind selbst gezeichnet.
     <br><a href="../impressum.html">Impressum</a> · <a href="../datenschutz.html">Datenschutz</a></footer>
 </div>
-<script src="gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="gemeinsam/bilder.js?v=2026112001"></script>
+<script src="gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="gemeinsam/bilder.js?v=2026112102"></script>
 <script src="../gemeinsam/silben.js"></script>
-<script src="gemeinsam/spiele.js?v=2026112001"></script>
+<script src="gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, B = SPIELBILDER, SP = V.SPIELE, sitz = V.sitzung;
 const svg = id => `<svg viewBox="0 0 200 200" aria-hidden="true">${B[id]()}</svg>`;
 const esc = V.esc;
-const FACH = [["deutsch", "Deutsch", "--deutsch"], ["mathe", "Mathematik", "--mathe"], ["su", "Sachunterricht", "--su"], ["spiele", "Sprachspiele (Vertretungsspiele SEP 3)", "--spiele"]];
+const FACH = [["deutsch", "Deutsch", "--deutsch"], ["mathe", "Mathematik", "--mathe"], ["su", "Sachunterricht", "--su"], ["spiele", "Sprachspiele (Wortschatz, Artikel, Reime, Silben)", "--spiele"]];
 const fachVon = id => SP[id].fach || "spiele";
 const WAEHLBAR = Object.keys(SP).filter(id => !["hallo", "tschuess", "cockpit", "klasse-gegen-lehrkraft"].includes(id));
 
@@ -172,6 +176,16 @@ function zeigeNiveau() {
   nivText.textContent = "Gewählt: " + V.NIVEAU[V.niveau()];
 }
 zeigeNiveau();
+const klBox = document.getElementById("klasse");
+function zeigeKlasse() {
+  klBox.innerHTML = "";
+  [["", "keine Angabe"]].concat(V.KLASSEN.map(k => [k, k])).forEach(([k, t]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "k"; b.textContent = t; b.setAttribute("aria-pressed", V.klasse() === k);
+    b.onclick = () => { sitz.setz("klasse", k); if (k) V.setzeNiveau(V.KLASSE_NIVEAU[k]); auswahl = auswahl.filter(id => V.passt(id, k)); speichern(); zeigeKlasse(); zeigeNiveau(); zeigePlan(); zeigeTafeln(); };
+    klBox.appendChild(b);
+  });
+}
+zeigeKlasse();
 const feld = document.getElementById("namen"), liste = document.getElementById("namenListe");
 function zeigeNamen() { const n = V.namen(); liste.innerHTML = n.map(x => `<span>${esc(x)}</span>`).join(""); if (!feld.value && n.length) feld.value = n.join("\n"); }
 document.getElementById("namenOk").onclick = () => {
@@ -182,24 +196,26 @@ document.getElementById("namenWeg").onclick = () => { sessionStorage.removeItem(
 zeigeNamen();
 
 // ---------- 2 Ablauf ----------
-let auswahl = V.ablauf().filter(x => WAEHLBAR.includes(x));
+let auswahl = V.ablauf().filter(x => WAEHLBAR.includes(x) && V.passt(x, V.klasse()));
+// Vorschläge: je Platz eine Liste von Möglichkeiten – genommen wird die erste, die zur gewählten Klasse passt
 const VORSCHLAEGE = [
-  ["Deutsch-Stunde", ["blitzlesen", "bildergeschichte"]],
-  ["Mathe-Stunde", ["einmaleins-rakete", "uhr-werkstatt"]],
-  ["Mathe-Stunde mit Bingo", ["rechen-bingo", "uhr-werkstatt"]],
-  ["SU-Stunde", ["wer-wohnt-wo", "was-fehlt"]],
-  ["Spiele 45 Minuten", ["versteckt", "reime", "gluecksrad"]],
-  ["Spiele 90 Minuten", ["versteckt", "reime", "gluecksrad", "wer-bin-ich"]],
+  ["Deutsch-Stunde", [["blitzlesen"], ["bildergeschichte"]]],
+  ["Mathe-Stunde", [["einmaleins-rakete", "rechen-bingo"], ["uhr-werkstatt"]]],
+  ["Mathe-Stunde mit Bingo", [["rechen-bingo"], ["uhr-werkstatt"]]],
+  ["SU-Stunde", [["wer-wohnt-wo"], ["was-fehlt", "wer-bin-ich"]]],
+  ["Spiele 45 Minuten", [["versteckt", "wer-bin-ich"], ["reime", "wimmelbild"], ["gluecksrad"]]],
+  ["Spiele 90 Minuten", [["versteckt", "wimmelbild"], ["reime", "gluecksrad"], ["gluecksrad", "wer-bin-ich"], ["wer-bin-ich", "bildergeschichte"]]],
 ];
+const vorschlag = plaetze => { const l = []; plaetze.forEach(m => { const id = m.find(x => V.passt(x, V.klasse()) && !l.includes(x)); if (id) l.push(id); }); return l; };
 const vb = document.getElementById("vorschlaege");
-VORSCHLAEGE.forEach(([t, l]) => { const b = document.createElement("button"); b.type = "button"; b.className = "k"; b.textContent = t; b.onclick = () => { auswahl = [...l]; speichern(); zeigePlan(); }; vb.appendChild(b); });
+VORSCHLAEGE.forEach(([t, l]) => { const b = document.createElement("button"); b.type = "button"; b.className = "k"; b.textContent = t; b.onclick = () => { auswahl = vorschlag(l); speichern(); zeigePlan(); }; vb.appendChild(b); });
 const wahl = document.getElementById("wahl"), plan = document.getElementById("plan"), kopien = document.getElementById("kopien");
 function zeigePlan() {
   wahl.innerHTML = "";
   FACH.forEach(([f, name]) => {
     const g = document.createElement("div"); g.className = "wahl-gruppe"; g.innerHTML = `<div class="wl">${name}</div>`;
     const w = document.createElement("div"); w.className = "wahl";
-    WAEHLBAR.filter(id => fachVon(id) === f).forEach(id => {
+    WAEHLBAR.filter(id => fachVon(id) === f && V.passt(id, V.klasse())).forEach(id => {
       const btn = document.createElement("button"); btn.type = "button"; const pos = auswahl.indexOf(id);
       btn.setAttribute("aria-pressed", pos >= 0); btn.innerHTML = svg(SP[id].bild) + SP[id].titel + (pos >= 0 ? `<span class="pos">${pos + 1}</span>` : "");
       btn.onclick = () => { auswahl = pos >= 0 ? auswahl.filter(x => x !== id) : auswahl.concat(id).slice(0, 4); speichern(); zeigePlan(); };
@@ -218,10 +234,15 @@ zeigePlan();
 
 // ---------- 3 Tafelbilder ----------
 const kachel = (href, bild, titel, tags, desc, gen) => `<a class="kachel${gen ? " gen" : ""}" href="${href}"><span class="sym">${svg(bild)}</span><strong>${titel}</strong>${tags}${desc ? `<span class="desc">${desc}</span>` : ""}</a>`;
-document.getElementById("tafeln").innerHTML = `<div class="grid" style="margin-bottom:6px">${kachel("cockpit/", "winken", "Vertretungs-Cockpit", '<span class="tag">Start jeder Stunde</span>', "Begrüßung, Ablauf, Namensrad, Regeln, Timer")}</div>` +
+const stufenText = id => { const k = V.klassen(id); return k.length === V.KLASSEN.length ? "" : k[0] === "SEP 1" ? "bis " + k[k.length - 1] : "ab " + k[0]; };
+function zeigeTafeln() {
+const kl = V.klasse();
+document.getElementById("tafeln").innerHTML = (kl ? `<p class="hinweis" style="margin:0 0 10px">Gezeigt: alles, was für ${kl} passt.</p>` : "") + `<div class="grid" style="margin-bottom:6px">${kachel("cockpit/", "winken", "Vertretungs-Cockpit", '<span class="tag">Start jeder Stunde</span>', "Begrüßung, Ablauf, Namensrad, Regeln, Timer")}</div>` +
   FACH.map(([f, name, farbe]) => `<h3><span class="punkt" style="background:var(${farbe})"></span>${name}</h3><div class="grid">` +
-    Object.keys(SP).filter(id => id !== "cockpit" && fachVon(id) === f).map(id => { const s = SP[id];
-      return kachel(s.pfad, s.bild, s.titel, `<span class="tag">${s.nr ? s.nr + " · " : ""}${s.niveau || s.art || (id === "hallo" ? "Einstieg" : id === "tschuess" ? "Abschluss" : "")}</span>`, ""); }).join("") + "</div>").join("");
+    Object.keys(SP).filter(id => id !== "cockpit" && fachVon(id) === f && V.passt(id, kl)).map(id => { const s = SP[id];
+      return kachel(s.pfad, s.bild, s.titel, `<span class="tag">${s.nr ? s.nr + " · " : ""}${s.niveau || s.art || (id === "hallo" ? "Einstieg" : id === "tschuess" ? "Abschluss" : "")}</span>`, stufenText(id)); }).join("") + "</div>").join("");
+}
+zeigeTafeln();
 
 // ---------- 4 Generatoren ----------
 document.getElementById("generatoren").innerHTML = Object.entries(V.GENERATOREN).map(([k, g]) =>

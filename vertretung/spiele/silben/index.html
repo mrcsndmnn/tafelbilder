@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Silben-Sortierer – Vertretungsspiele</title>
+<title>Silben-Sortierer – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .karte-s{position:absolute;width:300px;height:290px;z-index:20;cursor:grab;touch-action:none;transition:left .45s ease,top .45s ease,transform .45s ease,opacity .45s}
@@ -49,9 +49,9 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
 let niveau = "mittel", jetzt = null, karte = null, koerbe = [], fertig = false;
@@ -137,7 +137,7 @@ function hilfeZeigen() {
   teile.forEach((t, i) => V.nach(300 + i * 900, () => { if (s[i]) s[i].classList.add("da"); }));
   V.sprich(teile.join(" – "), .6);
 }
-const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "mittel", text: "mittel" }, { wert: "schwer", text: "schwer" }], "mittel", v => { niveau = v; start(); }, "silben-niveau");
+const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "mittel", text: "mittel" }, { wert: "schwer", text: "schwer" }], "mittel", v => { niveau = v; start(); }, "silben-niveau", { 1: "leicht", 2: "mittel", 3: "schwer" });
 niveau = niv.wert;
 const koenig = V.knopf(V.bild("klatschen") + "Silbenkönig", () => V.namensrad({ titel: "Wer klatscht vor?" }));
 function start() { V.stop(); baueKoerbe(); neuesBild(); }

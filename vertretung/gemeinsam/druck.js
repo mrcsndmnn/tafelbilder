@@ -55,7 +55,8 @@
     const cfg = laden(def.id, {});
     const opt = def.optionen || [];
     opt.forEach(o => { if (cfg[o.key] === undefined || (o.werte && !o.werte.some(w => w.wert === cfg[o.key]))) cfg[o.key] = o.std; });
-    if (def.niveau !== false && ![1, 2, 3].includes(cfg.niveau)) cfg.niveau = [1, 2, 3].includes(sitzung("niveau", 0)) ? sitzung("niveau", 2) : 2;
+    // Niveau: Die Wahl auf der Startseite (dieser Tab) hat Vorrang vor der zuletzt gespeicherten Einstellung
+    if (def.niveau !== false) { const sn = sitzung("niveau", 0); if ([1, 2, 3].includes(sn)) cfg.niveau = sn; else if (![1, 2, 3].includes(cfg.niveau)) cfg.niveau = 2; }
     if (def.schrift !== false && !["silben", "druck"].includes(cfg.schrift)) cfg.schrift = "silben";
     if (def.lineatur && ![1, 2, 3].includes(cfg.lineatur)) cfg.lineatur = cfg.niveau === 1 ? 1 : cfg.niveau === 2 ? 2 : 3;
     if (typeof cfg.loesung !== "boolean") cfg.loesung = true;

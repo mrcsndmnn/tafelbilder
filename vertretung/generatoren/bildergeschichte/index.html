@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Bildergeschichte – Generator – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112102">
 <style>
 .schneiden{display:grid;grid-template-columns:repeat(3,54mm);gap:4mm;justify-content:center;margin:0 0 5mm}
 .schneiden .b{width:54mm;height:40mm;border:.35mm dashed #555;padding:1mm}
@@ -34,10 +34,10 @@
 </head>
 <body>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/geschichten.js?v=2026112001"></script>
-<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/geschichten.js?v=2026112102"></script>
+<script src="../../gemeinsam/druck.js?v=2026112102"></script>
 <script>
 const D = Druck, GS = GESCHICHTEN;
 const geschichteVon = (cfg, rnd) => cfg.geschichte === "zufall" ? D.wahl(GS.liste, rnd) : GS.liste.find(g => g.id === cfg.geschichte);
@@ -49,10 +49,11 @@ D.start({
   optionen: [
     { key: "geschichte", label: "Geschichte", std: "kakao", werte: GS.liste.map(g => ({ wert: g.id, text: D.ohne(g.titel) })).concat([{ wert: "zufall", text: "zufällig" }]) },
     { key: "anzahl", label: "Anzahl Bilder", std: "niveau", werte: [{ wert: "niveau", text: "wie Niveau" }, { wert: "3", text: "3" }, { wert: "4", text: "4" }, { wert: "5", text: "5" }, { wert: "6", text: "6" }] },
+    { key: "schreiben", label: "Schreibseite (Sätze schreiben)", schalter: true, std: true },
     { key: "anfaenge", label: "Satzanfänge vorgeben", schalter: true, std: true },
   ],
-  auftrag: () => ({ symbole: ["schere", "kleber", "stift"], text: "Schnei-de die Bil-der aus. Kle-be sie in der rich-ti-gen Rei-hen-fol-ge auf. Schrei-be zu je-dem Bild ei-nen Satz." }),
-  hinweis: "Seite 1: Bilder ausschneiden und aufkleben. Seite 2: Sätze schreiben. Die Lösung zeigt die Reihenfolge mit Beispielsätzen.",
+  auftrag: cfg => ({ symbole: cfg.schreiben ? ["schere", "kleber", "stift"] : ["schere", "kleber"], text: "Schnei-de die Bil-der aus. Kle-be sie in der rich-ti-gen Rei-hen-fol-ge auf." + (cfg.schreiben ? " Schrei-be zu je-dem Bild ei-nen Satz." : " Er-zäh-le die Ge-schich-te.") }),
+  hinweis: "Seite 1: Bilder ausschneiden und aufkleben. Seite 2: Sätze schreiben (für Kinder, die noch keine Sätze schreiben, z. B. in SEP 1, die Schreibseite weglassen). Die Lösung zeigt die Reihenfolge mit Beispielsätzen.",
   info: cfg => cfg.anfaenge ? "mit Satzanfängen" : "ohne Satzanfänge",
   baue(cfg, rnd, loesung) {
     const g = geschichteVon(cfg, rnd), n = anzahlVon(cfg, g), idx = GS.auswahl(g, n);
@@ -68,7 +69,7 @@ D.start({
     const s2 = `<div class="zeile-t">${D.bild("stift")}${D.w("Schrei-be zu je-dem Bild ei-nen Satz.")}</div>` +
       (cfg.anfaenge ? "" : `<div class="anfaenge">${["Zu-erst", "Dann", "Da-nach", "Zum Schluss"].map(a => `<span>${D.w(a)}</span>`).join("")}</div>`) +
       `<div class="saetze">${idx.map((_, i) => `<div class="satz-zeile" style="margin-bottom:${abst}mm"><span class="nr">${i + 1}</span><div class="lin">${D.linien(lin, zeilen, 168, cfg.anfaenge ? D.ohne(GS.anfang(i, n)) : "")}</div></div>`).join("")}</div>`;
-    return [s1, s2];
+    return cfg.schreiben ? [s1, s2] : [s1];
   },
 });
 </script>

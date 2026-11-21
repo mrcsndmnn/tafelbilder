@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Was versteckt sich da? – Vertretungsspiele</title>
+<title>Was versteckt sich da? – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .bildfeld{position:absolute;left:110px;top:104px;width:620px;height:620px;border:4px solid var(--ink);border-radius:22px;overflow:hidden;background:#fff}
@@ -48,9 +48,9 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
 const PASTELL = ["#f7d8e3", "#d8ecf7", "#e2f3e0", "#fdf0c9", "#ead9f5", "#fde2cf"];
@@ -93,7 +93,7 @@ function aufloesen() {
   const w = V.wort(jetzt); r.satz(`Das ist ${w.art} ${w.silben}.`); zeigeAblage(); V.lob();
   V.sprich(`Das ist ${w.ganz}.`);
 }
-const rasterWahl = V.gruppe("Raster", [{ wert: "2x2", text: "2 × 2" }, { wert: "3x3", text: "3 × 3" }, { wert: "4x3", text: "4 × 3" }], raster, v => { raster = v; neu(); }, "versteckt-raster");
+const rasterWahl = V.gruppe("Raster", [{ wert: "2x2", text: "2 × 2" }, { wert: "3x3", text: "3 × 3" }, { wert: "4x3", text: "4 × 3" }], raster, v => { raster = v; neu(); }, "versteckt-raster", { 1: "2x2", 2: "3x3", 3: "4x3" });
 raster = rasterWahl.wert;
 const r = V.rahmen({ id: "versteckt", titel: "Was versteckt sich da?", onWeiter: neu, onNeu: neu, onHilfe: zeigeAblage, extra: [rasterWahl] });
 neu();

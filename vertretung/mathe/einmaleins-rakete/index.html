@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Einmaleins-Rakete – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:14px}
@@ -61,13 +61,14 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne();
 const STUFEN = 10, KERN = [1, 2, 5, 10];
-let reihen = V.laden("rakete-reihen", V.niveau() === 3 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : KERN), geteilt = V.laden("rakete-geteilt", V.niveau() === 3);
+// Reihen und „Geteilt“ gelten nur in diesem Tab und starten passend zum Niveau der Startseite
+let reihen = V.sitzung.hol("rakete-reihen", V.niveau() === 3 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : KERN), geteilt = V.sitzung.hol("rakete-geteilt", V.niveau() === 3);
 let stand = { k: 0, l: 0 }, auf = null, offen = false, vorbei = false;
 
 // ---------- Auswahl ----------
@@ -77,9 +78,9 @@ const rBox = V.el("div", "gruppe reihe"); zeile.appendChild(rBox);
 const rKn = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => { const b = V.knopf("·" + n, () => { reihen = reihen.includes(n) ? reihen.filter(x => x !== n) : reihen.concat(n).sort((a, c) => a - c); if (!reihen.length) reihen = [n]; merkReihen(); }); b.setAttribute("aria-label", n + "er-Reihe"); rBox.appendChild(b); return b; });
 const kernKn = V.knopf("Kern", () => { reihen = [...KERN]; merkReihen(); });
 const alleKn = V.knopf("Alle", () => { reihen = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; merkReihen(); });
-const gKn = V.schalter("Geteilt", geteilt, v => { geteilt = v; V.merken("rakete-geteilt", v); });
+const gKn = V.schalter("Geteilt", geteilt, v => { geteilt = v; V.sitzung.setz("rakete-geteilt", v); });
 zeile.append(kernKn, alleKn, gKn);
-function merkReihen() { V.merken("rakete-reihen", reihen); rKn.forEach((b, i) => b.setAttribute("aria-pressed", reihen.includes(i + 1))); }
+function merkReihen() { V.sitzung.setz("rakete-reihen", reihen); rKn.forEach((b, i) => b.setAttribute("aria-pressed", reihen.includes(i + 1))); }
 merkReihen();
 
 // ---------- Raketenbahnen ----------

@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Blitzlesen – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:22px}
@@ -54,10 +54,10 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/lesen.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/lesen.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), L = LESEN;
 const RUNDE = 10;
@@ -67,7 +67,7 @@ let liste = [], pos = 0, ergebnis = [], jetzt = null, offen = false;
 const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
 const artWahl = V.gruppe("Was?", [{ wert: "silben", text: "Silben" }, { wert: "woerter", text: "Wörter" }, { wert: "sicht", text: "Häufige Wörter" }, { wert: "saetze", text: "Sätze" }], art,
   v => { art = v; neu(); }, "blitz-art");
-const tWahl = V.gruppe("Tempo", [{ wert: 2000, text: "langsam" }, { wert: 1000, text: "mittel" }, { wert: 500, text: "schnell" }], tempo, v => { tempo = v; }, "blitz-tempo");
+const tWahl = V.gruppe("Tempo", [{ wert: 2000, text: "langsam" }, { wert: 1000, text: "mittel" }, { wert: 500, text: "schnell" }], tempo, v => { tempo = v; }, "blitz-tempo", { 1: 2000, 2: 1000, 3: 1000 });
 const nWahl = V.niveauWahl(v => { niveau = v; neu(); });
 zeile.append(artWahl, tWahl, nWahl); art = artWahl.wert; tempo = tWahl.wert;
 

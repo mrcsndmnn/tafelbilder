@@ -42,6 +42,16 @@
     rechnen: { titel: "Rechenblätter", nr: "G-M3/M4", bild: "stift", text: "Päckchen, Rechenmauern, Zahlenhäuser, Einmaleins, Umkehraufgaben." },
     uhrzeit: { titel: "Uhrzeit-Blätter", nr: "G-M9", bild: "uhr", text: "Uhren ablesen, Zeiger einzeichnen, Zeitspannen." },
   };
+  // Klassenstufen: Für welche Stufen passt ein Tafelbild? (ohne Angabe: alle)
+  V.KLASSEN = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3", "Klasse 4"];
+  V.KLASSE_NIVEAU = { "SEP 1": 1, "SEP 2": 1, "SEP 3": 2, "Klasse 3": 2, "Klasse 4": 3 };
+  const BIS_KL3 = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3"];        // Bildwortschatz, Reime, Silben: für Klasse 4 zu leicht
+  ["versteckt", "was-fehlt", "reime", "silben"].forEach(id => { V.SPIELE[id].klassen = BIS_KL3; });
+  V.SPIELE["einmaleins-rakete"].klassen = ["SEP 2", "SEP 3", "Klasse 3", "Klasse 4"];   // Einmaleins erst ab dem 2. Schulbesuchsjahr
+  V.klassen = id => V.SPIELE[id].klassen || V.KLASSEN;
+  V.passt = (id, klasse) => !klasse || V.klassen(id).includes(klasse);
+  V.klasse = () => V.sitzung.hol("klasse", "");
+
   // Niveau für die ganze Stunde (Startseite), gilt als Vorgabe in allen Tafelbildern
   V.NIVEAU = { 1: "★ SEP 1–2", 2: "★★ SEP 3 / Klasse 3 Anfang", 3: "★★★ Klasse 3–4" };
 
@@ -145,13 +155,16 @@
     b.addEventListener("click", () => { const v = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", v); onChange(v); });
     b.setze = v => b.setAttribute("aria-pressed", !!v); return b;
   };
-  V.gruppe = (label, optionen, aktiv, onChange, key) => {
-    if (key) aktiv = V.laden(key, aktiv);
+  // niveauStd { 1: …, 2: …, 3: … }: Schwierigkeit richtet sich nach dem Niveau der Startseite und gilt nur in diesem Tab
+  // (damit eine Einstellung aus einer anderen Klasse nicht hängen bleibt)
+  V.gruppe = (label, optionen, aktiv, onChange, key, niveauStd) => {
+    if (key && niveauStd) aktiv = V.sitzung.hol("g-" + key, niveauStd[V.niveau()]);
+    else if (key) aktiv = V.laden(key, aktiv);
     if (!optionen.some(o => o.wert === aktiv)) aktiv = optionen[0].wert;
     const g = V.el("div", "gruppe"); g.setAttribute("role", "group"); if (label) { g.appendChild(V.el("span", "glabel", label)); g.setAttribute("aria-label", label); }
     const kn = optionen.map(o => { const b = V.knopf(o.text); if (o.aria) b.setAttribute("aria-label", o.aria); b.setAttribute("aria-pressed", o.wert === aktiv);
       b.addEventListener("click", () => { if (g.wert === o.wert) return; setze(o.wert); onChange(o.wert); }); g.appendChild(b); return b; });
-    const setze = w => { kn.forEach((b, i) => b.setAttribute("aria-pressed", optionen[i].wert === w)); g.wert = w; if (key) V.merken(key, w); };
+    const setze = w => { kn.forEach((b, i) => b.setAttribute("aria-pressed", optionen[i].wert === w)); g.wert = w; if (key && niveauStd) V.sitzung.setz("g-" + key, w); else if (key) V.merken(key, w); };
     g.wert = aktiv; g.setze = setze; return g;
   };
 
@@ -293,6 +306,7 @@
         "Die kleinen Bilder oben zeigen den **Ablauf** der Stunde. Antippen wechselt zum Spiel, erledigte Spiele haben einen Haken.",
         "**Stern / Eule**: Punktestand „Klasse gegen Lehrkraft“. Antippen gibt einen Punkt. Korrigieren und Zurücksetzen auf der Seite „Klasse gegen Lehrkraft“.",
         "**Hand**: Ruhesignal „Hand hoch – Ohren auf!“ (bildschirmfüllend, Antippen schließt).",
+        "Die Schwierigkeit startet passend zum **Niveau**, das auf der Startseite gewählt ist (★, ★★, ★★★). Eine Änderung hier gilt nur in diesem Tab.",
         "**Lautsprecher-Knopf oben**: Ton an oder aus – gilt für die Klänge (sanfter Ton bei richtig, nie Fehlertöne) und für das automatische Vorlesen. In jedem neuen Tab ist der Ton zuerst aus (durchgestrichener Lautsprecher). **Vollbild** für das Smartboard.",
         "Unten: **Satzmuster** und **Hilfe** ein- oder ausblenden, **Weiter** zur nächsten Runde, **Neu starten** beginnt das Spiel von vorn.",
         "Der Lautsprecher-Knopf **am Satzstreifen** liest den Satz einmal vor – auch wenn der Ton oben aus ist (nur wenn das Gerät eine deutsche Stimme hat)." ] }]) }, "knopf sym"));

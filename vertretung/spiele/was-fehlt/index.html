@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Was fehlt? – Vertretungsspiele</title>
+<title>Was fehlt? – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .einst{position:absolute;left:24px;right:24px;top:96px;height:64px;display:flex;gap:26px;align-items:center}
@@ -45,9 +45,9 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
 let anzahl = 6, niveau = "eins", karten = [], fehlen = [], phase = "schauen";
@@ -102,9 +102,9 @@ function zeigen() {
 }
 const augenKnopf = V.knopf(V.bild("eule_schlaeft") + "Augen zu!", augenZu, "haupt");
 const zeigKnopf = V.knopf("Zeigen", zeigen);
-einst.append(V.gruppe("Anzahl", [4, 6, 8].map(n => ({ wert: n, text: String(n) })), 6, v => { anzahl = v; neu(); }, "fehlt-anzahl"),
-  V.gruppe("Niveau", [{ wert: "eins", text: "1 fehlt" }, { wert: "zwei", text: "2 fehlen" }, { wert: "profi", text: "Profi: Plätze tauschen" }], "eins", v => { niveau = v; neu(); }, "fehlt-niveau"));
-anzahl = V.laden("fehlt-anzahl", 6); niveau = V.laden("fehlt-niveau", "eins");
+einst.append(V.gruppe("Anzahl", [4, 6, 8].map(n => ({ wert: n, text: String(n) })), 6, v => { anzahl = v; neu(); }, "fehlt-anzahl", { 1: 4, 2: 6, 3: 8 }),
+  V.gruppe("Niveau", [{ wert: "eins", text: "1 fehlt" }, { wert: "zwei", text: "2 fehlen" }, { wert: "profi", text: "Profi: Plätze tauschen" }], "eins", v => { niveau = v; neu(); }, "fehlt-niveau", { 1: "eins", 2: "zwei", 3: "profi" }));
+anzahl = einst.children[0].wert; niveau = einst.children[1].wert;
 const r = V.rahmen({ id: "was-fehlt", titel: "Was fehlt?", onWeiter: neu, onNeu: neu, extra: [augenKnopf, zeigKnopf],
   onHilfe: an => fehlen.forEach(k => { const l = k.el.querySelector(".loch"); if (l) l.innerHTML = (an ? V.bild(k.id) : "") + "?"; }) });
 neu();

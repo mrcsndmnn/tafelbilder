@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Wimmelbild – Vertretungsspiele</title>
+<title>Wimmelbild – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .szene{position:absolute;left:24px;top:100px;width:1040px;height:582px;border:4px solid var(--ink);border-radius:20px;overflow:hidden;background:#fff}
@@ -54,9 +54,9 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE, B = SPIELBILDER, K = 'stroke="#1d2320" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
 const rr = (x, y, w, h, f, r = 6) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" ${K}/>`;
@@ -158,7 +158,8 @@ panel.innerHTML = `<div class="lbl">Szene</div><div class="reihe sz"></div><div 
 panel.querySelector(".sz").appendChild(V.gruppe("", [{ wert: "zimmer", text: "Kinderzimmer" }, { wert: "spielplatz", text: "Spielplatz" }], szene, v => { szene = v; neu(); }, "wimmel-szene"));
 panel.querySelector(".mo").appendChild(V.gruppe("", [{ wert: "finde", text: "Finde" }, { wert: "sag", text: "Sag es" }, { wert: "verstecken", text: "Verstecken" }], modus, v => { modus = v; neu(); }, "wimmel-modus"));
 panel.querySelector(".kn").append(V.knopf("Auflösen", aufloesen, "haupt"), V.knopf("Wer?", () => V.namensrad()));
-const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer (mit zwischen)" }], niveau, v => { niveau = v; symbole(r.hilfe); neu(); }, "wimmel-niveau");
+const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer (mit zwischen)" }], niveau, v => { niveau = v; symbole(r.hilfe); neu(); }, "wimmel-niveau", { 1: "leicht", 2: "leicht", 3: "schwer" });
+niveau = niv.wert;
 const r = V.rahmen({ id: "wimmelbild", titel: "Wimmelbild", onWeiter: neu, onNeu: neu, onHilfe: symbole, extra: [niv] });
 neu();
 </script>

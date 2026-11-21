@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Rechen-Bingo – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .wahlzeile{position:absolute;left:24px;right:24px;top:92px;height:64px;display:flex;align-items:center;gap:20px}
@@ -49,10 +49,10 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/bingo.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/bingo.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), BG = BINGO;
 const ARTEN = Object.keys(BG.ARTEN).filter(k => !BG.ARTEN[k].nurDruck);
@@ -61,9 +61,9 @@ let art = V.laden("bingo-art", STD[V.niveau()]); if (!ARTEN.includes(art)) art =
 let gezogen = [], jetzt = null, aufgabe = null, offen = false;
 
 const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
-const aWahl = V.gruppe("Art", ARTEN.map(k => ({ wert: k, text: BG.ARTEN[k].kurz, aria: BG.ARTEN[k].titel })), art, v => { art = v; neu(); }, "bingo-art");
+const aWahl = V.gruppe("Art", ARTEN.map(k => ({ wert: k, text: BG.ARTEN[k].kurz, aria: BG.ARTEN[k].titel })), art, v => { art = v; neu(); }, "bingo-art", STD);
 const nWahl = V.niveauWahl(v => { aWahl.setze(STD[v]); art = STD[v]; neu(); });
-zeile.append(aWahl, nWahl);
+zeile.append(aWahl, nWahl); art = aWahl.wert;
 
 const box = V.el("div", "aufgabe"); box.setAttribute("aria-live", "polite"); S.appendChild(box);
 const verlauf = V.el("div", "verlauf", '<div class="kz"><span>Verlauf</span><span class="zahl"></span></div><div class="felder"></div>'); S.appendChild(verlauf);

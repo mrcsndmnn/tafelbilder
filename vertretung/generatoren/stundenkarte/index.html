@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Stundenkarte – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112102">
 <style>
 .sk-kopf{display:flex;align-items:baseline;gap:4mm;margin-bottom:3mm}
 .sk-kopf h2{font-size:20pt;margin:0;flex:1}
@@ -36,10 +36,10 @@ ul.liste li{margin:.6mm 0}
 </head>
 <body>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
-<script src="../../gemeinsam/druck.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
+<script src="../../gemeinsam/druck.js?v=2026112102"></script>
 <script>
 const V = Spiele, D = Druck, SP = V.SPIELE, G = V.GENERATOREN;
 const VORLAGEN = {
@@ -59,12 +59,16 @@ D.start({
       { wert: "mathe", text: "Mathe" }, { wert: "bingo", text: "Mathe mit Bingo" }, { wert: "su", text: "Sachunterricht" }, { wert: "spiele", text: "Sprachspiele" }] },
     { key: "klasse", label: "Klasse (freiwillig)", eingabe: "text", std: "" },
   ],
-  hinweis: "Name der Lehrkraft und Niveau kommen von der Startseite (nur in diesem Tab gespeichert).",
+  hinweis: "Name der Lehrkraft, Klasse und Niveau kommen von der Startseite (nur in diesem Tab gespeichert). Die Vorlagen passen sich der Klasse an, z. B. Rechen-Bingo statt Einmaleins in SEP 1.",
   baue(cfg) {
-    const liste = (cfg.ablauf === "gespeichert" ? V.ablauf() : VORLAGEN[cfg.ablauf]).filter(id => SP[id]);
+    // Vorlagen an die Klasse von der Startseite anpassen (z. B. kein Einmaleins in SEP 1)
+    const ERSATZ = { "einmaleins-rakete": "rechen-bingo", versteckt: "wer-bin-ich", reime: "wimmelbild", "was-fehlt": "wer-bin-ich", silben: "gluecksrad" };
+    const kl = V.klasse();
+    let liste = (cfg.ablauf === "gespeichert" ? V.ablauf() : VORLAGEN[cfg.ablauf]).filter(id => SP[id]);
+    if (cfg.ablauf !== "gespeichert") liste = [...new Set(liste.map(id => V.passt(id, kl) ? id : ERSATZ[id]).filter(Boolean))];
     const lk = D.sitzung("lehrkraft", "");
     let h = `<div class="sk-kopf"><h2>Stundenkarte Vertretung</h2><span class="sterne">${D.sterne(cfg.niveau)} ${D.NIVEAU[cfg.niveau]}</span></div>
-      <div class="felder"><span>Klasse: <b class="fuell">${D.esc(cfg.klasse || "")}</b></span><span>Datum:</span><span>Stunde:</span>
+      <div class="felder"><span>Klasse: <b class="fuell">${D.esc(cfg.klasse || kl || "")}</b></span><span>Datum:</span><span>Stunde:</span>
       <span style="grid-column:span 3">Vertretung durch: <b class="fuell">${D.esc(lk)}</b></span></div>`;
     if (!liste.length) {
       h += `<div class="leerhinweis">Noch kein Ablauf geplant. Bitte auf der Startseite des Vertretungsbaukastens einen Ablauf wählen – oder links eine Vorlage (Deutsch, Mathe, Sachunterricht, Sprachspiele).</div>`;

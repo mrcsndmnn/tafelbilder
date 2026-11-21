@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Glücksrad mit Aufträgen – Vertretungsspiele</title>
+<title>Glücksrad mit Aufträgen – Vertretungsbaukasten</title>
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
-<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112001">
+<link rel="stylesheet" href="../../gemeinsam/spiele.css?v=2026112102">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .rad{position:absolute;left:40px;top:96px;width:560px;height:600px;padding:0;border:none;background:none;cursor:pointer;touch-action:manipulation}
@@ -48,9 +48,9 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../../gemeinsam/inhalte.js?v=2026112001"></script>
-<script src="../../gemeinsam/bilder.js?v=2026112001"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112001"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112102"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112102"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112102"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE, K = I.KATEGORIEN;
 let aktiv = V.laden("rad-kat", Object.keys(K)).filter(k => K[k]); if (!aktiv.length) aktiv = Object.keys(K);
@@ -110,7 +110,7 @@ const katKnoepfe = Object.keys(K).map(k => {
   }, "sym kat-knopf");
   b.dataset.k = k; b.setAttribute("aria-pressed", aktiv.includes(k)); b.setAttribute("aria-label", V.ohne(K[k].name)); b.title = V.ohne(K[k].name); return b;
 });
-const niv = V.gruppe("", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer" }], niveau, v => { niveau = v; zeigeHilfen(); }, "rad-niveau");
+const niv = V.gruppe("", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer" }], niveau, v => { niveau = v; zeigeHilfen(); }, "rad-niveau", { 1: "leicht", 2: "leicht", 3: "schwer" });
 niveau = niv.wert;
 const r = V.rahmen({ id: "gluecksrad", titel: "Glücksrad mit Aufträgen", onWeiter: () => { name.textContent = ""; drehen(); }, onNeu: neu, onHilfe: zeigeHilfen, extra: [niv, ...katKnoepfe] });
 zeichneRad(); neu();
