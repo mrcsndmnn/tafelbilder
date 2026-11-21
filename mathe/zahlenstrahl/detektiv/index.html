@@ -6,8 +6,8 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Strahl-Detektiv – Zahlenstrahl bis 1000</title>
-<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
-<link rel="stylesheet" href="../gemeinsam/strahl.css">
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112101">
+<link rel="stylesheet" href="../gemeinsam/strahl.css?v=2026112101">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .frage{display:flex;align-items:center;justify-content:center;gap:16px}
@@ -44,8 +44,8 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
-<script src="../gemeinsam/strahl.js"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
 let stufe = 1, ziffern = false, A = null, strahl = null, schrittOk = false, marken = [], zf = null, springt = false;
@@ -63,14 +63,18 @@ const band = T.blk(100, 272, 1400, 56, "satzband");
 const box = T.blk(50, 300, 1500, 360);
 const akt = T.blk(200, 676, 1200, 64, "aktionen");
 const springKn = T.knopf("Springen", () => springen(), "hilfe");
-akt.append(springKn, T.knopf("Alle aufdecken", () => { schrittOk = true; marken.forEach(m => loese(m)); }), T.knopf("Nächster Ausschnitt →", () => neu(), "haupt"));
+// „Alle aufdecken“ erst, wenn die Schrittgröße bestimmt ist
+akt.append(springKn, T.knopf("Alle aufdecken", () => { if (!schrittOk) { Z.melde(streifen, "noch", "Zuerst: Wie groß ist ein Schritt?"); return; } marken.forEach(m => loese(m)); }), T.knopf("Nächster Ausschnitt →", () => neu(), "haupt"));
 const unten = T.blk(150, 764, 1300, 0); const streifen = T.streifen(unten);
 
 function neu() {
   T.stop(); zuZiffern(); springt = false; schrittOk = false;
   const schritt = stufe === 1 ? 1 : stufe === 2 ? 10 : T.wahl([1, 10]);
   const gegeben = stufe === 1 ? "enden" : stufe === 2 ? T.wahl(["enden", "endeMitte"]) : "zwei";
-  A = Z.ausschnittAufgabe({ schritt, gegeben, ausgerichtet: stufe === 1 || (stufe === 2 && gegeben === "enden" && Math.random() < .6), gesucht: stufe === 3 ? 3 : T.zufall(2, 3), abstand: 2, abstandG: 1 });
+  // Immer mindestens zwei bekannte Zahlen, damit man die Schrittgröße erschließen kann
+  let versuche = 0;
+  do A = Z.ausschnittAufgabe({ schritt, gegeben, ausgerichtet: stufe === 1 || (stufe === 2 && gegeben === "enden" && Math.random() < .6), gesucht: stufe === 3 ? 3 : T.zufall(2, 3), abstand: 2, abstandG: 1 });
+  while (A.gegeben.length < 2 && ++versuche < 50);
   sKn.forEach(b => { b.classList.remove("ok", "falsch"); b.disabled = false; });
   band.textContent = A.eineZahl ? Z.SATZ(schritt) : "";
   box.innerHTML = "";
