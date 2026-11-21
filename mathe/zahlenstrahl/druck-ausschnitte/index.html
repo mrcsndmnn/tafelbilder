@@ -9,9 +9,10 @@
 <link rel="stylesheet" href="../gemeinsam/strahl.css">
 <link rel="stylesheet" href="../gemeinsam/druck.css">
 <style>
-.aufgaben{display:grid;grid-template-columns:1fr 1fr;column-gap:8mm}
-.aufg{height:33mm;position:relative;padding-left:7mm}
-.aufg .nr{position:absolute;left:0;top:4.5mm;font-weight:700;font-size:13pt}
+.aufgaben{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:6mm}
+.aufg{height:33mm;position:relative}
+.aufg .nr{position:absolute;left:0;top:0;font-weight:700;font-size:13pt;line-height:5.5mm}
+.aufg .satz{padding-left:7mm}
 .aufg .satz{font-size:13pt;height:5.5mm;line-height:5.5mm}
 .aufg .satz b{font-weight:700}
 .aufg .luecke{display:inline-block;width:14mm;border-bottom:.3mm solid #000;text-align:center}
@@ -27,7 +28,7 @@
 <script>
 const Z = Strahl, D = Druck;
 const SCHRITT = { "1": "Schritt 1", "10": "Schritt 10", "gemischt": "Schritt gemischt" };
-const GEG = { enden: "beide Enden", endeMitte: "Ende und Mitte", eine: "eine Zahl" };
+const GEG = { enden: "beide Enden", endeMitte: "Ende und Mitte", zwei: "zwei Zahlen irgendwo" };
 
 // Ein Ausschnitt: 11 Striche auf 70 mm, Mittelstrich länger
 function ausschnitt(A, nr, art) {   // art: "aufgabe" | "loesung" | "beispiel"
@@ -37,7 +38,7 @@ function ausschnitt(A, nr, art) {   // art: "aufgabe" | "loesung" | "beispiel"
   if (A.eineZahl) oben.innerHTML = `<b>${Z.SATZ(A.schritt)}</b>`;
   d.appendChild(oben);
   const s = D.strahl(d, { von: A.von, bis: A.bis, schritt: A.schritt, einheitlich: true, beschriftung: "keine", farben: false, randLinks: true,
-    breite: 78, hoehe: 22, y: 4.5, links: 3, rechts: 5 });
+    breite: 86, hoehe: 22, y: 4.5, links: 7.5, rechts: 8.5 });   // Platz für Kästchen an den Enden
   const grau = art === "beispiel";
   A.gegeben.forEach(i => {
     const t = Z.el("text", { x: s.x(A.wert(i)), y: 13.6, "text-anchor": "middle", "font-size": 4.9, class: "s-zahl" + (grau ? " gz" : "") }, s.root);
@@ -64,7 +65,7 @@ D.start({
   id: "ausschnitte", titel: "Zahlenstrahl: Ausschnitte bestimmen",
   optionen: [
     { key: "schritt", label: "Schritt", werte: [{ wert: "1", text: "1" }, { wert: "10", text: "10" }, { wert: "gemischt", text: "gemischt" }], std: "gemischt" },
-    { key: "gegeben", label: "Gegeben", werte: [{ wert: "enden", text: "beide Enden" }, { wert: "endeMitte", text: "ein Ende und Mitte" }, { wert: "eine", text: "nur eine Zahl" }], std: "enden" },
+    { key: "gegeben", label: "Gegeben", werte: [{ wert: "enden", text: "beide Enden" }, { wert: "endeMitte", text: "ein Ende und Mitte" }, { wert: "zwei", text: "zwei Zahlen irgendwo" }], std: "enden" },
   ],
   info: cfg => `${SCHRITT[cfg.schritt]} · ${GEG[cfg.gegeben]}`,
   baue(cfg, rnd, loesung) {
