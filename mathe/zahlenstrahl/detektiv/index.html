@@ -33,14 +33,14 @@ window.HINWEISE = {
  teile: [
   { h: "Worum geht es?", text: "Ein Ausschnitt mit 11 Strichen. Aus den bekannten Zahlen herausfinden: Wie groß ist ein Schritt? Dann die gesuchten Zahlen bestimmen." },
   { h: "So geht es", punkte: [
-    "Zuerst die Frage **„Wie groß ist ein Schritt?“** mit 1, 10 oder 100 beantworten. Bei falscher Wahl kommt ein Tipp: „Zähle die Striche von 340 bis 350.“",
+    "Auf Stufe ● und ●● zuerst die Frage **„Wie groß ist ein Schritt?“** mit 1, 10 oder 100 beantworten. Bei falscher Wahl kommt ein Tipp: „Zähle die Striche von 340 bis 350.“",
     "Erst danach werden die Kästchen mit „?“ aktiv: Antippen deckt auf.",
     "Schalter **Ziffernfeld**: Statt aufzudecken, gibt ein Kind die Zahl selbst ein. **OK** prüft.",
     "**Springen** (Hilfe): Bögen hüpfen von einer bekannten Zahl zum nächsten gesuchten Strich und zählen mit (+1, +1, …). Die Zwischenzahl erscheint kurz." ] },
   { h: "Stufen", punkte: [
     "● Beide Enden beschriftet, ein Strich bedeutet 1 (z. B. 340 … 350).",
     "●● Ein Strich bedeutet 10. Beide Enden beschriftet (z. B. 400 … 500) oder ein Ende und die Mitte (z. B. 830 und 880, das Ende rechts ist gesucht).",
-    "●●● Nur eine Zahl ist gegeben. Darum steht über dem Strahl: „Ein Strich bedeutet 1.“ bzw. „10.“" ] },
+    "●●● Nur eine Zahl ist gegeben. Daraus kann man die Schrittgröße nicht erschließen. Darum steht sie über dem Strahl („Ein Strich bedeutet 1.“ bzw. „10.“), und die Frage „Wie groß ist ein Schritt?“ entfällt. Die Kinder lesen den Satz und rechnen von der gegebenen Zahl aus weiter." ] },
  ],
 };
 </script>
@@ -82,7 +82,11 @@ function neu() {
     const m = strahl.markiere({ wert: A.wert(i), seite: "unten", text: "?", linie: "linie", klasse: "leer zu", abstand: 98, kb: 118, kh: 62, onTap: () => tippe(m) });
     m.wert = A.wert(i); m.i = i; m.setAttribute("role", "button"); m.setAttribute("aria-label", "Gesuchte Zahl"); marken.push(m);
   });
-  Z.melde(streifen, "muster hilfe", "Ein Strich bedeutet …");
+  // Stufe 3: Nur eine Zahl ist gegeben – die Schrittgröße lässt sich daraus nicht erschließen.
+  // Darum steht sie im Satz über dem Strahl, und die Frage „Wie groß ist ein Schritt?“ entfällt.
+  frage.hidden = A.eineZahl; band.style.top = A.eineZahl ? "206px" : "272px";
+  if (A.eineZahl) { schrittOk = true; marken.forEach(m => m.classList.remove("zu")); Z.melde(streifen, "", `Lies den Satz. Rechne dann von ${A.wert(A.gegeben[0])} aus weiter.`); }
+  else Z.melde(streifen, "muster hilfe", "Ein Strich bedeutet …");
 }
 function schrittWahl(w, b) {
   if (schrittOk) return;
