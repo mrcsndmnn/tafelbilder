@@ -17,6 +17,14 @@
 .gewicht .th .wert{font-weight:700;text-align:right}
 .gewicht .th.aus{opacity:.45}
 .gewicht .th .warum{grid-column:1 / -1;font-size:12px;color:#5d6862}
+.inhalte .fach{border:2px solid #d5ddd7;border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.inhalte .fach.zu{opacity:.75}
+.inhalte .haken{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
+.inhalte .haken input{width:22px;height:22px;accent-color:#2f7d4f}
+.inhalte .haken.aus{opacity:.5;cursor:default}
+.inhalte .fachname{font-weight:700;font-size:16px}
+.inhalte .warum,.gewicht .warum{font-size:12px;color:#5d6862}
+.inhalte .knoepfe button{min-height:38px;font-size:14px}
 .plan-info{background:#e8f5ec;border:2px solid #2f7d4f;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.4}
 .plan-info.warn{background:#fff3e0;border-color:#e08a1e}
 
@@ -32,8 +40,12 @@ table.db-liste{width:100%;border-collapse:collapse;font-size:13pt;margin-bottom:
 .db-liste td{border-bottom:.25mm solid #b9c2bc;padding:1.6mm 2mm;vertical-align:middle}
 .db-liste td.nr{font-weight:700;font-size:15pt;width:9mm}
 .db-liste td.fach{width:24mm;font-size:10.5pt;color:#5d6862}
+.db-liste td.thema{width:48mm;font-size:10.5pt;color:#5d6862}
 .db-liste td.min{width:16mm;white-space:nowrap}
 .db-liste td.box{width:16mm;text-align:center;font-size:16pt}
+.db-liste tr.fz td{font-weight:700;font-size:13pt;padding-top:3mm;border-bottom:.4mm solid #000}
+.db-liste tr.fz th{font-size:10pt;color:#5d6862;border-bottom:.4mm solid #000;padding-top:3mm;width:22mm;text-align:center}
+.ab-fach{font-size:16pt;font-weight:700;border-bottom:.5mm solid #000;margin:0 0 3mm;padding-bottom:1mm}
 .db-liste.eng{font-size:11pt}
 .db-liste.eng td{padding:.7mm 2mm}
 .db-liste.eng td.nr{font-size:12pt}
@@ -99,37 +111,58 @@ const TEMPO = { langsam: 1.3, mittel: 1, schnell: .8 };
 // Klasse von der Startseite übernehmen (gilt nur in diesem Tab)
 try { const k = JSON.parse(sessionStorage.getItem("vs-klasse") || '""'); if (k) { const c = JSON.parse(localStorage.getItem("vb-druck-arbeitsauftrag") || "{}"); c.klasse = k; localStorage.setItem("vb-druck-arbeitsauftrag", JSON.stringify(c)); } } catch (e) {}
 
+const FAECHER = Object.keys(A.FAECHER), THEMEN = Object.keys(A.THEMEN);
+const themenVon = f => THEMEN.filter(t => A.THEMEN[t].fach === f);
 // Welche Bausteine passen zu Klasse und Niveau?
 const passend = cfg => A.BAUSTEINE.filter(b => b.klassen.includes(cfg.klasse) && b.niveaus.includes(cfg.niveau));
-const themenMit = cfg => { const p = passend(cfg); return Object.keys(A.THEMEN).filter(t => p.some(b => b.thema === t)); };
+const themenMit = cfg => { const p = passend(cfg); return THEMEN.filter(t => p.some(b => b.thema === t)); };
+const zeitVon = cfg => cfg.zeit === "frei" ? Math.max(5, Math.min(240, +cfg.zeitFrei || 30)) : cfg.zeit;
+// Grundeinstellung der Inhalte: alle Fächer und Themen gewählt
+const inhaltStd = () => Object.fromEntries(FAECHER.map(f => [f, { an: true, modus: "wahl", themen: Object.fromEntries(themenVon(f).map(t => [t, true])), anzahl: 1 }]));
 
-// ---------- Planung: Aufgaben nach Gewichtung und Zeit auswählen ----------
+// ---------- Planung: Themen bestimmen, nach Gewichtung und Zeit Aufgaben auswählen ----------
 function plane(cfg, rnd) {
-  const verfuegbar = themenMit(cfg), g = cfg.gewichte || {};
-  const themen = verfuegbar.filter(t => (g[t] ?? 0) > 0), summe = themen.reduce((s, t) => s + g[t], 0);
-  if (!themen.length) return { liste: [], themen: [], ziel: {} };
-  const faktor = TEMPO[cfg.tempo] || 1, budget = cfg.zeit / faktor;   // Minuten im „mittleren“ Tempo
+  const da = themenMit(cfg), inh = cfg.inhalt || inhaltStd(), gF = cfg.gFach || {}, gT = cfg.gewichte || {};
+  // 1. Themen je Fach: selbst gewählt oder zufällig
+  const wahl = {};
+  FAECHER.forEach(f => {
+    const e = inh[f]; if (!e || !e.an) return;
+    const k = themenVon(f).filter(t => da.includes(t));
+    const l = e.modus === "zufall" ? D.mischen(k, rnd).slice(0, e.anzahl === "alle" ? k.length : +e.anzahl || 1) : k.filter(t => e.themen && e.themen[t]);
+    if (l.length) wahl[f] = l;
+  });
+  const faecher = Object.keys(wahl);
+  if (!faecher.length) return { liste: [], wahl };
+  // 2. Gewichte: Fach (bei mehreren Fächern) × Thema (bei selbst gewählten Themen)
+  const wF = f => faecher.length > 1 ? (gF[f] ?? 50) : 100, sF = faecher.reduce((s, f) => s + wF(f), 0);
+  const gewicht = {};
+  faecher.forEach(f => {
+    const zufall = inh[f].modus === "zufall", wT = t => zufall || wahl[f].length < 2 ? 1 : (gT[t] ?? 50), sT = wahl[f].reduce((s, t) => s + wT(t), 0);
+    wahl[f].forEach(t => { gewicht[t] = sF && sT ? wF(f) / sF * wT(t) / sT : 0; });
+  });
+  const themen = Object.keys(gewicht).filter(t => gewicht[t] > 0);
+  if (!themen.length) return { liste: [], wahl };
+  // 3. Aufgaben auswählen: immer das Thema mit dem größten Rückstand
+  const faktor = TEMPO[cfg.tempo] || 1, budget = zeitVon(cfg) / faktor;   // Minuten im „mittleren“ Tempo
   const ziel = {}, ist = {}, liste = [], stapel = {};
-  themen.forEach(t => { ziel[t] = budget * g[t] / summe; ist[t] = 0; stapel[t] = []; });
+  themen.forEach(t => { ziel[t] = budget * gewicht[t]; ist[t] = 0; stapel[t] = []; });
   const naechster = t => { if (!stapel[t].length) stapel[t] = D.mischen(passend(cfg).filter(b => b.thema === t), rnd); return stapel[t].shift(); };
-  // reihum füllen: immer das Thema mit dem größten Rückstand
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 80; i++) {
     const t = themen.map(x => [x, ziel[x] - ist[x]]).sort((a, b) => b[1] - a[1])[0];
-    if (!t) break;
     const b = naechster(t[0]), m = b.minuten[cfg.niveau];
     const gesamt = Object.values(ist).reduce((s, x) => s + x, 0);
     if (gesamt + m > budget + m * .45) break;        // nur hinzufügen, wenn es ungefähr noch passt
     liste.push({ b, m, thema: t[0] }); ist[t[0]] += m;
   }
-  if (!liste.length) { const t = themen[0], b = naechster(t); liste.push({ b, m: b.minuten[cfg.niveau], thema: t }); ist[t] = liste[0].m; }
-  // Reihenfolge: Fächer abwechseln
-  const nachFach = {}; liste.forEach(x => (nachFach[A.THEMEN[x.thema].fach] = nachFach[A.THEMEN[x.thema].fach] || []).push(x));
-  const reihen = Object.values(nachFach), sortiert = [];
-  for (let i = 0; sortiert.length < liste.length; i++) reihen.forEach(r => { if (r[i]) sortiert.push(r[i]); });
-  return { liste: sortiert, themen, ziel, ist, faktor };
+  if (!liste.length) { const t = themen[0], b = naechster(t); liste.push({ b, m: b.minuten[cfg.niveau], thema: t }); }
+  // 4. Reihenfolge: nach Fach, innerhalb des Fachs nach Thema sortiert
+  const rang = x => FAECHER.indexOf(A.THEMEN[x.thema].fach) * 100 + THEMEN.indexOf(x.thema);
+  liste.forEach((x, i) => { x.i = i; });
+  liste.sort((a, b) => rang(a) - rang(b) || a.i - b.i);
+  return { liste, wahl, faktor };
 }
 
-// ---------- Seitenumbruch: Aufgaben nacheinander auf A4-Seiten verteilen ----------
+// ---------- Seitenumbruch: Teile nacheinander auf A4-Seiten verteilen ----------
 function verteile(kopf, bloecke, cfg) {
   const m = document.createElement("section"); m.className = "blatt" + (cfg.schrift === "druck" ? "" : " silben");
   m.style.cssText = "position:absolute;left:-30000px;top:0;height:auto;visibility:hidden";
@@ -144,84 +177,152 @@ function verteile(kopf, bloecke, cfg) {
   return seiten.map((s, i) => kopf(i + 1) + s.join(""));
 }
 
+// Kleine Bausteine für die linke Spalte
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const kn = (text, an, fn) => { const b = el("button", "", text); b.type = "button"; b.setAttribute("aria-pressed", !!an); b.addEventListener("click", fn); return b; };
+
 let letzterPlan = null;
 D.start({
   id: "arbeitsauftrag", titel: "Arbeitsauftrag zusammenstellen", nr: "G-A", lineatur: true, klassensatz: true, ohneKopf: true,
   optionen: [
-    { key: "zeit", label: "1. Bearbeitungszeit", std: 30, werte: [15, 20, 30, 45, 60, 90].map(m => ({ wert: m, text: m + " Min." })) },
+    { key: "zeit", label: "1. Bearbeitungszeit", std: 30, werte: [15, 20, 30, 45, 60, 90].map(m => ({ wert: m, text: m + " Min." })).concat([{ wert: "frei", text: "eigene Angabe" }]) },
     { key: "klasse", label: "2. Klassenstufe", std: "SEP 2", werte: KLASSEN.map(k => ({ wert: k, text: k })) },
     { key: "tempo", label: "Arbeitstempo", std: "mittel", werte: [{ wert: "langsam", text: "langsam" }, { wert: "mittel", text: "mittel" }, { wert: "schnell", text: "schnell" }] },
   ],
   steuer(st, cfg, aendern) {
-    if (!cfg.gewichte) cfg.gewichte = Object.fromEntries(Object.keys(A.THEMEN).map(t => [t, 50]));
-    const box = document.createElement("div"); box.className = "gruppe gewicht"; box.setAttribute("aria-label", "Gewichtung der Themen");
-    st.appendChild(box);
-    const info = document.createElement("div"); info.className = "plan-info"; info.setAttribute("aria-live", "polite"); st.appendChild(info);
-    const zeichneRegler = () => {
-      const da = themenMit(cfg);
-      box.innerHTML = '<span class="glabel">3. Fächer und Themen gewichten</span>';
-      Object.entries(A.FAECHER).forEach(([f, fname]) => {
-        box.insertAdjacentHTML("beforeend", `<h3>${fname}</h3>`);
-        Object.entries(A.THEMEN).filter(([, t]) => t.fach === f).forEach(([id, t]) => {
-          const ok = da.includes(id), w = cfg.gewichte[id] ?? 0;
-          const d = document.createElement("div"); d.className = "th" + (ok ? "" : " aus");
-          d.innerHTML = `<label for="g-${id}">${t.titel}</label><span class="wert">${ok ? w + " %" : "–"}</span>
-            <input id="g-${id}" type="range" min="0" max="100" step="10" value="${w}" ${ok ? "" : "disabled"}>${ok ? "" : `<span class="warum">nicht für ${cfg.klasse} auf Niveau ${"★".repeat(cfg.niveau)}</span>`}`;
-          const inp = d.querySelector("input"), wert = d.querySelector(".wert");
-          inp.addEventListener("input", () => { wert.textContent = inp.value + " %"; });
-          inp.addEventListener("change", () => { cfg.gewichte = Object.assign({}, cfg.gewichte, { [id]: +inp.value }); aendern("gewichte", cfg.gewichte); });
-          box.appendChild(d);
-        });
-      });
-      box.insertAdjacentHTML("beforeend", '<span class="klein">0 % = Thema kommt nicht vor. Die Werte sind Anteile: 50 % und 50 % ergibt halbe-halbe.</span>');
+    if (!cfg.inhalt) cfg.inhalt = inhaltStd();
+    FAECHER.forEach(f => { if (!cfg.inhalt[f]) cfg.inhalt[f] = inhaltStd()[f]; });
+    if (!cfg.gFach) cfg.gFach = Object.fromEntries(FAECHER.map(f => [f, 50]));
+    if (!cfg.gewichte) cfg.gewichte = Object.fromEntries(THEMEN.map(t => [t, 50]));
+    if (!cfg.zeitFrei) cfg.zeitFrei = 40;
+    const kopie = o => JSON.parse(JSON.stringify(o));
+    const setzeInhalt = (f, aend) => { const i = kopie(cfg.inhalt); aend(i[f]); aendern("inhalt", i); };
+
+    // Freie Zeitangabe (wird unter „1. Bearbeitungszeit“ eingeblendet)
+    const frei = el("div", "gruppe zeit-frei", `<label class="glabel" for="zeitFrei">Eigene Bearbeitungszeit in Minuten</label><input id="zeitFrei" type="number" min="5" max="240" step="5">`);
+    const fi = frei.querySelector("input"); fi.value = cfg.zeitFrei;
+    fi.addEventListener("change", () => { const v = Math.max(5, Math.min(240, parseInt(fi.value, 10) || 30)); fi.value = v; aendern("zeitFrei", v); });
+    st.appendChild(frei);
+
+    const wahlBox = el("div", "gruppe inhalte"); wahlBox.setAttribute("aria-label", "Inhalte wählen"); st.appendChild(wahlBox);
+    const gewBox = el("div", "gruppe gewicht"); gewBox.setAttribute("aria-label", "Gewichtung"); st.appendChild(gewBox);
+    const info = el("div", "plan-info"); info.setAttribute("aria-live", "polite"); st.appendChild(info);
+
+    const regler = (id, label, wert, onChange) => {
+      const d = el("div", "th", `<label for="${id}">${label}</label><span class="wert">${wert} %</span><input id="${id}" type="range" min="0" max="100" step="10" value="${wert}">`);
+      const inp = d.querySelector("input"), w = d.querySelector(".wert");
+      inp.addEventListener("input", () => { w.textContent = inp.value + " %"; }); inp.addEventListener("change", () => onChange(+inp.value));
+      return d;
     };
-    // nach jedem Neuzeichnen: Regler und Planungsinfo aktualisieren
+    // 3. Inhalte wählen: Fach an/aus, Themen per Häkchen oder zufällig
+    const zeichneWahl = () => {
+      const da = themenMit(cfg);
+      wahlBox.innerHTML = '<span class="glabel">3. Inhalte wählen</span>';
+      FAECHER.forEach(f => {
+        const e = cfg.inhalt[f], verf = themenVon(f).filter(t => da.includes(t));
+        const fb = el("div", "fach" + (e.an ? "" : " zu"));
+        const cb = el("label", "haken fachname", `<input type="checkbox" ${e.an && verf.length ? "checked" : ""} ${verf.length ? "" : "disabled"}> ${A.FAECHER[f]}`);
+        cb.querySelector("input").addEventListener("change", ev => setzeInhalt(f, x => { x.an = ev.target.checked; }));
+        fb.appendChild(cb);
+        if (!verf.length) fb.appendChild(el("span", "warum", `Für ${cfg.klasse} auf Niveau ${"★".repeat(cfg.niveau)} noch keine Aufgaben.`));
+        else if (e.an) {
+          const mod = el("div", "knoepfe");
+          mod.append(kn("Themen wählen", e.modus === "wahl", () => setzeInhalt(f, x => { x.modus = "wahl"; })),
+            kn("Zufällige Themen", e.modus === "zufall", () => setzeInhalt(f, x => { x.modus = "zufall"; })));
+          fb.appendChild(mod);
+          if (e.modus === "wahl") {
+            themenVon(f).forEach(t => {
+              const ok = da.includes(t);
+              const l = el("label", "haken" + (ok ? "" : " aus"), `<input type="checkbox" ${e.themen[t] && ok ? "checked" : ""} ${ok ? "" : "disabled"}> ${A.THEMEN[t].titel}${ok ? "" : ' <span class="warum">(nicht für diese Klasse/dieses Niveau)</span>'}`);
+              l.querySelector("input").addEventListener("change", ev => setzeInhalt(f, x => { x.themen[t] = ev.target.checked; }));
+              fb.appendChild(l);
+            });
+          } else {
+            const an = el("div", "knoepfe", '<span class="klein">Wie viele Themen?</span>');
+            [1, 2, "alle"].filter(n => n === "alle" || n <= verf.length).forEach(n => an.appendChild(kn(n === "alle" ? "alle" : String(n), String(e.anzahl) === String(n), () => setzeInhalt(f, x => { x.anzahl = n; }))));
+            fb.appendChild(an);
+            fb.appendChild(el("span", "klein", `Zufällig aus: ${verf.map(t => A.THEMEN[t].titel).join(", ")}. Jedes Blatt kann andere Themen bekommen.`));
+          }
+        }
+        wahlBox.appendChild(fb);
+      });
+    };
+    // 4. Gewichtung – erst, wenn Inhalte gewählt sind
+    const zeichneGewichte = () => {
+      const p = letzterPlan, gew = p ? Object.keys(p.wahl || {}) : [];
+      gewBox.innerHTML = '<span class="glabel">4. Gewichtung</span>';
+      if (!gew.length) { gewBox.appendChild(el("span", "klein", "Zuerst oben Fächer und Themen wählen.")); return; }
+      if (gew.length > 1) {
+        gewBox.appendChild(el("h3", "", "Fächer"));
+        gew.forEach(f => gewBox.appendChild(regler("gf-" + f, A.FAECHER[f], cfg.gFach[f] ?? 50, v => aendern("gFach", Object.assign({}, cfg.gFach, { [f]: v })))));
+      }
+      gew.forEach(f => {
+        const e = cfg.inhalt[f];
+        if (e.modus === "zufall") { gewBox.appendChild(el("span", "klein", `${A.FAECHER[f]}: zufällige Themen, gleich verteilt.`)); return; }
+        const th = p.wahl[f]; if (th.length < 2) return;
+        gewBox.appendChild(el("h3", "", "Themen in " + A.FAECHER[f]));
+        th.forEach(t => gewBox.appendChild(regler("g-" + t, A.THEMEN[t].titel, cfg.gewichte[t] ?? 50, v => aendern("gewichte", Object.assign({}, cfg.gewichte, { [t]: v })))));
+      });
+      gewBox.appendChild(el("span", "klein", "Die Werte sind Anteile: 50 % und 50 % ergibt halbe-halbe. 0 % lässt etwas weg."));
+    };
+    // nach jedem Neuzeichnen: Bedienelemente und Planungsinfo aktualisieren
     window.__nachZeichnen = () => {
-      zeichneRegler();
-      const p = letzterPlan;
+      frei.hidden = cfg.zeit !== "frei";
+      zeichneWahl(); zeichneGewichte();
+      const p = letzterPlan, zeit = zeitVon(cfg);
       if (!p || !p.liste.length) { info.className = "plan-info warn";
-        info.textContent = themenMit(cfg).length ? "Bitte mindestens ein Thema über 0 % stellen, das zur Klasse und zum Niveau passt."
+        info.textContent = themenMit(cfg).length ? "Bitte mindestens ein Fach und ein Thema wählen (Gewichtung über 0 %)."
           : `Für ${cfg.klasse} auf Niveau ${"★".repeat(cfg.niveau)} gibt es im Aufgabenspeicher noch keine Aufgaben. Er wächst mit jeder ausgewerteten Vorlage.`; return; }
       const min = Math.round(p.liste.reduce((s, x) => s + x.m, 0) * p.faktor), proFach = {};
       p.liste.forEach(x => { const f = A.FAECHER[A.THEMEN[x.thema].fach]; proFach[f] = (proFach[f] || 0) + x.m * p.faktor; });
-      const abw = Math.abs(min - cfg.zeit) > Math.max(5, cfg.zeit * .2);
+      const abw = Math.abs(min - zeit) > Math.max(5, zeit * .2);
+      const zufall = Object.keys(p.wahl).filter(f => cfg.inhalt[f].modus === "zufall");
       info.className = "plan-info" + (abw ? " warn" : "");
-      info.innerHTML = `<b>${p.liste.length} Aufgaben, ca. ${min} Minuten</b> (gewünscht: ${cfg.zeit})<br>` +
+      info.innerHTML = `<b>${p.liste.length} Aufgaben, ca. ${min} Minuten</b> (gewünscht: ${zeit})<br>` +
         Object.entries(proFach).map(([f, m]) => `${f}: ${Math.round(m / min * 100)} %`).join(" · ") +
+        (zufall.length ? "<br>Zufällig gewählt (1. Blatt): " + zufall.map(f => p.wahl[f].map(t => A.THEMEN[t].titel).join(", ")).join("; ") : "") +
         (abw ? "<br>Mit diesen Themen passt die Zeit nicht genau. Mehr Themen zulassen oder Zeit ändern." : "");
     };
   },
   nachZeichnen: () => window.__nachZeichnen && window.__nachZeichnen(),
-  info: cfg => `${cfg.zeit} Min. · ${cfg.klasse}${cfg.tempo !== "mittel" ? " · Tempo " + cfg.tempo : ""}`,
+  info: cfg => `${zeitVon(cfg)} Min. · ${cfg.klasse}${cfg.tempo !== "mittel" ? " · Tempo " + cfg.tempo : ""}`,
   baue(cfg, rnd, loesung, nummer, k) {
     const p = plane(cfg, rnd); if (k === 0) letzterPlan = p;
-    if (!p.liste.length) return loesung ? [] : [`<p>${themenMit(cfg).length ? "Es ist noch kein Thema ausgewählt. Links mindestens ein Thema über 0 % stellen." : "Für diese Klasse und dieses Niveau gibt es im Aufgabenspeicher noch keine Aufgaben."}</p>`];
+    if (!p.liste.length) return loesung ? [] : [`<p>${themenMit(cfg).length ? "Es ist noch kein Inhalt gewählt. Links mindestens ein Fach und ein Thema wählen." : "Für diese Klasse und dieses Niveau gibt es im Aufgabenspeicher noch keine Aufgaben."}</p>`];
     // jede Aufgabe mit eigenem Zufall bauen (gleich für Aufgabe und Lösung)
-    const aufgaben = p.liste.map((x, i) => { const r = D.zufallMit(nummer * 131 + i * 7 + 3); const e = x.b.baue(cfg.niveau, r, D, cfg); return Object.assign({ nr: i + 1, x }, e); });
-    if (loesung) {   // Lösung, bei langen Aufträgen auf mehrere Seiten verteilt
+    const aufgaben = p.liste.map((x, i) => { const r = D.zufallMit(nummer * 131 + x.i * 7 + 3); const e = x.b.baue(cfg.niveau, r, D, cfg); return Object.assign({ nr: i + 1, x, fach: A.THEMEN[x.thema].fach }, e); });
+    const minuten = a => Math.round(a.x.m * p.faktor), gesamt = aufgaben.reduce((s, a) => s + a.x.m, 0) * p.faktor;
+    const neuesFach = (a, i) => i === 0 || aufgaben[i - 1].fach !== a.fach;
+    if (loesung) {   // Lösungsblatt: Übersicht mit Zeiten, dann Lösungen nach Fächern
+      const uebersicht = `<table class="db-liste${aufgaben.length > 11 ? " eng" : ""}"><tr><th></th><th>Aufgabe</th><th>Thema</th><th>Zeit</th></tr>` +
+        aufgaben.map((a, i) => (neuesFach(a, i) ? `<tr class="fz"><td colspan="4">${A.FAECHER[a.fach]}</td></tr>` : "") +
+          `<tr><td class="nr">${a.nr}</td><td>${a.x.b.titel}</td><td class="thema">${A.THEMEN[a.x.thema].titel.replace("Zahlen bis 100: ", "")}</td><td class="min">ca. ${minuten(a)} Min.</td></tr>`).join("") +
+        `<tr><td></td><td><b>Zusammen</b></td><td></td><td class="min"><b>ca. ${Math.round(gesamt)} Min.</b></td></tr></table>`;
       return verteile(sl => sl === 1 ? `<div class="db-titel"><h2>Lösung zum Arbeitsauftrag</h2></div>` : `<div class="ab-seitenkopf"><span>Lösung zum Arbeitsauftrag</span><span>Seite ${sl}</span></div>`,
-        aufgaben.map(a => `<div class="loes-liste"><div><b>${a.nr}.</b> ${a.x.b.titel}: ${a.loesung}</div></div>`), cfg);
+        [uebersicht].concat(aufgaben.map((a, i) => (neuesFach(a, i) ? `<div class="ab-fach">${A.FAECHER[a.fach]}</div>` : "") + `<div class="loes-liste"><div><b>${a.nr}.</b> ${a.x.b.titel}: ${a.loesung}</div></div>`)), cfg);
     }
-    const min = Math.round(p.liste.reduce((s, x) => s + x.m, 0) * p.faktor);
-    // Deckblatt: Kopf, Arbeitsweise, Liste der Aufgaben (bei vielen Aufgaben auf zwei Seiten), Hinweis für Schnelle
-    const zeile = a => `<tr><td class="nr">${a.nr}</td><td class="fach">${A.FAECHER[A.THEMEN[a.x.thema].fach]}</td><td>${a.x.b.titel}</td><td class="min">ca. ${Math.round(a.x.m * p.faktor)} Min.</td><td class="box">☐</td><td class="box">☐</td></tr>`;
-    const tabelle = l => `<table class="db-liste${aufgaben.length > 11 ? " eng" : ""}"><tr><th></th><th>Fach</th><th>Aufgabe</th><th>Zeit</th><th>fertig</th><th>kontrolliert</th></tr>${l.map(zeile).join("")}</table>`;
+    // Deckblatt für die Kinder: nach Fächern geordnet, ohne Zeit je Aufgabe
+    const zeile = a => `<tr><td class="nr">${a.nr}</td><td>${a.x.b.titel}</td><td class="box">☐</td><td class="box">☐</td></tr>`;
     const deckTeile = [`<div class="db-felder"><span>Name:</span><span>Datum:</span></div>
       <div class="db-so">${D.bild("stern")}<div><b>${D.w("So ar-bei-test du:")}</b><ol><li>${D.w("Ar-bei-te der Rei-he nach.")}</li><li>${D.w("Mach ei-nen Ha-ken, wenn du fer-tig bist.")}</li>
         <li>${D.w("Lass dei-ne Ar-beit kon-trol-lie-ren.")}</li></ol></div></div>`];
-    for (let i = 0; i < aufgaben.length; i += 8) deckTeile.push(tabelle(aufgaben.slice(i, i + 8)));
+    FAECHER.forEach(f => {
+      const l = aufgaben.filter(a => a.fach === f); if (!l.length) return;
+      for (let i = 0; i < l.length; i += 8) deckTeile.push(`<table class="db-liste${aufgaben.length > 11 ? " eng" : ""}"><tr class="fz"><td colspan="2">${A.FAECHER[f]}</td><th>fertig</th><th>kontrolliert</th></tr>${l.slice(i, i + 8).map(zeile).join("")}</table>`);
+    });
     deckTeile.push(`<div class="db-so">${D.bild("daumen_hoch")}<div><b>${D.w("Fer-tig?")}</b> ${D.w("Dann lies in dei-nem Buch o-der ma-le ein Bild zu dei-ner Lieb-lings-auf-ga-be.")}</div></div>`);
-    const deck = verteile(sl => sl === 1 ? `<div class="db-titel"><h2>Mein Arbeitsauftrag</h2><span class="zeit">${D.bild("uhr")}ca. ${Math.round(min / 5) * 5 || min} Minuten</span></div>`
+    const deck = verteile(sl => sl === 1 ? `<div class="db-titel"><h2>Mein Arbeitsauftrag</h2><span class="zeit">${D.bild("uhr")}ca. ${Math.round(gesamt / 5) * 5 || Math.round(gesamt)} Minuten</span></div>`
       : `<div class="ab-seitenkopf"><span>Mein Arbeitsauftrag · Übersicht</span><span></span></div>`, deckTeile, cfg);
-    const bloecke = aufgaben.map(a => `<section class="ab-aufgabe"><div class="ab-kopf"><span class="ab-nr">${a.nr}</span><span class="ab-sym">${(a.x.b.symbole || []).map(s => D.bild(s)).join("")}</span>
-      <span class="ab-titel">${D.w(a.x.b.auftrag(cfg.niveau))}</span><span class="ab-min">ca. ${Math.round(a.x.m * p.faktor)} Min.</span></div>${a.html}</section>`);
+    // Aufgabenseiten: nach Fächern, mit Fach-Überschrift
+    const bloecke = aufgaben.map((a, i) => `${neuesFach(a, i) ? `<div class="ab-fach">${A.FAECHER[a.fach]}</div>` : ""}<section class="ab-aufgabe"><div class="ab-kopf"><span class="ab-nr">${a.nr}</span><span class="ab-sym">${(a.x.b.symbole || []).map(s => D.bild(s)).join("")}</span>
+      <span class="ab-titel">${D.w(a.x.b.auftrag(cfg.niveau))}</span></div>${a.html}</section>`);
     const kopf = s => `<div class="ab-seitenkopf"><span>Mein Arbeitsauftrag · Name: ____________________</span><span>Seite ${s + deck.length}</span></div>`;
     return deck.concat(verteile(kopf, bloecke, cfg));
   },
 });
-// „Bearbeitungszeit“ als Erstes in der linken Spalte zeigen
+// Reihenfolge links: Bearbeitungszeit (mit eigener Angabe) und Klassenstufe zuerst
 (() => { const st = document.querySelector(".steuer"), z = st.querySelector('[aria-label="1. Bearbeitungszeit"]'), n = st.querySelector('[aria-label="Niveau"]');
-  if (z && n) { st.insertBefore(z, n); const k = st.querySelector('[aria-label="2. Klassenstufe"]'); st.insertBefore(k, n); } })();
+  if (z && n) { st.insertBefore(z, n); st.insertBefore(st.querySelector(".zeit-frei"), n); st.insertBefore(st.querySelector('[aria-label="2. Klassenstufe"]'), n); } })();
 </script>
 </body>
 </html>
