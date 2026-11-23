@@ -6,7 +6,7 @@
      optionen: [{ key, label, werte: [{ wert, text }], std } | { key, label, schalter: true, std } | { key, label, eingabe: "text"|"zahl", std }],
      niveau (Standard an), schrift (Silbenschrift/Druckschrift wählbar, Standard an), lineatur (aus),
      klassensatz (aus): mehrere verschiedene Blätter auf einmal,
-     mitLoesung (an), ohneKopf, baue(cfg, rnd, loesung, nummer, index) → Array von Seiten (HTML oder Element)
+     steuer(st, cfg, aendern): eigene Bedienelemente; mitLoesung (an), ohneKopf, baue(cfg, rnd, loesung, nummer, index) → Array von Seiten (HTML oder Element)
    })
    Zufall mit Startwert: gleiche Blatt-Nummer = gleiches Blatt. Die Nummer steht klein in der Fußzeile.
    Benötigt: ../../../gemeinsam/silben.js, inhalte.js, bilder.js
@@ -95,6 +95,7 @@
         st.appendChild(g);
       }
     });
+    if (def.steuer) def.steuer(st, cfg, aendern);      // eigene Einstellungen eines Generators (z. B. Gewichtung)
     if (def.schrift !== false) gruppe("Schrift", [{ wert: "silben", text: "Silbenschrift" }, { wert: "druck", text: "Druckschrift" }], "schrift");
     if (def.lineatur) gruppe("Lineatur", [{ wert: 1, text: "Kl. 1" }, { wert: 2, text: "Kl. 2" }, { wert: 3, text: "Kl. 3–4" }], "lineatur");
     if (def.klassensatz) gruppe("Klassensatz (verschiedene Blätter)", [1, 4, 8, 12, 16, 24, 30].map(n => ({ wert: n, text: String(n) })), "anzahlBlaetter");

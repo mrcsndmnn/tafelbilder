@@ -41,6 +41,7 @@
     "lesen-schreiben": { titel: "Lese- und Schreibblätter", nr: "G-D4/D5", bild: "buch", text: "Bild + Wort mit Silbenbögen, Lesepyramide, Lesekarten." },
     rechnen: { titel: "Rechenblätter", nr: "G-M3/M4", bild: "stift", text: "Päckchen, Rechenmauern, Zahlenhäuser, Einmaleins, Umkehraufgaben." },
     uhrzeit: { titel: "Uhrzeit-Blätter", nr: "G-M9", bild: "uhr", text: "Uhren ablesen, Zeiger einzeichnen, Zeitspannen." },
+    arbeitsauftrag: { titel: "Arbeitsauftrag zusammenstellen", nr: "G-A", bild: "stern", text: "Individuelles Aufgabenpaket aus dem Aufgabenspeicher: Zeit, Klasse, Themen gewichten." },
   };
   // Klassenstufen: Für welche Stufen passt ein Tafelbild? (ohne Angabe: alle)
   V.KLASSEN = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3", "Klasse 4"];

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Aufgabenspeicher – Vertretungsbaukasten</title>
+<meta name="description" content="Übersicht aller Aufgabenarten im Aufgabenspeicher, mit Beispiel, Klassenstufen und ausgewerteten Vorlagen.">
+<link rel="stylesheet" href="../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../gemeinsam/druck.css?v=2026112301">
+<style>
+:root{--bg:#f4f7f4;--card:#fff;--ink:#1d2320;--soft:#5d6862;--line:#d5ddd7;--tool:#2f7d7a;--tool-bg:#e0f2f1}
+@media (prefers-color-scheme: dark){:root{--bg:#151a17;--card:#1f2622;--ink:#e8eee9;--soft:#a9b4ad;--line:#334039;--tool:#7fd0cb;--tool-bg:#1d3331;color-scheme:dark}}
+body{background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 56px}
+.zurueck-zeile{margin:0 0 20px}
+h1{font-size:clamp(28px,5vw,40px);margin:0 0 4px;line-height:1.15}
+h2{font-size:24px;margin:34px 0 8px}
+h3{font-size:19px;margin:22px 0 6px}
+.unter{color:var(--soft);margin:0;max-width:72ch}
+.karte{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 18px;margin-top:12px}
+.schritte{margin:0;padding-left:22px}
+.schritte li{margin:4px 0}
+a.k{display:inline-flex;align-items:center;font-weight:700;min-height:48px;padding:0 16px;border-radius:12px;background:var(--tool);color:#fff;text-decoration:none;margin-top:10px}
+@media (prefers-color-scheme: dark){a.k{color:#10201f}}
+.bs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start}
+@media (max-width:760px){.bs{grid-template-columns:1fr}}
+.bs .meta{font-size:15px;color:var(--soft)}
+.bs .meta b{color:var(--ink)}
+.tag{display:inline-block;font-size:13px;font-weight:700;color:var(--tool);background:var(--tool-bg);border-radius:8px;padding:1px 8px;margin:2px 4px 2px 0}
+.probe{background:#fff;color:#1d2320;border:1px solid #d5ddd7;border-radius:10px;padding:10px;overflow:hidden;font-size:12pt;zoom:.62}
+.probe .ab-aufgabe{margin:0}
+table.q{width:100%;border-collapse:collapse;font-size:15px}
+.q th,.q td{text-align:left;border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+.q th{color:var(--soft);font-size:13px}
+.wrap-tab{overflow-x:auto}
+footer{margin-top:40px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+</style>
+<!-- Aussehen der Aufgaben wie im Generator -->
+<style>
+.ab-aufgabe{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2.5mm 4mm 3.5mm;margin-bottom:5mm}
+.ab-kopf{display:flex;align-items:center;gap:3mm;margin-bottom:2.5mm;font-size:13.5pt;line-height:1.3}
+.ab-sym{display:flex;gap:1mm;flex:none}.ab-sym svg{width:8mm;height:8mm;border:.3mm solid #8d9892;border-radius:1.5mm;padding:.5mm}
+.ab-titel{flex:1}
+.ab-karten{display:flex;flex-wrap:wrap;gap:2.5mm 3mm}.ab-wk{border:.35mm solid #000;border-radius:1.5mm;padding:1mm 3mm;font-size:14pt;background:#fff}
+.ab-zwei{display:grid;grid-template-columns:minmax(0,1fr) 76mm;gap:6mm;align-items:start}.ab-schreib{display:flex;flex-direction:column;gap:3mm}
+.ab-kasten{display:flex;flex-wrap:wrap;gap:2mm 5mm;border:.35mm dashed #000;border-radius:2mm;padding:1.5mm 4mm;margin-bottom:3mm;font-size:13pt}
+.ab-saetze{margin:0;padding-left:7mm;font-size:15pt;line-height:2.1}.ab-saetze.weit{line-height:2.5}
+.ab-luecke{display:inline-block;border-bottom:.4mm solid #000;height:7mm;vertical-align:baseline}
+.ab-bilder{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm}.ab-bz{display:flex;flex-direction:column;gap:2mm;align-items:center}
+.ab-bild{width:40mm;height:29mm;border:.3mm solid #b9c2bc;border-radius:1.5mm;overflow:hidden}.ab-bild svg{width:100%;height:100%;display:block}
+.ab-salat{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}.ab-salat div{display:flex;flex-direction:column;gap:1.5mm}.ab-buchst{font-size:17pt;font-weight:700;letter-spacing:.6mm}
+.ab-nv{display:flex;flex-direction:column;gap:3mm}.ab-nvz{display:flex;align-items:center;gap:5mm}.ab-nvb{width:40mm;display:flex;align-items:center;gap:2mm;font-size:13pt;flex:none}.ab-nvb svg{width:14mm;height:14mm}
+table.ab-tab{border-collapse:collapse;font-size:15pt}.ab-tab th{border:.4mm solid #000;background:#f1f3f1;padding:1mm 4mm;font-size:12pt}.ab-tab td{border:.4mm solid #000;height:11mm;min-width:18mm;text-align:center;padding:1mm 2mm}.ab-tab td.ab-dienes{min-width:60mm;text-align:left}
+.ab-mit-tafel{display:grid;grid-template-columns:minmax(0,1fr) 62mm;gap:5mm;align-items:start}table.ab-100{border-collapse:collapse;font-size:8pt}.ab-100 td{border:.25mm solid #000;width:6mm;height:5.5mm;text-align:center;padding:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="zurueck-zeile"><a class="zurueck" href="../"><span class="pfeil" aria-hidden="true">←</span> Vertretungsbaukasten</a></div>
+  <h1>Aufgabenspeicher</h1>
+  <p class="unter">Hier sind alle Aufgabenarten gesammelt, aus denen der Generator „Arbeitsauftrag“ individuelle Aufgabenpakete zusammenstellt – passend zu Klassenstufe, Niveau, Themen und Bearbeitungszeit.</p>
+  <a class="k" href="../generatoren/arbeitsauftrag/">Arbeitsauftrag zusammenstellen</a>
+
+  <h2>So wächst der Aufgabenspeicher</h2>
+  <div class="karte">
+    <ol class="schritte">
+      <li>Arbeitsblätter (leer, ohne Namen von Kindern) im Chat mit Claude hochladen – als PDF, Word-Datei oder Foto.</li>
+      <li>Claude wertet sie aus: Welche <b>Aufgabenarten</b> kommen vor, für welches Fach, Thema, welche Klassenstufe und wie viel Zeit?</li>
+      <li>Für jede Aufgabenart entsteht ein <b>Baustein</b>, der immer <b>neue Inhalte</b> erzeugt (eigene Wörter, Sätze, Zahlen und Bilder). Die Originale werden nicht ins Repository geladen und nicht kopiert.</li>
+      <li>Die Vorlage wird unten in der Liste eingetragen – nur mit Kurzangaben.</li>
+      <li>Sie prüfen die Bausteine hier auf dieser Seite und melden Korrekturen (Klassenstufe, Zeit, Wortwahl).</li>
+    </ol>
+  </div>
+
+  <h2>Aufgabenarten</h2>
+  <p class="unter" id="zahl"></p>
+  <div id="liste"></div>
+
+  <h2>Ausgewertete Vorlagen</h2>
+  <p class="unter">Nur Kurzangaben. Von gekauftem oder fremdem Material wurden ausschließlich die Aufgabenarten übernommen, keine Texte, Bilder oder Wortlisten.</p>
+  <div class="wrap-tab"><table class="q" id="quellen"></table></div>
+
+  <footer>Die Bearbeitungszeiten sind Schätzwerte bei mittlerem Arbeitstempo. Im Generator lässt sich das Tempo anpassen.<br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
+</div>
+<script src="../../gemeinsam/silben.js"></script>
+<script src="../gemeinsam/inhalte.js?v=2026112301"></script>
+<script src="../gemeinsam/bilder.js?v=2026112301"></script>
+<script src="../gemeinsam/geschichten.js?v=2026112301"></script>
+<script src="speicher.js?v=2026112301"></script>
+<script>
+// Bausteine des Druckgerüsts (Silbenschrift, Bilder, Schreiblinien) ohne das ganze Generator-Gerüst
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const D = { w: t => silben(t), ohne: t => String(t).replace(/(\S)-(?=\S)/g, "$1"), esc,
+  bild: id => `<svg viewBox="0 0 200 200" aria-hidden="true">${SPIELBILDER[id] ? SPIELBILDER[id]() : ""}</svg>`,
+  wort: id => { const w = INHALTE.WOERTER[id] || ["", id]; return { art: w[0], silben: w[1] }; },
+  linien: (lin, n, breite) => `<svg viewBox="0 0 ${breite} 12" style="width:${breite}mm;height:12mm" aria-hidden="true"><rect y="4" width="${breite}" height="4" fill="#eef2ef"/><line x1="0" x2="${breite}" y1="0" y2="0" stroke="#8d9892" stroke-width=".2"/><line x1="0" x2="${breite}" y1="8" y2="8" stroke="#1d2320" stroke-width=".4"/><line x1="0" x2="${breite}" y1="12" y2="12" stroke="#8d9892" stroke-width=".2"/></svg>` };
+const zufall = s => { let a = s; return () => { a = (a * 1103515245 + 12345) % 2147483648; return a / 2147483648; }; };
+const A = AUFGABEN, NIV = n => "★".repeat(n);
+document.getElementById("zahl").textContent = `${A.BAUSTEINE.length} Aufgabenarten in ${Object.keys(A.THEMEN).length} Themen. Das Beispiel zeigt jeweils das kleinste verfügbare Niveau.`;
+document.getElementById("liste").innerHTML = Object.entries(A.FAECHER).map(([f, fn]) => `<h3>${fn}</h3>` +
+  Object.entries(A.THEMEN).filter(([, t]) => t.fach === f).map(([tid, t]) => A.BAUSTEINE.filter(b => b.thema === tid).map(b => {
+    const n = b.niveaus[0], e = b.baue(n, zufall(7), D, { lineatur: 2 });
+    return `<div class="karte bs"><div><b>${esc(b.titel)}</b><div class="meta"><span class="tag">${esc(t.titel)}</span><br>
+      Klassen: <b>${b.klassen.join(", ")}</b><br>Niveau: <b>${b.niveaus.map(NIV).join(" · ")}</b><br>
+      Zeit: <b>${b.niveaus.map(x => NIV(x) + " ca. " + b.minuten[x] + " Min.").join(", ")}</b></div></div>
+      <div class="probe silben"><section class="ab-aufgabe"><div class="ab-kopf"><span class="ab-sym">${(b.symbole || []).map(D.bild).join("")}</span><span class="ab-titel">${D.w(b.auftrag(n))}</span></div>${e.html}</section></div></div>`;
+  }).join("")).join("")).join("");
+document.getElementById("quellen").innerHTML = "<tr><th>Datum</th><th>Fach</th><th>Klasse</th><th>Art der Vorlage</th><th>Inhalt</th><th>Bausteine</th></tr>" +
+  A.QUELLEN.map(q => `<tr><td>${q.datum.split("-").reverse().join(".")}</td><td>${esc(q.fach)}</td><td>${esc(q.klasse)}</td><td>${esc(q.art)}</td><td>${esc(q.inhalt)}</td>
+    <td>${q.bausteine.map(id => esc((A.baustein(id) || {}).titel || id)).join(", ")}</td></tr>`).join("");
+</script>
+</body>
+</html>

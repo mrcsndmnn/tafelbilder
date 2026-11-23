@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Arbeitsauftrag zusammenstellen – Vertretungsbaukasten</title>
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112301">
+<style>
+/* Einstellungen: Gewichtung */
+.gewicht{display:flex;flex-direction:column;gap:8px}
+.gewicht h3{font-size:15px;margin:6px 0 0;color:#5d6862}
+.gewicht .th{display:grid;grid-template-columns:1fr 44px;gap:2px 8px;align-items:center;font-size:15px}
+.gewicht .th input{grid-column:1 / -1;width:100%;accent-color:#2f7d7a}
+.gewicht .th .wert{font-weight:700;text-align:right}
+.gewicht .th.aus{opacity:.45}
+.gewicht .th .warum{grid-column:1 / -1;font-size:12px;color:#5d6862}
+.plan-info{background:#e8f5ec;border:2px solid #2f7d4f;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.4}
+.plan-info.warn{background:#fff3e0;border-color:#e08a1e}
+
+/* Deckblatt */
+.db-titel{display:flex;align-items:center;gap:4mm;margin:0 0 3mm}
+.db-titel h2{font-size:22pt;margin:0;flex:1}
+.db-titel .zeit{font-size:14pt;font-weight:700;border:.5mm solid #000;border-radius:3mm;padding:1mm 4mm;display:flex;align-items:center;gap:2mm}
+.db-titel .zeit svg{width:9mm;height:9mm}
+.db-felder{display:flex;gap:8mm;font-size:13pt;margin-bottom:5mm}
+.db-felder span{flex:1;border-bottom:.35mm solid #000;padding-bottom:1mm}
+table.db-liste{width:100%;border-collapse:collapse;font-size:13pt;margin-bottom:1mm}
+.db-liste th{font-size:10.5pt;color:#5d6862;text-align:left;border-bottom:.4mm solid #000;padding:1mm 2mm}
+.db-liste td{border-bottom:.25mm solid #b9c2bc;padding:1.6mm 2mm;vertical-align:middle}
+.db-liste td.nr{font-weight:700;font-size:15pt;width:9mm}
+.db-liste td.fach{width:24mm;font-size:10.5pt;color:#5d6862}
+.db-liste td.min{width:16mm;white-space:nowrap}
+.db-liste td.box{width:16mm;text-align:center;font-size:16pt}
+.db-liste.eng{font-size:11pt}
+.db-liste.eng td{padding:.7mm 2mm}
+.db-liste.eng td.nr{font-size:12pt}
+.db-liste.eng td.box{font-size:13pt}
+.db-so{display:flex;gap:6mm;align-items:flex-start;border:.35mm solid #b9c2bc;border-radius:3mm;padding:3mm 4mm;font-size:12.5pt;margin-bottom:4mm}
+.db-so svg{width:12mm;height:12mm;flex:none}
+.db-so ol{margin:0;padding-left:5mm}
+
+/* Aufgabenseiten */
+.ab-seitenkopf{display:flex;gap:6mm;font-size:11pt;color:#5d6862;border-bottom:.3mm solid #b9c2bc;padding-bottom:1.5mm;margin-bottom:4mm}
+.ab-seitenkopf span:first-child{flex:1}
+.ab-aufgabe{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2.5mm 4mm 3.5mm;margin-bottom:5mm;break-inside:avoid}
+.ab-kopf{display:flex;align-items:center;gap:3mm;margin-bottom:2.5mm;font-size:13.5pt;line-height:1.3}
+.ab-nr{width:9mm;height:9mm;border-radius:50%;background:#000;color:#fff;font-weight:700;font-size:13pt;display:grid;place-items:center;flex:none}
+.ab-sym{display:flex;gap:1mm;flex:none}
+.ab-sym svg{width:8mm;height:8mm;border:.3mm solid #8d9892;border-radius:1.5mm;padding:.5mm}
+.ab-titel{flex:1}
+.ab-min{font-size:9.5pt;color:#5d6862;white-space:nowrap}
+.ab-karten{display:flex;flex-wrap:wrap;gap:2.5mm 3mm;align-content:flex-start}
+.ab-wk{border:.35mm solid #000;border-radius:1.5mm;padding:1mm 3mm;font-size:14pt;background:#fff}
+.ab-zwei{display:grid;grid-template-columns:minmax(0,1fr) 76mm;gap:6mm;align-items:start}
+.ab-schreib{display:flex;flex-direction:column;gap:3mm}
+.ab-kasten{display:flex;flex-wrap:wrap;gap:2mm 5mm;border:.35mm dashed #000;border-radius:2mm;padding:1.5mm 4mm;margin-bottom:3mm;font-size:13pt}
+.ab-saetze{margin:0;padding-left:7mm;font-size:15pt;line-height:2.1}
+.ab-saetze.weit{line-height:2.5}
+.ab-luecke{display:inline-block;border-bottom:.4mm solid #000;height:7mm;vertical-align:baseline}
+.ab-bilder{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm}
+.ab-bz{display:flex;flex-direction:column;gap:2mm;align-items:center}
+.ab-bild{width:40mm;height:29mm;border:.3mm solid #b9c2bc;border-radius:1.5mm;overflow:hidden}
+.ab-bild svg{width:100%;height:100%;display:block}
+.ab-salat{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}
+.ab-salat div{display:flex;flex-direction:column;gap:1.5mm}
+.ab-buchst{font-size:17pt;font-weight:700;letter-spacing:.6mm;font-family:"Andika","Comic Sans MS",sans-serif}
+.ab-nv{display:flex;flex-direction:column;gap:3mm}
+.ab-nvz{display:flex;align-items:center;gap:5mm}
+.ab-nvb{width:40mm;display:flex;align-items:center;gap:2mm;font-size:13pt;flex:none}
+.ab-nvb svg{width:14mm;height:14mm}
+table.ab-tab{border-collapse:collapse;font-size:15pt}
+.ab-tab th{border:.4mm solid #000;background:#f1f3f1;padding:1mm 4mm;font-size:12pt}
+.ab-tab td{border:.4mm solid #000;height:11mm;min-width:18mm;text-align:center;padding:1mm 2mm}
+.ab-tab td.ab-dienes{min-width:60mm;text-align:left}
+.ab-mit-tafel{display:grid;grid-template-columns:minmax(0,1fr) 62mm;gap:5mm;align-items:start}
+table.ab-100{border-collapse:collapse;font-size:8pt}
+.ab-100 td{border:.25mm solid #000;width:6mm;height:5.5mm;text-align:center;padding:0}
+/* Lösung */
+.loes-liste{font-size:12.5pt;line-height:1.5}
+.loes-liste div{border-bottom:.25mm solid #d5ddd7;padding:1.5mm 0}
+.loes-liste b{display:inline-block;min-width:8mm}
+</style>
+</head>
+<body>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
+<script src="../../gemeinsam/bilder.js?v=2026112301"></script>
+<script src="../../gemeinsam/geschichten.js?v=2026112301"></script>
+<script src="../../aufgabenspeicher/speicher.js?v=2026112301"></script>
+<script src="../../gemeinsam/druck.js?v=2026112301"></script>
+<script>
+const D = Druck, A = AUFGABEN;
+const KLASSEN = ["SEP 1", "SEP 2", "SEP 3", "Klasse 3", "Klasse 4"];
+const TEMPO = { langsam: 1.3, mittel: 1, schnell: .8 };
+
+// Klasse von der Startseite übernehmen (gilt nur in diesem Tab)
+try { const k = JSON.parse(sessionStorage.getItem("vs-klasse") || '""'); if (k) { const c = JSON.parse(localStorage.getItem("vb-druck-arbeitsauftrag") || "{}"); c.klasse = k; localStorage.setItem("vb-druck-arbeitsauftrag", JSON.stringify(c)); } } catch (e) {}
+
+// Welche Bausteine passen zu Klasse und Niveau?
+const passend = cfg => A.BAUSTEINE.filter(b => b.klassen.includes(cfg.klasse) && b.niveaus.includes(cfg.niveau));
+const themenMit = cfg => { const p = passend(cfg); return Object.keys(A.THEMEN).filter(t => p.some(b => b.thema === t)); };
+
+// ---------- Planung: Aufgaben nach Gewichtung und Zeit auswählen ----------
+function plane(cfg, rnd) {
+  const verfuegbar = themenMit(cfg), g = cfg.gewichte || {};
+  const themen = verfuegbar.filter(t => (g[t] ?? 0) > 0), summe = themen.reduce((s, t) => s + g[t], 0);
+  if (!themen.length) return { liste: [], themen: [], ziel: {} };
+  const faktor = TEMPO[cfg.tempo] || 1, budget = cfg.zeit / faktor;   // Minuten im „mittleren“ Tempo
+  const ziel = {}, ist = {}, liste = [], stapel = {};
+  themen.forEach(t => { ziel[t] = budget * g[t] / summe; ist[t] = 0; stapel[t] = []; });
+  const naechster = t => { if (!stapel[t].length) stapel[t] = D.mischen(passend(cfg).filter(b => b.thema === t), rnd); return stapel[t].shift(); };
+  // reihum füllen: immer das Thema mit dem größten Rückstand
+  for (let i = 0; i < 60; i++) {
+    const t = themen.map(x => [x, ziel[x] - ist[x]]).sort((a, b) => b[1] - a[1])[0];
+    if (!t) break;
+    const b = naechster(t[0]), m = b.minuten[cfg.niveau];
+    const gesamt = Object.values(ist).reduce((s, x) => s + x, 0);
+    if (gesamt + m > budget + m * .45) break;        // nur hinzufügen, wenn es ungefähr noch passt
+    liste.push({ b, m, thema: t[0] }); ist[t[0]] += m;
+  }
+  if (!liste.length) { const t = themen[0], b = naechster(t); liste.push({ b, m: b.minuten[cfg.niveau], thema: t }); ist[t] = liste[0].m; }
+  // Reihenfolge: Fächer abwechseln
+  const nachFach = {}; liste.forEach(x => (nachFach[A.THEMEN[x.thema].fach] = nachFach[A.THEMEN[x.thema].fach] || []).push(x));
+  const reihen = Object.values(nachFach), sortiert = [];
+  for (let i = 0; sortiert.length < liste.length; i++) reihen.forEach(r => { if (r[i]) sortiert.push(r[i]); });
+  return { liste: sortiert, themen, ziel, ist, faktor };
+}
+
+// ---------- Seitenumbruch: Aufgaben nacheinander auf A4-Seiten verteilen ----------
+function verteile(kopf, bloecke, cfg) {
+  const m = document.createElement("section"); m.className = "blatt" + (cfg.schrift === "druck" ? "" : " silben");
+  m.style.cssText = "position:absolute;left:-30000px;top:0;height:auto;visibility:hidden";
+  const innen = document.createElement("div"); innen.className = "innen"; innen.style.height = "auto"; m.appendChild(innen); document.body.appendChild(m);
+  const mm = (() => { const t = document.createElement("div"); t.style.height = "100mm"; m.appendChild(t); const h = t.getBoundingClientRect().height / 100; t.remove(); return h; })();
+  const max = 259 * mm, seiten = [];
+  let akt = [];
+  const hoehe = teile => { innen.innerHTML = kopf(seiten.length + 1) + teile.join(""); return innen.getBoundingClientRect().height; };
+  bloecke.forEach(b => { if (akt.length && hoehe(akt.concat(b)) > max) { seiten.push(akt); akt = []; } akt.push(b); });
+  if (akt.length) seiten.push(akt);
+  m.remove();
+  return seiten.map((s, i) => kopf(i + 1) + s.join(""));
+}
+
+let letzterPlan = null;
+D.start({
+  id: "arbeitsauftrag", titel: "Arbeitsauftrag zusammenstellen", nr: "G-A", lineatur: true, klassensatz: true, ohneKopf: true,
+  optionen: [
+    { key: "zeit", label: "1. Bearbeitungszeit", std: 30, werte: [15, 20, 30, 45, 60, 90].map(m => ({ wert: m, text: m + " Min." })) },
+    { key: "klasse", label: "2. Klassenstufe", std: "SEP 2", werte: KLASSEN.map(k => ({ wert: k, text: k })) },
+    { key: "tempo", label: "Arbeitstempo", std: "mittel", werte: [{ wert: "langsam", text: "langsam" }, { wert: "mittel", text: "mittel" }, { wert: "schnell", text: "schnell" }] },
+  ],
+  steuer(st, cfg, aendern) {
+    if (!cfg.gewichte) cfg.gewichte = Object.fromEntries(Object.keys(A.THEMEN).map(t => [t, 50]));
+    const box = document.createElement("div"); box.className = "gruppe gewicht"; box.setAttribute("aria-label", "Gewichtung der Themen");
+    st.appendChild(box);
+    const info = document.createElement("div"); info.className = "plan-info"; info.setAttribute("aria-live", "polite"); st.appendChild(info);
+    const zeichneRegler = () => {
+      const da = themenMit(cfg);
+      box.innerHTML = '<span class="glabel">3. Fächer und Themen gewichten</span>';
+      Object.entries(A.FAECHER).forEach(([f, fname]) => {
+        box.insertAdjacentHTML("beforeend", `<h3>${fname}</h3>`);
+        Object.entries(A.THEMEN).filter(([, t]) => t.fach === f).forEach(([id, t]) => {
+          const ok = da.includes(id), w = cfg.gewichte[id] ?? 0;
+          const d = document.createElement("div"); d.className = "th" + (ok ? "" : " aus");
+          d.innerHTML = `<label for="g-${id}">${t.titel}</label><span class="wert">${ok ? w + " %" : "–"}</span>
+            <input id="g-${id}" type="range" min="0" max="100" step="10" value="${w}" ${ok ? "" : "disabled"}>${ok ? "" : `<span class="warum">nicht für ${cfg.klasse} auf Niveau ${"★".repeat(cfg.niveau)}</span>`}`;
+          const inp = d.querySelector("input"), wert = d.querySelector(".wert");
+          inp.addEventListener("input", () => { wert.textContent = inp.value + " %"; });
+          inp.addEventListener("change", () => { cfg.gewichte = Object.assign({}, cfg.gewichte, { [id]: +inp.value }); aendern("gewichte", cfg.gewichte); });
+          box.appendChild(d);
+        });
+      });
+      box.insertAdjacentHTML("beforeend", '<span class="klein">0 % = Thema kommt nicht vor. Die Werte sind Anteile: 50 % und 50 % ergibt halbe-halbe.</span>');
+    };
+    // nach jedem Neuzeichnen: Regler und Planungsinfo aktualisieren
+    window.__nachZeichnen = () => {
+      zeichneRegler();
+      const p = letzterPlan;
+      if (!p || !p.liste.length) { info.className = "plan-info warn";
+        info.textContent = themenMit(cfg).length ? "Bitte mindestens ein Thema über 0 % stellen, das zur Klasse und zum Niveau passt."
+          : `Für ${cfg.klasse} auf Niveau ${"★".repeat(cfg.niveau)} gibt es im Aufgabenspeicher noch keine Aufgaben. Er wächst mit jeder ausgewerteten Vorlage.`; return; }
+      const min = Math.round(p.liste.reduce((s, x) => s + x.m, 0) * p.faktor), proFach = {};
+      p.liste.forEach(x => { const f = A.FAECHER[A.THEMEN[x.thema].fach]; proFach[f] = (proFach[f] || 0) + x.m * p.faktor; });
+      const abw = Math.abs(min - cfg.zeit) > Math.max(5, cfg.zeit * .2);
+      info.className = "plan-info" + (abw ? " warn" : "");
+      info.innerHTML = `<b>${p.liste.length} Aufgaben, ca. ${min} Minuten</b> (gewünscht: ${cfg.zeit})<br>` +
+        Object.entries(proFach).map(([f, m]) => `${f}: ${Math.round(m / min * 100)} %`).join(" · ") +
+        (abw ? "<br>Mit diesen Themen passt die Zeit nicht genau. Mehr Themen zulassen oder Zeit ändern." : "");
+    };
+  },
+  nachZeichnen: () => window.__nachZeichnen && window.__nachZeichnen(),
+  info: cfg => `${cfg.zeit} Min. · ${cfg.klasse}${cfg.tempo !== "mittel" ? " · Tempo " + cfg.tempo : ""}`,
+  baue(cfg, rnd, loesung, nummer, k) {
+    const p = plane(cfg, rnd); if (k === 0) letzterPlan = p;
+    if (!p.liste.length) return loesung ? [] : [`<p>${themenMit(cfg).length ? "Es ist noch kein Thema ausgewählt. Links mindestens ein Thema über 0 % stellen." : "Für diese Klasse und dieses Niveau gibt es im Aufgabenspeicher noch keine Aufgaben."}</p>`];
+    // jede Aufgabe mit eigenem Zufall bauen (gleich für Aufgabe und Lösung)
+    const aufgaben = p.liste.map((x, i) => { const r = D.zufallMit(nummer * 131 + i * 7 + 3); const e = x.b.baue(cfg.niveau, r, D, cfg); return Object.assign({ nr: i + 1, x }, e); });
+    if (loesung) {   // Lösung, bei langen Aufträgen auf mehrere Seiten verteilt
+      return verteile(sl => sl === 1 ? `<div class="db-titel"><h2>Lösung zum Arbeitsauftrag</h2></div>` : `<div class="ab-seitenkopf"><span>Lösung zum Arbeitsauftrag</span><span>Seite ${sl}</span></div>`,
+        aufgaben.map(a => `<div class="loes-liste"><div><b>${a.nr}.</b> ${a.x.b.titel}: ${a.loesung}</div></div>`), cfg);
+    }
+    const min = Math.round(p.liste.reduce((s, x) => s + x.m, 0) * p.faktor);
+    // Deckblatt: Kopf, Arbeitsweise, Liste der Aufgaben (bei vielen Aufgaben auf zwei Seiten), Hinweis für Schnelle
+    const zeile = a => `<tr><td class="nr">${a.nr}</td><td class="fach">${A.FAECHER[A.THEMEN[a.x.thema].fach]}</td><td>${a.x.b.titel}</td><td class="min">ca. ${Math.round(a.x.m * p.faktor)} Min.</td><td class="box">☐</td><td class="box">☐</td></tr>`;
+    const tabelle = l => `<table class="db-liste${aufgaben.length > 11 ? " eng" : ""}"><tr><th></th><th>Fach</th><th>Aufgabe</th><th>Zeit</th><th>fertig</th><th>kontrolliert</th></tr>${l.map(zeile).join("")}</table>`;
+    const deckTeile = [`<div class="db-felder"><span>Name:</span><span>Datum:</span></div>
+      <div class="db-so">${D.bild("stern")}<div><b>${D.w("So ar-bei-test du:")}</b><ol><li>${D.w("Ar-bei-te der Rei-he nach.")}</li><li>${D.w("Mach ei-nen Ha-ken, wenn du fer-tig bist.")}</li>
+        <li>${D.w("Lass dei-ne Ar-beit kon-trol-lie-ren.")}</li></ol></div></div>`];
+    for (let i = 0; i < aufgaben.length; i += 8) deckTeile.push(tabelle(aufgaben.slice(i, i + 8)));
+    deckTeile.push(`<div class="db-so">${D.bild("daumen_hoch")}<div><b>${D.w("Fer-tig?")}</b> ${D.w("Dann lies in dei-nem Buch o-der ma-le ein Bild zu dei-ner Lieb-lings-auf-ga-be.")}</div></div>`);
+    const deck = verteile(sl => sl === 1 ? `<div class="db-titel"><h2>Mein Arbeitsauftrag</h2><span class="zeit">${D.bild("uhr")}ca. ${Math.round(min / 5) * 5 || min} Minuten</span></div>`
+      : `<div class="ab-seitenkopf"><span>Mein Arbeitsauftrag · Übersicht</span><span></span></div>`, deckTeile, cfg);
+    const bloecke = aufgaben.map(a => `<section class="ab-aufgabe"><div class="ab-kopf"><span class="ab-nr">${a.nr}</span><span class="ab-sym">${(a.x.b.symbole || []).map(s => D.bild(s)).join("")}</span>
+      <span class="ab-titel">${D.w(a.x.b.auftrag(cfg.niveau))}</span><span class="ab-min">ca. ${Math.round(a.x.m * p.faktor)} Min.</span></div>${a.html}</section>`);
+    const kopf = s => `<div class="ab-seitenkopf"><span>Mein Arbeitsauftrag · Name: ____________________</span><span>Seite ${s + deck.length}</span></div>`;
+    return deck.concat(verteile(kopf, bloecke, cfg));
+  },
+});
+// „Bearbeitungszeit“ als Erstes in der linken Spalte zeigen
+(() => { const st = document.querySelector(".steuer"), z = st.querySelector('[aria-label="1. Bearbeitungszeit"]'), n = st.querySelector('[aria-label="Niveau"]');
+  if (z && n) { st.insertBefore(z, n); const k = st.querySelector('[aria-label="2. Klassenstufe"]'); st.insertBefore(k, n); } })();
+</script>
+</body>
+</html>
