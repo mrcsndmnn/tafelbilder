@@ -9,12 +9,15 @@
 <link rel="stylesheet" href="../../../gemeinsam/silben.css">
 <link rel="stylesheet" href="../../gemeinsam/druck.css?v=2026112301">
 <style>
+.steuer [hidden]{display:none!important}
 /* Einstellungen: Gewichtung */
 .gewicht{display:flex;flex-direction:column;gap:8px}
 .gewicht h3{font-size:15px;margin:6px 0 0;color:#5d6862}
 .gewicht .th{display:grid;grid-template-columns:1fr 44px;gap:2px 8px;align-items:center;font-size:15px}
 .gewicht .th input{grid-column:1 / -1;width:100%;accent-color:#2f7d7a}
 .gewicht .th .wert{font-weight:700;text-align:right}
+.gewicht .th .zus{grid-column:1 / -1;font-size:12px;color:#5d6862;margin-top:-4px}
+.gewicht .summe{font-size:13px;font-weight:700;color:#2f7d4f;text-align:right}
 .gewicht .th.aus{opacity:.45}
 .gewicht .th .warum{grid-column:1 / -1;font-size:12px;color:#5d6862}
 .inhalte .fach{border:2px solid #d5ddd7;border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
@@ -120,6 +123,16 @@ const zeitVon = cfg => cfg.zeit === "frei" ? Math.max(5, Math.min(240, +cfg.zeit
 // Grundeinstellung der Inhalte: alle Fächer und Themen gewählt
 const inhaltStd = () => Object.fromEntries(FAECHER.map(f => [f, { an: true, modus: "wahl", themen: Object.fromEntries(themenVon(f).map(t => [t, true])), anzahl: 1 }]));
 
+// Anteile einer Gruppe auf 100 % bringen (10er-Schritte, mindestens 10 %) – gleich für Regler und Planung
+const normiere = (ids, roh) => {
+  const n = ids.length, w = ids.map(id => Math.max(1, +roh[id] || 0)), s = w.reduce((x, y) => x + y, 0);
+  let v = w.map(x => Math.max(10, Math.round(x / s * 10) * 10));
+  for (let k = 0; k < 20 && v.reduce((x, y) => x + y, 0) !== 100; k++) {
+    const d = 100 - v.reduce((x, y) => x + y, 0), i = d > 0 ? v.indexOf(Math.min(...v)) : v.indexOf(Math.max(...v));
+    v[i] += d > 0 ? 10 : -10;
+  }
+  return Object.fromEntries(ids.map((id, i) => [id, n === 1 ? 100 : v[i]]));
+};
 // ---------- Planung: Themen bestimmen, nach Gewichtung und Zeit Aufgaben auswählen ----------
 function plane(cfg, rnd) {
   const da = themenMit(cfg), inh = cfg.inhalt || inhaltStd(), gF = cfg.gFach || {}, gT = cfg.gewichte || {};
@@ -134,10 +147,10 @@ function plane(cfg, rnd) {
   const faecher = Object.keys(wahl);
   if (!faecher.length) return { liste: [], wahl };
   // 2. Gewichte: Fach (bei mehreren Fächern) × Thema (bei selbst gewählten Themen)
-  const wF = f => faecher.length > 1 ? (gF[f] ?? 50) : 100, sF = faecher.reduce((s, f) => s + wF(f), 0);
+  const nF = normiere(faecher, gF), wF = f => nF[f], sF = 100;
   const gewicht = {};
   faecher.forEach(f => {
-    const zufall = inh[f].modus === "zufall", wT = t => zufall || wahl[f].length < 2 ? 1 : (gT[t] ?? 50), sT = wahl[f].reduce((s, t) => s + wT(t), 0);
+    const zufall = inh[f].modus === "zufall", nT = normiere(wahl[f], gT), wT = t => zufall ? 1 : nT[t], sT = wahl[f].reduce((s, t) => s + wT(t), 0);
     wahl[f].forEach(t => { gewicht[t] = sF && sT ? wF(f) / sF * wT(t) / sT : 0; });
   });
   const themen = Object.keys(gewicht).filter(t => gewicht[t] > 0);
@@ -208,11 +221,39 @@ D.start({
     const gewBox = el("div", "gruppe gewicht"); gewBox.setAttribute("aria-label", "Gewichtung"); st.appendChild(gewBox);
     const info = el("div", "plan-info"); info.setAttribute("aria-live", "polite"); st.appendChild(info);
 
-    const regler = (id, label, wert, onChange) => {
-      const d = el("div", "th", `<label for="${id}">${label}</label><span class="wert">${wert} %</span><input id="${id}" type="range" min="0" max="100" step="10" value="${wert}">`);
-      const inp = d.querySelector("input"), w = d.querySelector(".wert");
-      inp.addEventListener("input", () => { w.textContent = inp.value + " %"; }); inp.addEventListener("change", () => onChange(+inp.value));
-      return d;
+    // Gekoppelte Regler: Die Anteile einer Gruppe ergeben immer zusammen 100 %.
+    // Zieht man einen Regler hoch, werden die anderen im gleichen Verhältnis kleiner (mindestens 10 %).
+    const verteileNeu = (ids, werte, id, neu) => {
+      const andere = ids.filter(x => x !== id), max = 100 - 10 * andere.length;
+      neu = Math.max(10, Math.min(max, Math.round(neu / 10) * 10));
+      const rest = 100 - neu, alt = andere.reduce((x, y) => x + werte[y], 0);
+      const r = { [id]: neu };
+      // Rest im bisherigen Verhältnis verteilen, auf 10er runden, Rundungsfehler beim größten ausgleichen
+      andere.forEach(x => { r[x] = Math.max(10, Math.round((alt ? werte[x] / alt : 1 / andere.length) * rest / 10) * 10); });
+      for (let k = 0; k < 20; k++) {
+        const d = 100 - ids.reduce((x, y) => x + r[y], 0); if (!d) break;
+        const kand = andere.filter(x => d > 0 || r[x] > 10); if (!kand.length) break;
+        const ziel = kand.reduce((a, b) => (d > 0 ? r[a] <= r[b] : r[a] >= r[b]) ? a : b);
+        r[ziel] += d > 0 ? 10 : -10;
+      }
+      return r;
+    };
+    const reglerGruppe = (titel, ids, label, roh, speichern, zusatz) => {
+      if (ids.length < 2) return;
+      let werte = normiere(ids, roh);
+      gewBox.appendChild(el("h3", "", titel));
+      const zeilen = {};
+      ids.forEach(id => {
+        const d = el("div", "th", `<label for="r-${id}">${label(id)}</label><span class="wert"></span><input id="r-${id}" type="range" min="0" max="100" step="10"><span class="zus"></span>`);
+        zeilen[id] = d; gewBox.appendChild(d);
+        const inp = d.querySelector("input");
+        inp.addEventListener("input", () => { werte = verteileNeu(ids, werte, id, +inp.value); zeige(); });
+        inp.addEventListener("change", () => speichern(werte));
+      });
+      const zeige = () => ids.forEach(id => { const d = zeilen[id]; d.querySelector("input").value = werte[id]; d.querySelector(".wert").textContent = werte[id] + " %";
+        d.querySelector(".zus").textContent = zusatz ? zusatz(id, werte[id]) : ""; });
+      zeige();
+      gewBox.appendChild(el("span", "summe", `Zusammen: 100 %`));
     };
     // 3. Inhalte wählen: Fach an/aus, Themen per Häkchen oder zufällig
     const zeichneWahl = () => {
@@ -252,18 +293,21 @@ D.start({
       const p = letzterPlan, gew = p ? Object.keys(p.wahl || {}) : [];
       gewBox.innerHTML = '<span class="glabel">4. Gewichtung</span>';
       if (!gew.length) { gewBox.appendChild(el("span", "klein", "Zuerst oben Fächer und Themen wählen.")); return; }
-      if (gew.length > 1) {
-        gewBox.appendChild(el("h3", "", "Fächer"));
-        gew.forEach(f => gewBox.appendChild(regler("gf-" + f, A.FAECHER[f], cfg.gFach[f] ?? 50, v => aendern("gFach", Object.assign({}, cfg.gFach, { [f]: v })))));
-      }
+      // Anteil der Fächer am ganzen Auftrag
+      const fachAnteil = gew.length > 1 ? normiere(gew, cfg.gFach) : { [gew[0]]: 100 };
+      if (gew.length === 1) gewBox.appendChild(el("span", "klein", `Nur ${A.FAECHER[gew[0]]} gewählt: 100 % des Auftrags.`));
+      reglerGruppe("Anteil der Fächer am Auftrag", gew, f => A.FAECHER[f], cfg.gFach, w => aendern("gFach", Object.assign({}, cfg.gFach, w)));
+      // Anteil der Themen innerhalb eines Fachs
       gew.forEach(f => {
         const e = cfg.inhalt[f];
         if (e.modus === "zufall") { gewBox.appendChild(el("span", "klein", `${A.FAECHER[f]}: zufällige Themen, gleich verteilt.`)); return; }
-        const th = p.wahl[f]; if (th.length < 2) return;
-        gewBox.appendChild(el("h3", "", "Themen in " + A.FAECHER[f]));
-        th.forEach(t => gewBox.appendChild(regler("g-" + t, A.THEMEN[t].titel, cfg.gewichte[t] ?? 50, v => aendern("gewichte", Object.assign({}, cfg.gewichte, { [t]: v })))));
+        const th = p.wahl[f];
+        if (th.length < 2) { gewBox.appendChild(el("span", "klein", `${A.FAECHER[f]}: nur ein Thema gewählt – es bekommt den ganzen Anteil des Fachs.`)); return; }
+        reglerGruppe(`Themen innerhalb von ${A.FAECHER[f]}`, th, t => A.THEMEN[t].titel.replace("Zahlen bis 100: ", ""), cfg.gewichte,
+          w => aendern("gewichte", Object.assign({}, cfg.gewichte, w)),
+          (t, v) => `= ${Math.round(v * fachAnteil[f] / 100)} % des ganzen Auftrags`);
       });
-      gewBox.appendChild(el("span", "klein", "Die Werte sind Anteile: 50 % und 50 % ergibt halbe-halbe. 0 % lässt etwas weg."));
+      gewBox.appendChild(el("span", "klein", "Die Regler einer Gruppe hängen zusammen und ergeben immer 100 %. Zieht man einen hoch, werden die anderen kleiner. Jedes gewählte Thema bekommt mindestens 10 %."));
     };
     // nach jedem Neuzeichnen: Bedienelemente und Planungsinfo aktualisieren
     window.__nachZeichnen = () => {
