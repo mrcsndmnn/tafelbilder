@@ -6,7 +6,7 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Wege mit dem Marienkäfer – Zahlenraum bis 1000</title>
-<link rel="stylesheet" href="../gemeinsam/tafel.css">
+<link rel="stylesheet" href="../gemeinsam/tafel.css?v=2026112701">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
 <style>
 .qtitel{font-size:26px;font-weight:700;color:var(--soft)}
@@ -37,11 +37,9 @@
 .sym-z{display:inline-block;width:10px;height:30px;margin:0 6px 0 2px;vertical-align:-4px;background:var(--Z);border:2px solid #8e2620;border-radius:2px;
   background-image:linear-gradient(rgba(255,255,255,.45) 1px,transparent 1px);background-size:100% 3px}
 .sym-e{display:inline-block;width:12px;height:12px;margin:0 6px 0 2px;vertical-align:1px;background:var(--E);border:2px solid #1a4787;border-radius:2px}
-.mat{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:8px}
+.mat{--s:9px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:8px}
 .mat .vz{font-size:40px;font-weight:700;line-height:1;margin-right:2px}
 .mat .grp{display:flex;align-items:flex-end;gap:6px}
-.mat .st{width:16px;height:66px;background:var(--Z);border:2px solid #8e2620;border-radius:2px;background-image:linear-gradient(rgba(255,255,255,.45) 1px,transparent 1px);background-size:100% 6.6px}
-.mat .wu{width:16px;height:16px;background:var(--E);border:2px solid #1a4787;border-radius:2px}
 .rw-antworten{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .rw-antworten .knopf{min-height:92px;font-size:46px}
 .rw-antworten .knopf.daneben{border-color:var(--nochrand);background:var(--nochbg);color:var(--noch)}
@@ -82,7 +80,7 @@ window.HINWEISE = {
    "h": "Rechenweg",
    "punkte": [
     "Aufgabe: „Start: 347. Gehe 3 Zehner weiter. Gehe 2 Einer weiter.“ 1 Zehner = 1 Zeile nach unten, 1 Einer = 1 Feld nach rechts (zurück: nach oben bzw. links).",
-    "**Zeige**: als Text, als **Material** (Zehnerstangen und Einerwürfel, zurück mit Minuszeichen) oder als **Rechnung** (347 + 32).",
+    "**Zeige**: als Text, als **Material** (Zehner = 10 Kästchen, Einer = 1 Kästchen, zurück mit Minuszeichen) oder als **Rechnung** (347 + 32).",
     "Eine der vier Zahlen antippen. Falsche Knöpfe bleiben orange markiert, die Rückmeldung nennt den Fehler („Wie viele Zehner?“, „Weiter oder zurück?“).",
     "Nach der richtigen Wahl läuft der Käfer: erst die Zehner, dann die Einer. Danach steht die Rechnung da, z. B. 347 + 32 = 379.",
     "**Umgekehrt**: Start und Fahne sind markiert, die Kinder wählen die passende Beschreibung des Weges.",
@@ -100,7 +98,7 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../gemeinsam/tafel.js?v=2026112701"></script>
 <script>
 const T = Tafel, S = T.buehne();
 let modus = "wohin", stufe = 1, start = 0, ziel = 0, befehle = [], eingabe = [], vermutung = null, laeuft = false;
@@ -288,8 +286,8 @@ function rechnung(a, mitErgebnis) {
 function aufgabeHTML(a) {
   if (rw.darst === "rechnung") return `<div class="zahl" style="font-size:52px">${rechnung(a, false)}</div>`;
   if (rw.darst === "material") {
-    const grp = (k, cls, d) => k ? `<span class="vz">${d > 0 ? "+" : "−"}</span><span class="grp" aria-label="${k} ${cls === "st" ? "Zehner" : "Einer"} ${RICHT(d)}">${`<span class="${cls}"></span>`.repeat(k)}</span>` : "";
-    return `Start: ${a.n}<div class="mat">${grp(a.z, "st", a.dz)}${grp(a.e, "wu", a.de)}</div>`;
+    const grp = (k, cls, d) => k ? `<span class="vz">${d > 0 ? "+" : "−"}</span><span class="grp" aria-label="${k} ${cls === "st" ? "Zehner" : "Einer"} ${RICHT(d)}">${`<i class="gs ${cls === "st" ? "gs-z" : "gs-e"}"></i>`.repeat(k)}</span>` : "";
+    return `Start: ${a.n}<div class="mat farbig">${grp(a.z, "st", a.dz)}${grp(a.e, "wu", a.de)}</div>`;
   }
   return [`Start: ${a.n}.`, teilText(a.z, "Z", a.dz), teilText(a.e, "E", a.de)].filter(Boolean).join("<br>");
 }

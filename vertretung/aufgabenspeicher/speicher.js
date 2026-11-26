@@ -183,12 +183,13 @@
   });
 
   // 7) Wie heißt die Zahl? (Zehnerstangen und Einerwürfel)
+  // Zehner = 10 Kästchen übereinander, Einer = 1 Kästchen (gleiche Kästchengröße)
   const stangen = (zz, ee) => {
-    let s = "", x = 0;
-    for (let i = 0; i < zz; i++) { s += `<rect x="${x}" y="0" width="5" height="40" fill="#f3d3cf" stroke="#000" stroke-width=".5"/>` + Array.from({ length: 9 }, (_, k) => `<line x1="${x}" x2="${x + 5}" y1="${4 * (k + 1)}" y2="${4 * (k + 1)}" stroke="#000" stroke-width=".3"/>`).join(""); x += 7; }
+    const k = 4; let s = "", x = 0;
+    for (let i = 0; i < zz; i++) { s += `<rect x="${x}" y="0" width="${k}" height="${10 * k}" fill="#f3d3cf" stroke="#000" stroke-width=".5"/>` + Array.from({ length: 9 }, (_, j) => `<line x1="${x}" x2="${x + k}" y1="${k * (j + 1)}" y2="${k * (j + 1)}" stroke="#000" stroke-width=".3"/>`).join(""); x += k + 2 + (i % 5 === 4 ? 2 : 0); }
     x += zz ? 3 : 0;
-    for (let i = 0; i < ee; i++) { s += `<rect x="${x + (i % 2) * 6}" y="${36 - Math.floor(i / 2) * 6}" width="4" height="4" fill="#cfe0f5" stroke="#000" stroke-width=".5"/>`; }
-    x += ee ? 12 : 0;
+    for (let i = 0; i < ee; i++) { s += `<rect x="${x + (i % 2) * (k + 1.5)}" y="${10 * k - k - Math.floor(i / 2) * (k + 1.5)}" width="${k}" height="${k}" fill="#cfe0f5" stroke="#000" stroke-width=".5"/>`; }
+    x += ee ? 2 * k + 1.5 : 0;
     return `<svg viewBox="-1 -1 ${x + 2} 42" style="height:16mm;width:${(x + 2) * 16 / 42}mm" aria-hidden="true">${s}</svg>`;
   };
   T.BAUSTEINE.push({

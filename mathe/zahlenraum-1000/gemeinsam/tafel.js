@@ -296,18 +296,33 @@
   };
 
   // ---------------- Material ----------------
-  T.material = box => {
-    const m = T.el("div", "material"); box.appendChild(m);
+  // Material in einer Box: Größe der Kästchen so wählen, dass alles hineinpasst
+  T.material = (box, max = 12) => {
+    const m = T.el("div", "material farbig"); box.appendChild(m);
+    const passe = () => {
+      if (!m.children.length) return;
+      const versteckt = box.hidden; box.hidden = false;
+      m.style.height = "auto";
+      const passt = () => m.offsetHeight <= box.clientHeight + 1 && m.scrollWidth <= box.clientWidth + 1;
+      let s = max;
+      // erst alles in einer Reihe versuchen, sonst umbrechen lassen
+      m.style.flexWrap = "nowrap";
+      for (; s >= 6; s -= .5) { m.style.setProperty("--s", s + "px"); if (passt()) break; }
+      if (s < 6) { m.style.flexWrap = ""; for (s = max; s >= 3; s -= .5) { m.style.setProperty("--s", s + "px"); if (passt()) break; } }
+      m.style.height = ""; box.hidden = versteckt;
+    };
     return {
       zeige(n) {
-        const s = T.stellen(n), g = (k, cls) => { const d = T.el("div", "grp"); for (let i = 0; i < k; i++) d.appendChild(T.el("div", cls)); return d; };
+        const s = T.stellen(n), g = (k, cls, art) => { const d = T.el("div", "grp " + art); for (let i = 0; i < k; i++) d.appendChild(T.el("i", cls)); return d; };
         m.innerHTML = "";
-        if (s.T) m.appendChild(g(+s.T, "tausender"));
-        if (+s.H) m.appendChild(g(+s.H, "platte"));
-        if (+s.Z) m.appendChild(g(+s.Z, "stange"));
-        if (+s.E) m.appendChild(g(+s.E, "wuerfel"));
+        if (s.T) m.appendChild(g(+s.T, "tausender", "t"));
+        if (+s.H) m.appendChild(g(+s.H, "gs gs-h", "h"));
+        if (+s.Z) m.appendChild(g(+s.Z, "gs gs-z", "z"));
+        if (+s.E) m.appendChild(g(+s.E, "gs gs-e", "e"));
         m.setAttribute("aria-label", `Material: ${+s.T || 0} Tausender, ${+s.H || 0} Hunderter, ${+s.Z || 0} Zehner, ${+s.E || 0} Einer`);
+        passe();
       },
+      passe,
     };
   };
 

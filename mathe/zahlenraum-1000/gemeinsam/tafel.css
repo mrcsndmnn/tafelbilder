@@ -110,16 +110,24 @@ body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);ov
 .streifen p{margin:0}
 .streifen p+p{margin-top:6px}
 
-/* ---------- Material (Hunderterplatten, Zehnerstangen, Einerwürfel) ---------- */
-.material{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
-.material .grp{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-end}
-.platte{width:46px;height:46px;background-color:var(--H);border:2px solid #1f5f2a;
-  background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:4.2px 4.2px}
-.stange{width:9px;height:46px;background-color:var(--Z);border:2px solid #8e2620;background-image:linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px);background-size:100% 4.2px}
-.wuerfel{width:9px;height:9px;background:var(--E);border:2px solid #1a4787}
+/* ---------- Material: Einer = 1 Kästchen, Zehner = 10 Kästchen übereinander,
+   Hunderter = 10 Zehner nebeneinander (10 × 10). Größe eines Kästchens über --s. ---------- */
+.gs{box-sizing:border-box;display:block;flex:none;padding:0;
+  --bl:#1d2420;--bf:#f6f3ea;
+  border:var(--bw,2px) solid var(--bl);background-color:var(--bf)}
+.gs-e{width:var(--s,13px);height:var(--s,13px)}
+.gs-z{width:var(--s,13px);height:calc(var(--s,13px) * 10);
+  background-image:linear-gradient(var(--bl) 0 1px,transparent 1px);background-size:100% 10%}
+.gs-h{width:calc(var(--s,13px) * 10);height:calc(var(--s,13px) * 10);
+  background-image:linear-gradient(var(--bl) 0 1px,transparent 1px),linear-gradient(90deg,var(--bl) 0 1px,transparent 1px);background-size:10% 10%}
+.farben .gs-h,.farbig .gs-h{--bl:#1f6a2e;--bf:#d5ecd9}
+.farben .gs-z,.farbig .gs-z{--bl:#a52a23;--bf:#f7d9d6}
+.farben .gs-e,.farbig .gs-e{--bl:#1d4f9c;--bf:#d6e3f7}
+.material{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;align-content:flex-end;height:100%}
+.material .grp{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end}
+.material .grp.h{gap:6px}
 .tausender{width:60px;height:60px;background:var(--T);border:2px solid #222;
   background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:6px 6px}
-.material .leer{font-size:22px;color:var(--soft)}
 
 /* ---------- Pfeil-Overlay ---------- */
 .ueber{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
