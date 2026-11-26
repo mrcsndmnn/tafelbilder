@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Geheimschrift legen – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css?v=2026112601">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.auftrag{position:absolute;left:40px;top:176px;width:500px;display:flex;flex-direction:column;gap:12px}
+.auftrag .t{font-size:30px;font-weight:700;color:var(--soft)}
+.auftrag .gross{font-size:110px;font-weight:700;line-height:1}
+.auftrag .bed{font-size:30px;font-weight:700;background:var(--hellgelb);border:3px solid var(--gelbrand);border-radius:14px;padding:8px 14px;line-height:1.3}
+.tasten{position:absolute;left:40px;top:430px;width:500px;display:flex;flex-direction:column;gap:12px}
+.taste{display:flex;align-items:center;gap:14px;font-size:26px;font-weight:700}
+.taste .sym{width:64px;display:grid;place-items:center}
+.taste .name{flex:1}
+.taste .knopf{width:76px;padding:0;font-size:34px}
+.aktion .aktion{display:flex;gap:12px}
+.aktion{display:flex;gap:12px}
+/* Legefeld in drei Spalten */
+.legefeld{position:absolute;left:570px;top:176px;width:990px;height:456px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.spalte{border:4px solid var(--ink);border-radius:22px;background:#fbfcfb;display:flex;flex-direction:column;overflow:hidden}
+.spalte .kz{display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-size:24px;font-weight:700;height:52px;flex:none}
+.spalte.h .kz{background:var(--H)} .spalte.z .kz{background:var(--Z)} .spalte.e .kz{background:var(--E)}
+.spalte .inhalt{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px 6px;padding:10px;justify-content:center}
+.spalte .zahl-unten{height:52px;flex:none;display:grid;place-items:center;font-size:34px;font-weight:700;border-top:3px solid #e3e7e4}
+.spalte .zahl-unten.viel{background:var(--hellgelb)}
+.spalte .buendel{padding:0 10px 10px;display:flex;justify-content:center}
+.spalte .buendel .knopf{font-size:19px;min-height:56px;padding:0 10px;white-space:normal;line-height:1.15}
+button.gs{border:none;padding:0;cursor:pointer;touch-action:manipulation;flex:none}
+button.gs:focus-visible{outline:4px solid var(--ok);outline-offset:3px}
+.gs-h,button.gs.gs-h{width:72px;height:72px;border:7px solid var(--ink);border-radius:4px;background:#fff}
+.gs-z{width:14px;height:70px;border-radius:7px;background:var(--ink);margin:0 3px}
+.gs-e{width:28px;height:28px;border-radius:50%;background:var(--ink);margin:4px}
+.farben .gs-h,.farben button.gs.gs-h{border-color:var(--H);background:#e3f2e6}
+.farben .gs-z{background:var(--Z)}
+.farben .gs-e{background:var(--E)}
+.gs.neu{animation:neu .6s ease-out}
+@keyframes neu{0%{transform:scale(1.8);opacity:.3}100%{transform:none;opacity:1}}
+.taste i{display:block}
+.taste .gs-h{width:44px;height:44px;border-width:5px}
+.taste .gs-z{height:52px;width:12px}
+.taste .gs-e{width:22px;height:22px}
+.satz{position:absolute;left:40px;top:716px;width:1520px}
+.satz .streifen{font-size:27px}
+@media (prefers-reduced-motion: reduce){.gs.neu{animation:none}}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Geheimschrift legen",
+ farben: "**Farben** färbt die Zeichen: Quadrat (Hunderter) grün, Strich (Zehner) rot, Punkt (Einer) blau.",
+ teile: [
+  { h: "Worum geht es?", text: "Zahlen in Geheimschrift legen – wie mit dem Dienes-Material: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer. Dazu Bündeln (10 Punkte werden 1 Strich) und Entbündeln (1 Strich wird 10 Punkte)." },
+  { h: "So geht es", punkte: [
+    "Oben links steht die Zahl. Ein Kind legt sie mit den Knöpfen **+** (dazulegen) und **−** (wegnehmen). Ein Zeichen im Legefeld antippen nimmt es auch weg.",
+    "**Prüfen** sagt, ob es stimmt – oder an welcher Stelle noch etwas fehlt.",
+    "Liegen 10 oder mehr gleiche Zeichen da, erscheint **Bündeln**: 10 Punkte werden zu 1 Strich, 10 Striche zu 1 Quadrat.",
+    "**Entbündeln**: 1 Quadrat wird zu 10 Strichen, 1 Strich zu 10 Punkten. Das braucht man auf Stufe ●●●.",
+    "**Hilfen**: Unter jeder Spalte steht die Anzahl, dazu das Satzmuster im Streifen." ] },
+  { h: "Stufen", punkte: [
+    "● Kleine Ziffern (1 bis 5), keine Null.",
+    "●● Alle Zahlen bis 999, auch mit Nullen (z. B. 405).",
+    "●●● Mit Bedingung: „Lege 243 ohne Quadrate“ (24 Striche, 3 Punkte) oder „… mit genau 13 Punkten“. Hier hilft Entbündeln." ] },
+ ],
+};
+</script>
+<script src="../gemeinsam/tafel.js?v=2026112601"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const NAME = { h: ["Quadrat", "Quadrate", "Hunderter"], z: ["Strich", "Striche", "Zehner"], e: ["Punkt", "Punkte", "Einer"] };
+let stufe = 1, auf = null, liegt = { h: 0, z: 0, e: 0 }, geloest = false, letztNeu = null, vorher = [];
+
+const sWahl = T.stufen(v => { stufe = v; neu(); }, "gs-legen-stufe"); stufe = sWahl.wert;
+T.kopf({ titel: "Geheimschrift legen", onNeu: () => neu(), onHilfen: () => zeichne() });
+T.leiste(sWahl);
+
+const aufBox = T.blk(40, 176, 500, 0, "auftrag"); aufBox.setAttribute("aria-live", "polite");
+const tasten = T.blk(40, 430, 500, 0, "tasten");
+["h", "z", "e"].forEach(a => {
+  const z = T.el("div", "taste", `<span class="sym"><i class="gs-${a}"></i></span><span class="name">${NAME[a][2]}</span>`);
+  const minus = T.knopf("−", () => aendere(a, -1)), plus = T.knopf("+", () => aendere(a, 1), "haupt");
+  minus.setAttribute("aria-label", NAME[a][0] + " wegnehmen"); plus.setAttribute("aria-label", NAME[a][0] + " dazulegen");
+  z.append(minus, plus); tasten.appendChild(z);
+});
+const akt = T.el("div", "aktion"); akt.append(T.knopf("Prüfen", () => pruefen(), "haupt"), T.knopf("Alles wegnehmen", () => { liegt = { h: 0, z: 0, e: 0 }; geloest = false; zeichne(); }), T.knopf("Nächste Zahl →", () => neu()));
+
+const feld = T.blk(570, 176, 990, 456, "legefeld");
+const aktBox = T.blk(570, 644, 990, 0, "aktion"); aktBox.appendChild(akt);
+const spalten = {};
+["h", "z", "e"].forEach(a => {
+  const sp = T.el("div", "spalte " + a, `<div class="kz"><span>${NAME[a][2]}</span></div><div class="inhalt" aria-live="polite"></div><div class="buendel"></div><div class="zahl-unten hilfe"></div>`);
+  feld.appendChild(sp); spalten[a] = sp;
+});
+const satz = T.streifen(T.blk(40, 716, 1520, 0, "satz"));
+const melde = (art, text) => { satz.className = "streifen" + (art ? " " + art : ""); satz.innerHTML = Array.isArray(text) ? text.map(t => `<p>${t}</p>`).join("") : text; };
+
+// ---------- Aufgaben ----------
+function neueAufgabe() {
+  for (let v = 0; v < 500; v++) {
+    let h, z, e;
+    if (stufe === 1) { h = T.zufall(1, 5); z = T.zufall(1, 5); e = T.zufall(1, 5); }
+    else { h = T.zufall(1, 9); z = T.zufall(0, 9); e = T.zufall(0, 9); if (stufe === 2 && Math.random() < .3) { Math.random() < .5 ? z = 0 : e = 0; } }
+    const wert = h * 100 + z * 10 + e;
+    if (vorher.includes(wert)) continue;
+    let bed = null;
+    if (stufe === 3) {
+      const art = T.wahl(["ohneH", "ohneH", "genauE", "genauZ"]);
+      if (art === "ohneH") { if (h > 2) continue; bed = { art, text: "ohne Quadrate", ziel: { h: 0, z: h * 10 + z, e } }; }
+      if (art === "genauE") { if (z < 1 || e > 8) continue; bed = { art, text: `mit genau ${e + 10} Punkten`, ziel: { h, z: z - 1, e: e + 10 } }; }
+      if (art === "genauZ") { if (h < 2 || z > 8) continue; bed = { art, text: `mit genau ${z + 10} Strichen`, ziel: { h: h - 1, z: z + 10, e } }; }
+    }
+    vorher.push(wert); if (vorher.length > 10) vorher.shift();
+    return { wert, h, z, e, bed };
+  }
+}
+function neu() {
+  T.stop(); auf = neueAufgabe(); liegt = { h: 0, z: 0, e: 0 }; geloest = false; letztNeu = null;
+  aufBox.innerHTML = `<div class="t">Lege die Zahl:</div><div class="gross zahl">${T.zahlHTML(auf.wert)}</div>` + (auf.bed ? `<div class="bed">… ${auf.bed.text}!</div>` : "");
+  zeichne();
+  melde("muster hilfe", "Ich lege … Hunderter, … Zehner und … Einer.");
+}
+
+// ---------- Legen ----------
+function aendere(a, d, still) {
+  if (geloest && !still) geloest = false;
+  liegt[a] = Math.max(0, Math.min(30, liegt[a] + d));
+  letztNeu = d > 0 ? a : null; zeichne();
+}
+function zeichne() {
+  ["h", "z", "e"].forEach(a => {
+    const sp = spalten[a], inh = sp.querySelector(".inhalt"), n = liegt[a];
+    inh.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      const b = T.el("button", "gs gs-" + a + (letztNeu === a && i === n - 1 ? " neu" : "")); b.type = "button";
+      b.setAttribute("aria-label", NAME[a][0] + " wegnehmen"); b.addEventListener("click", () => aendere(a, -1)); inh.appendChild(b);
+    }
+    const u = sp.querySelector(".zahl-unten"); u.textContent = n + " " + (n === 1 ? NAME[a][0] : NAME[a][1]); u.classList.toggle("viel", n > 9);
+    // Bündeln (ab 10 gleichen Zeichen) und Entbündeln
+    const bu = sp.querySelector(".buendel"); bu.innerHTML = "";
+    if (a !== "h" && n >= 10) bu.appendChild(T.knopf(`Bündeln: 10 ${NAME[a][1]} → 1 ${a === "e" ? "Strich" : "Quadrat"}`, () => buendeln(a)));
+    else if (a !== "e" && n >= 1) bu.appendChild(T.knopf(`Entbündeln: 1 ${NAME[a][0]} → 10 ${a === "h" ? "Striche" : "Punkte"}`, () => entbuendeln(a)));
+  });
+  feld.setAttribute("aria-label", `Gelegt: ${liegt.h} Quadrate, ${liegt.z} Striche, ${liegt.e} Punkte`);
+}
+const hoeher = { e: "z", z: "h" }, tiefer = { h: "z", z: "e" };
+function buendeln(a) {
+  if (liegt[a] < 10) return;
+  liegt[a] -= 10; liegt[hoeher[a]]++; letztNeu = hoeher[a]; zeichne();
+  melde("", a === "e" ? "10 Einer sind 1 Zehner. Aus 10 Punkten wird 1 Strich." : "10 Zehner sind 1 Hunderter. Aus 10 Strichen wird 1 Quadrat.");
+}
+function entbuendeln(a) {
+  if (liegt[a] < 1 || liegt[tiefer[a]] > 20) return;
+  liegt[a]--; liegt[tiefer[a]] += 10; letztNeu = tiefer[a]; zeichne();
+  melde("", a === "h" ? "1 Hunderter sind 10 Zehner. Aus 1 Quadrat werden 10 Striche." : "1 Zehner sind 10 Einer. Aus 1 Strich werden 10 Punkte.");
+}
+
+// ---------- Prüfen ----------
+function pruefen() {
+  const wert = liegt.h * 100 + liegt.z * 10 + liegt.e;
+  const satzGelegt = `Ich habe ${liegt.h} Hunderter, ${liegt.z} Zehner und ${liegt.e} Einer gelegt.`;
+  if (auf.bed) {
+    const z = auf.bed.ziel, passt = liegt.h === z.h && liegt.z === z.z && liegt.e === z.e;
+    if (passt) { geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert} – ${auf.bed.text}. ${T.lob()}`]); return; }
+    if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt! Aber es soll ${auf.bed.text} sein.`, auf.bed.art === "ohneH" ? "Tipp: Entbündle die Quadrate." : "Tipp: Entbündle einmal."]); return; }
+    melde("noch", [satzGelegt, `Das ist ${wert}. Gesucht ist ${auf.wert} – ${auf.bed.text}.`]); return;
+  }
+  if (wert === auf.wert && liegt.z < 10 && liegt.e < 10) {
+    geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert}. ${T.lob()}`]); return;
+  }
+  if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt!`, `Aber es liegen 10 oder mehr gleiche Zeichen da. Bündle sie.`]); return; }
+  // Rückmeldung zur ersten falschen Stelle
+  const soll = { h: auf.h, z: auf.z, e: auf.e };
+  const a = ["h", "z", "e"].find(x => liegt[x] !== soll[x]);
+  const zuViel = liegt[a] > soll[a], d = Math.abs(liegt[a] - soll[a]);
+  melde("noch", [`Noch nicht. Schau bei den ${NAME[a][2]}n:`,
+    `Es ${zuViel ? (d === 1 ? "ist 1 " + NAME[a][0] + " zu viel" : "sind " + d + " " + NAME[a][1] + " zu viel") : (d === 1 ? "fehlt 1 " + NAME[a][0] : "fehlen " + d + " " + NAME[a][1])}.`]);
+}
+neu();
+</script>
+</body>
+</html>

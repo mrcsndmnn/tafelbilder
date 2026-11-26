@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Geheimschrift lesen – Zahlenraum bis 1000</title>
+<link rel="stylesheet" href="../gemeinsam/tafel.css?v=2026112601">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+.gsfeld{position:absolute;left:40px;top:176px;width:1520px;height:330px;border:4px solid var(--ink);border-radius:26px;background:#fbfcfb;overflow:hidden}
+.gsfeld.blitz{box-shadow:inset 0 0 0 8px var(--gelb)}
+.reihe{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:46px;padding:20px 30px;flex-wrap:wrap}
+.gruppe-gs{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;max-width:620px}
+.gruppe-gs .fuenf{display:flex;gap:10px;align-items:flex-end}
+.gruppe-gs .fuenf+.fuenf{margin-left:18px}
+.zu{position:absolute;inset:0;display:grid;place-items:center;font-size:150px;font-weight:700;color:#cfd6d1}
+/* Zeichen der Geheimschrift: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer */
+.gs-h{width:72px;height:72px;border:7px solid var(--ink);border-radius:4px;background:#fff;flex:none}
+.gs-z{width:14px;height:96px;border-radius:7px;background:var(--ink);flex:none}
+.gs-e{width:26px;height:26px;border-radius:50%;background:var(--ink);flex:none}
+.farben .gs-h{border-color:var(--H);background:#e3f2e6}
+.farben .gs-z{background:var(--Z)}
+.farben .gs-e{background:var(--E)}
+.streu .gs{position:absolute}
+.streu .gs-h{width:58px;height:58px;border-width:6px}
+/* Lösung */
+.loesung{position:absolute;left:40px;top:520px;width:1520px;height:180px;display:flex;align-items:center;justify-content:center;gap:60px}
+table.anz{border-collapse:separate;border-spacing:8px 0}
+.anz th{width:150px;height:52px;color:#fff;font-size:26px;border-radius:12px 12px 0 0}
+.anz th.h{background:var(--H)} .anz th.z{background:var(--Z)} .anz th.e{background:var(--E)}
+.anz td{height:92px;text-align:center;font-size:60px;font-weight:700;border:3px solid #cfd6d1;border-top:none;border-radius:0 0 12px 12px;background:#fff}
+.anz td.leer{color:#cfd6d1}
+.anz td.viel{background:var(--hellgelb)}
+.gross{font-size:120px;font-weight:700;line-height:1}
+.gross .gl{color:var(--soft);margin-right:20px}
+.aktionen{position:absolute;left:40px;top:822px;display:flex;gap:16px;align-items:center}
+.aktionen .zaehler{font-size:24px;color:var(--soft);font-weight:700;margin-left:10px}
+.satz{position:absolute;left:40px;top:712px;width:1520px}
+.satz .streifen{font-size:27px}
+.legende{position:absolute;right:40px;top:104px;display:flex;gap:22px;align-items:center;font-size:22px;font-weight:700;color:var(--soft)}
+.legende span{display:flex;align-items:center;gap:8px}
+.legende .gs-h{width:26px;height:26px;border-width:4px}
+.legende .gs-z{width:7px;height:34px}
+.legende .gs-e{width:13px;height:13px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+window.HINWEISE = {
+ titel: "Geheimschrift lesen",
+ farben: "**Farben** färbt die Zeichen: Quadrat (Hunderter) grün, Strich (Zehner) rot, Punkt (Einer) blau.",
+ teile: [
+  { h: "Worum geht es?", text: "Die Geheimschrift ist die gezeichnete Form des Dienes-Materials: Quadrat = Hunderterplatte, Strich = Zehnerstange, Punkt = Einerwürfel. Die Kinder lesen, welche Zahl dort „geheim“ geschrieben steht." },
+  { h: "So geht es", punkte: [
+    "Die Zahl steht in Geheimschrift im Feld. Die Kinder zählen Quadrate, Striche und Punkte und nennen die Zahl im Satz: „Das sind 2 Hunderter, 4 Zehner und 3 Einer. Das ist 243.“",
+    "**Lösung** zeigt die Anzahl in der Stellenwerttafel und die Zahl.",
+    "**Blitz**: Die Geheimschrift ist nur 3 Sekunden zu sehen. Die Kinder müssen schnell erfassen (Fünfer-Gruppen helfen).",
+    "**Nächste Zahl** – eine Runde hat 10 Zahlen.",
+    "**Hilfen**: Fünfer-Gruppen bei Strichen und Punkten und das Satzmuster im Streifen." ] },
+  { h: "Stufen", punkte: [
+    "● Geordnet: erst Quadrate, dann Striche, dann Punkte. Keine Null in der Zahl.",
+    "●● Geordnet, auch mit Nullen (z. B. 305 – keine Striche!).",
+    "●●● Durcheinander. Manchmal sind es mehr als 9 Striche oder Punkte: Dann muss gebündelt werden (12 Striche = 1 Hunderter und 2 Zehner)." ] },
+ ],
+};
+</script>
+<script src="../gemeinsam/tafel.js?v=2026112601"></script>
+<script>
+const T = Tafel, S = T.buehne();
+const RUNDE = 10;
+let stufe = 1, blitz = T.laden("gs-blitz", false), anz = null, nr = 0, offen = false, vorher = [];
+
+const sWahl = T.stufen(v => { stufe = v; start(); }, "gs-lesen-stufe"); stufe = sWahl.wert;
+const bKn = T.schalter("Blitz (3 Sek.)", blitz, v => { blitz = v; T.merken("gs-blitz", v); zeige(); });
+T.kopf({ titel: "Geheimschrift lesen", onNeu: () => start(), onHilfen: () => { if (anz && stufe < 3 && (!blitz || offen)) zeichneFeld(); } });
+T.leiste(sWahl, bKn);
+S.appendChild(T.el("div", "legende", '<span><i class="gs-h"></i>Hunderter</span><span><i class="gs-z"></i>Zehner</span><span><i class="gs-e"></i>Einer</span>'));
+
+const feld = T.blk(40, 176, 1520, 330, "gsfeld"); feld.style.position = "absolute"; feld.setAttribute("role", "img");
+const loes = T.blk(40, 520, 1520, 180, "loesung"); loes.setAttribute("aria-live", "polite");
+const akt = T.blk(40, 822, 0, 0, "aktionen");
+const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Zahl →", () => weiter()), nochKn = T.knopf("Noch mal zeigen", () => zeige());
+const zaehler = T.el("span", "zaehler"); akt.append(loesKn, weiterKn, nochKn, zaehler);
+const satz = T.streifen(T.blk(40, 712, 1520, 0, "satz"));
+const melde = (art, text) => { satz.className = "streifen" + (art ? " " + art : ""); satz.innerHTML = Array.isArray(text) ? text.map(t => `<p>${t}</p>`).join("") : text; };
+
+// ---------- Aufgaben ----------
+// anz = { h, z, e } Anzahl der Zeichen; wert = Zahl
+function neueAufgabe() {
+  for (let v = 0; v < 500; v++) {
+    let h = T.zufall(1, 9), z = T.zufall(1, 9), e = T.zufall(1, 9);
+    if (stufe === 2 && Math.random() < .6) { if (Math.random() < .5) z = 0; else e = 0; }
+    if (stufe === 3) {
+      if (Math.random() < .5) { if (Math.random() < .5) z = T.zufall(10, 15); else e = T.zufall(10, 15); h = T.zufall(1, 7); }   // bündeln nötig
+      else if (Math.random() < .4) { if (Math.random() < .5) z = 0; else e = 0; }
+    }
+    const wert = h * 100 + z * 10 + e;
+    if (wert > 999 || vorher.includes(wert)) continue;
+    vorher.push(wert); if (vorher.length > 12) vorher.shift();
+    return { h, z, e, wert };
+  }
+}
+const zeichen = (art, n) => {
+  // Fünfer-Gruppen als Zählhilfe (nur mit „Hilfen“)
+  const eins = `<i class="gs gs-${art}"></i>`;
+  if (!T.hilfen() || art === "h") return `<div class="gruppe-gs">${eins.repeat(n)}</div>`;
+  let s = ""; for (let i = 0; i < n; i += 5) s += `<span class="fuenf">${eins.repeat(Math.min(5, n - i))}</span>`;
+  return `<div class="gruppe-gs">${s}</div>`;
+};
+function zeichneFeld() {
+  feld.classList.remove("streu");
+  feld.setAttribute("aria-label", `Geheimschrift: ${anz.h} Quadrate, ${anz.z} Striche, ${anz.e} Punkte`);
+  if (stufe < 3) { feld.innerHTML = `<div class="reihe">${anz.h ? zeichen("h", anz.h) : ""}${anz.z ? zeichen("z", anz.z) : ""}${anz.e ? zeichen("e", anz.e) : ""}</div>`; return; }
+  // durcheinander: Zeichen auf freie Plätze eines Rasters verteilen
+  feld.classList.add("streu");
+  const sp = 22, ze = 5, w = 1480 / sp, hh = 290 / ze, rx = 20, ry = 16, plaetze = T.mischen(Array.from({ length: sp * ze }, (_, i) => i));
+  let html = "", k = 0;
+  const setze = (art, n) => { for (let i = 0; i < n; i++) { const p = plaetze[k++], x = (p % sp) * w + w / 2, y = Math.floor(p / sp) * hh + hh / 2;
+    const [bw, bh] = art === "h" ? [58, 58] : art === "z" ? [14, 52] : [26, 26];
+    html += `<i class="gs gs-${art}" style="left:${(rx + x - bw / 2 + T.zufall(-6, 6)).toFixed(0)}px;top:${(ry + y - bh / 2 + T.zufall(-3, 3)).toFixed(0)}px;${art === "z" ? "height:52px;" : ""}"></i>`; } };
+  // Quadrate brauchen mehr Platz: nur jeden zweiten Platz in jeder zweiten Zeile nutzen
+  const gross = T.mischen(plaetze.filter(p => p % 2 === 1 && Math.floor(p / sp) % 2 === 1));
+  for (let i = 0; i < anz.h; i++) { const p = gross[i], x = (p % sp) * w + w / 2, y = Math.floor(p / sp) * hh + hh / 2; html += `<i class="gs gs-h" style="left:${(rx + x - 29).toFixed(0)}px;top:${(ry + y - 29).toFixed(0)}px"></i>`; }
+  const belegt = new Set(gross.slice(0, anz.h).flatMap(p => [p, p - 1, p + 1, p - sp, p + sp, p - sp - 1, p - sp + 1, p + sp - 1, p + sp + 1]));
+  plaetze.splice(0, plaetze.length, ...plaetze.filter(p => !belegt.has(p)));
+  setze("z", anz.z); setze("e", anz.e);
+  feld.innerHTML = html;
+}
+function zeige() {
+  T.stop(); zeichneFeld();
+  if (blitz && !offen) { feld.classList.add("blitz"); T.nach(3000, () => { feld.classList.remove("blitz"); feld.innerHTML = '<div class="zu">?</div>'; }); }
+}
+function start() { nr = 0; weiter(); }
+function weiter() {
+  if (nr >= RUNDE) { nr = 0; }
+  nr++; anz = neueAufgabe(); offen = false;
+  loes.innerHTML = ""; loesKn.disabled = false; nochKn.hidden = !blitz;
+  zaehler.textContent = `Zahl ${nr} von ${RUNDE}`; weiterKn.textContent = nr >= RUNDE ? "Neue Runde" : "Nächste Zahl →";
+  melde("muster hilfe", "Das sind … Hunderter, … Zehner und … Einer. Das ist …");
+  zeige();
+}
+function loesung() {
+  if (offen) return; offen = true; T.stop(); feld.classList.remove("blitz"); zeichneFeld(); loesKn.disabled = true;
+  const z = n => `<td class="${n ? (n > 9 ? "viel" : "") : "leer"}">${n}</td>`;
+  loes.innerHTML = `<table class="anz" aria-label="Anzahl: ${anz.h} Hunderter, ${anz.z} Zehner, ${anz.e} Einer"><tr><th class="h">H</th><th class="z">Z</th><th class="e">E</th></tr><tr>${z(anz.h)}${z(anz.z)}${z(anz.e)}</tr></table>
+    <div class="gross zahl"><span class="gl">=</span>${T.zahlHTML(anz.wert)}</div>`;
+  const teile = [`Das sind ${anz.h} Hunderter, ${anz.z} Zehner und ${anz.e} Einer.`];
+  if (anz.z > 9) teile.push(`${anz.z} Zehner sind 1 Hunderter und ${anz.z - 10} Zehner. Das ist ${anz.wert}.`);
+  else if (anz.e > 9) teile.push(`${anz.e} Einer sind 1 Zehner und ${anz.e - 10} Einer. Das ist ${anz.wert}.`);
+  else teile.push(`Das ist ${anz.wert}.` + (anz.z === 0 ? " Es gibt keine Zehner: Die Null steht an der Zehnerstelle." : anz.e === 0 ? " Es gibt keine Einer: Die Null steht an der Einerstelle." : ""));
+  melde("ok", teile);
+}
+start();
+</script>
+</body>
+</html>
