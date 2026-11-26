@@ -8,6 +8,7 @@
 <title>Geheimschrift legen – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css?v=2026112601">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<link rel="stylesheet" href="../gemeinsam/geheimschrift.css?v=2026112602">
 <style>
 .auftrag{position:absolute;left:40px;top:176px;width:500px;display:flex;flex-direction:column;gap:12px}
 .auftrag .t{font-size:30px;font-weight:700;color:var(--soft)}
@@ -25,25 +26,19 @@
 .spalte{border:4px solid var(--ink);border-radius:22px;background:#fbfcfb;display:flex;flex-direction:column;overflow:hidden}
 .spalte .kz{display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-size:24px;font-weight:700;height:52px;flex:none}
 .spalte.h .kz{background:var(--H)} .spalte.z .kz{background:var(--Z)} .spalte.e .kz{background:var(--E)}
-.spalte .inhalt{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px 6px;padding:10px;justify-content:center}
+.spalte .inhalt{flex:1;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-end;align-items:flex-end;gap:8px 6px;padding:10px;justify-content:center}
+.spalte.z .inhalt{gap:10px 5px}
+.spalte.e .inhalt{gap:5px}
 .spalte .zahl-unten{height:52px;flex:none;display:grid;place-items:center;font-size:34px;font-weight:700;border-top:3px solid #e3e7e4}
 .spalte .zahl-unten.viel{background:var(--hellgelb)}
 .spalte .buendel{padding:0 10px 10px;display:flex;justify-content:center}
 .spalte .buendel .knopf{font-size:19px;min-height:56px;padding:0 10px;white-space:normal;line-height:1.15}
-button.gs{border:none;padding:0;cursor:pointer;touch-action:manipulation;flex:none}
+button.gs{cursor:pointer;touch-action:manipulation}
 button.gs:focus-visible{outline:4px solid var(--ok);outline-offset:3px}
-.gs-h,button.gs.gs-h{width:72px;height:72px;border:7px solid var(--ink);border-radius:4px;background:#fff}
-.gs-z{width:14px;height:70px;border-radius:7px;background:var(--ink);margin:0 3px}
-.gs-e{width:28px;height:28px;border-radius:50%;background:var(--ink);margin:4px}
-.farben .gs-h,.farben button.gs.gs-h{border-color:var(--H);background:#e3f2e6}
-.farben .gs-z{background:var(--Z)}
-.farben .gs-e{background:var(--E)}
+.legefeld{--s:10px}
 .gs.neu{animation:neu .6s ease-out}
 @keyframes neu{0%{transform:scale(1.8);opacity:.3}100%{transform:none;opacity:1}}
-.taste i{display:block}
-.taste .gs-h{width:44px;height:44px;border-width:5px}
-.taste .gs-z{height:52px;width:12px}
-.taste .gs-e{width:22px;height:22px}
+.taste .sym{--s:6px;--bw:1.5px}
 .satz{position:absolute;left:40px;top:716px;width:1520px}
 .satz .streifen{font-size:27px}
 @media (prefers-reduced-motion: reduce){.gs.neu{animation:none}}
@@ -55,30 +50,30 @@ button.gs:focus-visible{outline:4px solid var(--ok);outline-offset:3px}
 <script>
 window.HINWEISE = {
  titel: "Geheimschrift legen",
- farben: "**Farben** färbt die Zeichen: Quadrat (Hunderter) grün, Strich (Zehner) rot, Punkt (Einer) blau.",
+ farben: "**Farben** färbt das Material: Hunderter grün, Zehner rot, Einer blau.",
  teile: [
-  { h: "Worum geht es?", text: "Zahlen in Geheimschrift legen – wie mit dem Dienes-Material: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer. Von jeder Sorte liegen höchstens 9 Zeichen. Bündeln und Entbündeln gibt es nur im Experten-Modus." },
+  { h: "Worum geht es?", text: "Zahlen in Geheimschrift legen – wie mit dem Dienes-Material: Ein Einer ist ein Kästchen, ein Zehner sind 10 Kästchen übereinander, ein Hunderter sind 10 Zehner nebeneinander. Von jeder Sorte liegen höchstens 9. Bündeln und Entbündeln gibt es nur im Experten-Modus." },
   { h: "So geht es", punkte: [
     "Oben links steht die Zahl. Ein Kind legt sie mit den Knöpfen **+** (dazulegen) und **−** (wegnehmen). Ein Zeichen im Legefeld antippen nimmt es auch weg.",
     "**Prüfen** sagt, ob es stimmt – oder an welcher Stelle noch etwas fehlt.",
-    "In jeder Spalte können höchstens 9 Zeichen liegen.",
+    "In jeder Spalte können höchstens 9 Teile liegen.",
     "**Hilfen**: Unter jeder Spalte steht die Anzahl, dazu das Satzmuster im Streifen." ] },
   { h: "Stufen", punkte: [
     "● Kleine Ziffern (1 bis 5), keine Null.",
     "●● Alle Zahlen bis 999, auch mit Nullen (z. B. 405).",
     "●●● Nachbarzahlen: „Lege die Zahl, die 10 mehr ist als 243.“ Es gibt dabei keinen Übergang (also nie 10 Zeichen).",
-    "●●● mit Experten-Modus: Bedingungen wie „Lege 243 ohne Quadrate“ (24 Striche, 3 Punkte) oder „… mit genau 13 Punkten“." ] },
+    "●●● mit Experten-Modus: Bedingungen wie „Lege 243 ohne Hunderter“ (24 Zehner, 3 Einer) oder „… mit genau 13 Einern“." ] },
   { h: "Experten-Modus", punkte: [
     "Erst einschalten, wenn Bündeln und Entbündeln im Unterricht behandelt wurden.",
-    "Dann können bis zu 30 Zeichen in einer Spalte liegen. Ab 10 gleichen Zeichen erscheint **Bündeln** (10 Punkte → 1 Strich, 10 Striche → 1 Quadrat).",
-    "**Entbündeln**: 1 Quadrat wird zu 10 Strichen, 1 Strich zu 10 Punkten. Das braucht man für die Bedingungen auf Stufe ●●●." ] },
+    "Dann können bis zu 30 Teile in einer Spalte liegen (das Material wird dann kleiner). Ab 10 gleichen Teilen erscheint **Bündeln** (10 Einer → 1 Zehner, 10 Zehner → 1 Hunderter).",
+    "**Entbündeln**: 1 Hunderter wird zu 10 Zehnern, 1 Zehner zu 10 Einern. Das braucht man für die Bedingungen auf Stufe ●●●." ] },
  ],
 };
 </script>
 <script src="../gemeinsam/tafel.js?v=2026112601"></script>
 <script>
 const T = Tafel, S = T.buehne();
-const NAME = { h: ["Quadrat", "Quadrate", "Hunderter"], z: ["Strich", "Striche", "Zehner"], e: ["Punkt", "Punkte", "Einer"] };
+const NAME = { h: ["Hunderter", "Hunderter", "Hunderter"], z: ["Zehner", "Zehner", "Zehner"], e: ["Einer", "Einer", "Einer"] };
 let stufe = 1, experte = T.laden("gs-experte", false), auf = null, liegt = { h: 0, z: 0, e: 0 }, geloest = false, letztNeu = null, vorher = [];
 
 const sWahl = T.stufen(v => { stufe = v; neu(); }, "gs-legen-stufe"); stufe = sWahl.wert;
@@ -90,7 +85,7 @@ const plusKn = {};
 const aufBox = T.blk(40, 176, 500, 0, "auftrag"); aufBox.setAttribute("aria-live", "polite");
 const tasten = T.blk(40, 430, 500, 0, "tasten");
 ["h", "z", "e"].forEach(a => {
-  const z = T.el("div", "taste", `<span class="sym"><i class="gs-${a}"></i></span><span class="name">${NAME[a][2]}</span>`);
+  const z = T.el("div", "taste", `<span class="sym"><i class="gs gs-${a}"></i></span><span class="name">${NAME[a][2]}</span>`);
   const minus = T.knopf("−", () => aendere(a, -1)), plus = T.knopf("+", () => aendere(a, 1), "haupt");
   minus.setAttribute("aria-label", NAME[a][0] + " wegnehmen"); plus.setAttribute("aria-label", NAME[a][0] + " dazulegen");
   plusKn[a] = plus; z.append(minus, plus); tasten.appendChild(z);
@@ -127,9 +122,9 @@ function neueAufgabe() {
     }
     if (stufe === 3) {
       const art = T.wahl(["ohneH", "ohneH", "genauE", "genauZ"]);
-      if (art === "ohneH") { if (h > 2) continue; bed = { art, text: "ohne Quadrate", ziel: { h: 0, z: h * 10 + z, e } }; }
-      if (art === "genauE") { if (z < 1 || e > 8) continue; bed = { art, text: `mit genau ${e + 10} Punkten`, ziel: { h, z: z - 1, e: e + 10 } }; }
-      if (art === "genauZ") { if (h < 2 || z > 8) continue; bed = { art, text: `mit genau ${z + 10} Strichen`, ziel: { h: h - 1, z: z + 10, e } }; }
+      if (art === "ohneH") { if (h > 2) continue; bed = { art, text: "ohne Hunderter", ziel: { h: 0, z: h * 10 + z, e } }; }
+      if (art === "genauE") { if (z < 1 || e > 8) continue; bed = { art, text: `mit genau ${e + 10} Einern`, ziel: { h, z: z - 1, e: e + 10 } }; }
+      if (art === "genauZ") { if (h < 2 || z > 8) continue; bed = { art, text: `mit genau ${z + 10} Zehnern`, ziel: { h: h - 1, z: z + 10, e } }; }
     }
     vorher.push(wert); if (vorher.length > 10) vorher.shift();
     return { wert, h, z, e, bed };
@@ -162,21 +157,31 @@ function zeichne() {
     const bu = sp.querySelector(".buendel"); bu.innerHTML = "";
     plusKn[a].disabled = n >= (experte ? 30 : 9);
     if (!experte) return;
-    if (a !== "h" && n >= 10) bu.appendChild(T.knopf(`Bündeln: 10 ${NAME[a][1]} → 1 ${a === "e" ? "Strich" : "Quadrat"}`, () => buendeln(a)));
-    else if (a !== "e" && n >= 1) bu.appendChild(T.knopf(`Entbündeln: 1 ${NAME[a][0]} → 10 ${a === "h" ? "Striche" : "Punkte"}`, () => entbuendeln(a)));
+    if (a !== "h" && n >= 10) bu.appendChild(T.knopf(`Bündeln: 10 ${NAME[a][1]} → 1 ${a === "e" ? "Zehner" : "Hunderter"}`, () => buendeln(a)));
+    else if (a !== "e" && n >= 1) bu.appendChild(T.knopf(`Entbündeln: 1 ${NAME[a][0]} → 10 ${a === "h" ? "Zehner" : "Einer"}`, () => entbuendeln(a)));
   });
-  feld.setAttribute("aria-label", `Gelegt: ${liegt.h} Quadrate, ${liegt.z} Striche, ${liegt.e} Punkte`);
+  feld.style.setProperty("--s", groesse() + "px");
+  feld.setAttribute("aria-label", `Gelegt: ${liegt.h} Hunderter, ${liegt.z} Zehner, ${liegt.e} Einer`);
+}
+// Kästchengröße: alle Spalten gleich groß, damit Einer, Zehner und Hunderter zusammenpassen
+function groesse() {
+  const box = spalten.h.querySelector(".inhalt"), B = box.clientWidth - 20, H = box.clientHeight - 20;
+  const passt = (s, w, h, g, n) => { const proReihe = Math.max(1, Math.floor((B + g) / (w * s + g))); return Math.ceil(n / proReihe) * (h * s + g) - g <= H; };
+  for (let s = 10; s > 3; s -= .5) {
+    if (passt(s, 10, 10, 8, Math.max(9, liegt.h)) && passt(s, 1.5, 10, 10, Math.max(9, liegt.z)) && passt(s, 1.4, 1.4, 5, Math.max(9, liegt.e))) return s;
+  }
+  return 3;
 }
 const hoeher = { e: "z", z: "h" }, tiefer = { h: "z", z: "e" };
 function buendeln(a) {
   if (liegt[a] < 10) return;
   liegt[a] -= 10; liegt[hoeher[a]]++; letztNeu = hoeher[a]; zeichne();
-  melde("", a === "e" ? "10 Einer sind 1 Zehner. Aus 10 Punkten wird 1 Strich." : "10 Zehner sind 1 Hunderter. Aus 10 Strichen wird 1 Quadrat.");
+  melde("", a === "e" ? "10 Einer sind 1 Zehner." : "10 Zehner sind 1 Hunderter.");
 }
 function entbuendeln(a) {
   if (liegt[a] < 1 || liegt[tiefer[a]] > 20) return;
   liegt[a]--; liegt[tiefer[a]] += 10; letztNeu = tiefer[a]; zeichne();
-  melde("", a === "h" ? "1 Hunderter sind 10 Zehner. Aus 1 Quadrat werden 10 Striche." : "1 Zehner sind 10 Einer. Aus 1 Strich werden 10 Punkte.");
+  melde("", a === "h" ? "1 Hunderter sind 10 Zehner." : "1 Zehner sind 10 Einer.");
 }
 
 // ---------- Prüfen ----------
@@ -186,7 +191,7 @@ function pruefen() {
   if (auf.bed) {
     const z = auf.bed.ziel, passt = liegt.h === z.h && liegt.z === z.z && liegt.e === z.e;
     if (passt) { geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert} – ${auf.bed.text}. ${T.lob()}`]); return; }
-    if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt! Aber es soll ${auf.bed.text} sein.`, auf.bed.art === "ohneH" ? "Tipp: Entbündle die Quadrate." : "Tipp: Entbündle einmal."]); return; }
+    if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt! Aber es soll ${auf.bed.text} sein.`, auf.bed.art === "ohneH" ? "Tipp: Entbündle die Hunderter." : "Tipp: Entbündle einmal."]); return; }
     melde("noch", [satzGelegt, `Das ist ${wert}. Gesucht ist ${auf.wert} – ${auf.bed.text}.`]); return;
   }
   if (wert === auf.wert && liegt.z < 10 && liegt.e < 10) {

@@ -1,0 +1,17 @@
+/* =====================================================================
+   Geheimschrift-Zeichen als Kästchen-Material
+   Einer = 1 Kästchen, Zehner = 10 Kästchen übereinander,
+   Hunderter = 10 Zehner nebeneinander (10 × 10 Kästchen).
+   Größe eines Kästchens über --s am umgebenden Element (Standard 13px).
+   ===================================================================== */
+.gs{box-sizing:border-box;display:block;flex:none;padding:0;
+  --bl:#1d2420;--bf:#f6f3ea;
+  border:var(--bw,2px) solid var(--bl);background-color:var(--bf)}
+.gs-e{width:var(--s,13px);height:var(--s,13px)}
+.gs-z{width:var(--s,13px);height:calc(var(--s,13px) * 10);
+  background-image:linear-gradient(var(--bl) 0 1px,transparent 1px);background-size:100% 10%}
+.gs-h{width:calc(var(--s,13px) * 10);height:calc(var(--s,13px) * 10);
+  background-image:linear-gradient(var(--bl) 0 1px,transparent 1px),linear-gradient(90deg,var(--bl) 0 1px,transparent 1px);background-size:10% 10%}
+.farben .gs-h{--bl:#1f6a2e;--bf:#d5ecd9}
+.farben .gs-z{--bl:#a52a23;--bf:#f7d9d6}
+.farben .gs-e{--bl:#1d4f9c;--bf:#d6e3f7}

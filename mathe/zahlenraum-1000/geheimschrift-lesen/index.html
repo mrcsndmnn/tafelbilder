@@ -8,23 +8,18 @@
 <title>Geheimschrift lesen – Zahlenraum bis 1000</title>
 <link rel="stylesheet" href="../gemeinsam/tafel.css?v=2026112601">
 <link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<link rel="stylesheet" href="../gemeinsam/geheimschrift.css?v=2026112602">
 <style>
 .gsfeld{position:absolute;left:40px;top:176px;width:1520px;height:330px;border:4px solid var(--ink);border-radius:26px;background:#fbfcfb;overflow:hidden}
 .gsfeld.blitz{box-shadow:inset 0 0 0 8px var(--gelb)}
-.reihe{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:46px;padding:20px 30px;flex-wrap:wrap}
-.gruppe-gs{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;max-width:620px}
+.reihe{position:absolute;inset:0;display:flex;align-items:flex-end;align-content:center;justify-content:center;gap:16px 46px;padding:12px 30px;flex-wrap:wrap}
+.gruppe-gs{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.gruppe-gs.h{gap:10px}
 .gruppe-gs .fuenf{display:flex;gap:10px;align-items:flex-end}
 .gruppe-gs .fuenf+.fuenf{margin-left:18px}
 .zu{position:absolute;inset:0;display:grid;place-items:center;font-size:150px;font-weight:700;color:#cfd6d1}
-/* Zeichen der Geheimschrift: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer */
-.gs-h{width:72px;height:72px;border:7px solid var(--ink);border-radius:4px;background:#fff;flex:none}
-.gs-z{width:14px;height:96px;border-radius:7px;background:var(--ink);flex:none}
-.gs-e{width:26px;height:26px;border-radius:50%;background:var(--ink);flex:none}
-.farben .gs-h{border-color:var(--H);background:#e3f2e6}
-.farben .gs-z{background:var(--Z)}
-.farben .gs-e{background:var(--E)}
+.gsfeld{--s:13px}
 .streu .gs{position:absolute}
-.streu .gs-h{width:58px;height:58px;border-width:6px}
 /* Lösung */
 .loesung{position:absolute;left:40px;top:520px;width:1520px;height:180px;display:flex;align-items:center;justify-content:center;gap:60px}
 table.anz{border-collapse:separate;border-spacing:8px 0}
@@ -41,9 +36,7 @@ table.anz{border-collapse:separate;border-spacing:8px 0}
 .satz .streifen{font-size:27px}
 .legende{position:absolute;right:40px;top:104px;display:flex;gap:22px;align-items:center;font-size:22px;font-weight:700;color:var(--soft)}
 .legende span{display:flex;align-items:center;gap:8px}
-.legende .gs-h{width:26px;height:26px;border-width:4px}
-.legende .gs-z{width:7px;height:34px}
-.legende .gs-e{width:13px;height:13px}
+.legende{--s:5.5px;--bw:1.2px;align-items:flex-end}
 </style>
 </head>
 <body>
@@ -52,20 +45,20 @@ table.anz{border-collapse:separate;border-spacing:8px 0}
 <script>
 window.HINWEISE = {
  titel: "Geheimschrift lesen",
- farben: "**Farben** färbt die Zeichen: Quadrat (Hunderter) grün, Strich (Zehner) rot, Punkt (Einer) blau.",
+ farben: "**Farben** färbt das Material: Hunderter grün, Zehner rot, Einer blau.",
  teile: [
-  { h: "Worum geht es?", text: "Die Geheimschrift ist die gezeichnete Form des Dienes-Materials: Quadrat = Hunderterplatte, Strich = Zehnerstange, Punkt = Einerwürfel. Die Kinder lesen, welche Zahl dort „geheim“ geschrieben steht." },
+  { h: "Worum geht es?", text: "Die Geheimschrift ist die gezeichnete Form des Dienes-Materials: Ein Einer ist ein Kästchen, ein Zehner sind 10 Kästchen übereinander, ein Hunderter sind 10 Zehner nebeneinander (10 × 10 Kästchen). Die Kinder lesen, welche Zahl dort „geheim“ geschrieben steht." },
   { h: "So geht es", punkte: [
-    "Die Zahl steht in Geheimschrift im Feld. Die Kinder zählen Quadrate, Striche und Punkte und nennen die Zahl im Satz: „Das sind 2 Hunderter, 4 Zehner und 3 Einer. Das ist 243.“",
+    "Die Zahl steht in Geheimschrift im Feld. Die Kinder zählen Hunderter, Zehner und Einer und nennen die Zahl im Satz: „Das sind 2 Hunderter, 4 Zehner und 3 Einer. Das ist 243.“",
     "**Lösung** zeigt die Anzahl in der Stellenwerttafel und die Zahl.",
     "**Blitz**: Die Geheimschrift ist nur 3 Sekunden zu sehen. Die Kinder müssen schnell erfassen (Fünfer-Gruppen helfen).",
     "**Nächste Zahl** – eine Runde hat 10 Zahlen.",
-    "**Hilfen**: Fünfer-Gruppen bei Strichen und Punkten und das Satzmuster im Streifen." ] },
+    "**Hilfen**: Fünfer-Gruppen bei Zehnern und Einern und das Satzmuster im Streifen." ] },
   { h: "Stufen", punkte: [
-    "● Geordnet: erst Quadrate, dann Striche, dann Punkte. Keine Null in der Zahl.",
-    "●● Geordnet, auch mit Nullen (z. B. 305 – keine Striche!).",
+    "● Geordnet: erst Hunderter, dann Zehner, dann Einer. Keine Null in der Zahl.",
+    "●● Geordnet, auch mit Nullen (z. B. 305 – keine Zehner!).",
     "●●● Durcheinander: Die Zeichen liegen verstreut im Feld, auch mit Nullen." ] },
-  { h: "Experten-Modus", text: "Normalerweise gibt es von jeder Sorte höchstens 9 Zeichen. Mit **Experten-Modus** kommen in Stufe ●●● auch mehr als 9 Striche oder Punkte vor. Dann muss gebündelt werden (12 Striche = 1 Hunderter und 2 Zehner). Erst einschalten, wenn das Bündeln im Unterricht behandelt wurde." },
+  { h: "Experten-Modus", text: "Normalerweise gibt es von jeder Sorte höchstens 9 Zeichen. Mit **Experten-Modus** kommen in Stufe ●●● auch mehr als 9 Zehner oder Einer vor. Dann muss gebündelt werden (12 Zehner = 1 Hunderter und 2 Zehner). Erst einschalten, wenn das Bündeln im Unterricht behandelt wurde." },
  ],
 };
 </script>
@@ -109,27 +102,38 @@ function neueAufgabe() {
 const zeichen = (art, n) => {
   // Fünfer-Gruppen als Zählhilfe (nur mit „Hilfen“)
   const eins = `<i class="gs gs-${art}"></i>`;
-  if (!T.hilfen() || art === "h") return `<div class="gruppe-gs">${eins.repeat(n)}</div>`;
+  if (!T.hilfen() || art === "h") return `<div class="gruppe-gs ${art}">${eins.repeat(n)}</div>`;
   let s = ""; for (let i = 0; i < n; i += 5) s += `<span class="fuenf">${eins.repeat(Math.min(5, n - i))}</span>`;
   return `<div class="gruppe-gs">${s}</div>`;
 };
+// Rechtecke ohne Überlappung verteilen (Hunderter zuerst, sie brauchen am meisten Platz)
+function streue(a, s, B, Hh, rand) {
+  const masse = { h: [10 * s, 10 * s], z: [s, 10 * s], e: [s, s] };
+  for (let versuch = 0; versuch < 40; versuch++) {
+    const liste = [], ok = ["h", "z", "e"].every(art => {
+      for (let i = 0; i < a[art]; i++) {
+        const [w, h] = masse[art]; let gefunden = false;
+        for (let t = 0; t < 400 && !gefunden; t++) {
+          const x = Math.random() * (B - w), y = Math.random() * (Hh - h);
+          if (liste.every(r => x + w + rand <= r.x || r.x + r.w + rand <= x || y + h + rand <= r.y || r.y + r.h + rand <= y)) { liste.push({ art, x, y, w, h }); gefunden = true; }
+        }
+        if (!gefunden) return false;
+      }
+      return true;
+    });
+    if (ok) return liste;
+  }
+  return null;
+}
 function zeichneFeld() {
   feld.classList.remove("streu");
-  feld.setAttribute("aria-label", `Geheimschrift: ${anz.h} Quadrate, ${anz.z} Striche, ${anz.e} Punkte`);
+  feld.setAttribute("aria-label", `Geheimschrift: ${anz.h} Hunderter, ${anz.z} Zehner, ${anz.e} Einer`);
   if (stufe < 3) { feld.innerHTML = `<div class="reihe">${anz.h ? zeichen("h", anz.h) : ""}${anz.z ? zeichen("z", anz.z) : ""}${anz.e ? zeichen("e", anz.e) : ""}</div>`; return; }
-  // durcheinander: Zeichen auf freie Plätze eines Rasters verteilen
+  // durcheinander: Material ohne Überlappung frei im Feld verteilen
   feld.classList.add("streu");
-  const sp = 22, ze = 5, w = 1480 / sp, hh = 290 / ze, rx = 20, ry = 16, plaetze = T.mischen(Array.from({ length: sp * ze }, (_, i) => i));
-  let html = "", k = 0;
-  const setze = (art, n) => { for (let i = 0; i < n; i++) { const p = plaetze[k++], x = (p % sp) * w + w / 2, y = Math.floor(p / sp) * hh + hh / 2;
-    const [bw, bh] = art === "h" ? [58, 58] : art === "z" ? [14, 52] : [26, 26];
-    html += `<i class="gs gs-${art}" style="left:${(rx + x - bw / 2 + T.zufall(-6, 6)).toFixed(0)}px;top:${(ry + y - bh / 2 + T.zufall(-3, 3)).toFixed(0)}px;${art === "z" ? "height:52px;" : ""}"></i>`; } };
-  // Quadrate brauchen mehr Platz: nur jeden zweiten Platz in jeder zweiten Zeile nutzen
-  const gross = T.mischen(plaetze.filter(p => p % 2 === 1 && Math.floor(p / sp) % 2 === 1));
-  for (let i = 0; i < anz.h; i++) { const p = gross[i], x = (p % sp) * w + w / 2, y = Math.floor(p / sp) * hh + hh / 2; html += `<i class="gs gs-h" style="left:${(rx + x - 29).toFixed(0)}px;top:${(ry + y - 29).toFixed(0)}px"></i>`; }
-  const belegt = new Set(gross.slice(0, anz.h).flatMap(p => [p, p - 1, p + 1, p - sp, p + sp, p - sp - 1, p - sp + 1, p + sp - 1, p + sp + 1]));
-  plaetze.splice(0, plaetze.length, ...plaetze.filter(p => !belegt.has(p)));
-  setze("z", anz.z); setze("e", anz.e);
+  const S0 = 13, B = 1480, Hh = 290, rand = 14, platz = streue(anz, S0, B, Hh, rand);
+  if (!platz) { feld.classList.remove("streu"); feld.innerHTML = `<div class="reihe">${anz.h ? zeichen("h", anz.h) : ""}${anz.z ? zeichen("z", anz.z) : ""}${anz.e ? zeichen("e", anz.e) : ""}</div>`; return; }
+  const html = platz.map(r => `<i class="gs gs-${r.art}" style="left:${(20 + r.x).toFixed(0)}px;top:${(18 + r.y).toFixed(0)}px"></i>`).join("");
   feld.innerHTML = html;
 }
 function zeige() {

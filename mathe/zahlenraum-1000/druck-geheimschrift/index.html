@@ -8,33 +8,34 @@
 <title>Geheimschrift – Druckvorlage</title>
 <link rel="stylesheet" href="../../zahlenstrahl/gemeinsam/druck.css?v=2026112101">
 <style>
-.legende-gs{display:flex;gap:8mm;align-items:center;border:.4mm solid #000;border-radius:3mm;padding:2mm 4mm;margin:0 0 4mm;font-size:13pt}
+.legende-gs{display:flex;gap:6mm;align-items:flex-end;white-space:nowrap;border:.4mm solid #000;border-radius:3mm;padding:2mm 4mm;margin:0 0 3mm;font-size:12pt}
 .legende-gs b{font-size:11.5pt;color:#5d6862}
 .legende-gs span{display:inline-flex;align-items:center;gap:2mm}
-.legende-gs svg{height:7mm;width:auto}
-.karten{display:grid;grid-template-columns:1fr 1fr;gap:4.5mm 6mm}
-.karte{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2mm 3mm 2.5mm;display:flex;flex-direction:column;gap:2mm;break-inside:avoid}
-.karte .bild{border:.3mm solid #d5ddd7;border-radius:2mm;height:34mm;display:block;width:100%}
-.karte .bild.leer{background:repeating-linear-gradient(0deg,transparent 0 12mm,#eef1ee 12mm 12.4mm)}
+.karten{display:flex;flex-direction:column;gap:3.5mm}
+.karte{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2mm 3mm;display:flex;gap:4mm;align-items:stretch;break-inside:avoid}
+.karte .bild{border:.3mm solid #d5ddd7;border-radius:2mm;height:30mm;width:124mm;flex:none;display:block}
+.karte .bild.leer{background:#fff}
+.karte .rechts{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:1.5mm}
 .karte .zeile{display:flex;align-items:center;gap:2mm;font-size:13pt;white-space:nowrap}
 .karte table{border-collapse:collapse}
 .karte th{font-size:10pt;font-weight:700;border:.35mm solid #000;width:10mm;padding:.3mm 0;background:#f1f3f1}
 .karte td{border:.35mm solid #000;height:8mm;text-align:center;font-size:14pt;font-weight:700}
-.karte .gleich{font-size:15pt;margin:0 1mm}
-.karte .lz{display:inline-block;min-width:22mm;border-bottom:.4mm solid #000;text-align:center;font-size:16pt;font-weight:700;line-height:1.2}
-.karte .gross{font-size:20pt;font-weight:700;letter-spacing:.5mm}
+.karte .lz{display:inline-block;min-width:20mm;border-bottom:.4mm solid #000;text-align:center;font-size:16pt;font-weight:700;line-height:1.2}
+.karte .gross{font-size:22pt;font-weight:700;letter-spacing:.5mm}
 .karte.bsp{color:#8d9892}
 .karte.bsp td,.karte.bsp th,.karte.bsp .lz{border-color:#8d9892;color:#8d9892}
 .karte .bsp-lbl{font-size:9.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.3mm}
-.karte .nr{font-size:10pt;font-weight:700;color:#5d6862}
+.karte .nr{font-size:11pt;font-weight:700;color:#5d6862}
 .loes td,td.loes{color:#2667c9}
-/* Zeichen */
-.s-h{fill:none;stroke:#000;stroke-width:.75}
-.s-z{stroke:#000;stroke-width:1.5;stroke-linecap:round}
-.s-e{fill:#000}
-.farben .s-h{stroke:#2e8b3e}.farben .s-z{stroke:#d03a32}.farben .s-e{fill:#2667c9}
-.bsp .s-h,.bsp .s-z{stroke:#8d9892}.bsp .s-e{fill:#8d9892}
-.loes-gs .s-h,.loes-gs .s-z{stroke:#2667c9}.loes-gs .s-e{fill:#2667c9}
+/* Material: Einer = 1 Kästchen, Zehner = 10 Kästchen, Hunderter = 10 × 10 Kästchen */
+.m{fill:#fff;stroke:#000;stroke-width:1.1px}
+.m-l{fill:none;stroke:#000;stroke-width:.45px}
+.farben .m.h{fill:#d5ecd9;stroke:#1f6a2e}.farben .m-l.h{stroke:#1f6a2e}
+.farben .m.z{fill:#f7d9d6;stroke:#a52a23}.farben .m-l.z{stroke:#a52a23}
+.farben .m.e{fill:#d6e3f7;stroke:#1d4f9c}
+.bsp .m,.bsp .m-l{stroke:#8d9892}.bsp .m{fill:#fff}
+.loes-gs .m,.loes-gs .m-l{stroke:#2667c9}
+.legende-gs .teil{display:inline-flex;align-items:flex-end;gap:2mm}
 .hinweis{font-size:12pt;margin:-1.5mm 0 3mm;color:#333}
 </style>
 </head>
@@ -45,44 +46,75 @@
 const D = Druck;
 const z = (a, b, rnd) => a + Math.floor(rnd() * (b - a + 1));
 const ART = { lesen: "Geheimschrift lesen", zeichnen: "Geheimschrift schreiben", gemischt: "Lesen und Schreiben" };
-const W = 72, H = 30;    // Zeichenfläche in mm
-
-// ---------- Zeichen als SVG (Maße in mm) ----------
-const quadrat = (x, y) => `<rect class="s-h" x="${x}" y="${y}" width="5.4" height="5.4"/>`;
-const strich = (x, y, l = 7.5) => `<line class="s-z" x1="${x}" y1="${y}" x2="${x}" y2="${(y + l).toFixed(2)}"/>`;
-const punkt = (x, y) => `<circle class="s-e" cx="${x}" cy="${y}" r="1.1"/>`;
-
-// Geordnet: oben die Quadrate, darunter Striche und Punkte in Fünfer-Gruppen
-function geordnet(a) {
-  let s = "", x0 = 4;
-  const hatH = a.h > 0;
-  for (let i = 0; i < a.h; i++) s += quadrat(x0 + i * 8.2, 4);
-  const y = hatH ? 14 : 8;
-  let x = x0 + .6;
-  for (let i = 0; i < a.z; i++) { s += strich(x, y + (hatH ? 0 : 3)); x += 2.6 + (i % 5 === 4 ? 1.8 : 0); }
-  if (a.z) x += 4;
-  for (let i = 0; i < a.e; i++) { s += punkt(x + .5, y + (hatH ? 6.4 : 9.4)); x += 2.9 + (i % 5 === 4 ? 1.8 : 0); }
-  // zu breit? (nur Experten-Modus mit vielen Zeichen) → zusammendrücken
-  const voll = Math.max(x + 2, x0 + a.h * 8.2);
-  return { svg: s, breite: Math.max(W, voll) };
+// ---------- Material als SVG (Maße in Kästchen; das Bild wird auf die Karte skaliert) ----------
+const BW = 124, BH = 30;          // Bildfläche in mm
+const NS = 'vector-effect="non-scaling-stroke"';
+function einer(x, y) { return `<rect class="m e" ${NS} x="${x}" y="${y}" width="1" height="1"/>`; }
+function zehner(x, y) {
+  let l = ""; for (let i = 1; i < 10; i++) l += `M${x} ${y + i}h1`;
+  return `<rect class="m z" ${NS} x="${x}" y="${y}" width="1" height="10"/><path class="m-l z" ${NS} d="${l}"/>`;
 }
-// Durcheinander: Zeichen auf zufälligen Feldern eines Rasters
+function hunderter(x, y) {
+  let l = ""; for (let i = 1; i < 10; i++) l += `M${x} ${y + i}h10M${x + i} ${y}v10`;
+  return `<rect class="m h" ${NS} x="${x}" y="${y}" width="10" height="10"/><path class="m-l h" ${NS} d="${l}"/>`;
+}
+const MASS = { h: [10, 10, hunderter], z: [1, 10, zehner], e: [1, 1, einer] };
+
+// Eine Reihe gleicher Teile (mit Fünfer-Lücke), unten bündig auf Höhe y0
+function reihe(art, n, x, y0, proReihe = 99) {
+  const [w, h, f] = MASS[art], g = art === "h" ? 1.2 : .55, fl = art === "h" ? 0 : .9;
+  let s = "", bx = 0, by = 0, zeilen = Math.ceil(n / proReihe);
+  for (let i = 0; i < n; i++) {
+    const sp = i % proReihe, ze = Math.floor(i / proReihe);
+    const px = x + sp * (w + g) + Math.floor(sp / 5) * fl, py = y0 - h - (zeilen - 1 - ze) * (h + g);
+    s += f(px, py); bx = Math.max(bx, px + w - x); by = Math.max(by, y0 - py);
+  }
+  return { s, b: bx, h: by };
+}
+// Geordnet: mehrere Anordnungen ausprobieren, die mit dem größten Maßstab nehmen
+function geordnet(a) {
+  const zE = a.e > 5 ? 5 : 99;      // Einer ab 6 in zwei Reihen (5 + Rest)
+  const kand = [];
+  const neben = hPro => {           // Hunderter links, Zehner und Einer rechts daneben
+    const H = a.h ? reihe("h", a.h, 0, 0, hPro) : { s: "", b: 0, h: 0 };
+    const hoch = Math.max(H.h, a.z ? 10 : 0, a.e ? 1 : 0);
+    let x = H.b + (a.h ? 2.5 : 0), s = "";
+    const Hs = a.h ? reihe("h", a.h, 0, hoch, hPro).s : "";
+    if (a.z) { const Z = reihe("z", a.z, x, hoch); s += Z.s; x += Z.b + 2; }
+    if (a.e) { const E = reihe("e", a.e, x, hoch, zE); s += E.s; x += E.b; }
+    return { s: Hs + s, b: x, h: hoch };
+  };
+  kand.push(neben(99));
+  if (a.h > 3) kand.push(neben(Math.ceil(a.h / 2)));
+  if (a.h) {                         // Hunderter oben, darunter Zehner und Einer
+    const Hr = reihe("h", a.h, 0, 10), hoch = 10 + (a.z || a.e ? 2 + (a.z ? 10 : 1) : 0);
+    let x = 0, s = Hr.s;
+    if (a.z) { const Z = reihe("z", a.z, x, hoch); s += Z.s; x += Z.b + 2; }
+    if (a.e) { const E = reihe("e", a.e, x, hoch, zE); s += E.s; x += E.b; }
+    kand.push({ s, b: Math.max(Hr.b, x), h: hoch });
+  }
+  const mass = k => Math.min(2.4, (BW - 6) / k.b, (BH - 5) / k.h);
+  return kand.sort((p, q) => mass(q) - mass(p))[0];
+}
+// Durcheinander: Teile ohne Überlappung zufällig verteilen (Maßstab fest 1,6 mm)
 function wirr(a, rnd) {
-  const sp = 11, ze = 4, wz = W / sp, hz = H / ze, frei = [];
-  for (let c = 0; c < sp; c++) for (let r = 0; r < ze; r++) frei.push([c, r]);
-  const zellen = frei.sort(() => rnd() - .5);
-  let s = "", k = 0;
-  const nimm = () => zellen[k++] || [0, 0];
-  const j = () => (rnd() - .5) * 1.2;
-  for (let i = 0; i < a.h; i++) { const [c, r] = nimm(); s += quadrat(c * wz + (wz - 5.4) / 2 + j(), r * hz + (hz - 5.4) / 2 + j()); }
-  for (let i = 0; i < a.z; i++) { const [c, r] = nimm(); s += strich(c * wz + wz / 2 + j(), r * hz + (hz - 6.2) / 2, 6.2); }
-  for (let i = 0; i < a.e; i++) { const [c, r] = nimm(); s += punkt(c * wz + wz / 2 + j(), r * hz + hz / 2 + j()); }
-  return { svg: s, breite: W };
+  const W = (BW - 4) / 1.6, H = (BH - 3) / 1.6, rand = .9;
+  for (let v = 0; v < 60; v++) {
+    const liste = [];
+    const ok = ["h", "z", "e"].every(art => { for (let i = 0; i < a[art]; i++) { const [w, h] = MASS[art]; let gut = false;
+      for (let t = 0; t < 300 && !gut; t++) { const x = rnd() * (W - w), y = rnd() * (H - h);
+        if (liste.every(r => x + w + rand <= r.x || r.x + r.w + rand <= x || y + h + rand <= r.y || r.y + r.h + rand <= y)) { liste.push({ art, x, y, w, h }); gut = true; } }
+      if (!gut) return false; } return true; });
+    if (ok) return { s: liste.map(r => MASS[r.art][2](+r.x.toFixed(2), +r.y.toFixed(2))).join(""), b: W, h: H };
+  }
+  return null;
 }
 const bild = (a, cfg, rnd, extra = "") => {
-  const g = cfg.niveau === 3 ? wirr(a, rnd) : geordnet(a);
-  const svg = g.svg;
-  return `<svg class="bild${extra}" viewBox="0 0 ${g.breite} ${H}" preserveAspectRatio="xMinYMid meet" role="img" aria-label="${a.h} Quadrate, ${a.z} Striche, ${a.e} Punkte">${svg}</svg>`;
+  const g = (cfg.niveau === 3 && wirr(a, rnd)) || geordnet(a);
+  const m = Math.min(2.4, (BW - 6) / g.b, (BH - 5) / g.h), vw = BW / m, vh = BH / m;
+  // Bild mittig in der Fläche
+  const ox = (vw - g.b) / 2, oy = (vh - g.h) / 2;
+  return `<svg class="bild${extra}" viewBox="${(-ox).toFixed(2)} ${(-oy).toFixed(2)} ${vw.toFixed(2)} ${vh.toFixed(2)}" role="img" aria-label="${a.h} Hunderter, ${a.z} Zehner, ${a.e} Einer">${g.s}</svg>`;
 };
 
 // ---------- Zahlen ----------
@@ -106,14 +138,13 @@ function karteLesen(a, cfg, rnd, loes, bsp, nr) {
   const zeig = loes || bsp, lc = bsp ? "" : "loes", ohneH = cfg.raum === "100";
   const kopf = (ohneH ? "" : "<th>H</th>") + "<th>Z</th><th>E</th>";
   const zellen = (ohneH ? "" : L(a.h, zeig, lc)) + L(a.z, zeig, lc) + L(a.e, zeig, lc);
-  return `<div class="karte${bsp ? " bsp" : ""}">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}${bild(a, cfg, rnd)}
-    <div class="zeile"><table><tr>${kopf}</tr><tr>${zellen}</tr></table><span class="gleich">→</span>Zahl: <span class="lz${zeig && !bsp ? " loes" : ""}">${zeig ? a.wert : "&nbsp;"}</span></div></div>`;
+  return `<div class="karte${bsp ? " bsp" : ""}">${bild(a, cfg, rnd)}<div class="rechts">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}
+    <table><tr>${kopf}</tr><tr>${zellen}</tr></table><div class="zeile">Zahl: <span class="lz${zeig && !bsp ? " loes" : ""}">${zeig ? a.wert : "&nbsp;"}</span></div></div></div>`;
 }
 function karteZeichnen(a, cfg, rnd, loes, bsp, nr) {
   const zeig = loes || bsp;
-  return `<div class="karte${bsp ? " bsp" : ""}">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}
-    <div class="zeile">Zahl: <span class="gross">${a.wert}</span></div>
-    ${zeig ? bild(a, Object.assign({}, cfg, { niveau: 1 }), rnd, bsp ? "" : " loes-gs") : '<div class="bild leer"></div>'}</div>`;
+  return `<div class="karte${bsp ? " bsp" : ""}">${zeig ? bild(a, Object.assign({}, cfg, { niveau: 1 }), rnd, bsp ? "" : " loes-gs") : '<div class="bild leer"></div>'}
+    <div class="rechts">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}<div class="zeile">Zahl:</div><div class="gross">${a.wert}</div><span></span></div></div>`;
 }
 
 D.start({
@@ -126,14 +157,14 @@ D.start({
   info: cfg => ART[cfg.art] + " · bis " + cfg.raum + (cfg.niveau === 3 ? " · durcheinander" : "") + (cfg.experte ? " · Experten-Modus" : ""),
   baue(cfg, rnd, loes) {
     const genutzt = [], ohneH = cfg.raum === "100";
-    const leg = (cls, inner, w) => `<svg viewBox="0 0 ${w} 9" style="width:${w}mm;height:9mm" class="${cls}">${inner}</svg>`;
-    let h = `<div class="legende-gs"><b>Geheim&shy;schrift</b>`
-      + (ohneH ? "" : `<span>${leg("", quadrat(1.3, 1.8), 8)} = 1 Hunderter</span>`)
-      + `<span>${leg("", strich(3, .8), 6)} = 1 Zehner</span><span>${leg("", punkt(3, 4.5), 6)} = 1 Einer</span></div>`;
+    const leg = (inner, w, h) => `<svg viewBox="-.2 -.2 ${w + .4} ${h + .4}" style="width:${(w + .4) * 1.6}mm;height:${(h + .4) * 1.6}mm">${inner}</svg>`;
+    let h = `<div class="legende-gs"><b>Geheimschrift</b>`
+      + (ohneH ? "" : `<span class="teil">${leg(hunderter(0, 0), 10, 10)} 1 Hunderter = 10 Zehner</span>`)
+      + `<span class="teil">${leg(zehner(0, 0), 1, 10)} 1 Zehner = 10 Einer</span><span class="teil">${leg(einer(0, 0), 1, 1)} 1 Einer</span></div>`;
     const auftrag = { lesen: "Welche Zahl ist das? Zähle und schreibe die Zahl auf.", zeichnen: "Schreibe die Zahl in Geheimschrift.", gemischt: "Lies die Geheimschrift oder schreibe die Zahl in Geheimschrift." }[cfg.art];
     h += `<p class="b-auftrag">${auftrag}</p>`;
-    if (cfg.experte && cfg.art !== "zeichnen") h += `<p class="hinweis">Achtung: Manchmal sind es mehr als 9 Zeichen. Dann musst du bündeln: 10 Punkte = 1 Zehner, 10 Striche = 1 Hunderter.</p>`;
-    const anzahl = 6;   // inkl. Beispiel
+    if (cfg.experte && cfg.art !== "zeichnen") h += `<p class="hinweis">Achtung: Manchmal sind es mehr als 9. Dann musst du bündeln: 10 Einer = 1 Zehner, 10 Zehner = 1 Hunderter.</p>`;
+    const anzahl = 5;   // inkl. Beispiel
     const bsp = { h: ohneH ? 0 : 2, z: 4, e: 3, wert: ohneH ? 43 : 243 }; genutzt.push(bsp.wert);
     h += '<div class="karten">';
     const ersteArt = cfg.art === "zeichnen" ? "zeichnen" : "lesen";
