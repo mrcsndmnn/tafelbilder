@@ -6,7 +6,7 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Zahlenraum bis 1000 – Tafelbilder</title>
-<meta name="description" content="Elf interaktive Tafelbilder zum Zahlenraum bis 1000: 1000er-Tafel als Leporello und Geheimschrift.">
+<meta name="description" content="Elf interaktive Tafelbilder und eine Druckvorlage zum Zahlenraum bis 1000: 1000er-Tafel als Leporello und Geheimschrift.">
 <link rel="stylesheet" href="../../gemeinsam/zurueck.css">
 <style>
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
@@ -85,9 +85,9 @@ const TAFELN = [
     S('<rect x="3" y="26" width="8" height="8" rx="1"/><rect x="13" y="26" width="8" height="8" rx="1"/><rect x="23" y="16" width="18" height="18" rx="2"/><path d="M17 22 L23 18"/>')],
   ["blitzrunde", "Blitzrunde zum Stundenbeginn", "10 schnelle Runden: Startzahl und Befehl, dann Lösung.",
     S('<path d="M25 4 L10 25 H21 L18 40 L34 18 H23 Z"/>')],
-  ["geheimschrift-lesen", "Geheimschrift lesen", "Quadrate, Striche und Punkte zählen: Welche Zahl steht da? Auch durcheinander und mit Bündeln.",
+  ["geheimschrift-lesen", "Geheimschrift lesen", "Quadrate, Striche und Punkte zählen: Welche Zahl steht da? Auch durcheinander. Bündeln nur im Experten-Modus.",
     S('<rect x="3" y="14" width="13" height="13" rx="1"/><path d="M22 10 V31 M27 10 V31"/><circle cx="34" cy="21" r="2.2" fill="currentColor"/><circle cx="40" cy="21" r="2.2" fill="currentColor"/>')],
-  ["geheimschrift-legen", "Geheimschrift legen", "Zahlen mit Quadraten, Strichen und Punkten legen. Bündeln und Entbündeln.",
+  ["geheimschrift-legen", "Geheimschrift legen", "Zahlen mit Quadraten, Strichen und Punkten legen, auch 1, 10 oder 100 mehr/weniger. Bündeln nur im Experten-Modus.",
     S('<rect x="3" y="6" width="13" height="13" rx="1"/><path d="M24 6 V27"/><circle cx="34" cy="16" r="2.2" fill="currentColor"/><path d="M8 34 H20 M14 28 V40"/>')],
 ];
 document.getElementById("grid").innerHTML = TAFELN.map(([pfad, titel, text, sym], i) => `
@@ -96,7 +96,13 @@ document.getElementById("grid").innerHTML = TAFELN.map(([pfad, titel, text, sym]
     <span class="nr">Tafelbild ${i + 1}</span>
     <strong>${titel}</strong>
     <span class="desc">${text}</span>
-  </a>`).join("");
+  </a>`).join("") + `
+  <a class="kachel" href="druck-geheimschrift/">
+    <span class="sym" style="color:var(--mathe)">${S('<rect x="8" y="3" width="28" height="38" rx="2"/><rect x="13" y="10" width="7" height="7"/><path d="M24 10 V17 M28 10 V17 M14 25 H30 M14 32 H26"/>')}</span>
+    <span class="nr">Druckvorlage</span>
+    <strong>Geheimschrift (Arbeitsblatt-Generator)</strong>
+    <span class="desc">A4-Blätter: Geheimschrift lesen und schreiben, bis 100 oder 1000. Mit Lösungsblatt, Bündeln nur im Experten-Modus.</span>
+  </a>`;
 </script>
 </body>
 </html>

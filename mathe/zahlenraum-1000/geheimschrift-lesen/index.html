@@ -64,7 +64,8 @@ window.HINWEISE = {
   { h: "Stufen", punkte: [
     "● Geordnet: erst Quadrate, dann Striche, dann Punkte. Keine Null in der Zahl.",
     "●● Geordnet, auch mit Nullen (z. B. 305 – keine Striche!).",
-    "●●● Durcheinander. Manchmal sind es mehr als 9 Striche oder Punkte: Dann muss gebündelt werden (12 Striche = 1 Hunderter und 2 Zehner)." ] },
+    "●●● Durcheinander: Die Zeichen liegen verstreut im Feld, auch mit Nullen." ] },
+  { h: "Experten-Modus", text: "Normalerweise gibt es von jeder Sorte höchstens 9 Zeichen. Mit **Experten-Modus** kommen in Stufe ●●● auch mehr als 9 Striche oder Punkte vor. Dann muss gebündelt werden (12 Striche = 1 Hunderter und 2 Zehner). Erst einschalten, wenn das Bündeln im Unterricht behandelt wurde." },
  ],
 };
 </script>
@@ -72,12 +73,13 @@ window.HINWEISE = {
 <script>
 const T = Tafel, S = T.buehne();
 const RUNDE = 10;
-let stufe = 1, blitz = T.laden("gs-blitz", false), anz = null, nr = 0, offen = false, vorher = [];
+let stufe = 1, blitz = T.laden("gs-blitz", false), experte = T.laden("gs-experte", false), anz = null, nr = 0, offen = false, vorher = [];
 
 const sWahl = T.stufen(v => { stufe = v; start(); }, "gs-lesen-stufe"); stufe = sWahl.wert;
 const bKn = T.schalter("Blitz (3 Sek.)", blitz, v => { blitz = v; T.merken("gs-blitz", v); zeige(); });
 T.kopf({ titel: "Geheimschrift lesen", onNeu: () => start(), onHilfen: () => { if (anz && stufe < 3 && (!blitz || offen)) zeichneFeld(); } });
-T.leiste(sWahl, bKn);
+const eKn = T.schalter("Experten-Modus", experte, v => { experte = v; T.merken("gs-experte", v); start(); });
+T.leiste(sWahl, bKn, eKn);
 S.appendChild(T.el("div", "legende", '<span><i class="gs-h"></i>Hunderter</span><span><i class="gs-z"></i>Zehner</span><span><i class="gs-e"></i>Einer</span>'));
 
 const feld = T.blk(40, 176, 1520, 330, "gsfeld"); feld.style.position = "absolute"; feld.setAttribute("role", "img");
@@ -95,7 +97,7 @@ function neueAufgabe() {
     let h = T.zufall(1, 9), z = T.zufall(1, 9), e = T.zufall(1, 9);
     if (stufe === 2 && Math.random() < .6) { if (Math.random() < .5) z = 0; else e = 0; }
     if (stufe === 3) {
-      if (Math.random() < .5) { if (Math.random() < .5) z = T.zufall(10, 15); else e = T.zufall(10, 15); h = T.zufall(1, 7); }   // bündeln nötig
+      if (experte && Math.random() < .5) { if (Math.random() < .5) z = T.zufall(10, 15); else e = T.zufall(10, 15); h = T.zufall(1, 7); }   // bündeln nötig (nur Experten-Modus)
       else if (Math.random() < .4) { if (Math.random() < .5) z = 0; else e = 0; }
     }
     const wert = h * 100 + z * 10 + e;

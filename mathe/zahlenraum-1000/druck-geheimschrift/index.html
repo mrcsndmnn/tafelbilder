@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Geheimschrift – Druckvorlage</title>
+<link rel="stylesheet" href="../../zahlenstrahl/gemeinsam/druck.css?v=2026112101">
+<style>
+.legende-gs{display:flex;gap:8mm;align-items:center;border:.4mm solid #000;border-radius:3mm;padding:2mm 4mm;margin:0 0 4mm;font-size:13pt}
+.legende-gs b{font-size:11.5pt;color:#5d6862}
+.legende-gs span{display:inline-flex;align-items:center;gap:2mm}
+.legende-gs svg{height:7mm;width:auto}
+.karten{display:grid;grid-template-columns:1fr 1fr;gap:4.5mm 6mm}
+.karte{border:.35mm solid #b9c2bc;border-radius:3mm;padding:2mm 3mm 2.5mm;display:flex;flex-direction:column;gap:2mm;break-inside:avoid}
+.karte .bild{border:.3mm solid #d5ddd7;border-radius:2mm;height:34mm;display:block;width:100%}
+.karte .bild.leer{background:repeating-linear-gradient(0deg,transparent 0 12mm,#eef1ee 12mm 12.4mm)}
+.karte .zeile{display:flex;align-items:center;gap:2mm;font-size:13pt;white-space:nowrap}
+.karte table{border-collapse:collapse}
+.karte th{font-size:10pt;font-weight:700;border:.35mm solid #000;width:10mm;padding:.3mm 0;background:#f1f3f1}
+.karte td{border:.35mm solid #000;height:8mm;text-align:center;font-size:14pt;font-weight:700}
+.karte .gleich{font-size:15pt;margin:0 1mm}
+.karte .lz{display:inline-block;min-width:22mm;border-bottom:.4mm solid #000;text-align:center;font-size:16pt;font-weight:700;line-height:1.2}
+.karte .gross{font-size:20pt;font-weight:700;letter-spacing:.5mm}
+.karte.bsp{color:#8d9892}
+.karte.bsp td,.karte.bsp th,.karte.bsp .lz{border-color:#8d9892;color:#8d9892}
+.karte .bsp-lbl{font-size:9.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.3mm}
+.karte .nr{font-size:10pt;font-weight:700;color:#5d6862}
+.loes td,td.loes{color:#2667c9}
+/* Zeichen */
+.s-h{fill:none;stroke:#000;stroke-width:.75}
+.s-z{stroke:#000;stroke-width:1.5;stroke-linecap:round}
+.s-e{fill:#000}
+.farben .s-h{stroke:#2e8b3e}.farben .s-z{stroke:#d03a32}.farben .s-e{fill:#2667c9}
+.bsp .s-h,.bsp .s-z{stroke:#8d9892}.bsp .s-e{fill:#8d9892}
+.loes-gs .s-h,.loes-gs .s-z{stroke:#2667c9}.loes-gs .s-e{fill:#2667c9}
+.hinweis{font-size:12pt;margin:-1.5mm 0 3mm;color:#333}
+</style>
+</head>
+<body>
+<script src="../../zahlenstrahl/gemeinsam/strahl.js?v=2026112101"></script>
+<script src="../../zahlenstrahl/gemeinsam/druck.js?v=2026112101"></script>
+<script>
+const D = Druck;
+const z = (a, b, rnd) => a + Math.floor(rnd() * (b - a + 1));
+const ART = { lesen: "Geheimschrift lesen", zeichnen: "Geheimschrift schreiben", gemischt: "Lesen und Schreiben" };
+const W = 72, H = 30;    // Zeichenfläche in mm
+
+// ---------- Zeichen als SVG (Maße in mm) ----------
+const quadrat = (x, y) => `<rect class="s-h" x="${x}" y="${y}" width="5.4" height="5.4"/>`;
+const strich = (x, y, l = 7.5) => `<line class="s-z" x1="${x}" y1="${y}" x2="${x}" y2="${(y + l).toFixed(2)}"/>`;
+const punkt = (x, y) => `<circle class="s-e" cx="${x}" cy="${y}" r="1.1"/>`;
+
+// Geordnet: oben die Quadrate, darunter Striche und Punkte in Fünfer-Gruppen
+function geordnet(a) {
+  let s = "", x0 = 4;
+  const hatH = a.h > 0;
+  for (let i = 0; i < a.h; i++) s += quadrat(x0 + i * 8.2, 4);
+  const y = hatH ? 14 : 8;
+  let x = x0 + .6;
+  for (let i = 0; i < a.z; i++) { s += strich(x, y + (hatH ? 0 : 3)); x += 2.6 + (i % 5 === 4 ? 1.8 : 0); }
+  if (a.z) x += 4;
+  for (let i = 0; i < a.e; i++) { s += punkt(x + .5, y + (hatH ? 6.4 : 9.4)); x += 2.9 + (i % 5 === 4 ? 1.8 : 0); }
+  // zu breit? (nur Experten-Modus mit vielen Zeichen) → zusammendrücken
+  const voll = Math.max(x + 2, x0 + a.h * 8.2);
+  return { svg: s, breite: Math.max(W, voll) };
+}
+// Durcheinander: Zeichen auf zufälligen Feldern eines Rasters
+function wirr(a, rnd) {
+  const sp = 11, ze = 4, wz = W / sp, hz = H / ze, frei = [];
+  for (let c = 0; c < sp; c++) for (let r = 0; r < ze; r++) frei.push([c, r]);
+  const zellen = frei.sort(() => rnd() - .5);
+  let s = "", k = 0;
+  const nimm = () => zellen[k++] || [0, 0];
+  const j = () => (rnd() - .5) * 1.2;
+  for (let i = 0; i < a.h; i++) { const [c, r] = nimm(); s += quadrat(c * wz + (wz - 5.4) / 2 + j(), r * hz + (hz - 5.4) / 2 + j()); }
+  for (let i = 0; i < a.z; i++) { const [c, r] = nimm(); s += strich(c * wz + wz / 2 + j(), r * hz + (hz - 6.2) / 2, 6.2); }
+  for (let i = 0; i < a.e; i++) { const [c, r] = nimm(); s += punkt(c * wz + wz / 2 + j(), r * hz + hz / 2 + j()); }
+  return { svg: s, breite: W };
+}
+const bild = (a, cfg, rnd, extra = "") => {
+  const g = cfg.niveau === 3 ? wirr(a, rnd) : geordnet(a);
+  const svg = g.svg;
+  return `<svg class="bild${extra}" viewBox="0 0 ${g.breite} ${H}" preserveAspectRatio="xMinYMid meet" role="img" aria-label="${a.h} Quadrate, ${a.z} Striche, ${a.e} Punkte">${svg}</svg>`;
+};
+
+// ---------- Zahlen ----------
+function zahl(cfg, rnd, genutzt, mitBuendeln) {
+  for (let v = 0; v < 400; v++) {
+    const n = cfg.niveau;
+    let h = n === 1 ? z(1, 5, rnd) : z(1, 9, rnd), zz = n === 1 ? z(1, 5, rnd) : z(1, 9, rnd), e = n === 1 ? z(1, 5, rnd) : z(1, 9, rnd);
+    if (n >= 2 && rnd() < (n === 2 ? .3 : .35)) { if (rnd() < .5) zz = 0; else e = 0; }
+    if (cfg.raum === "100") { h = 0; if (zz === 0) zz = z(1, 9, rnd); }
+    if (mitBuendeln) { if (rnd() < .5) zz = z(10, 15, rnd); else e = z(10, 15, rnd); if (cfg.raum !== "100") h = z(1, Math.min(h, 7), rnd); }
+    const wert = h * 100 + zz * 10 + e;
+    if (wert > (cfg.raum === "100" ? 100 : 999) || genutzt.includes(wert)) continue;
+    genutzt.push(wert); return { h, z: zz, e, wert };
+  }
+  return { h: 2, z: 4, e: 3, wert: 243 };
+}
+
+// ---------- Karten ----------
+const L = (w, zeigen, cls = "") => `<td class="${cls}">${zeigen ? w : ""}</td>`;
+function karteLesen(a, cfg, rnd, loes, bsp, nr) {
+  const zeig = loes || bsp, lc = bsp ? "" : "loes", ohneH = cfg.raum === "100";
+  const kopf = (ohneH ? "" : "<th>H</th>") + "<th>Z</th><th>E</th>";
+  const zellen = (ohneH ? "" : L(a.h, zeig, lc)) + L(a.z, zeig, lc) + L(a.e, zeig, lc);
+  return `<div class="karte${bsp ? " bsp" : ""}">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}${bild(a, cfg, rnd)}
+    <div class="zeile"><table><tr>${kopf}</tr><tr>${zellen}</tr></table><span class="gleich">→</span>Zahl: <span class="lz${zeig && !bsp ? " loes" : ""}">${zeig ? a.wert : "&nbsp;"}</span></div></div>`;
+}
+function karteZeichnen(a, cfg, rnd, loes, bsp, nr) {
+  const zeig = loes || bsp;
+  return `<div class="karte${bsp ? " bsp" : ""}">${bsp ? '<span class="bsp-lbl">Beispiel</span>' : `<span class="nr">${nr}</span>`}
+    <div class="zeile">Zahl: <span class="gross">${a.wert}</span></div>
+    ${zeig ? bild(a, Object.assign({}, cfg, { niveau: 1 }), rnd, bsp ? "" : " loes-gs") : '<div class="bild leer"></div>'}</div>`;
+}
+
+D.start({
+  id: "geheimschrift", titel: "Geheimschrift",
+  optionen: [
+    { key: "art", label: "Aufgaben", std: "gemischt", werte: Object.entries(ART).map(([w, t]) => ({ wert: w, text: t })) },
+    { key: "raum", label: "Zahlenraum", std: "1000", werte: [{ wert: "100", text: "bis 100" }, { wert: "1000", text: "bis 1000" }] },
+    { key: "experte", label: "Experten-Modus (mehr als 9)", std: false },
+  ],
+  info: cfg => ART[cfg.art] + " · bis " + cfg.raum + (cfg.niveau === 3 ? " · durcheinander" : "") + (cfg.experte ? " · Experten-Modus" : ""),
+  baue(cfg, rnd, loes) {
+    const genutzt = [], ohneH = cfg.raum === "100";
+    const leg = (cls, inner, w) => `<svg viewBox="0 0 ${w} 9" style="width:${w}mm;height:9mm" class="${cls}">${inner}</svg>`;
+    let h = `<div class="legende-gs"><b>Geheim&shy;schrift</b>`
+      + (ohneH ? "" : `<span>${leg("", quadrat(1.3, 1.8), 8)} = 1 Hunderter</span>`)
+      + `<span>${leg("", strich(3, .8), 6)} = 1 Zehner</span><span>${leg("", punkt(3, 4.5), 6)} = 1 Einer</span></div>`;
+    const auftrag = { lesen: "Welche Zahl ist das? Zähle und schreibe die Zahl auf.", zeichnen: "Schreibe die Zahl in Geheimschrift.", gemischt: "Lies die Geheimschrift oder schreibe die Zahl in Geheimschrift." }[cfg.art];
+    h += `<p class="b-auftrag">${auftrag}</p>`;
+    if (cfg.experte && cfg.art !== "zeichnen") h += `<p class="hinweis">Achtung: Manchmal sind es mehr als 9 Zeichen. Dann musst du bündeln: 10 Punkte = 1 Zehner, 10 Striche = 1 Hunderter.</p>`;
+    const anzahl = 6;   // inkl. Beispiel
+    const bsp = { h: ohneH ? 0 : 2, z: 4, e: 3, wert: ohneH ? 43 : 243 }; genutzt.push(bsp.wert);
+    h += '<div class="karten">';
+    const ersteArt = cfg.art === "zeichnen" ? "zeichnen" : "lesen";
+    h += ersteArt === "lesen" ? karteLesen(bsp, Object.assign({}, cfg, { niveau: Math.min(cfg.niveau, 2) }), rnd, loes, true) : karteZeichnen(bsp, cfg, rnd, loes, true);
+    let nLesen = 0;
+    for (let i = 1; i < anzahl; i++) {
+      const lesen = cfg.art === "lesen" || (cfg.art === "gemischt" && i % 2 === 0);
+      // Experten-Modus: jede zweite Lese-Aufgabe mit mehr als 9 Zeichen (bündeln)
+      const a = zahl(cfg, rnd, genutzt, lesen && cfg.experte && nLesen++ % 2 === 0);
+      h += lesen ? karteLesen(a, cfg, rnd, loes, false, i) : karteZeichnen(a, cfg, rnd, loes, false, i);
+    }
+    return [h + "</div>"];
+  },
+});
+</script>
+</body>
+</html>

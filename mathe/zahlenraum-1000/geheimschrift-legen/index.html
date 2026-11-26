@@ -57,17 +57,21 @@ window.HINWEISE = {
  titel: "Geheimschrift legen",
  farben: "**Farben** färbt die Zeichen: Quadrat (Hunderter) grün, Strich (Zehner) rot, Punkt (Einer) blau.",
  teile: [
-  { h: "Worum geht es?", text: "Zahlen in Geheimschrift legen – wie mit dem Dienes-Material: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer. Dazu Bündeln (10 Punkte werden 1 Strich) und Entbündeln (1 Strich wird 10 Punkte)." },
+  { h: "Worum geht es?", text: "Zahlen in Geheimschrift legen – wie mit dem Dienes-Material: Quadrat = Hunderter, Strich = Zehner, Punkt = Einer. Von jeder Sorte liegen höchstens 9 Zeichen. Bündeln und Entbündeln gibt es nur im Experten-Modus." },
   { h: "So geht es", punkte: [
     "Oben links steht die Zahl. Ein Kind legt sie mit den Knöpfen **+** (dazulegen) und **−** (wegnehmen). Ein Zeichen im Legefeld antippen nimmt es auch weg.",
     "**Prüfen** sagt, ob es stimmt – oder an welcher Stelle noch etwas fehlt.",
-    "Liegen 10 oder mehr gleiche Zeichen da, erscheint **Bündeln**: 10 Punkte werden zu 1 Strich, 10 Striche zu 1 Quadrat.",
-    "**Entbündeln**: 1 Quadrat wird zu 10 Strichen, 1 Strich zu 10 Punkten. Das braucht man auf Stufe ●●●.",
+    "In jeder Spalte können höchstens 9 Zeichen liegen.",
     "**Hilfen**: Unter jeder Spalte steht die Anzahl, dazu das Satzmuster im Streifen." ] },
   { h: "Stufen", punkte: [
     "● Kleine Ziffern (1 bis 5), keine Null.",
     "●● Alle Zahlen bis 999, auch mit Nullen (z. B. 405).",
-    "●●● Mit Bedingung: „Lege 243 ohne Quadrate“ (24 Striche, 3 Punkte) oder „… mit genau 13 Punkten“. Hier hilft Entbündeln." ] },
+    "●●● Nachbarzahlen: „Lege die Zahl, die 10 mehr ist als 243.“ Es gibt dabei keinen Übergang (also nie 10 Zeichen).",
+    "●●● mit Experten-Modus: Bedingungen wie „Lege 243 ohne Quadrate“ (24 Striche, 3 Punkte) oder „… mit genau 13 Punkten“." ] },
+  { h: "Experten-Modus", punkte: [
+    "Erst einschalten, wenn Bündeln und Entbündeln im Unterricht behandelt wurden.",
+    "Dann können bis zu 30 Zeichen in einer Spalte liegen. Ab 10 gleichen Zeichen erscheint **Bündeln** (10 Punkte → 1 Strich, 10 Striche → 1 Quadrat).",
+    "**Entbündeln**: 1 Quadrat wird zu 10 Strichen, 1 Strich zu 10 Punkten. Das braucht man für die Bedingungen auf Stufe ●●●." ] },
  ],
 };
 </script>
@@ -75,11 +79,13 @@ window.HINWEISE = {
 <script>
 const T = Tafel, S = T.buehne();
 const NAME = { h: ["Quadrat", "Quadrate", "Hunderter"], z: ["Strich", "Striche", "Zehner"], e: ["Punkt", "Punkte", "Einer"] };
-let stufe = 1, auf = null, liegt = { h: 0, z: 0, e: 0 }, geloest = false, letztNeu = null, vorher = [];
+let stufe = 1, experte = T.laden("gs-experte", false), auf = null, liegt = { h: 0, z: 0, e: 0 }, geloest = false, letztNeu = null, vorher = [];
 
 const sWahl = T.stufen(v => { stufe = v; neu(); }, "gs-legen-stufe"); stufe = sWahl.wert;
 T.kopf({ titel: "Geheimschrift legen", onNeu: () => neu(), onHilfen: () => zeichne() });
-T.leiste(sWahl);
+const eKn = T.schalter("Experten-Modus", experte, v => { experte = v; T.merken("gs-experte", v); neu(); });
+T.leiste(sWahl, eKn);
+const plusKn = {};
 
 const aufBox = T.blk(40, 176, 500, 0, "auftrag"); aufBox.setAttribute("aria-live", "polite");
 const tasten = T.blk(40, 430, 500, 0, "tasten");
@@ -87,7 +93,7 @@ const tasten = T.blk(40, 430, 500, 0, "tasten");
   const z = T.el("div", "taste", `<span class="sym"><i class="gs-${a}"></i></span><span class="name">${NAME[a][2]}</span>`);
   const minus = T.knopf("−", () => aendere(a, -1)), plus = T.knopf("+", () => aendere(a, 1), "haupt");
   minus.setAttribute("aria-label", NAME[a][0] + " wegnehmen"); plus.setAttribute("aria-label", NAME[a][0] + " dazulegen");
-  z.append(minus, plus); tasten.appendChild(z);
+  plusKn[a] = plus; z.append(minus, plus); tasten.appendChild(z);
 });
 const akt = T.el("div", "aktion"); akt.append(T.knopf("Prüfen", () => pruefen(), "haupt"), T.knopf("Alles wegnehmen", () => { liegt = { h: 0, z: 0, e: 0 }; geloest = false; zeichne(); }), T.knopf("Nächste Zahl →", () => neu()));
 
@@ -110,6 +116,15 @@ function neueAufgabe() {
     const wert = h * 100 + z * 10 + e;
     if (vorher.includes(wert)) continue;
     let bed = null;
+    if (stufe === 3 && !experte) {
+      // Nachbarzahl ohne Übergang: 1, 10 oder 100 mehr/weniger
+      const st = T.wahl(["h", "z", "e"]), mehr = Math.random() < .5, schritt = { h: 100, z: 10, e: 1 }[st];
+      const d = { h, z, e }; if (mehr ? d[st] === 9 : d[st] === (st === "h" ? 1 : 0)) continue;
+      const basis = mehr ? wert - schritt : wert + schritt;
+      if (vorher.includes(basis)) continue;
+      vorher.push(wert); if (vorher.length > 10) vorher.shift();
+      return { wert, h, z, e, bed: null, frage: `Lege die Zahl, die <b>${schritt} ${mehr ? "mehr" : "weniger"}</b> ist als`, basis };
+    }
     if (stufe === 3) {
       const art = T.wahl(["ohneH", "ohneH", "genauE", "genauZ"]);
       if (art === "ohneH") { if (h > 2) continue; bed = { art, text: "ohne Quadrate", ziel: { h: 0, z: h * 10 + z, e } }; }
@@ -122,7 +137,8 @@ function neueAufgabe() {
 }
 function neu() {
   T.stop(); auf = neueAufgabe(); liegt = { h: 0, z: 0, e: 0 }; geloest = false; letztNeu = null;
-  aufBox.innerHTML = `<div class="t">Lege die Zahl:</div><div class="gross zahl">${T.zahlHTML(auf.wert)}</div>` + (auf.bed ? `<div class="bed">… ${auf.bed.text}!</div>` : "");
+  aufBox.innerHTML = auf.frage ? `<div class="t">${auf.frage}</div><div class="gross zahl">${T.zahlHTML(auf.basis)}</div>`
+    : `<div class="t">Lege die Zahl:</div><div class="gross zahl">${T.zahlHTML(auf.wert)}</div>` + (auf.bed ? `<div class="bed">… ${auf.bed.text}!</div>` : "");
   zeichne();
   melde("muster hilfe", "Ich lege … Hunderter, … Zehner und … Einer.");
 }
@@ -130,7 +146,7 @@ function neu() {
 // ---------- Legen ----------
 function aendere(a, d, still) {
   if (geloest && !still) geloest = false;
-  liegt[a] = Math.max(0, Math.min(30, liegt[a] + d));
+  liegt[a] = Math.max(0, Math.min(experte ? 30 : 9, liegt[a] + d));
   letztNeu = d > 0 ? a : null; zeichne();
 }
 function zeichne() {
@@ -144,6 +160,8 @@ function zeichne() {
     const u = sp.querySelector(".zahl-unten"); u.textContent = n + " " + (n === 1 ? NAME[a][0] : NAME[a][1]); u.classList.toggle("viel", n > 9);
     // Bündeln (ab 10 gleichen Zeichen) und Entbündeln
     const bu = sp.querySelector(".buendel"); bu.innerHTML = "";
+    plusKn[a].disabled = n >= (experte ? 30 : 9);
+    if (!experte) return;
     if (a !== "h" && n >= 10) bu.appendChild(T.knopf(`Bündeln: 10 ${NAME[a][1]} → 1 ${a === "e" ? "Strich" : "Quadrat"}`, () => buendeln(a)));
     else if (a !== "e" && n >= 1) bu.appendChild(T.knopf(`Entbündeln: 1 ${NAME[a][0]} → 10 ${a === "h" ? "Striche" : "Punkte"}`, () => entbuendeln(a)));
   });
@@ -172,7 +190,7 @@ function pruefen() {
     melde("noch", [satzGelegt, `Das ist ${wert}. Gesucht ist ${auf.wert} – ${auf.bed.text}.`]); return;
   }
   if (wert === auf.wert && liegt.z < 10 && liegt.e < 10) {
-    geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert}. ${T.lob()}`]); return;
+    geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert}.` + (auf.frage ? ` ${auf.wert} ist ${auf.frage.replace(/.*<b>(.*)<\/b>.*/, "$1")} als ${auf.basis}.` : "") + ` ${T.lob()}`]); return;
   }
   if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt!`, `Aber es liegen 10 oder mehr gleiche Zeichen da. Bündle sie.`]); return; }
   // Rückmeldung zur ersten falschen Stelle
