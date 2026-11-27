@@ -56,13 +56,14 @@ window.HINWEISE = {
   { h: "Stufen", punkte: ["**●**: nur Zehner, die Prüfstelle ist schon unterstrichen. **●●**: Zehner und Hunderter, ohne Unterstreichung. **●●●**: mit Sonderfällen (Mitte, Übergang, unter 100, schon rund); bei Wählen gibt es dann drei Karten."]}]
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/runden.js"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
 const RUNDEN = 10;
 const HEFTZAHLEN = [273, 456, 250, 499, 875, 922, 505, 750, 138, 255, 359, 229, 351, 258, 349, 275, 396, 47, 55, 950, 754, 458, 369];
-let stufe = 1, art = "waehlen", zeit = 0, heft = T.laden("rblitz-heft", false), runde = 1, aufg = null, gezeigt = false, uhr = null, letzte = 0;
+let rf = 0, stufe = 1, art = "waehlen", zeit = 0, heft = T.laden("rblitz-heft", false), runde = 1, aufg = null, gezeigt = false, uhr = null, letzte = 0;
 
 // ---------- Aufbau ----------
 const stufenWahl = T.stufen(v => { stufe = v; start(); }, "rblitz-stufe");
@@ -79,6 +80,7 @@ const bed = T.blk(350, 664); const bedien = T.el("div", "bedien"); bed.appendChi
 const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Runde", () => weiter());
 const heftKn = T.schalter("Heftzahlen", heft, v => { heft = v; T.merken("rblitz-heft", v); });
 const zaehler = T.el("span", "zaehler"); bedien.append(loesKn, weiterKn, heftKn, zaehler);
+[weiterKn, heftKn, zaehler].forEach(x => x.dataset.runde = "aus");
 const satz = T.streifen(T.blk(350, 750, 900), "hilfe");
 
 T.kopf({ titel: "Blitzrunde Runden", onNeu: () => start() });
@@ -135,13 +137,13 @@ function zeigeAufgabe() {
 }
 function antwortW(o, b) {
   if (gezeigt) return;
-  if (o === aufg.r) { b.classList.add("richtig"); loesung(T.lob()); }
-  else { b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
+  if (o === aufg.r) { b.classList.add("richtig"); loesung(T.lob()); T.fertig(rf === 0); }
+  else { rf++; b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
 }
 function antwortZH(k, b) {
   if (gezeigt) return;
-  if (k === aufg.st) { b.classList.add("richtig"); loesung(T.lob()); }
-  else { b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
+  if (k === aufg.st) { b.classList.add("richtig"); loesung(T.lob()); T.fertig(rf === 0); }
+  else { rf++; b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
 }
 function loesung(lob) {
   if (gezeigt) return; gezeigt = true; clearTimeout(uhr); loesKn.disabled = true;
@@ -164,7 +166,7 @@ function weiter() {
   if (runde >= RUNDEN) { runde = RUNDEN + 1; T.melde(satz, "ok", "Geschafft! Alle 10 Runden sind fertig."); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; stoppeUhr(); return; }
   runde++; aufg = neueAufgabe(); zeigeAufgabe();
 }
-start();
+if (!T.runde({ id: "blitzrunde", neu: n => { stufe = n; zeit = 0; rf = 0; runde = 1; aufg = neueAufgabe(); zeigeAufgabe(); return `rb-${aufg.n}-${aufg.st}`; } })) start();
 </script>
 </body>
 </html>

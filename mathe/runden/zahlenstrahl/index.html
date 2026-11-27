@@ -54,11 +54,12 @@ window.HINWEISE = {
   { h: "Hilfen", punkte: ["Mit **Hilfen aus** stehen im Ausschnitt nur die Nachbarn, und es wird nicht mitgezählt."]}]
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/runden.js"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne(), ns = "http://www.w3.org/2000/svg";
-let st = "Z", stufe = 1, n = 273, win = { u: 270, o: 280 }, phase = "frage", schieben = false, ziffer = false;
+let rf = 0, st = "Z", stufe = 1, n = 273, win = { u: 270, o: 280 }, phase = "frage", schieben = false, ziffer = false;
 
 // ---------- Aufbau ----------
 const stWahl = T.gruppe("Auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; zifferKn.lastChild.textContent = v === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen"; neu(); }, "strahl-st");
@@ -73,6 +74,7 @@ const sch = T.blk(40, 650); sch.classList.add("schalter");
 const schiebKn = T.schalter("Selbst schieben", false, v => { schieben = v; if (!v) neu(); else { phase = "schieben"; zeichne(); live(); } });
 const zifferKn = T.schalter(st === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen", false, v => { ziffer = v; if (baender) baender.style.display = v ? "" : "none"; });
 sch.append(schiebKn, zifferKn);
+sch.dataset.runde = "aus";
 const gl = T.el("div", "gleichung zahl"); T.blk(40, 800, 380).appendChild(gl);
 const satz = T.streifen(T.blk(440, 650, 1120));
 const abm = T.el("div", "abmachung", "Abmachung: aufrunden"); abm.hidden = true; S.appendChild(abm);
@@ -153,9 +155,9 @@ function ergebnisSaetze() {
 function antwort(k) {
   if (phase !== "frage") return;
   const lu = n - win.u, lo = win.o - n;
-  if (lu === lo) { zeigen(); return; }
-  if ((k === "u") === (lu < lo)) { T.melde(satz, "ok", T.lob()); zeigen(true); }
-  else T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Wie viele Schritte sind es?");
+  if (lu === lo) { zeigen(); T.fertig(k === "o" && rf === 0); return; }
+  if ((k === "u") === (lu < lo)) { T.melde(satz, "ok", T.lob()); zeigen(true); T.fertig(rf === 0); }
+  else rf++, T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Wie viele Schritte sind es?");
 }
 async function hupfe(ziel, seite, lauf) {
   const b = st === "Z" ? 1 : 10, sgn = ziel < n ? -1 : 1; let a = n, gez = 0;
@@ -198,7 +200,8 @@ svg.addEventListener("pointermove", e => {
 });
 const loslassen = () => { ziehe = false; };
 svg.addEventListener("pointerup", loslassen); svg.addEventListener("pointercancel", loslassen);
-neu();
+// Übungsrunde: Welcher Nachbar ist näher? Hilfe = Ziffer zeigen
+if (!T.runde({ id: "zahlenstrahl", neu: s => { stufe = s; schieben = false; rf = 0; neu(); return `rz-${n}-${st}`; }, hilfe: an => { ziffer = an; if (baender) baender.style.display = an ? "" : "none"; } })) neu();
 </script>
 </body>
 </html>

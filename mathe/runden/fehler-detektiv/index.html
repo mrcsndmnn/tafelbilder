@@ -66,7 +66,8 @@ window.HINWEISE = {
     "**Wir sind Rundo** (Partnerarbeit): Das Antwortkind baut mit den Pfeilen eine Zahl und wählt absichtlich eine falsche Rundung. Daraus wird ein Zettel, auf dem das Fragekind den Fehler findet und erklärt."]}]
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/runden.js"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
@@ -77,7 +78,7 @@ const ARTEN = {
   kette:    { sym: "2×", text: "Zweimal gerundet" },
   mitte:    { sym: "½", text: "Mitte vergessen" },
 };
-let modus = "finden", st = "Z", stufe = 1, gls = [], sel = -1, phase = "", fehlerZahl = 0, gefunden = 0;
+let rf = 0, modus = "finden", st = "Z", stufe = 1, gls = [], sel = -1, phase = "", fehlerZahl = 0, gefunden = 0;
 
 // ---------- Aufbau ----------
 const modusWahl = T.gruppe("", [{ wert: "finden", text: "Finden" }, { wert: "rundo", text: "Wir sind Rundo" }], "finden", v => { modus = v; neu(); });
@@ -224,12 +225,12 @@ function urteil(stimmt) {
   if (!g.art && stimmt) {
     g.status = "ok"; const s = [`${T.lob()} ${g.n} ≈ ${g.r} ist richtig.`, R.kurzSatz(g.n, st)]; sel = -1; zeichneZettel(); zeichnePanel(); T.melde(satz, "ok", s);
   } else if (g.art && !stimmt) { phase = "verbessern"; zeichnePanel(); T.melde(satz, "", "Gut gesehen! Wie heißt die Rundung richtig?"); }
-  else if (g.art) T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Tipp: Berg zeigen.");
-  else T.melde(satz, "noch", "Noch nicht. Die Rundung stimmt. Schau noch einmal genau.");
+  else if (g.art) rf++, T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Tipp: Berg zeigen.");
+  else rf++, T.melde(satz, "noch", "Noch nicht. Die Rundung stimmt. Schau noch einmal genau.");
 }
 function verbessere(z, b) {
   const g = gls[sel];
-  if (z !== g.r) { b.classList.add("weg"); b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
+  if (z !== g.r) { rf++; b.classList.add("weg"); b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
   g.status = "gefunden"; gefunden++; zeichneZettel();
   const t = `${g.n} ≈ ${g.shown} ist falsch. Richtig ist ${g.r}.`;
   if (stufe === 1) fertig(g, [T.lob(), t, fehlerSatz(g)]);
@@ -237,12 +238,12 @@ function verbessere(z, b) {
 }
 function fehlerart(k, b) {
   const g = gls[sel];
-  if (!passende(g.n, g.shown).includes(k)) { b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
+  if (!passende(g.n, g.shown).includes(k)) { rf++; b.disabled = true; return T.melde(satz, "noch", T.NOCH); }
   fertig(g, [T.lob(), `${ARTEN[k].text}.`, fehlerSatz({ ...g, art: k })]);
 }
 function fertig(g, t) {
   phase = "fertig"; sel = -1; zeichneZettel(); zeichnePanel();
-  if (gefunden === fehlerZahl) t.push(`Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden!`);
+  if (gefunden === fehlerZahl) { t.push(`Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden!`); T.fertig(rf === 0); }
   T.melde(satz, "ok", t);
 }
 function aufloesen() {
@@ -286,7 +287,8 @@ function verstecken() {
   baueZettel({ n: bauZahl, shown: bauWahl, r: R.runde(bauZahl, st), art }); zeichneZettel(); zeichnePanel();
   T.melde(satz, "", "Fragekind: Finde Rundos Fehler und erkläre ihn.");
 }
-neu();
+// Übungsrunde: ein Zettel je Aufgabe, fertig wenn alle Fehler gefunden sind
+if (!T.runde({ id: "fehler-detektiv", neu: s => { stufe = s; modus = "finden"; rf = 0; neu(); return "fd-" + gls.map(g => g.n).join("-"); } })) neu();
 </script>
 </body>
 </html>

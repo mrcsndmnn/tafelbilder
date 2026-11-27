@@ -1,0 +1,74 @@
+{
+ "titel": "Runden",
+ "fach": "Mathematik",
+ "tafelbilder": [
+  {
+   "id": "zahlenstrahl",
+   "titel": "Zahlenstrahl-Lupe: Wo ist es näher?",
+   "pfad": "zahlenstrahl/",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/><path d=\"M12 18 H24\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 45,
+   "pruefung": "auto"
+  },
+  {
+   "id": "rundungsberg",
+   "titel": "Der Rundungsberg (Ich bin dran)",
+   "pfad": "rundungsberg/",
+   "svg": "<path d=\"M3 38 L22 8 L41 38 Z\"/><circle cx=\"31\" cy=\"22\" r=\"4\" fill=\"currentColor\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
+  },
+  {
+   "id": "blitzrunde",
+   "titel": "Blitzrunde Runden",
+   "pfad": "blitzrunde/",
+   "svg": "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 30,
+   "pruefung": "auto"
+  },
+  {
+   "id": "fehler-detektiv",
+   "titel": "Fehler-Detektiv",
+   "pfad": "fehler-detektiv/",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/><path d=\"M14 14 L22 22 M22 14 L14 22\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 150,
+   "pruefung": "auto"
+  },
+  {
+   "id": "schulfest",
+   "titel": "Schulfest: Gerundet oder nicht?",
+   "pfad": "schulfest/",
+   "svg": "<path d=\"M4 38 L22 8 L40 38 Z\"/><path d=\"M22 8 V38\"/><path d=\"M22 8 V3 L28 5 L22 7\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 40,
+   "pruefung": "auto"
+  }
+ ]
+}

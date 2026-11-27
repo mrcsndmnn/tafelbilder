@@ -71,7 +71,8 @@ window.HINWEISE = {
     "**Gerundet oder nicht?**: Ein Satz aus dem Heft. Die Kinder tippen die Signalwörter (fast, etwa, ca., ungefähr) an und entscheiden: gerundet oder genau."]}]
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/runden.js"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
@@ -221,16 +222,19 @@ function zeichneSignal() {
   });
   const reihe = T.el("div", "wahlreihe"); reihe.style.marginTop = "34px"; signalBox.appendChild(reihe);
   reihe.append(T.knopf("gerundet ≈", () => entscheide(true)), T.knopf("genau =", () => entscheide(false)), T.knopf("Nächster Satz", () => neuerSatz(), "haupt"));
+  reihe.lastChild.dataset.runde = "aus";
   signalSatz = T.streifen(signalBox); signalSatz.style.marginTop = "28px";
   const m = T.el("div", "merkkarte hilfe", "<strong>Diese Wörter verraten: Die Zahl ist gerundet.</strong>fast · etwa · ca. · ungefähr");
   m.style.marginTop = "20px"; signalBox.appendChild(m);
 }
 function entscheide(gerundet) {
   const sig = SAETZE[satzNr].split(" ").find(istSignal);
-  if (!!sig === gerundet) T.melde(signalSatz, "ok", sig ? `${T.lob()} Das Wort „${sig}“ verrät: Die Zahl ist gerundet.` : `${T.lob()} Hier steht kein Signalwort. Die Zahl ist genau.`);
-  else T.melde(signalSatz, "noch", T.NOCH);
+  if (!!sig === gerundet) { T.melde(signalSatz, "ok", sig ? `${T.lob()} Das Wort „${sig}“ verrät: Die Zahl ist gerundet.` : `${T.lob()} Hier steht kein Signalwort. Die Zahl ist genau.`); if (!entschieden) T.fertig(rf === 0); entschieden = true; }
+  else { rf++; T.melde(signalSatz, "noch", T.NOCH); }
 }
-neu();
+// Übungsrunde: „Gerundet oder nicht?“ – ein Satz je Aufgabe
+let rf = 0;
+if (!T.runde({ id: "schulfest", neu: () => { modus = "signal"; rf = 0; neu(); return "fest-" + satzNr; } })) neu();
 </script>
 </body>
 </html>

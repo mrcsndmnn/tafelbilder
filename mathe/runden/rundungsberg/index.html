@@ -44,11 +44,12 @@ window.HINWEISE = {
   { h: "Hilfen", punkte: ["Mit **Hilfen aus** verschwinden die Hangfarben und die Wörter „abrunden“/„aufrunden“. Nur die Zahlen 0–9 bleiben auf dem Berg."]}]
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/runden.js"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
-let modus = "zeigen", st = "Z", stufe = 1, n = 273, schritt = 0, phase = "platz", saetze = [];
+let rf = 0, modus = "zeigen", st = "Z", stufe = 1, n = 273, schritt = 0, phase = "platz", saetze = [];
 
 // ---------- Aufbau ----------
 const modusWahl = T.gruppe("", [{ wert: "zeigen", text: "Zeigen" }, { wert: "dran", text: "Ich bin dran" }], "zeigen", v => { modus = v; neu(n); }, "berg-modus");
@@ -128,7 +129,7 @@ async function rollen(d) {
 function platz(i) {
   if (modus !== "dran" || phase !== "platz") return;
   const d = R.pruefziffer(n, st);
-  if (i !== d) { berg.platz(i, "falsch"); return T.melde(satz, "noch", [`Noch nicht. Schau auf die ${R.PRUEFNAME[st]}ziffer.`]); }
+  if (i !== d) { rf++; berg.platz(i, "falsch"); return T.melde(satz, "noch", [`Noch nicht. Schau auf die ${R.PRUEFNAME[st]}ziffer.`]); }
   berg.kugel(d, R.FARBE[st]); phase = "fuss"; schritt = 4; zeigeSchritte();
   saetze.push(R.denkschritte(n, st)[2]);
   T.melde(satz, "ok", [`${T.lob()} ` + saetze[2], "Wohin rollt die Kugel? Tippe den Fuß an."]);
@@ -136,11 +137,13 @@ function platz(i) {
 async function fuss(f) {
   if (modus !== "dran" || phase !== "fuss") return;
   const d = R.pruefziffer(n, st), richtig = d >= 5 ? "o" : "u";
-  if (f !== richtig) return T.melde(satz, "noch", `Noch nicht. Liegt die ${d} links oder rechts vom Gipfel?`);
+  if (f !== richtig) return rf++, T.melde(satz, "noch", `Noch nicht. Liegt die ${d} links oder rechts vom Gipfel?`);
   phase = "rollt"; await rollen(d); phase = "fertig"; zeigeSchritte();
   T.melde(satz, "ok", [T.lob(), R.denkschritte(n, st)[3], ...R.zusatz(n, st), R.ungefaehr(n, st)]);
+  T.fertig(rf === 0);
 }
-neu(273);
+// Übungsrunde: „Ich bin dran“ – Platz der Kugel und Fuß antippen; Hilfe = Merkkarte
+if (!T.runde({ id: "rundungsberg", neu: s => { stufe = s; modus = "dran"; rf = 0; neu(); return `berg-${n}-${st}`; }, hilfe: an => { merk.hidden = !an; } })) neu(273);
 </script>
 </body>
 </html>
