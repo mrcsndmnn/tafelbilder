@@ -52,7 +52,8 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
@@ -71,6 +72,7 @@ const svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "feld
 svg.setAttribute("width", 1600); svg.setAttribute("height", 560); feld.appendChild(svg);
 const akt = T.blk(300, 714, 1000, 64, "aktionen");
 akt.append(T.knopf("Alle aufdecken", () => kaesten.forEach(k => aufdecken(k, true))), T.knopf("Nächste Zahl →", () => neu(), "haupt"));
+akt.lastChild.dataset.runde = "aus";
 const unten = T.blk(150, 788, 1300, 0); const streifen = T.streifen(unten);
 
 const NAME = { nh: "Nachbarhunderter", nz: "Nachbarzehner", nb: "Nachbarzahl", zahl: "Zahl" };
@@ -146,7 +148,7 @@ function fertig() {
   if (stufe === 1) s.push(`Die Nachbarzahl danach heißt Nachfolger. Der Nachfolger von ${n} ist ${f}.`);
   Z.melde(streifen, "muster hilfe", s);
 }
-neu();
+if (!T.runde({ id: "nachbarn", neu: st => { stufe = st; neu(true); return "nb-" + st + "-" + n; } })) neu();
 </script>
 </body>
 </html>

@@ -48,19 +48,21 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
 const NS = "http://www.w3.org/2000/svg";
 const SX = 50, SY = 330, LY = 190;          // Lage des Strahls auf der Bühne; Linie bei SY + LY
 const KB = 120, KH = 76;
-let stufe = 1, karten = [], gewaehlt = null, geordnet = false, strahl;
+let stufe = 1, karten = [], gewaehlt = null, geordnet = false, strahl, rf = 0;
 
 const sWahl = T.stufen(v => { stufe = v; neu(); }, "ordnen-stufe"); stufe = sWahl.wert;
 T.kopf({ titel: "Zahlen ordnen am Strahl", onNeu: () => neu(), farbenKey: "strahl-farben", farbenStd: true });
 const pruefKn = T.knopf("Prüfen", () => pruefen()), ordKn = T.knopf("Ordnen", () => ordnen(), "haupt");
 const akt = T.el("div", "aktionen"); akt.append(pruefKn, ordKn, T.knopf("Neue Karten →", () => neu()));
+akt.lastChild.dataset.runde = "aus";
 T.leiste(sWahl, akt);
 
 const box = T.blk(SX, SY, 1500, 300);
@@ -94,7 +96,7 @@ function zahlen() {
 
 // ---------- Karten ----------
 function neu() {
-  T.stop(); geordnet = false; gewaehlt = null;
+  T.stop(); geordnet = false; gewaehlt = null; rf = 0;
   karten.forEach(k => k.el.remove()); S.querySelectorAll(".zeichen").forEach(z => z.remove());
   const l = zahlen(), abst = 1180 / l.length;
   karten = l.map((v, i) => {
@@ -190,8 +192,9 @@ function pruefen() {
     const ok = Math.floor(k.v / 100) === Math.min(9, Math.floor(k.wert / 100));
     k.el.classList.toggle("ok", ok); k.el.classList.toggle("noch", !ok); if (!ok) falsch++;
   });
-  if (!falsch) Z.melde(streifen, "ok", `${T.lob()} Alle Karten liegen im richtigen Abschnitt. Jetzt „Ordnen“.`);
+  if (!falsch) { Z.melde(streifen, "ok", `${T.lob()} Alle Karten liegen im richtigen Abschnitt. Jetzt „Ordnen“.`); T.fertig(rf === 0); }
   else {
+    rf++;
     const k = karten.find(x => x.el.classList.contains("noch")), h = Math.floor(k.v / 100) * 100;
     Z.melde(streifen, "noch", `Noch nicht ganz. ${k.v} liegt zwischen ${h} und ${h + 100}.`);
   }
@@ -208,7 +211,9 @@ function ordnen() {
   let p = 0; for (let i = 1; i < n - 1; i++) if (sortiert[i + 1].v - sortiert[i].v < sortiert[p + 1].v - sortiert[p].v) p = i;
   Z.melde(streifen, "ok", [`Von klein nach groß: ${sortiert.map(k => k.v).join(", ")}.`, `${sortiert[p].v} ist kleiner als ${sortiert[p + 1].v}.`]);
 }
-neu();
+// Übungsrunde: Die Knöpfe Prüfen und Ordnen stehen sonst in der (ausgeblendeten) Leiste
+if (T.runde({ id: "ordnen", neu: n => { stufe = n; neu(); return "ordnen-" + karten.map(k => k.v).join("-"); } })) { const b = T.blk(40, 100, 800, 64); b.appendChild(akt); }
+else neu();
 </script>
 </body>
 </html>

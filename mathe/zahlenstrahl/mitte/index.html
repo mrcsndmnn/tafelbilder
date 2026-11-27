@@ -54,7 +54,8 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
@@ -72,6 +73,7 @@ const buehne = T.blk(100, 270, 1400, 400, "buehne3d");
 const akt = T.blk(200, 690, 1200, 64, "aktionen");
 const faltKn = T.knopf("Falten", () => falten(), "haupt");
 akt.append(faltKn, T.knopf("Nächste Aufgabe →", () => neu()));
+akt.lastChild.dataset.runde = "aus";
 const unten = T.blk(150, 776, 1300, 0); const streifen = T.streifen(unten);
 let li, re, falz, ueber, strahlL, gSchaetz, gEcht;
 
@@ -168,8 +170,9 @@ async function falten() {
   const urteil = Math.abs(abw) <= .03 ? "Sehr gut geschätzt!" : Math.abs(abw) <= .1 ? `Gut geschätzt! Die Mitte liegt etwas weiter ${r}.` : `Die Mitte liegt weiter ${r} als geschätzt.`;
   ufr.textContent = urteil;
   Z.melde(streifen, "ok", `In der Mitte zwischen ${von} und ${bis} liegt ${m}.`);
+  T.fertig(Math.abs(abw) <= .1);
 }
-neu();
+if (!T.runde({ id: "mitte", neu: n => { stufe = n; neu(); return `mitte-${von}-${bis}`; } })) neu();
 </script>
 </body>
 </html>

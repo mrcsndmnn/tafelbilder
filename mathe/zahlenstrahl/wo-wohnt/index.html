@@ -39,11 +39,12 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
-let bereich = "1000", zweiZeilen = false, modus = "ablesen", stufe = 1, ziel = 0, vorher = [], strahlen = [], zeiger = [], aktiv = 0, mark = null, geprueft = false;
+let rf = 0, bereich = "1000", zweiZeilen = false, modus = "ablesen", stufe = 1, ziel = 0, vorher = [], strahlen = [], zeiger = [], aktiv = 0, mark = null, geprueft = false;
 
 // ---------- Aufbau ----------
 const bWahl = T.gruppe("Bereich", [{ wert: "100", text: "0–100" }, { wert: "1000", text: "0–1000" }, { wert: "aus", text: "Ausschnitt" }], "1000",
@@ -63,6 +64,7 @@ const akt = T.blk(300, 700, 1000, 70, "aktionen");
 const pruefKn = T.knopf("Prüfen", () => pruefen(), "haupt");
 const weiterKn = T.knopf("Nächste Zahl →", () => neu(), "haupt");
 akt.append(pruefKn, weiterKn);
+weiterKn.dataset.runde = "aus";
 const unten = T.blk(150, 786, 1300, 0); const streifen = T.streifen(unten);
 
 // ---------- Zahlen nach Stufe ----------
@@ -104,7 +106,7 @@ function bauen() {
 const zeile = w => strahlen.findIndex(s => w >= s.o.von && w <= s.o.bis);
 
 function neu() {
-  T.stop(); geprueft = false; mark = null;
+  T.stop(); geprueft = false; mark = null; rf = 0;
   ziel = waehleZiel();
   bauen();
   Z.melde(streifen, "", "");
@@ -150,7 +152,11 @@ function pruefen() {
   if (w === ziel) {
     z.g.classList.add("ok"); z.zahlZeigen(true); strahlen[aktiv].leuchte(ziel);
     Z.melde(streifen, "ok", `${T.lob()} Die Zahl ${ziel} wohnt hier.`);
+    T.fertig(rf === 0);
     return;
+  }
+  rf++;
+  {
   }
   const d = Math.round((ziel - w) / schritt), n = Math.abs(d), richtung = d > 0 ? "rechts" : "links";
   const zeileZiel = zeile(ziel);
@@ -158,7 +164,7 @@ function pruefen() {
     Z.melde(streifen, "noch", `Noch nicht. ${ziel} wohnt in der ${zeileZiel === 0 ? "oberen" : "unteren"} Zeile.`);
   } else Z.melde(streifen, "noch", `${n <= 3 ? "Fast!" : "Noch nicht."} Noch ${n === 1 ? "1 Strich" : n + " Striche"} weiter nach ${richtung}.`);
 }
-neu();
+if (!T.runde({ id: "wo-wohnt", neu: n => { stufe = n; modus = "zeigen"; neu(); return "wo-" + ziel; } })) neu();
 </script>
 </body>
 </html>

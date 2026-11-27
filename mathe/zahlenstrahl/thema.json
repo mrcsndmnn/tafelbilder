@@ -1,0 +1,90 @@
+{
+ "titel": "Zahlenstrahl bis 1000",
+ "fach": "Mathematik",
+ "tafelbilder": [
+  {
+   "id": "wo-wohnt",
+   "titel": "Wo wohnt die Zahl? (Zeigen)",
+   "pfad": "wo-wohnt/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 45,
+   "pruefung": "auto",
+   "svg": "<path d=\"M3 30 H41\"/><path d=\"M8 24 V36 M36 24 V36\"/><path d=\"M22 6 V24 M16 18 L22 24 L28 18\"/>"
+  },
+  {
+   "id": "detektiv",
+   "titel": "Strahl-Detektiv",
+   "pfad": "detektiv/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/><path d=\"M10 18 H26\"/>"
+  },
+  {
+   "id": "ordnen",
+   "titel": "Zahlen ordnen am Strahl",
+   "pfad": "ordnen/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 120,
+   "pruefung": "auto",
+   "svg": "<path d=\"M3 32 H41\"/><rect x=\"5\" y=\"8\" width=\"9\" height=\"12\" rx=\"2\"/><rect x=\"18\" y=\"8\" width=\"9\" height=\"12\" rx=\"2\"/><rect x=\"31\" y=\"8\" width=\"9\" height=\"12\" rx=\"2\"/>"
+  },
+  {
+   "id": "mitte",
+   "titel": "Was steht in der Mitte?",
+   "pfad": "mitte/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto",
+   "svg": "<path d=\"M3 26 H41\"/><path d=\"M5 20 V32 M39 20 V32\"/><path d=\"M22 14 V36\" stroke-dasharray=\"3 3\"/>"
+  },
+  {
+   "id": "lupe",
+   "titel": "Zahlenstrahl-Lupe (Zahl finden)",
+   "pfad": "lupe/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/>"
+  },
+  {
+   "id": "nachbarn",
+   "titel": "Die Nachbarn der Zahl",
+   "pfad": "nachbarn/",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "lehrkraft",
+   "svg": "<rect x=\"3\" y=\"16\" width=\"11\" height=\"12\" rx=\"2\"/><rect x=\"16.5\" y=\"14\" width=\"11\" height=\"16\" rx=\"2\"/><rect x=\"30\" y=\"16\" width=\"11\" height=\"12\" rx=\"2\"/>"
+  }
+ ]
+}

@@ -295,6 +295,20 @@
     el.innerHTML = Array.isArray(text) ? text.map(t => `<p>${t}</p>`).join("") : text;
   };
 
+  // ---------------- Übungsrunde ----------------
+  // Im Rundenmodus (iframe mit ?modus=runde) meldet sich das Tafelbild beim Rahmen an.
+  // neu(niveau, ausschliessen) zeigt genau eine Aufgabe und darf eine Aufgaben-ID zurückgeben.
+  // Kopf und Leiste blendet runde-client.js aus; Elemente mit data-runde="aus" ebenso.
+  T.runde = ({ id, oben = 92, neu, hilfe }) => {
+    if (!window.Runde || !Runde.aktiv) return false;
+    let nr = 0;
+    Runde.verbinde({ id, oben,
+      neueAufgabe(n, aus) { const aid = neu(n, aus || []); Runde.gestartet(aid != null ? aid : `${id}-${++nr}`); },
+      hilfe(an) { T.S.classList.toggle("hilfen-aus", !an); if (hilfe) hilfe(an); } });
+    return true;
+  };
+  T.fertig = ohneFehler => { if (window.Runde) Runde.fertig({ ohneFehler }); };
+
   // ---------------- Material ----------------
   // Material in einer Box: Größe der Kästchen so wählen, dass alles hineinpasst
   T.material = (box, max = 12) => {

@@ -39,12 +39,15 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
 const STUFEN = [100, 10, 1];
 let pfad = [{ von: 0, bis: 1000, schritt: 100 }], wahl = null, laeuft = false, tafelAn = false;
+// Übungsrunde: Zielzahl und Ziel-Schritt (★ ein Mal Lupe, ★★/★★★ bis zu den Einerstrichen)
+let rziel = null, rf = 0;
 
 // ---------- Aufbau ----------
 const pfadBox = T.el("div", "pfad"); pfadBox.setAttribute("role", "navigation"); pfadBox.setAttribute("aria-label", "Pfad");
@@ -89,6 +92,12 @@ function zeige() {
   tafelKn.hidden = a.schritt !== 1;
   tipp.textContent = a.schritt === 1 ? "Ein Strich bedeutet 1. Die Zahlen stehen an jedem Strich." : "Tippe einen Abschnitt an. Dann drücke „Lupe“.";
   Z.melde(streifen, "", "");
+  if (rziel) {
+    const drin = rziel.zahl >= a.von && rziel.zahl <= a.bis;
+    impuls.classList.remove("hilfe"); impuls.hidden = false; impuls.innerHTML = `Finde mit der Lupe die Zahl <b style="font-size:40px">${rziel.zahl}</b>.`;
+    if (!drin) { rf++; Z.melde(streifen, "noch", `${rziel.zahl} liegt nicht zwischen ${a.von} und ${a.bis}. Tippe oben auf den Pfad und geh zurück.`); }
+    else if (a.schritt <= rziel.schritt) { Z.melde(streifen, "ok", `${T.lob()} ${rziel.zahl} liegt zwischen ${a.von} und ${a.bis}. ${Z.SATZ(a.schritt)}`); T.fertig(rf === 0); }
+  }
 }
 function boegen() {
   const a = ansicht();
@@ -149,7 +158,8 @@ async function tafel() {
     `Die Tafel beginnt bei 1, der Strahl bei 0. Der Strich ${a.von} hat hier kein Feld.`]);
 }
 
-zeige();
+if (window.Runde && Runde.aktiv) { const b = T.blk(40, 100, 1500, 64, "leiste"); b.style.cssText += ";display:flex;gap:22px;align-items:center"; b.classList.remove("leiste"); b.append(pfadBox, knBox); }
+if (!T.runde({ id: "lupe", neu: n => { let z; do z = T.zufall(101, 989); while (z % 100 < 10 || z % 100 > 90 || (n > 1 && z % 10 === 0)); rziel = { zahl: n === 1 ? Math.floor(z / 10) * 10 : z, schritt: n === 1 ? 10 : 1 }; rf = 0; pfad = pfad.slice(0, 1); zeige(); return "lupe-" + rziel.zahl; } })) zeige();
 </script>
 </body>
 </html>

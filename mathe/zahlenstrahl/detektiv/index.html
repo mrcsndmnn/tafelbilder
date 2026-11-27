@@ -44,11 +44,12 @@ window.HINWEISE = {
  ],
 };
 </script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112101"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/strahl.js?v=2026112101"></script>
 <script>
 const T = Tafel, Z = Strahl, S = T.buehne();
-let stufe = 1, ziffern = false, A = null, strahl = null, schrittOk = false, marken = [], zf = null, springt = false;
+let rf = 0, stufe = 1, ziffern = false, A = null, strahl = null, schrittOk = false, marken = [], zf = null, springt = false;
 
 const sWahl = T.stufen(v => { stufe = v; neu(); }, "det-stufe");
 const zKn = T.schalter("Ziffernfeld", T.laden("det-ziffern", false), v => { ziffern = v; T.merken("det-ziffern", v); });
@@ -64,11 +65,12 @@ const box = T.blk(50, 300, 1500, 360);
 const akt = T.blk(200, 676, 1200, 64, "aktionen");
 const springKn = T.knopf("Springen", () => springen(), "hilfe");
 // „Alle aufdecken“ erst, wenn die Schrittgröße bestimmt ist
-akt.append(springKn, T.knopf("Alle aufdecken", () => { if (!schrittOk) { Z.melde(streifen, "noch", "Zuerst: Wie groß ist ein Schritt?"); return; } marken.forEach(m => loese(m)); }), T.knopf("Nächster Ausschnitt →", () => neu(), "haupt"));
+akt.append(springKn, T.knopf("Alle aufdecken", () => { if (!schrittOk) { Z.melde(streifen, "noch", "Zuerst: Wie groß ist ein Schritt?"); return; } rf++; marken.forEach(m => loese(m)); }), T.knopf("Nächster Ausschnitt →", () => neu(), "haupt"));
+akt.lastChild.dataset.runde = "aus";
 const unten = T.blk(150, 764, 1300, 0); const streifen = T.streifen(unten);
 
 function neu() {
-  T.stop(); zuZiffern(); springt = false; schrittOk = false;
+  T.stop(); zuZiffern(); springt = false; schrittOk = false; rf = 0;
   const schritt = stufe === 1 ? 1 : stufe === 2 ? 10 : T.wahl([1, 10]);
   const gegeben = stufe === 1 ? "enden" : stufe === 2 ? T.wahl(["enden", "endeMitte"]) : "zwei";
   // Immer mindestens zwei bekannte Zahlen, damit man die Schrittgröße erschließen kann
@@ -95,7 +97,7 @@ function schrittWahl(w, b) {
     marken.forEach(m => m.classList.remove("zu"));
     Z.melde(streifen, "ok", `${T.lob()} ${Z.SATZ(w)} Jetzt die Kästchen.`);
   } else {
-    b.classList.add("falsch");
+    b.classList.add("falsch"); rf++;
     const g = A.gegeben.map(A.wert);
     Z.melde(streifen, "noch", A.eineZahl ? "Noch nicht. Lies den Satz über dem Strahl." : `Noch nicht. Zähle die Striche von ${g[0]} bis ${g[g.length - 1]}.`);
   }
@@ -108,7 +110,7 @@ function tippe(m) {
 function loese(m) {
   if (m.classList.contains("ok")) return;
   m.setzeText(m.wert); m.classList.remove("leer", "zu"); m.classList.add("ok"); strahl.leuchte(m.wert);
-  if (marken.every(x => x.classList.contains("ok"))) Z.melde(streifen, "ok", `${T.lob()} ${Z.SATZ(A.schritt)} Alle Zahlen gefunden.`);
+  if (marken.every(x => x.classList.contains("ok"))) { Z.melde(streifen, "ok", `${T.lob()} ${Z.SATZ(A.schritt)} Alle Zahlen gefunden.`); T.fertig(rf === 0); }
 }
 
 // ---------- Ziffernfeld ----------
@@ -126,7 +128,7 @@ function oeffneZiffern(m) {
   const ok = T.knopf("OK", () => {
     if (!eingabe) return;
     if (+eingabe === m.wert) { zuZiffern(); loese(m); }
-    else { Z.melde(streifen, "noch", `Noch nicht. ${eingabe} passt hier nicht. Zähle noch einmal.`); eingabe = ""; setz(); }
+    else { rf++; Z.melde(streifen, "noch", `Noch nicht. ${eingabe} passt hier nicht. Zähle noch einmal.`); eingabe = ""; setz(); }
   }, "haupt ok");
   ok.style.gridColumn = "1 / -1"; zf.appendChild(ok);
   const bx = 50 + m.x;   // Ziffernfeld neben das Kästchen, nicht darüber
@@ -137,6 +139,7 @@ function oeffneZiffern(m) {
 // ---------- Hilfe „Springen“ ----------
 async function springen() {
   if (springt) return;
+  rf++;
   const offen = marken.filter(m => !m.classList.contains("ok"));
   if (!offen.length) return;
   const m = offen[0];
@@ -157,7 +160,7 @@ async function springen() {
   }
   springt = false;
 }
-neu();
+if (!T.runde({ id: "detektiv", neu: n => { stufe = n; neu(); return `det-${A.von}-${A.schritt}`; } })) neu();
 </script>
 </body>
 </html>
