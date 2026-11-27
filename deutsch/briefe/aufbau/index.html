@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Aufbau eines Briefes – Briefe</title>
+<link rel="stylesheet" href="../gemeinsam/buehne.css?v=2026112701">
+<link rel="stylesheet" href="../../../gemeinsam/silben.css">
+<link rel="stylesheet" href="../../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Layout: Brief links, Legefelder in der Mitte, Kärtchen-Ablage rechts (wie die Vorlage). Satzstreifen oben über den Feldern. */
+.auftrag{top:96px}
+.woerter{left:48px;top:84px;width:880px;height:60px;justify-content:flex-start}
+.woerter span{font-size:17px}
+.woerter.an~.auftrag,.woerter.an+.auftrag{visibility:hidden}
+.satz{font-size:27px;padding:0 16px;gap:12px}
+.satz .lbl{font-size:16px;padding-right:12px}
+
+.brief{position:absolute;left:48px;top:150px;width:880px;height:736px;border:3px solid var(--ink);border-radius:16px;box-sizing:border-box}
+.part{position:absolute;left:30px;font-size:22px;line-height:1.38;border:2px dashed #9aa59f;border-radius:10px;padding:6px 14px;box-sizing:border-box;display:flex;align-items:center}
+.farben .part{border-style:solid;border-color:var(--c);background:var(--cbg)}
+.link{position:absolute;height:0;border-top:3px dotted var(--ink)}
+.link::before{content:"";position:absolute;left:-4px;top:-9px;border-top:7.5px solid transparent;border-bottom:7.5px solid transparent;border-right:11px solid var(--ink)}
+.field{position:absolute;width:300px;height:70px;border:3px dashed var(--ink);border-radius:14px;background:var(--field);box-sizing:border-box;transition:background .15s, box-shadow .15s}
+.farben .field{border-color:var(--c)}
+.field.hover{background:#e3efe6;box-shadow:0 0 0 4px rgba(47,125,79,.25)}
+.field .mark{position:absolute;right:-46px;top:50%;transform:translateY(-50%);font-size:34px;font-weight:700;display:none}
+.checking .field.ok .mark{display:block;color:var(--ok)}
+.checking .field.bad .mark{display:block;color:var(--bad)}
+.checking .field.ok{border-style:solid;border-color:var(--ok)}
+.checking .field.bad{border-style:solid;border-color:var(--bad)}
+
+.tray{position:absolute;left:1316px;top:150px;width:256px;height:736px;background:var(--tray);border-radius:16px;border:2px solid #c9d1cb;box-sizing:border-box}
+.tray b{position:absolute;top:14px;width:100%;text-align:center;font-size:22px;color:var(--soft)}
+.card{position:absolute;width:284px;height:60px;border:3px solid #1d2320;border-radius:12px;background:#fff;box-sizing:border-box;
+  display:grid;place-items:center;font-size:29px;font-weight:700;cursor:grab;touch-action:none;box-shadow:0 3px 8px rgba(0,0,0,.2);
+  transition:left .18s ease, top .18s ease, transform .1s;z-index:2}
+.farben .card{background:var(--cbg);border-color:var(--c)}
+.card.drag{cursor:grabbing;transition:none;transform:scale(1.06);z-index:10;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.card.inslot{width:284px}
+
+
+.c-ort{--c:#2f6fb0;--cbg:#e4eef8}.c-anrede{--c:#b0552f;--cbg:#f8e9e2}.c-einl{--c:#7a4fa8;--cbg:#efe7f7}
+.c-text{--c:#2f7d4f;--cbg:#e3f2e8}.c-gruss{--c:#a8871a;--cbg:#f8f1d9}.c-unter{--c:#b03a6a;--cbg:#f8e3ec}
+/* Silbenschrift im Brief etwas enger, damit der lange Brieftext in seinen Kasten passt */
+.silben .brief .w{margin-right:.24em}
+.silben .brief .s{padding-bottom:.27em;line-height:1.08;margin:0 .01em}
+.silben .brief .s::after{height:.21em;border-width:2.5px}
+.silben .part.c-text{font-size:20px}
+@media (prefers-reduced-motion: reduce){.card{transition:none}}
+</style>
+</head>
+<body class="tafel">
+<a class="zurueck" href="../" data-runde="aus"><span class="pfeil" aria-hidden="true">←</span> Briefe</a>
+<div id="fit"><div id="stage">
+  <h1 data-runde="aus">So ist ein Brief aufgebaut</h1>
+  <div class="auftrag" id="auftrag">Ziehe jedes Kärtchen in das richtige Feld.</div>
+  <div class="brief" id="brief"></div>
+  <div class="tray"><b>Kärtchen</b></div>
+</div></div>
+<script src="../../../gemeinsam/silben.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/buehne.js?v=2026112701"></script>
+<script>
+const B = Brief, S = B.buehne();
+// Texte mit Silbentrennung: "-" trennt Silben (nur sichtbar, wenn "Silben" an ist)
+const parts=[
+ {k:"ort",lab:"Ort und Da-tum",satz:"Das sind Ort und Da-tum",txt:"Gel-sen-kir-chen, 2.11.2026",h:62,w:330,right:true},
+ {k:"anrede",lab:"An-re-de",satz:"Das ist die An-re-de",txt:"Lie-be Kin-der,",h:62,w:210},
+ {k:"einl",lab:"Ein-lei-tung",satz:"Das ist die Ein-lei-tung",txt:"wie geht es euch? Mir geht es gut.<br>Ich möch-te euch von mei-nem Hal-lo-ween er-zäh-len.",h:84},
+ {k:"text",lab:"Brief-text",satz:"Das ist der Brief-text",txt:"Am Frei-tag ha-be ich mich als Vam-pir ver-klei-det. Ich hat-te ei-nen schwar-zen Um-hang und lan-ge Zäh-ne. Mit mei-nen Freun-den bin ich von Haus zu Haus ge-gan-gen. Wir ha-ben an den Tü-ren ge-klin-gelt und „Sü-ßes o-der Sau-res!“ ge-ru-fen. Wir ha-ben ganz vie-le Sü-ßig-kei-ten be-kom-men. Be-son-ders le-cker wa-ren die Gum-mi-bär-chen und die Scho-ko-la-de. Da-nach ha-ben wir noch ei-nen Gru-sel-film ge-schaut. Das war rich-tig toll!<br>Wie habt ihr Hal-lo-ween ge-fei-ert? Habt ihr euch auch ver-klei-det? Ich freu-e mich auf eu-re Brie-fe.",h:262},
+ {k:"gruss",lab:"Gruß",satz:"Das ist der Gruß",txt:"Vie-le Grü-ße",h:62,w:190},
+ {k:"unter",lab:"Un-ter-schrift",satz:"Das ist die Un-ter-schrift",txt:"Eu-er Tom",h:62,w:170},
+];
+const BRIEF={x:48,y:150,w:880}, FX=968, GAP=18;
+const brief=document.getElementById('brief');
+let y=26; const fields=[];
+parts.forEach(p=>{
+  const d=document.createElement('div');d.className='part c-'+p.k;d.innerHTML='<span>'+silben(p.txt)+'</span>';
+  const w=p.w||BRIEF.w-60; d.style.width=w+'px'; d.style.height=p.h+'px'; d.style.top=y+'px';
+  if(p.right){d.style.left='auto';d.style.right='30px'}
+  brief.appendChild(d);
+  const cy=BRIEF.y+y+p.h/2;
+  const l=document.createElement('div');l.className='link';l.style.left=(BRIEF.x+BRIEF.w+6)+'px';l.style.width=(FX-BRIEF.x-BRIEF.w-14)+'px';l.style.top=cy+'px';S.appendChild(l);
+  const f=document.createElement('div');f.className='field c-'+p.k;f.dataset.k=p.k;
+  f.style.left=FX+'px';f.style.top=(cy-35)+'px';f.innerHTML='<span class="mark"></span>';S.appendChild(f);
+  fields.push({el:f,k:p.k,x:FX,y:cy-35,card:null});
+  y+=p.h+GAP;
+});
+const cards=parts.map(p=>{const c=document.createElement('div');c.className='card c-'+p.k;c.innerHTML='<span>'+silben(p.lab)+'</span>';c.setAttribute('aria-label',ohneSilben(p.lab));c.dataset.k=p.k;S.appendChild(c);return {el:c,k:p.k,p,slot:null}});
+const TRAY={x:1316,y:200};
+let pruefungen=0;
+function home(c,i){c.slot=null;c.el.classList.remove('inslot');c.el.style.width='224px';c.el.style.left=(TRAY.x+16)+'px';c.el.style.top=(TRAY.y+12+i*104)+'px';c.el.style.fontSize=c.k==="ort"?'24px':'27px'}
+function shuffle(){const idx=B.mischen([...cards.keys()]);
+  fields.forEach(f=>f.card=null);idx.forEach((ci,pos)=>{cards[ci].trayPos=pos;home(cards[ci],pos)});S.classList.remove('checking','alldone');
+  pruefungen=0;B.satzLeer('Lege ein Kärtchen in ein Feld.');}
+function place(c,f){
+  if(f.card&&f.card!==c){home(f.card,f.card.trayPos)}
+  fields.forEach(o=>{if(o.card===c)o.card=null});
+  f.card=c;c.slot=f;c.el.classList.add('inslot');c.el.style.width='284px';c.el.style.fontSize='29px';
+  c.el.style.left=(f.x+8)+'px';c.el.style.top=(f.y+5)+'px';
+  S.classList.remove('checking','alldone');
+  // Satz beschreibt nur, was das Kind getan hat (verrät nicht, ob es stimmt)
+  const t=c.p.satz.split(' ');
+  B.satz(silben(t.slice(0,2).join(' '))+' <em>'+silben(t.slice(2).join(' '))+'</em>.');
+}
+function target(x,y,c){
+  const w=parseFloat(c.el.style.width)||224, cx=x+w/2, cy=y+30;
+  let best=null,bd=1e9;
+  fields.forEach(f=>{const fx=f.x+150,fy=f.y+35;const dx=Math.abs(cx-fx),dy=Math.abs(cy-fy);
+    if(dx<230&&dy<70){const d=dx*dx+dy*dy*3;if(d<bd){bd=d;best=f}}});
+  return best;
+}
+cards.forEach(c=>B.ziehbar(c.el,{
+  bewege:(x,y)=>{const t=target(x,y,c);fields.forEach(f=>f.el.classList.toggle('hover',f===t))},
+  ende:(x,y)=>{const t=target(x,y,c);fields.forEach(f=>f.el.classList.remove('hover'));
+    if(t)place(c,t);else{fields.forEach(o=>{if(o.card===c)o.card=null});home(c,c.trayPos)}}
+}));
+function pruefen(){
+  let all=true;pruefungen++;
+  fields.forEach(f=>{const ok=f.card&&f.card.k===f.k;f.el.classList.toggle('ok',!!ok);f.el.classList.toggle('bad',!!f.card&&!ok);
+    f.el.querySelector('.mark').textContent=ok?'✓':(f.card?'✗':'');if(!ok)all=false});
+  S.classList.add('checking');S.classList.toggle('alldone',all);
+  if(all){B.satz(silben('Su-per, al-les rich-tig!'));Runde.fertig({ohneFehler:pruefungen===1});}
+}
+// Silben-Schalter (wie bisher), danach die gemeinsame Knopfleiste: Wörter · Hilfe · Prüfen · Neu
+const silbenKn=B.el('label','knopf','<input type="checkbox" id="silben"> Silben');
+const farbenAn=B.laden('briefe-farben',false);
+const woerter=B.wortspeicher(48,84,880,60,['Ort und Datum','die Anrede','die Einleitung','der Brieftext','der Gruß','die Unterschrift'],['Das ist …']);
+S.insertBefore(woerter,document.getElementById('auftrag'));
+const kn=B.knoepfe({vorne:[silbenKn],woerter:an=>woerter.classList.toggle('an',an),
+  hilfe:an=>{S.classList.toggle('farben',an);B.merken('briefe-farben',an)},pruefen,neu:shuffle});
+kn.hilfe.title='Farben als Hilfe';kn.hilfe.setze(farbenAn);S.classList.toggle('farben',farbenAn);
+B.satzstreifen(968,82,604,62);
+silbenSchalter(document.getElementById('silben'),S,'brief-silben',false);
+shuffle();
+// Übungsrunde: eine Aufgabe = alle Kärtchen legen und prüfen
+if(Runde.aktiv) Runde.verbinde({id:'aufbau',neueAufgabe(){shuffle();Runde.gestartet('aufbau-'+Date.now())},
+  hilfe(an){kn.hilfe.setze(an);S.classList.toggle('farben',an)}});
+</script>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+ "titel": "Aufbau eines Briefes",
+ "teile": [
+  { "h": "So geht es", "punkte": [
+    "Die Kärtchen rechts mit dem Finger oder der Maus in das passende Feld neben dem Brief ziehen.",
+    "Ein Kärtchen lässt sich jederzeit in ein anderes Feld ziehen. Liegt dort schon eines, wandert dieses zurück in die Ablage.",
+    "Oben im **Satzstreifen** steht nach jedem Ziehen ein Satz zum Nachsprechen: „Das ist die Anrede.“",
+    "**Prüfen** zeigt an jedem Feld ✓ oder ✗. Sind alle richtig, steht im Satzstreifen „Super, alles richtig!“." ] },
+  { "h": "Knöpfe", "punkte": [
+    "**Silben**: Brieftext, Kärtchen und Satz in Silbenschrift mit Silbenbögen.",
+    "**Wörter**: Wortspeicher mit den Namen der Briefteile.",
+    "**Hilfe**: Briefteile und Kärtchen bekommen passende Farben.",
+    "**Neu**: Die Kärtchen werden gemischt und liegen wieder in der Ablage." ] },
+  { "h": "Im Unterricht", "punkte": [
+    "Hilfe (Farben) und Silben merkt sich das Gerät bis zum nächsten Mal.",
+    "Mit **F11** auf Vollbild schalten. **Briefe** führt zur Startseite des Themenblocks." ] }
+ ]
+});
+</script>
+</body>
+</html>

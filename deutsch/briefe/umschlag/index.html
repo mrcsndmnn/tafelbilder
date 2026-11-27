@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Was steht wo auf dem Umschlag? – Briefe</title>
+<link rel="stylesheet" href="../gemeinsam/buehne.css?v=2026112701">
+<link rel="stylesheet" href="../../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Layout: Umschlag links mit vier Ecken (oben/unten, links/rechts), Ablage rechts, Satzstreifen unten. */
+.umschlag{left:48px;top:150px;width:960px;height:600px}
+.zone{position:absolute;width:480px;height:300px;transition:background .15s}
+.zone.hover{background:rgba(47,125,79,.12)}
+.ghost{position:absolute;border:3px dashed var(--hint);border-radius:10px;display:none;color:var(--hint);font-size:20px;font-weight:700;place-items:center}
+.hilfe .ghost{display:grid}
+.ablage{left:1060px;top:150px;width:492px;height:600px}
+.addr.small{font-size:20px}
+.addr.big{font-size:29px;padding:14px 20px}
+.marke{width:140px;height:170px}
+.marke svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 5px rgba(0,0,0,.2))}
+.tag{position:absolute;left:0;top:-34px;font-size:19px;font-weight:700;background:#1d2320;color:#fff;border-radius:8px;padding:1px 10px;display:none;white-space:nowrap}
+.hilfe .tag,.ok .tag{display:block}
+.ok .tag{background:var(--ok)}
+.woerter{left:1060px;top:772px;width:492px;height:100px}
+.post{position:absolute;width:190px;height:190px;pointer-events:none;opacity:0;transform:scale(1.4) rotate(-14deg);transition:opacity .35s, transform .35s;z-index:5}
+.fertig .post{opacity:.85;transform:scale(1) rotate(-14deg)}
+@media (prefers-reduced-motion: reduce){.post{transition:none}}
+</style>
+</head>
+<body class="tafel">
+<a class="zurueck" href="../" data-runde="aus"><span class="pfeil" aria-hidden="true">←</span> Briefe</a>
+<div id="fit"><div id="stage">
+  <h1 data-runde="aus">Was steht wo auf dem Umschlag?</h1>
+  <div class="auftrag" id="auftrag"></div>
+  <div class="lob" id="lob"></div>
+  <div class="umschlag" id="env"></div>
+  <div class="ablage"><b>Ablage</b></div>
+  <div class="post" id="post"></div>
+</div></div>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/buehne.js?v=2026112701"></script>
+<script src="../gemeinsam/bilder.js?v=2026112701"></script>
+<script src="../gemeinsam/adressen.js?v=2026112701"></script>
+<script>
+const B = Brief, BB = BriefBilder, S = B.buehne(), env = document.getElementById('env');
+const ENV = { x: 48, y: 150, w: 960, h: 600 }, M = 30;
+let adr = ADRESSEN[0], pruefungen = 0;   // Tom
+document.getElementById('post').innerHTML = BB.poststempel();
+// Vier Ecken des Umschlags
+const ZONES = [
+  { id: "ol", wort: "oben links", x: 0, y: 0 }, { id: "or", wort: "oben rechts", x: 480, y: 0 },
+  { id: "ul", wort: "unten links", x: 0, y: 300 }, { id: "ur", wort: "unten rechts", x: 480, y: 300 }
+];
+ZONES.forEach(z => { const d = B.el('div', 'zone'); d.style.left = z.x + 'px'; d.style.top = z.y + 'px'; env.appendChild(d); z.el = d; z.item = null; });
+
+const ITEMS = [
+  { id: "marke", ziel: "or", satz: "Die Briefmarke klebt", name: "Briefmarke", w: 140, h: 170, cls: "marke", html: () => BB.marke() },
+  { id: "abs", ziel: "ol", satz: "Der Absender steht", name: "Absender", w: 300, h: 142, cls: "addr small", html: () => ABSENDER.join('<br>') },
+  { id: "emp", ziel: "ur", satz: "Der Empfänger steht", name: "Empfänger", w: 400, h: 150, cls: "addr big", html: () => adressZeilen(adr).map(B.esc).join('<br>') },
+];
+function posIn(z, it) { // Kärtchen in die Ecke der Zone setzen
+  const left = z.id[1] === "l", top = z.id[0] === "o";
+  return { x: ENV.x + z.x + (left ? M : 480 - M - it.w), y: ENV.y + z.y + (top ? M : 300 - M - it.h) };
+}
+ITEMS.forEach(it => {
+  const c = B.el('div', it.cls); c.style.width = it.w + 'px'; c.style.height = it.h + 'px';
+  c.innerHTML = `<div class="inhalt">${it.html()}</div><span class="tag">${it.name}</span><span class="mark"></span>`; S.appendChild(c); it.el = c;
+  c.setAttribute('aria-label', it.name);
+  // Hilfe-Umriss an der richtigen Stelle
+  const z = ZONES.find(z => z.id === it.ziel), p = posIn(z, it), g = B.el('div', 'ghost', it.name);
+  g.style.left = (p.x - ENV.x) + 'px'; g.style.top = (p.y - ENV.y) + 'px'; g.style.width = it.w + 'px'; g.style.height = it.h + 'px'; env.appendChild(g);
+  B.ziehbar(c, {
+    bewege: (x, y) => { const z = zoneAt(x + it.w / 2, y + it.h / 2); ZONES.forEach(o => o.el.classList.toggle('hover', o === z)); },
+    ende: (x, y) => { ZONES.forEach(o => o.el.classList.remove('hover')); const z = zoneAt(x + it.w / 2, y + it.h / 2); if (z) place(it, z); else { sendHome(it); clearCheck(); } }
+  });
+});
+const TRAY = { x: 1060, y: 150 };
+function layoutTray() { // Reihenfolge mischen, Höhen passend stapeln
+  let y = TRAY.y + 56;
+  B.mischen([0, 1, 2]).forEach(i => { const it = ITEMS[i]; it.zone = null; it.el.style.left = (TRAY.x + (492 - it.w) / 2) + 'px'; it.el.style.top = y + 'px'; it.hy = y; y += it.h + 32; });
+}
+function sendHome(it) { if (it.zone && it.zone.item === it) it.zone.item = null; it.zone = null; it.el.style.left = (TRAY.x + (492 - it.w) / 2) + 'px'; it.el.style.top = it.hy + 'px'; }
+function place(it, z) {
+  if (z.item && z.item !== it) sendHome(z.item);
+  if (it.zone && it.zone.item === it) it.zone.item = null;
+  z.item = it; it.zone = z; const p = posIn(z, it); B.setze(it.el, p.x, p.y);
+  B.satz(`${it.satz} <em>${z.wort}</em>.`); clearCheck();
+}
+function clearCheck() { S.classList.remove('fertig'); ITEMS.forEach(i => B.markiere(i.el, null)); }
+function zoneAt(cx, cy) { const x = cx - ENV.x, y = cy - ENV.y; if (x < 0 || y < 0 || x > ENV.w || y > ENV.h) return null; return ZONES.find(z => x >= z.x && x < z.x + 480 && y >= z.y && y < z.y + 300); }
+
+function pruefen() {
+  let alle = true; pruefungen++;
+  ITEMS.forEach(it => { const ok = !!it.zone && it.zone.id === it.ziel; B.markiere(it.el, ok ? true : it.zone ? false : null); if (!ok) alle = false; });
+  if (alle) {
+    const m = ITEMS[0], post = document.getElementById('post'), p = B.pos(m.el);
+    B.setze(post, p.x - 120, p.y + 10); S.classList.add('fertig');
+    Runde.fertig({ ohneFehler: pruefungen === 1 });
+  }
+}
+function neu() {
+  ZONES.forEach(z => z.item = null); layoutTray(); clearCheck(); pruefungen = 0;
+  document.getElementById('auftrag').textContent = `Unser Brief geht an ${adr.vorname}. Ziehe alles an die richtige Stelle.`;
+  document.getElementById('lob').textContent = `Super! Jetzt kann der Brief zu ${adr.vorname}.`;
+  B.satzLeer('Lege etwas auf den Umschlag.');
+}
+B.satzstreifen(48, 772, 960, 100);
+const woerter = B.wortspeicher(1060, 772, 492, 100, ['die Briefmarke', 'der Absender', 'der Empfänger'], ['oben', 'unten', 'links', 'rechts']);
+const kn = B.knoepfe({ woerter: an => woerter.classList.toggle('an', an), hilfe: an => S.classList.toggle('hilfe', an), pruefen, neu });
+neu();
+// Übungsrunde: ein Umschlag je Aufgabe, im Rundenmodus auch an andere Kinder aus der Adressliste
+if (Runde.aktiv) Runde.verbinde({ id: 'umschlag',
+  neueAufgabe() { adr = B.wahl(ADRESSEN); ITEMS[2].el.querySelector('.inhalt').innerHTML = ITEMS[2].html(); neu(); Runde.gestartet('umschlag-' + adr.vorname); },
+  hilfe(an) { kn.hilfe.setze(an); S.classList.toggle('hilfe', an); } });
+</script>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+ titel: "Was steht wo auf dem Umschlag?",
+ teile: [
+  { h: "So geht es", punkte: [
+    "Briefmarke, Absender und Empfänger aus der Ablage auf den Umschlag ziehen. Sie rasten in der Ecke ein, über der sie losgelassen werden.",
+    "Der **Satzstreifen** zeigt den Satz zum Nachsprechen: „Die Briefmarke klebt oben rechts.“ Er verrät nicht, ob es stimmt.",
+    "**Prüfen** setzt Haken und Kreuze. Ist alles richtig, kommt der Poststempel." ] },
+  { h: "Knöpfe", punkte: [
+    "**Wörter**: Wortspeicher mit oben, unten, links, rechts und den Namen der Teile.",
+    "**Hilfe**: Umrisse zeigen, wohin die Teile gehören, und die Teile bekommen ihre Namen.",
+    "**Neu**: Alles liegt wieder gemischt in der Ablage." ] },
+ ]
+});
+</script>
+</body>
+</html>

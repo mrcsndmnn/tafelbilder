@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Adress-Baukasten – Briefe</title>
+<link rel="stylesheet" href="../gemeinsam/buehne.css?v=2026112701">
+<link rel="stylesheet" href="../../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Layout: Bausteine links, Umschlag mit drei Adresszeilen rechts, Satzstreifen unten. Zwei Modi: Bausteine sortieren, Zeilen ordnen. */
+.modes{position:absolute;right:28px;top:96px;display:flex;border:2px solid #1d2320;border-radius:12px;overflow:hidden}
+.modes .knopf{border:0;border-radius:0;font-size:19px;padding:5px 16px;min-height:44px}
+.modes .knopf+.knopf{border-left:2px solid #1d2320}
+.modes .knopf[aria-pressed="true"]{background:#1d2320;color:#fff}
+.ablage{left:48px;top:160px;width:540px;height:590px}
+.umschlag{left:630px;top:160px;width:922px;height:590px}
+.umschlag .abs{position:absolute;left:28px;top:24px;font-size:17px;line-height:1.3;color:#8a948e}
+.umschlag .marke{position:absolute;right:28px;top:24px;width:100px;height:120px}
+
+.row{position:absolute;height:92px;border-radius:14px;background:var(--rbg)}
+.row .lab{position:absolute;left:14px;top:0;height:92px;width:220px;display:flex;align-items:center;gap:10px;font-size:19px;line-height:1.2;font-weight:700;color:var(--rc)}
+.row .lab svg{flex:0 0 56px;width:56px;height:56px}
+.row .lab .w{display:none}
+.woerter-an .mode-a .row .lab .w{display:block}
+.mode-b .row{background:transparent}
+.mode-b .row .lab{color:#1d2320}
+.mode-b .row .lab svg,.mode-b .row .lab .w{display:none}
+.mode-b .row .lab .seq{display:none}
+.woerter-an .mode-b .row .lab .seq{display:block}
+.mode-b.fertig .row{background:var(--rbg)}
+.mode-b.fertig .row .lab{color:var(--rc)}
+.mode-b.fertig .row .lab svg,.mode-b.fertig .row .lab .w{display:block}
+.mode-b.fertig .row .lab .seq{display:none}
+.mode-a .row .lab .seq{display:none}
+.slot{position:absolute;height:72px;border:3px dashed var(--rc);border-radius:12px;background:rgba(255,255,255,.6);transition:box-shadow .15s}
+.mode-b .slot{border-color:#1d2320}
+.slot.hover{box-shadow:0 0 0 5px rgba(47,125,79,.3)}
+
+.chip{position:absolute;height:72px;background:#fff;border:3px solid #1d2320;border-radius:12px;display:grid;place-items:center;
+  font-size:30px;font-weight:700;box-shadow:0 3px 8px rgba(0,0,0,.18);white-space:nowrap;transition:left .18s ease, top .18s ease, width .18s ease}
+.chip.drag{box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.chip .mark{right:-14px;top:-14px;width:36px;height:36px;font-size:23px}
+.chip.ok{border-color:var(--ok)}.chip.bad{border-color:var(--bad)}
+.satz{left:48px;top:772px;width:1504px;height:100px}
+
+.merk{position:absolute;inset:0;background:rgba(29,35,32,.55);display:none;place-items:center;z-index:20}
+.merk.an{display:grid}
+.merk .box{width:960px;background:#fff;border-radius:20px;padding:36px 44px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.merk h2{margin:0 0 20px;font-size:40px}
+.merk .mr{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:18px;padding:12px 18px;border-radius:14px;background:var(--rbg);margin-bottom:12px}
+.merk .mr svg{width:64px;height:64px}
+.merk .mr strong{font-size:30px;color:var(--rc)}
+.merk .mr span{font-size:28px}
+.merk p{font-size:24px;margin:18px 0 22px;color:#3b4540}
+.merk .knopf{float:right}
+@media (prefers-reduced-motion: reduce){.chip{transition:none}}
+</style>
+</head>
+<body class="tafel">
+<a class="zurueck" href="../" data-runde="aus"><span class="pfeil" aria-hidden="true">←</span> Briefe</a>
+<div id="fit"><div id="stage" class="mode-a">
+  <h1 data-runde="aus">Adress-Baukasten</h1>
+  <div class="auftrag" id="auftrag"></div>
+  <div class="lob" id="lob"></div>
+  <div class="modes" role="group" aria-label="Aufgabe" data-runde="aus">
+    <button type="button" class="knopf" id="m-a" aria-pressed="true">1 Bausteine sortieren</button>
+    <button type="button" class="knopf" id="m-b" aria-pressed="false">2 Zeilen ordnen</button>
+  </div>
+  <div class="ablage"><b>Bausteine</b></div>
+  <div class="umschlag" id="env"><div class="abs" id="abs"></div><div class="marke" id="marke"></div></div>
+  <div class="merk" id="merk"><div class="box">
+    <button type="button" class="knopf" id="b-merk-zu">Schließen</button>
+    <h2>Eine Adresse hat:</h2>
+    <div id="merk-rows"></div>
+    <p>Die Postleitzahl sagt der Post, in welche Stadt der Brief muss.</p>
+  </div></div>
+</div></div>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/buehne.js?v=2026112701"></script>
+<script src="../gemeinsam/bilder.js?v=2026112701"></script>
+<script src="../gemeinsam/adressen.js?v=2026112701"></script>
+<script>
+const B = Brief, BB = BriefBilder, S = B.buehne();
+document.getElementById('abs').innerHTML = ABSENDER.join('<br>');
+document.getElementById('marke').innerHTML = BB.marke();
+const ICON = { name: BB.person(), str: BB.haus(), ort: BB.stadt() };
+const TYP = ["vorname", "nachname", "strasse", "nr", "plz", "ort"];
+const ROLLE = { vorname: "der Vorname", nachname: "der Nachname", strasse: "die Straße", nr: "die Hausnummer", plz: "die Postleitzahl", ort: "der Ort" };
+const ROWS = [
+  { k: "name", cls: "r-name", wort: "Name", seq: "zuerst", slots: [["vorname", 250], ["nachname", 250]] },
+  { k: "str", cls: "r-str", wort: "Straße und Hausnummer", seq: "dann", slots: [["strasse", 250], ["nr", 250]] },
+  { k: "ort", cls: "r-ort", wort: "Postleitzahl und Ort", seq: "zum Schluss", slots: [["plz", 250], ["ort", 250]] },
+];
+const ENV = { x: 630, y: 160 }, ROWX = ENV.x + 40, ROWW = 842, SLOTX = ENV.x + 290, POOL = { x: 48, y: 160 };
+let modus = "a", adr = 0, items = [], zones = [], rowEls = [], pruefungen = 0;
+const A = () => ADRESSEN[adr];
+
+// Zeilen anlegen
+ROWS.forEach((r, i) => {
+  const y = ENV.y + 190 + i * 118;
+  const d = B.el('div', 'row ' + r.cls); d.style.left = ROWX + 'px'; d.style.top = y + 'px'; d.style.width = ROWW + 'px';
+  d.innerHTML = `<div class="lab">${ICON[r.k]}<span class="w">${r.wort}</span><span class="seq">${r.seq}</span></div>`;
+  S.appendChild(d); rowEls.push({ el: d, y, r });
+});
+function clearZones() { zones.forEach(z => z.el.remove()); zones = []; items.forEach(it => it.el.remove()); items = []; }
+function makeSlot(x, y, w, cls, data) { const el = B.el('div', 'slot ' + cls); el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; S.appendChild(el);
+  const z = Object.assign({ el, x, y, w, h: 72, item: null }, data); zones.push(z); return z; }
+function makeChip(text, data, w, cls) {
+  const el = B.el('div', 'chip ' + (cls || ''), '<span class="t"></span><span class="mark"></span>'); el.querySelector('.t').textContent = text;
+  el.style.width = w + 'px'; S.appendChild(el); const it = Object.assign({ el, text, w, homeW: w, zone: null }, data); items.push(it);
+  B.ziehbar(el, {
+    bewege: (x, y) => { const z = zoneAt(x + el.offsetWidth / 2, y + 36); zones.forEach(o => o.el.classList.toggle('hover', o === z)); },
+    ende: (x, y) => { zones.forEach(o => o.el.classList.remove('hover')); const z = zoneAt(x + el.offsetWidth / 2, y + 36); if (z) place(it, z); else { sendHome(it); clearCheck(); } }
+  });
+  return it;
+}
+function aufbau() {
+  clearZones(); S.classList.remove('fertig'); pruefungen = 0; const a = A(), werte = TYP.map(t => a[t]);
+  if (modus === "a") {
+    ROWS.forEach((r, i) => { let x = SLOTX; r.slots.forEach(([typ, w]) => { makeSlot(x, rowEls[i].y + 10, w, r.cls, { typ }); x += w + 16; }); });
+    B.mischen(TYP.map((t, i) => i)).forEach((ti, n) => { const it = makeChip(werte[ti], { typ: TYP[ti] }, 240); it.hx = POOL.x + 24 + (n % 2) * 256; it.hy = POOL.y + 64 + Math.floor(n / 2) * 96; sendHome(it); });
+    setText('auftrag', `Baue die Adresse von ${a.vorname}. Ziehe jeden Baustein an die richtige Stelle.`);
+    B.satzLeer('Lege einen Baustein auf den Umschlag.');
+  } else {
+    const lines = adressZeilen(a);
+    ROWS.forEach((r, i) => makeSlot(SLOTX, rowEls[i].y + 10, 500, '', { pos: i }));
+    B.mischen([0, 1, 2]).forEach((li, n) => { const it = makeChip(lines[li], { pos: li }, 492, 'line'); it.hx = POOL.x + 24; it.hy = POOL.y + 80 + n * 120; sendHome(it); });
+    setText('auftrag', 'In welcher Reihenfolge stehen die Zeilen? Ziehe sie auf den Umschlag.');
+    B.satzLeer('Lege eine Zeile auf den Umschlag.');
+  }
+  merkFuellen();
+}
+function setText(id, t) { document.getElementById(id).textContent = t; }
+function sage(it, z) {
+  const em = `<em>${B.esc(it.text)}</em>`;
+  if (modus === "a") B.satz(`${em} ist ${ROLLE[z.typ]}.`);
+  else B.satz(["Zuerst kommt ", "Dann kommt ", "Zum Schluss kommt "][z.pos] + em + '.');
+}
+function sendHome(it) { if (it.zone && it.zone.item === it) it.zone.item = null; it.zone = null; it.el.style.width = it.homeW + 'px'; B.setze(it.el, it.hx, it.hy); }
+function place(it, z) {
+  if (z.item && z.item !== it) sendHome(z.item);
+  if (it.zone && it.zone.item === it) it.zone.item = null;
+  z.item = it; it.zone = z; it.el.style.width = (z.w - 10) + 'px'; B.setze(it.el, z.x + 5, z.y);
+  sage(it, z); clearCheck();
+}
+function clearCheck() { S.classList.remove('fertig'); items.forEach(i => B.markiere(i.el, null)); }
+function zoneAt(cx, cy) { let best = null, bd = 1e9; zones.forEach(z => { const zx = z.x + z.w / 2, zy = z.y + 36, dx = Math.abs(cx - zx), dy = Math.abs(cy - zy);
+  if (dx < z.w / 2 + 30 && dy < 60) { const d = dx * dx + dy * dy * 4; if (d < bd) { bd = d; best = z; } } }); return best; }
+
+function pruefen() {
+  let alle = true; pruefungen++;
+  items.forEach(it => { const ok = !!it.zone && (modus === "a" ? it.zone.typ === it.typ : it.zone.pos === it.pos); B.markiere(it.el, ok ? true : it.zone ? false : null); if (!ok) alle = false; });
+  if (alle) { setText('lob', modus === "a" ? `Super! Das ist die Adresse von ${A().vorname}.` : 'Super! So kommt der Brief an.'); S.classList.add('fertig'); Runde.fertig({ ohneFehler: pruefungen === 1 }); }
+}
+function neueAdresse() { let n; do { n = Math.floor(Math.random() * ADRESSEN.length); } while (n === adr); adr = n; aufbau(); }
+function setModus(m) { modus = m; S.classList.toggle('mode-a', m === "a"); S.classList.toggle('mode-b', m === "b");
+  document.getElementById('m-a').setAttribute('aria-pressed', m === "a"); document.getElementById('m-b').setAttribute('aria-pressed', m === "b"); aufbau(); }
+document.getElementById('m-a').onclick = () => setModus("a");
+document.getElementById('m-b').onclick = () => setModus("b");
+function merkFuellen() { const ex = adressZeilen(A()), box = document.getElementById('merk-rows'); box.innerHTML = '';
+  ROWS.forEach((r, i) => { const d = B.el('div', 'mr ' + r.cls, `<span style="color:var(--rc)">${ICON[r.k]}</span><strong>${r.wort}</strong><span></span>`); d.lastChild.textContent = ex[i]; box.appendChild(d); }); }
+// Hilfe = Merkkarte „Eine Adresse hat:“
+const merk = document.getElementById('merk');
+const zeigeMerk = an => { merk.classList.toggle('an', an); if (kn) kn.hilfe.setze(an); };
+document.getElementById('b-merk-zu').onclick = () => zeigeMerk(false);
+B.satzstreifen(48, 772, 1504, 100);
+const kn = B.knoepfe({ woerter: an => document.getElementById('fit').classList.toggle('woerter-an', an), hilfe: zeigeMerk, pruefen, neu: neueAdresse });
+kn.hilfe.title = 'Merkkarte: Eine Adresse hat …';
+aufbau();
+// Übungsrunde: ★ Zeilen ordnen, ★★ Bausteine sortieren
+if (Runde.aktiv) Runde.verbinde({ id: 'adresse',
+  neueAufgabe(n) { adr = Math.floor(Math.random() * ADRESSEN.length); setModus(n >= 2 ? "a" : "b"); Runde.gestartet(`adresse-${modus}-${A().vorname}`); },
+  hilfe: zeigeMerk });
+</script>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+ titel: "Adress-Baukasten",
+ teile: [
+  { h: "Aufgabe 1: Bausteine sortieren", punkte: [
+    "Sechs Bausteine (Vorname, Nachname, Straße, Hausnummer, Postleitzahl, Ort) in die drei farbigen Adresszeilen ziehen.",
+    "Satzstreifen: „12 ist die Hausnummer.“" ] },
+  { h: "Aufgabe 2: Zeilen ordnen", punkte: [
+    "Drei fertige Zeilen in die richtige Reihenfolge ziehen. Satzstreifen: „Zuerst kommt Tom Becker.“" ] },
+  { h: "Knöpfe", punkte: [
+    "**Wörter**: Die Zeilen zeigen ihre Namen (Name; Straße und Hausnummer; Postleitzahl und Ort) bzw. zuerst, dann, zum Schluss.",
+    "**Hilfe**: Merkkarte „Eine Adresse hat:“ mit Beispiel.",
+    "**Prüfen**: Haken und Kreuze an den Bausteinen. **Neu**: eine andere erfundene Adresse." ] },
+ ]
+});
+</script>
+</body>
+</html>
