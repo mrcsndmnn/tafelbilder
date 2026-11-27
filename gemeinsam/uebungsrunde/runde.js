@@ -36,7 +36,7 @@ const symHTML = t => t && t.svg ? `<svg viewBox="0 0 44 44" fill="none" stroke="
 
 // ---------- Einstellungen ----------
 const STD = { auswahl: null, reihenfolge: "abwechselnd", anzahl: 8, kontingent: 2, namenAn: false, tiere: false, modus: "fenster",
-  niveaus: {}, punkte: false, joker: true, klang: false, animation: true };
+  niveaus: {}, punkte: false, joker: true, klang: false, animation: true, klassenrunde: true, klassenAbstand: 5 };
 let cfg = null;
 const namenListe = () => A.namenAusText(namenFeld ? namenFeld.value : "");
 let namenFeld = null;
@@ -162,8 +162,14 @@ function zeigeEinrichtung() {
 
   // ⑥ Auswahl des Kindes
   const b6 = bereich(6, "Auswahl des Kindes");
-  b6.append(gruppe("Auswahl des Kindes", [{ wert: "fenster", text: "Auswahl-Fenster nach jeder Aufgabe" }, { wert: "zufall", text: "Zufällig (Namensrad)" }], cfg.modus, v => { cfg.modus = v; speichereEinst(); }),
+  b6.append(gruppe("Auswahl des Kindes", [{ wert: "fenster", text: "Auswahl-Fenster nach jeder Aufgabe" }, { wert: "zufall", text: "Zufällig (Namensrad)" }], cfg.modus, v => { cfg.modus = v; aktualisiere(); }),
     el("p", "hinweis", "Gilt für die ganze Runde. Während der Runde über das Menü ☰ umschaltbar."));
+  // Klassenrunde: im Zufallsmodus antwortet regelmäßig die ganze Klasse (zählt für kein Kind, eine Aufgabe mehr)
+  const kr = el("div", "namen-zeile"); kr.style.alignItems = "center";
+  kr.append(schalter("Klassenrunde im Zufallsmodus", cfg.klassenrunde, v => { cfg.klassenrunde = v; aktualisiere(); }), el("span", "", "nach jeder"),
+    gruppe("Abstand der Klassenrunde", [4, 5, 6].map(n => ({ wert: n, text: n + ".", aria: `jede ${n}. Aufgabe` })), cfg.klassenAbstand, v => { cfg.klassenAbstand = v; aktualisiere(); }),
+    el("span", "", "Aufgabe"));
+  b6.append(kr, el("p", "hinweis", "Bei der Klassenrunde antworten alle zusammen (Chor). Sie zählt für kein Kind und verlängert die Runde um eine Aufgabe."));
   f.appendChild(b6);
 
   // Mehr Einstellungen
@@ -216,7 +222,11 @@ function aktualisiere() {
   const gew = thema.tafelbilder.filter(t => cfg.auswahl.includes(t.id));
   const sek = gew.length ? gew.reduce((s, t) => s + (t.dauerSek || 60), 0) / gew.length : 60;
   const min = Math.max(1, Math.round(zuege * (sek + 15) / 60));
-  zeitText.textContent = `Das ergibt ${zuege} Aufgaben (ca. ${min} Min.)`;
+  // Klassenrunden im Zufallsmodus: jede n-te Aufgabe, also zusätzliche Aufgaben
+  let kr = 0;
+  if (cfg.modus === "zufall" && cfg.klassenrunde && zuege) { const n = cfg.klassenAbstand || 5; let T = zuege; while (zuege + Math.floor(T / n) > T) T++; kr = T - zuege; }
+  const minK = Math.max(1, Math.round((zuege + kr) * (sek + 15) / 60));
+  zeitText.textContent = `Das ergibt ${zuege} Aufgaben${kr ? ` + ${kr} Klassenrunde${kr > 1 ? "n" : ""}` : ""} (ca. ${kr ? minK : min} Min.)`;
   // Niveau je Tafelbild
   niveauBox.innerHTML = "";
   gew.filter(t => (t.niveaus || []).length > 1).forEach(t => {
@@ -283,7 +293,7 @@ function baueKopf() {
   zeigeFortschritt();
 }
 function zeigeFortschritt() {
-  const r = stand.runde, ges = A.gesamtZuege(r), erl = A.erledigteZuege(r);
+  const r = stand.runde, ges = A.gesamtZuege(r) + (r.aktuell === "klasse" ? 1 : 0), erl = A.erledigteZuege(r);
   const jetzt = Math.min(ges, erl + (stand.gezaehlt ? 0 : 1));
   $("rText").textContent = `Aufgabe ${Math.max(1, jetzt)} von ${ges}`;
   $("rBalken").style.width = (ges ? erl / ges * 100 : 0) + "%";
@@ -348,7 +358,11 @@ function waehleKind() {
   const r = stand.runde, frei = A.waehlbareKinder(r);
   if (!frei.length) return abschluss();
   if (frei.length === 1) { A.waehle(r, frei[0].id); speichere(); zeigeBand(`Letzte Aufgabe für ${frei[0].name}`); return; }
-  if (cfg.modus === "zufall") return namensrad();
+  if (cfg.modus === "zufall") {
+    // Klassenrunde: jede n-te Aufgabe ist für die ganze Klasse
+    if (cfg.klassenrunde && stand.zugNr % (cfg.klassenAbstand || 5) === 0) return klassenrunde();
+    return namensrad();
+  }
   auswahlFenster();
 }
 function auswahlFenster(verwalten) {
@@ -389,6 +403,14 @@ function auswahlFenster(verwalten) {
     zeile.append(knopf("🎲 Zufall", () => { A.waehle(r, A.ziehe(r)); speichere(); sch.remove(); zeigeBand(); }, "haupt"), knopf("Runde pausieren", () => pause()));
   }
   sch.appendChild(t); ebene().appendChild(sch);
+}
+function klassenrunde() {
+  schliesseSchichten();
+  A.waehle(stand.runde, "klasse"); speichere(); zeigeBand(); ton();
+  const sch = el("div", "schicht"); sch.setAttribute("role", "dialog"); sch.setAttribute("aria-label", "Klassenrunde");
+  const t = el("div", "tafel silben", `<h2 style="font-size:56px">👥 ${sw("Klas-sen-run-de!")}</h2><p style="font-size:30px;text-align:center;margin:0">${sw("Al-le ant-wor-ten zu-sam-men.")}</p>`);
+  sch.appendChild(t); ebene().appendChild(sch);
+  setTimeout(() => { if (sch.isConnected) sch.remove(); }, bewegt && cfg.animation ? 2200 : 1200);
 }
 function namensrad() {
   schliesseSchichten();
@@ -488,7 +510,10 @@ $("rMenue").addEventListener("click", () => {
 document.addEventListener("pointerdown", e => { if (menueOffen && !menueOffen.contains(e.target) && e.target.closest("#rMenue") === null) { menueOffen.remove(); menueOffen = null; $("rMenue").setAttribute("aria-expanded", false); } });
 
 function rueckgaengig() {
+  const vorher = stand.runde.aktuell;
   const art = A.rueckgaengig(stand.runde); if (!art) return;
+  // Klassenrunde zurückgenommen: dann doch ein einzelnes Kind ziehen
+  if (art === "auswahl" && vorher === "klasse" && cfg.modus === "zufall") { speichere(); return namensrad(); }
   if (art === "zug") { stand.gezaehlt = false; const l = stand.aufgaben[stand.tbAkt]; if (l) l.pop(); }
   speichere();
   if (art === "auswahl") waehleKind(); else zeigeBand("Zug zurückgenommen – das Kind ist noch einmal dran.");
