@@ -150,6 +150,7 @@
     }
     z2.appendChild(l);
     S.appendChild(z2);
+    P._pruefen = onPruefen; P._zeile = z2;
     const obj = {
       kopf: k, zeile: z2, leiste: l,
       auftrag(text, satz) {
@@ -160,6 +161,18 @@
     obj.auftrag(auftrag, say);
     return obj;
   };
+  // Übungsrunde (iframe mit ?modus=runde): Kopf und Leiste blendet runde-client.js aus.
+  // Der Prüfen-Knopf wandert dann in die zweite Zeile, damit das Kind selbst prüfen kann.
+  P.runde = ({ id, oben = 84, neu, hilfe }) => {
+    if (!window.Runde || !Runde.aktiv) return false;
+    if (P._pruefen && P._zeile) { const b = P.knopf("Prüfen", () => P._pruefen(), "haupt"); b.style.marginLeft = "auto"; P._zeile.appendChild(b); }
+    let nr = 0;
+    Runde.verbinde({ id, oben,
+      neueAufgabe(n, aus) { P.stop(); const aid = neu(n, aus || []); Runde.gestartet(aid != null ? aid : `${id}-${++nr}`); },
+      hilfe(an) { S.classList.toggle("hilfen-aus", !an); if (hilfe) hilfe(an); } });
+    return true;
+  };
+  P.fertig = ohneFehler => { if (window.Runde) Runde.fertig({ ohneFehler }); };
   P.hilfen = () => !S.classList.contains("hilfen-aus");
 
   // ---------------- Wortspeicher ----------------

@@ -48,7 +48,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 // ============================================================
@@ -175,7 +176,8 @@ tafel.el.appendChild(P.knopf("Fertig", () => tafel.zu(), "haupt"));
 
 P.kopf({ titel: "Glücksrad „Wer bin ich?“", auftrag: "Hör gut zu. Ant-wor-te im gan-zen Satz.", say: "Ich bin …", onNeu: neu,
   leiste: [P.knopf("Drehen", drehen, "haupt"), P.knopf("Themen", () => tafel.zeige())] });
-neu();
+// Übungsrunde: Rad drehen und ein Rätsel beantworten, die Lehrkraft prüft
+if (!P.runde({ id: "gluecksrad", neu: () => { neu(); } })) neu();
 </script>
 </body>
 </html>

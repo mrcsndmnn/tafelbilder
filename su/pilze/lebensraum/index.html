@@ -53,7 +53,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 const P = Pilz, S = P.buehne(), K = "#1d2320";
@@ -151,7 +152,8 @@ const wetter = P.gruppe("Wetter", [{ wert: "sonne", text: SONNE + "Sonne" }, { w
 panel.querySelector(".wetter").appendChild(wetter);
 P.kopf({ titel: "Wo wachsen Pilze?", auftrag: "Wo ver-mu-test du Pil-ze?", say: "Pil-ze wach-sen gern dort, wo es … ist.", onNeu: neu,
   leiste: [P.knopf("Aufdecken", aufdecken)], woerter: ["feucht", "tro-cken", "schat-tig", "son-nig", "to-tes Holz", "der Wald", "das Moos", "die Wie-se", "der Re-gen"] });
-neu();
+// Übungsrunde: Wo wachsen Pilze? Das Kind legt Marker und begründet, die Lehrkraft prüft
+if (!P.runde({ id: "lebensraum", neu: () => { neu(); } })) neu();
 </script>
 </body>
 </html>

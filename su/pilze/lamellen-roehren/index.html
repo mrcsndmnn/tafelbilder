@@ -56,7 +56,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 const P = Pilz, S = P.buehne();
@@ -158,8 +159,9 @@ function ordne() {
 }
 function pruefen() {
   if (modus !== "sortieren") { P.melde(satzA, "", "Tip-pe un-ter den Hut. Was siehst du?"); return; }
-  let alle = true;
+  let alle = true; pz++;
   karten.forEach(k => { if (!k.korb) { alle = false; P.marke(k.el, null); return; } const ok = k.korb.k === k.k; P.marke(k.el, ok ? "ok" : "noch"); if (!ok) alle = false; });
+  if (alle) P.fertig(pz === 1);
   P.melde(satzB, alle ? "ok" : "noch", alle ? P.LOB : karten.some(k => !k.korb) ? "Sor-tie-re zu-erst al-le Pil-ze." : P.NOCH);
 }
 
@@ -183,7 +185,8 @@ modus = modusWahl.wert;
 const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "lr-stufe"); stufe = stufenWahl.wert;
 const kopf = P.kopf({ titel: "Lamellen oder Röhren?", onNeu: neu, onPruefen: pruefen, leiste: [modusWahl, stufenWahl],
   woerter: ["die La-mel-len", "die Röh-ren", "der La-mel-len-pilz", "der Röh-ren-pilz", "der Hut", "un-ter", "Strei-fen", "Lö-cher"] });
-neu();
+let pz = 0;  // Übungsrunde: Zahl der Prüfungen
+if (!P.runde({ id: "lamellen-roehren", neu: n => { stufe = n; modus = "sortieren"; pz = 0; neu(); } })) neu();
 </script>
 </body>
 </html>

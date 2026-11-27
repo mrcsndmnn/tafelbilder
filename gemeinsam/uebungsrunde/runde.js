@@ -111,9 +111,9 @@ function zeigeEinrichtung() {
   const b1 = bereich(1, "Tafelbilder");
   const kacheln = el("div", "kacheln");
   thema.tafelbilder.forEach(t => {
-    const k = el("button", "kachel", `<span class="sym">${symHTML(t)}</span><strong>${esc(t.titel)}</strong><small>${t.runde ? (t.pruefung === "auto" ? "prüft selbst" : "Lehrkraft prüft") : "noch nicht für Übungsrunden"}</small>`);
+    const k = el("button", "kachel", `<span class="sym">${symHTML(t)}</span><strong>${esc(t.titel)}</strong><small>${t.runde ? (t.pruefung === "auto" ? "prüft selbst" : "Lehrkraft prüft") : t.hinweis ? "nicht in der Runde: " + esc(t.hinweis) : "noch nicht für Übungsrunden"}</small>`);
     k.type = "button"; k.dataset.id = t.id;
-    if (!t.runde) { k.disabled = true; k.setAttribute("aria-label", t.titel + " – noch nicht für Übungsrunden"); }
+    if (!t.runde) { k.disabled = true; k.setAttribute("aria-label", t.titel + (t.hinweis ? " – nicht in der Runde: " + t.hinweis : " – noch nicht für Übungsrunden")); }
     else { k.setAttribute("aria-pressed", cfg.auswahl.includes(t.id)); k.addEventListener("click", () => { const an = !cfg.auswahl.includes(t.id);
       cfg.auswahl = an ? thema.tafelbilder.filter(x => x.id === t.id || cfg.auswahl.includes(x.id)).map(x => x.id) : cfg.auswahl.filter(x => x !== t.id);
       k.setAttribute("aria-pressed", an); aktualisiere(); }); }

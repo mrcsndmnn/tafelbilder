@@ -1,0 +1,155 @@
+{
+ "titel": "Pilze",
+ "fach": "Sachunterricht",
+ "tafelbilder": [
+  {
+   "id": "aufbau",
+   "titel": "Aufbau eines Pilzes",
+   "pfad": "aufbau/",
+   "svg": "<path d=\"M6 22 C6 10 14 6 22 6 C30 6 38 10 38 22 Z\"/><path d=\"M17 22 L16 36 H28 L27 22\"/><path d=\"M40 14 H44 M40 30 H44\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "puzzle",
+   "titel": "Pilz-Puzzle",
+   "pfad": "puzzle/",
+   "svg": "<path d=\"M6 20 C6 10 14 6 22 6 C30 6 38 10 38 20 Z\" stroke-dasharray=\"4 4\"/><path d=\"M17 24 L16 38 H28 L27 24\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "lupe",
+   "titel": "Lupe: Was ist versteckt?",
+   "pfad": "lupe/",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
+  },
+  {
+   "id": "lamellen-roehren",
+   "titel": "Lamellen oder Röhren? (Sortieren)",
+   "pfad": "lamellen-roehren/",
+   "svg": "<path d=\"M4 16 Q22 4 40 16 Q22 26 4 16Z\"/><path d=\"M14 16 L10 22 M22 18 L22 25 M30 16 L34 22\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "satzbaukasten",
+   "titel": "Satzbaukasten „Der Pilz hat …“",
+   "pfad": "satzbaukasten/",
+   "svg": "<rect x=\"4\" y=\"14\" width=\"12\" height=\"14\" rx=\"2\"/><rect x=\"18\" y=\"14\" width=\"10\" height=\"14\" rx=\"2\"/><rect x=\"30\" y=\"14\" width=\"10\" height=\"14\" rx=\"2\" stroke-dasharray=\"3 3\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "entwicklung",
+   "titel": "Vom Sporen-Korn zum Pilz",
+   "pfad": "entwicklung/",
+   "svg": "<circle cx=\"8\" cy=\"10\" r=\"2.5\"/><path d=\"M4 30 H40\"/><path d=\"M14 30 C14 22 18 20 22 20 C26 20 30 22 30 30\"/><path d=\"M36 10 A14 14 0 0 1 40 22\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 120,
+   "pruefung": "auto"
+  },
+  {
+   "id": "essbar-giftig",
+   "titel": "Essbar oder giftig?",
+   "pfad": "essbar-giftig/",
+   "svg": "<path d=\"M22 4 L40 36 H4 Z\"/><path d=\"M22 16 V26 M22 31 V31.5\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "lebensraum",
+   "titel": "Wo wachsen Pilze?",
+   "pfad": "lebensraum/",
+   "svg": "<path d=\"M4 34 Q22 26 40 34\"/><path d=\"M12 30 V18 M12 18 C4 18 4 6 12 6 C20 6 20 18 12 18\"/><path d=\"M28 26 C28 20 31 18 34 18 C37 18 40 20 40 26 Z\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 60,
+   "pruefung": "lehrkraft"
+  },
+  {
+   "id": "gluecksrad",
+   "titel": "Glücksrad „Wer bin ich?“",
+   "pfad": "gluecksrad/",
+   "svg": "<circle cx=\"22\" cy=\"24\" r=\"16\"/><path d=\"M22 8 V40 M6 24 H38 M11 13 L33 35 M33 13 L11 35\"/><path d=\"M18 2 H26 L22 8 Z\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 45,
+   "pruefung": "lehrkraft"
+  },
+  {
+   "id": "zeitraffer",
+   "titel": "Zeitraffer: So wächst ein Pilz",
+   "pfad": "zeitraffer/",
+   "svg": "<path d=\"M4 34 H40\"/><circle cx=\"26\" cy=\"34\" r=\"5\"/><path d=\"M12 22 C12 14 16 12 20 12 C24 12 28 14 28 22 Z\"/>",
+   "runde": false,
+   "hinweis": "zum Erklären für alle"
+  },
+  {
+   "id": "tagebuch",
+   "titel": "Unser Pilzbox-Tagebuch",
+   "pfad": "tagebuch/",
+   "svg": "<rect x=\"6\" y=\"6\" width=\"32\" height=\"32\" rx=\"3\"/><path d=\"M6 15 H38 M14 6 V15 M30 6 V15\"/><path d=\"M14 30 C14 24 17 22 22 22 C27 22 30 24 30 30\"/>",
+   "runde": false,
+   "hinweis": "Beobachtungen der Klasse"
+  },
+  {
+   "id": "memory",
+   "titel": "Pilz-Memory",
+   "pfad": "memory/",
+   "svg": "<rect x=\"4\" y=\"8\" width=\"16\" height=\"22\" rx=\"3\"/><rect x=\"24\" y=\"14\" width=\"16\" height=\"22\" rx=\"3\"/><path d=\"M28 24 C28 20 30 19 32 19 C34 19 36 20 36 24 Z\"/>",
+   "runde": false,
+   "hinweis": "ganzes Spiel für die Klasse"
+  },
+  {
+   "id": "hefe-versuch",
+   "titel": "Hefe-Versuch",
+   "pfad": "hefe-versuch/",
+   "svg": "<path d=\"M18 16 H26 V20 C34 24 36 28 36 32 V38 H8 V32 C8 28 10 24 18 20 Z\"/><circle cx=\"22\" cy=\"9\" r=\"6\"/>",
+   "runde": false,
+   "hinweis": "Versuch für die Klasse"
+  }
+ ]
+}

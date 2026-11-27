@@ -49,7 +49,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 const P = Pilz, S = P.buehne();
@@ -100,7 +101,7 @@ function setzeLupe(x, y) {
 function entdecke(k) {
   gefunden.add(k); zeilen[k].classList.add("da");
   P.melde(satz, "ok", TEILE.find(t => t.k === k).satz);
-  if (gefunden.size === TEILE.length) P.nach(1600, () => P.melde(satz, "ok", "Du hast al-les ent-deckt!"));
+  if (gefunden.size === TEILE.length) { P.nach(1600, () => P.melde(satz, "ok", "Du hast al-les ent-deckt!")); if (!aufgedeckt) P.fertig(true); }
 }
 function zeigeAlles() {
   aufgedeckt = true; bild.innerHTML = VOLL;
@@ -134,7 +135,7 @@ lupe.addEventListener("keydown", e => {
 
 P.kopf({ titel: "Lupe: Was ist versteckt?", auftrag: "Zie-he die Lu-pe ü-ber den Pilz.", say: "Ich se-he …",
   onNeu: neu, leiste: [alles], woerter: ["der Hut", "der Stiel", "das My-zel", "die La-mel-len", "die Spo-ren", "die Er-de", "un-ter", "o-ben"] });
-neu();
+if (!P.runde({ id: "lupe", neu: () => { neu(); } })) neu();
 </script>
 </body>
 </html>

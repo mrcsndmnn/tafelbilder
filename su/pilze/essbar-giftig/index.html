@@ -45,7 +45,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 const P = Pilz, S = P.buehne();
@@ -95,8 +96,9 @@ function ordne() {
 const regel = P.tafelauf({ x: 250, y: 190, w: 1100, h: 560, cls: "regel" });
 regel.el.setAttribute("aria-label", "Unsere Regel");
 function pruefen() {
-  let alle = true, gelegt = 0;
+  let alle = true, gelegt = 0; pz++;
   karten.forEach(k => { if (!k.korb) { alle = false; return; } gelegt++; const ok = k.korb.k === k.k; P.marke(k.el, ok ? "ok" : "noch"); if (!ok) alle = false; });
+  if (alle) P.fertig(pz === 1);
   const erg = alle ? P.LOB : !gelegt ? "Sor-tie-re die Pil-ze in die Kör-be." : karten.some(k => !k.korb) ? "Es lie-gen noch Pil-ze o-ben." : P.NOCH;
   regel.el.innerHTML = `<div class="erg ${alle ? "ok" : "noch"}">${P.w(erg)}</div><div class="hand">${P.bild("stopp", "Hand: Stopp")}</div>
     <div class="text">${P.w(REGEL)}</div>`;
@@ -106,7 +108,8 @@ function pruefen() {
 const stufenWahl = P.stufen(v => { stufe = v; neu(); }, "eg-stufe", 2); stufe = stufenWahl.wert;
 P.kopf({ titel: "Essbar oder giftig?", auftrag: "Sor-tie-re die Pil-ze.", say: "Der … ist ess-bar.", onNeu: neu, onPruefen: pruefen, leiste: [stufenWahl],
   woerter: ["ess-bar", "gif-tig", "der Cham-pig-non", "der Stein-pilz", "der Flie-gen-pilz", "der Knol-len-blät-ter-pilz", "wild"] });
-neu();
+let pz = 0;  // Übungsrunde: Zahl der Prüfungen
+if (!P.runde({ id: "essbar-giftig", neu: n => { stufe = Math.min(n, 2); pz = 0; neu(); } })) neu();
 </script>
 </body>
 </html>

@@ -54,7 +54,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const P = Pilz, S = P.buehne();
 
@@ -108,13 +109,14 @@ function mischen() {
   zuruecksetzenPruefung();
 }
 function pruefen() {
-  let alle = true;
+  let alle = true; pz++;
   felder.forEach(f => {
     const ok = f.karte && f.karte.k === f.k;
     P.marke(f.el, ok ? "ok" : f.karte ? "noch" : null);
     if (!ok) alle = false;
   });
   lob.innerHTML = alle ? P.w(P.LOB) : "";
+  if (alle) P.fertig(pz === 1);
 }
 
 // ---------- Rätsel „Wer bin ich?“ ----------
@@ -166,7 +168,8 @@ function setzeRaetsel(an) {
 P.kopf({ titel: "So ist ein Pilz aufgebaut", auftrag: "Zie-he je-des Kärt-chen in das rich-ti-ge Feld.", say: "Das ist der Hut.",
   onPruefen: pruefen, onNeu: () => { mischen(); if (rt.offen) { reihe = P.mischen(RAETSEL); pos = 0; zeige(); } }, leiste: [rKnopf],
   woerter: ["der Hut", "der Stiel", "das My-zel", "der Frucht-kör-per", "die Er-de", "die La-mel-len", "die Spo-ren"] });
-mischen();
+let pz = 0;  // Übungsrunde: Zahl der Prüfungen
+if (!P.runde({ id: "aufbau", neu: () => { pz = 0; mischen(); } })) mischen();
 </script>
 </body>
 </html>

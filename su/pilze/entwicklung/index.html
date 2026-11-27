@@ -48,7 +48,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script src="../gemeinsam/bilder.js"></script>
 <script>
 const P = Pilz, S = P.buehne();
@@ -137,10 +138,10 @@ function ordne() {
 }
 function markenWeg() { slots.forEach(s => P.marke(s.el, null)); }
 function pruefen() {
-  const reihe = auswahl(); let alle = true;
+  const reihe = auswahl(); let alle = true; pz++;
   slots.forEach(s => { const ok = s.karte && s.karte.i === reihe[s.pos]; P.marke(s.el, ok ? "ok" : s.karte ? "noch" : null); if (!ok) alle = false; });
   if (alle) {
-    geloest = true; erzKnopf.disabled = false;
+    geloest = true; erzKnopf.disabled = false; P.fertig(pz === 1);
     if (stufe === 3 && !kreis) karten.forEach(k => { k.el.classList.remove("nurtext"); k.el.innerHTML = karteHTML(k.i); });
     zeigeErz(P.LOB + " Tip-pe auf „Er-zäh-len“.", "ok");
   } else if (!kreis) zeigeErz(slots.some(s => !s.karte) ? "Le-ge zu-erst al-le Kar-ten." : P.NOCH, "noch");
@@ -170,7 +171,8 @@ const kreisKnopf = P.schalter("Kreislauf", false, v => { kreis = v; baue(); });
 P.kopf({ titel: "Vom Sporen-Korn zum Pilz", auftrag: "", say: "Zu-erst … Dann … Zum Schluss …",
   onNeu: baue, onPruefen: pruefen, leiste: [stufenWahl, kreisKnopf, erzKnopf],
   woerter: ["die Spo-ren", "die Hy-phen", "das My-zel", "der Pilz", "fal-len", "kei-men", "wach-sen", "reif", "Zu-erst", "Dann", "Da-nach", "Zum Schluss"] });
-baue();
+let pz = 0;  // Übungsrunde: Zahl der Prüfungen
+if (!P.runde({ id: "entwicklung", neu: n => { stufe = n; pz = 0; baue(); } })) baue();
 </script>
 </body>
 </html>

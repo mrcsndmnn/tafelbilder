@@ -43,7 +43,8 @@ window.HINWEISE = {
 };
 </script>
 <script src="../../../gemeinsam/silben.js"></script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const P = Pilz, S = P.buehne();
 const SIL = { einen: "ei-nen", Myzel: "My-zel", Lamellen: "La-mel-len", oben: "o-ben", unten: "un-ten", über: "ü-ber", unter: "un-ter", Erde: "Er-de" };
@@ -157,10 +158,10 @@ function bewerte(s) {
 function pruefen() {
   const erg = bahnen.map(b => b.el.hidden || (stufe === 3 && !b.teile.length) ? null : bewerte(text(b)));
   if (erg.every(e => !e)) { P.melde(satz, "noch", "Le-ge zu-erst Wör-ter in die Bahn."); return; }
-  erg.forEach((e, i) => P.marke(bahnen[i].el, e ? (e.ok ? "ok" : "noch") : null));
+  erg.forEach((e, i) => P.marke(bahnen[i].el, e ? (e.ok ? "ok" : "noch") : null)); pz++;
   const falsch = erg.find(e => e && !e.ok);
   if (falsch) { P.melde(satz, "noch", falsch.m); lk.textContent = falsch.lk ? "Für die Lehrkraft: " + falsch.lk : ""; }
-  else { P.melde(satz, "ok", ["Rich-tig!"].concat(erg.filter(Boolean).map(e => silbig(e.satz)))); lk.textContent = ""; }
+  else { P.fertig(pz === 1); P.melde(satz, "ok", ["Rich-tig!"].concat(erg.filter(Boolean).map(e => silbig(e.satz)))); lk.textContent = ""; }
 }
 function vorlesen() {
   const s = bahnen.filter(b => !b.el.hidden && b.teile.length).map(b => text(b) + ".").join(" ");
@@ -174,7 +175,8 @@ P.kopf({ titel: "Der Pilz hat …", auftrag: "Baue Sät-ze.", say: "Der Pilz hat
   woerter: ["der Hut → ei-nen Hut", "der Stiel → ei-nen Stiel", "das My-zel → ein My-zel", "die La-mel-len → La-mel-len", "o-ben", "un-ten"] });
 // Silbenschrift ein/aus ändert die Breite der Bausteine
 new MutationObserver(() => ordne()).observe(S, { attributes: true, attributeFilter: ["class"] });
-neu();
+let pz = 0;  // Übungsrunde: Zahl der Prüfungen
+if (!P.runde({ id: "satzbaukasten", neu: n => { stufe = n; pz = 0; neu(); } })) neu();
 </script>
 </body>
 </html>
