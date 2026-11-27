@@ -1,0 +1,43 @@
+/* Bilder (SVG) für den Themenblock „Briefe“. Jede Funktion liefert SVG-Text. */
+(function () {
+  "use strict";
+  const B = {};
+  B.marke = () => `<svg viewBox="0 0 140 170" aria-hidden="true"><path d="M8 0h124a8 8 0 0 0 8 8v154a8 8 0 0 0 -8 8H8a8 8 0 0 0 -8 -8V8a8 8 0 0 0 8 -8z" fill="#fff" stroke="#c9d1cb"/><rect x="16" y="16" width="108" height="138" rx="4" fill="#e4eef8"/><circle cx="70" cy="70" r="16" fill="#f2c14e"/><g fill="#e06a5b"><circle cx="70" cy="44" r="13"/><circle cx="70" cy="96" r="13"/><circle cx="44" cy="70" r="13"/><circle cx="96" cy="70" r="13"/></g><circle cx="70" cy="70" r="12" fill="#f2c14e"/><rect x="67" y="106" width="6" height="34" fill="#2f7d4f"/><path d="M73 128c10-10 22-8 26-6-6 8-16 10-26 6z" fill="#2f7d4f"/></svg>`;
+  B.poststempel = (ort = "Gelsenkirchen") => `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="80" fill="none" stroke="#3a4b8a" stroke-width="6"/><circle cx="100" cy="100" r="62" fill="none" stroke="#3a4b8a" stroke-width="3"/><text x="100" y="94" text-anchor="middle" font-family="Andika, sans-serif" font-size="26" font-weight="700" fill="#3a4b8a">POST</text><text x="100" y="124" text-anchor="middle" font-family="Andika, sans-serif" font-size="${ort.length > 11 ? 18 : 20}" fill="#3a4b8a">${ort}</text></svg>`;
+  // Symbole der Adresszeilen (Farbe über currentColor)
+  B.person = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="20" r="12" fill="currentColor"/><path d="M10 58c2-14 11-22 22-22s20 8 22 22z" fill="currentColor"/></svg>`;
+  B.haus = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 30L32 10l24 20" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><rect x="14" y="28" width="36" height="28" fill="currentColor"/><rect x="28" y="40" width="9" height="16" fill="#fff"/><rect x="40" y="34" width="9" height="9" rx="4.5" fill="#fff"/></svg>`;
+  B.stadt = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="26" width="16" height="32" fill="currentColor"/><rect x="24" y="12" width="16" height="46" fill="currentColor"/><rect x="42" y="30" width="16" height="28" fill="currentColor"/><g fill="#fff"><rect x="10" y="32" width="4" height="5"/><rect x="28" y="18" width="4" height="5"/><rect x="33" y="18" width="4" height="5"/><rect x="28" y="28" width="4" height="5"/><rect x="33" y="28" width="4" height="5"/><rect x="46" y="36" width="4" height="5"/><rect x="51" y="36" width="4" height="5"/></g></svg>`;
+  // Bildkarten für den Einstieg
+  B.nachname = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="22" cy="20" r="9" fill="#2f6fb0"/><path d="M6 50c1-11 8-17 16-17s15 6 16 17z" fill="#2f6fb0"/><rect x="34" y="34" width="26" height="16" rx="3" fill="#fff" stroke="#1d2320" stroke-width="2.5"/><path d="M38 42h18" stroke="#1d2320" stroke-width="3" stroke-linecap="round"/></svg>`;
+  B.strassenschild = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="29" y="30" width="6" height="30" fill="#5d6862"/><rect x="4" y="12" width="56" height="22" rx="3" fill="#2f6fb0" stroke="#1d2320" stroke-width="2.5"/><rect x="8" y="16" width="48" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M14 23h36" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>`;
+  B.hausnummer = (nr = "12") => `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="12" width="48" height="40" rx="6" fill="#2f6fb0" stroke="#1d2320" stroke-width="2.5"/><rect x="12" y="16" width="40" height="32" rx="4" fill="none" stroke="#fff" stroke-width="2"/><text x="32" y="41" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="22" fill="#fff">${nr}</text></svg>`;
+  B.briefkasten = (plz = "45879") => `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="10" width="44" height="40" rx="8" fill="#f2c14e" stroke="#1d2320" stroke-width="2.5"/><rect x="18" y="18" width="28" height="5" rx="2" fill="#1d2320"/><rect x="29" y="50" width="6" height="12" fill="#5d6862"/><text x="32" y="42" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="13" fill="#1d2320">${plz}</text></svg>`;
+  B.herz = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 54C14 41 6 31 6 21a12 12 0 0 1 26-6 12 12 0 0 1 26 6c0 10-8 20-26 33z" fill="#e06a5b" stroke="#1d2320" stroke-width="2.5"/></svg>`;
+  B.sticker = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l7.6 15.4 17 2.5-12.3 12 2.9 16.9L32 44.8 16.8 52.8l2.9-16.9-12.3-12 17-2.5z" fill="#f2c14e" stroke="#1d2320" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+  B.farbe = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6C16 6 6 18 6 31s10 25 22 25c5 0 6-4 4-7s-1-7 4-7h8c8 0 14-5 14-13C58 16 46 6 32 6z" fill="#fff" stroke="#1d2320" stroke-width="2.5"/><circle cx="20" cy="26" r="5" fill="#e06a5b"/><circle cx="32" cy="17" r="5" fill="#f2c14e"/><circle cx="45" cy="23" r="5" fill="#2f7d4f"/><circle cx="20" cy="40" r="5" fill="#2f6fb0"/></svg>`;
+  B.torte = () => `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="30" width="44" height="24" rx="4" fill="#f8e3ec" stroke="#1d2320" stroke-width="2.5"/><path d="M10 38c6 4 10-4 16 0s10-4 16 0 8-4 12 0" fill="none" stroke="#b03a6a" stroke-width="3"/><g stroke="#1d2320" stroke-width="2"><rect x="20" y="16" width="5" height="14" fill="#2f6fb0"/><rect x="39" y="16" width="5" height="14" fill="#2f7d4f"/></g><path d="M22.5 8c-3 4 0 6 0 6s3-2 0-6zM41.5 8c-3 4 0 6 0 6s3-2 0-6z" fill="#f2a33a"/></svg>`;
+  // Freundliche Postbotin
+  B.postbotin = () => `<svg viewBox="0 0 240 320" aria-hidden="true">
+    <path d="M60 300 L70 190 Q120 170 170 190 L180 300 Z" fill="#f2c14e" stroke="#1d2320" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M120 186 L120 300" stroke="#1d2320" stroke-width="3"/>
+    <rect x="34" y="210" width="74" height="60" rx="8" fill="#2f6fb0" stroke="#1d2320" stroke-width="4" transform="rotate(-8 70 240)"/>
+    <path d="M42 222 L70 244 L100 216" fill="none" stroke="#fff" stroke-width="4" transform="rotate(-8 70 240)"/>
+    <path d="M150 196 Q200 230 186 270" fill="none" stroke="#1d2320" stroke-width="14" stroke-linecap="round"/>
+    <path d="M150 196 Q200 230 186 270" fill="none" stroke="#f2c14e" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="186" cy="274" r="11" fill="#e8b48f" stroke="#1d2320" stroke-width="3"/>
+    <rect x="108" y="150" width="24" height="30" fill="#e8b48f" stroke="#1d2320" stroke-width="3"/>
+    <circle cx="120" cy="112" r="50" fill="#e8b48f" stroke="#1d2320" stroke-width="4"/>
+    <path d="M70 108 Q72 58 120 56 Q170 58 170 108 Q160 84 120 84 Q84 84 70 108 Z" fill="#7a4a2a" stroke="#1d2320" stroke-width="3"/>
+    <path d="M166 104 Q186 130 172 160" fill="none" stroke="#7a4a2a" stroke-width="12" stroke-linecap="round"/>
+    <path d="M68 70 Q120 30 172 70 L172 84 Q120 62 68 84 Z" fill="#2f6fb0" stroke="#1d2320" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M64 84 Q120 66 176 84 Q178 94 176 96 Q120 80 64 96 Q62 92 64 84Z" fill="#1d4f9c" stroke="#1d2320" stroke-width="3"/>
+    <circle cx="102" cy="116" r="6" fill="#1d2320"/><circle cx="140" cy="116" r="6" fill="#1d2320"/>
+    <circle cx="92" cy="134" r="8" fill="#f3a3a3" opacity=".6"/><circle cx="150" cy="134" r="8" fill="#f3a3a3" opacity=".6"/>
+    <path d="M104 138 Q121 154 138 138" fill="none" stroke="#1d2320" stroke-width="4" stroke-linecap="round"/>
+  </svg>`;
+  // Haus mit Hausnummer (für die Briefzustellung)
+  B.hausNr = (nr, farbe = "#f8e9e2") => `<svg viewBox="0 0 120 130" aria-hidden="true"><path d="M10 56 L60 12 L110 56" fill="#b0552f" stroke="#1d2320" stroke-width="4" stroke-linejoin="round"/><rect x="20" y="54" width="80" height="70" fill="${farbe}" stroke="#1d2320" stroke-width="4"/><rect x="50" y="86" width="22" height="38" fill="#7a4a2a" stroke="#1d2320" stroke-width="3"/><rect x="28" y="66" width="18" height="16" fill="#e4eef8" stroke="#1d2320" stroke-width="3"/><rect x="76" y="66" width="18" height="16" fill="#e4eef8" stroke="#1d2320" stroke-width="3"/><rect x="74" y="92" width="24" height="18" rx="3" fill="#2f6fb0" stroke="#1d2320" stroke-width="2.5"/><text x="86" y="106" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="13" fill="#fff">${nr}</text></svg>`;
+  B.brief = () => `<svg viewBox="0 0 120 80" aria-hidden="true"><rect x="4" y="4" width="112" height="72" rx="6" fill="#f6f3ec" stroke="#1d2320" stroke-width="4"/><path d="M4 8 L60 46 L116 8" fill="none" stroke="#1d2320" stroke-width="4" stroke-linejoin="round"/><rect x="88" y="12" width="20" height="24" fill="#e4eef8" stroke="#1d2320" stroke-width="2"/></svg>`;
+  window.BriefBilder = B;
+})();
