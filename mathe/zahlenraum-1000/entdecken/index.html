@@ -57,7 +57,8 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js?v=2026112701"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
 const START = 347;
@@ -106,7 +107,11 @@ function zeige(vorher) {
   pfeile.mitte.innerHTML = T.zahlHTML(n);
   Object.keys(T.R).forEach(ri => { if (pfeile[ri]) pfeile[ri].disabled = T.schritt(n, ri) === null; });
 }
-function gehe(m, text) { const v = n; n = m; zeige(v); T.melde(satz, "", text); }
+function gehe(m, text) { const v = n; n = m; zeige(v); T.melde(satz, "", text); if (rz) pruefeZiel(); }
+// Übungsrunde: „Geh von … zu …“ mit dem Steuerkreuz (★ ein Schritt, ★★ zwei, ★★★ mit Quadratsprung)
+let rz = null;
+const rAuftrag = T.blk(1060, 104, 500); rAuftrag.style.cssText += ";font-size:30px;font-weight:700;line-height:1.2"; rAuftrag.hidden = true;
+function pruefeZiel() { rz.schritte++; if (n !== rz.ziel) return; T.melde(satz, "ok", `${T.lob()} Du bist bei ${rz.ziel}.`); T.fertig(rz.schritte <= rz.min); rz = null; }
 function schritt(ri) { const m = T.schritt(n, ri); if (m !== null) gehe(m, T.bewegungsSatz(n, m, ri)); }
 function wechsleQuadrat(s) {
   const p = T.pos(n); if (s === p.s) return;
@@ -114,6 +119,13 @@ function wechsleQuadrat(s) {
   gehe(m, `Ich springe ins ${s + 1}. Quadrat an dieselbe Stelle. ` + T.stellenSatz(n, m, ri, k));
 }
 q.zeigeQuadrat(T.pos(n).s); zeige(null);
+T.runde({ id: "entdecken", oben: 96, neu: s => {
+  let start, ziel, w;
+  do { start = T.zufall(1, 1000); const r = T.mischen(T.ACHT); w = s === 1 ? [r[0]] : s === 2 ? [r[0], r[1]] : [r[0], T.wahl(["plus100", "minus100"])];
+    ziel = w.reduce((x, ri) => x === null ? null : T.schritt(x, ri), start); } while (ziel === null || ziel === start);
+  q.leere(); n = start; zeige(null); rz = { ziel, schritte: 0, min: w.length };
+  rAuftrag.hidden = false; rAuftrag.innerHTML = `Geh mit dem Steuerkreuz von ${start} zu <span style="font-size:44px">${ziel}</span>.`;
+  T.melde(satz, "", `Du bist bei ${start}.`); return `ent-${start}-${ziel}`; } });
 </script>
 </body>
 </html>

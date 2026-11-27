@@ -64,10 +64,11 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
-let modus = "erkunden", ansicht = "heft", s = 0, zeile = null, ziel = 0, schritt = 1, laeuft = false;
+let rf = 0, modus = "erkunden", ansicht = "heft", s = 0, zeile = null, ziel = 0, schritt = 1, laeuft = false;
 
 // ---------- Aufbau ----------
 const neueZahl = T.knopf("Neue Zahl", () => neu());
@@ -147,7 +148,7 @@ function texte() {
 function blockGetippt(i) {
   if (laeuft) return;
   if (modus === "finden") {
-    if (i !== T.pos(ziel).s) { bloecke[i].classList.add("falsch"); return T.melde(heftSatz, "noch", `Noch nicht. In diesem Quadrat stehen die Zahlen ${T.bereich(i)}.`); }
+    if (i !== T.pos(ziel).s) { rf++; bloecke[i].classList.add("falsch"); return T.melde(heftSatz, "noch", `Noch nicht. In diesem Quadrat stehen die Zahlen ${T.bereich(i)}.`); }
     schritt = 2; T.melde(heftSatz, "", "");
   }
   zoomeIn(i);
@@ -159,7 +160,7 @@ function markiereZeile(r) {
 function zeileGetippt(r) {
   if (modus === "erkunden") { markiereZeile(r); return T.melde(qSatz, "", `Zeile ${r + 1}: ${T.num(s, r, 0)} bis ${T.num(s, r, 9)}`); }
   if (schritt !== 2) return;
-  if (r !== T.pos(ziel).r) return T.melde(qSatz, "noch", `Noch nicht. In dieser Zeile stehen die Zahlen ${T.num(s, r, 0)} bis ${T.num(s, r, 9)}.`);
+  if (r !== T.pos(ziel).r) return rf++, T.melde(qSatz, "noch", `Noch nicht. In dieser Zeile stehen die Zahlen ${T.num(s, r, 0)} bis ${T.num(s, r, 9)}.`);
   markiereZeile(r); schritt = 3; texte(); T.melde(qSatz, "", "Richtig, diese Zeile. Jetzt das Feld.");
 }
 function feldGetippt(n) {
@@ -171,11 +172,13 @@ function feldGetippt(n) {
   if (schritt === 2) return zeileGetippt(p.r);
   if (schritt !== 3) return;
   if (p.r !== zeile) return T.melde(qSatz, "noch", "Bleib in deiner Zeile.");
-  if (n !== ziel) return T.melde(qSatz, "noch", `Noch nicht. Das ist die ${n}.`);
+  if (n !== ziel) return rf++, T.melde(qSatz, "noch", `Noch nicht. Das ist die ${n}.`);
   q.mark(n, "sel"); swtBox.hidden = false; swt.zeige(n); schritt = 4; texte();
   T.melde(qSatz, "ok", [T.lob(), `Die ${n} ist ${T.ortsSatz(n).replace(/in der (\d+)\. Spalte/, "im $1. Feld")}.`]);
+  T.fertig(rf === 0);
 }
-neu();
+// Übungsrunde: „Finde die Zahl“ – Quadrat, Zeile, Feld
+if (!T.runde({ id: "zoom", neu: () => { modus = "finden"; rf = 0; neu(); return "zoom-" + ziel; } })) neu();
 </script>
 </body>
 </html>

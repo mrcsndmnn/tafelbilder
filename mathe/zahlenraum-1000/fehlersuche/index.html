@@ -54,10 +54,11 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
-let stufe = 1, sprung = T.laden("fehler-sprung", false), zellen = [], fehlerZahl = 0, gefunden = 0;
+let rf = 0, stufe = 1, sprung = T.laden("fehler-sprung", false), zellen = [], fehlerZahl = 0, gefunden = 0;
 
 // ---------- Aufbau ----------
 const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "fehler-stufe"); stufe = stufenWahl.wert;
@@ -117,16 +118,16 @@ function tippe(z) {
   if (z.falsch) {
     decke(z); gefunden++; zaehle();
     const t = ["Das stimmt nicht. " + nachbarSatz(z)];
-    if (gefunden === fehlerZahl) t.push(`${T.lob()} Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden.`);
+    if (gefunden === fehlerZahl) { t.push(`${T.lob()} Du hast ${fehlerZahl === 1 ? "den Fehler" : "alle Fehler"} gefunden.`); T.fertig(rf === 0); }
     T.melde(satz, "ok", t);
-  } else T.melde(satz, "", "Die Zahl stimmt. Such weiter.");
+  } else { rf++; T.melde(satz, "", "Die Zahl stimmt. Such weiter."); }
 }
 function aufloesen() {
   zellen.filter(z => z.falsch && !z.gefunden).forEach(decke);
   gefunden = fehlerZahl; zaehle();
   T.melde(satz, "", "Hier sind alle Fehler. Sprecht darüber: Was ist passiert?");
 }
-neu();
+if (!T.runde({ id: "fehlersuche", neu: s => { stufe = s; rf = 0; neu(); return "fs-" + s + "-" + Date.now(); } })) neu();
 </script>
 </body>
 </html>

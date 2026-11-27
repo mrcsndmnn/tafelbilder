@@ -53,13 +53,14 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
 const TYP = ri => (ri === "rechts" || ri === "links") ? "waagerecht" : (ri === "oben" || ri === "unten") ? "senkrecht" : "diagonal";
 const ADJ = { waagerecht: "waagerechte", senkrecht: "senkrechte", diagonal: "diagonale" };
 
-let modus = "legen", linie = [], ri = null, geloest = false, grau = false;
+let rf = 0, modus = "legen", linie = [], ri = null, geloest = false, grau = false;
 
 // ---------- Aufbau ----------
 const neueFolge = T.knopf("Neue Folge", () => neu());
@@ -153,9 +154,11 @@ function antwort(t, b) {
   if (t === TYP(ri)) {
     geloest = true; zeichne(); b.classList.add("richtig");
     T.melde(satz, "ok", [T.lob(), erklaerung()]);
-  } else T.melde(satz, "noch", T.NOCH);
+    T.fertig(rf === 0);
+  } else { rf++; T.melde(satz, "noch", T.NOCH); }
 }
-neu();
+// Übungsrunde: „Welche Linie?“ – Zahlenfolge lesen und die Linie benennen
+if (!T.runde({ id: "linien", neu: () => { modus = "raten"; rf = 0; neu(); return "lin-" + linie.join("-"); } })) neu();
 </script>
 </body>
 </html>

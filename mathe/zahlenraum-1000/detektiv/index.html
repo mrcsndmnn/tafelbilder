@@ -55,10 +55,11 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
-let modus = "loesen", art = "ort", geheim = 0, offen = 1, geloest = false, gewaehlt = null;
+let rf = 0, modus = "loesen", art = "ort", geheim = 0, offen = 1, geloest = false, gewaehlt = null;
 
 // ---------- Aufbau ----------
 const modusWahl = T.gruppe("", [{ wert: "loesen", text: "Rätsel lösen" }, { wert: "bauen", text: "Rätsel bauen" }], "loesen", v => { modus = v; neu(); });
@@ -121,12 +122,14 @@ function tippe(n) {
   if (n === geheim) {
     geloest = true; q.mark(n, "sel"); zeigeKarten();
     T.melde(satz, "ok", [T.lob(), `Ich bin die ${n}. Ich wohne ${T.ortsSatz(n)}.`]);
+    T.fertig(rf === 0);
   } else {
-    q.mark(n, "falsch");
+    q.mark(n, "falsch"); rf++;
     T.melde(satz, "noch", offen < 3 ? "Noch nicht. Nimm den nächsten Hinweis dazu." : T.NOCH);
   }
 }
-neu();
+// Übungsrunde: ein Rätsel lösen (★ Hinweise zum Ort, ★★/★★★ zu den Stellen)
+if (!T.runde({ id: "detektiv", neu: s => { modus = "loesen"; art = s === 1 ? "ort" : "stellen"; rf = 0; neu(); return "zd-" + geheim; } })) neu();
 </script>
 </body>
 </html>

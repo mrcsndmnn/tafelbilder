@@ -98,10 +98,11 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js?v=2026112701"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
-let modus = "wohin", stufe = 1, start = 0, ziel = 0, befehle = [], eingabe = [], vermutung = null, laeuft = false;
+let rf = 0, modus = "wohin", stufe = 1, start = 0, ziel = 0, befehle = [], eingabe = [], vermutung = null, laeuft = false;
 
 // ---------- Aufbau ----------
 const modusWahl = T.gruppe("", [{ wert: "wohin", text: "Wohin läuft der Käfer?" }, { wert: "weg", text: "Finde den Weg" }, { wert: "rechen", text: "Rechenweg" }], "wohin",
@@ -204,12 +205,12 @@ async function los(liste) {
   }
   laeuft = false;
   if (modus === "wohin") {
-    if (vermutung === n) T.melde(satz, "ok", [`${T.lob()} Der Käfer ist bei ${n}.`, ...saetze]);
-    else if (vermutung) T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}.`, ...saetze]);
+    if (vermutung === n) { T.melde(satz, "ok", [`${T.lob()} Der Käfer ist bei ${n}.`, ...saetze]); T.fertig(rf === 0); }
+    else if (vermutung) rf++, T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}.`, ...saetze]);
     else T.melde(satz, "", [`Der Käfer ist bei ${n}.`, ...saetze]);
   } else {
-    if (n === ziel) T.melde(satz, "ok", [`${T.lob()} Der Käfer ist an der Fahne.`, ...saetze]);
-    else T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}. Die Fahne ist bei ${ziel}.`, ...saetze]);
+    if (n === ziel) { T.melde(satz, "ok", [`${T.lob()} Der Käfer ist an der Fahne.`, ...saetze]); T.fertig(rf === 0); }
+    else rf++, T.melde(satz, "noch", [`Noch nicht. Der Käfer ist bei ${n}. Die Fahne ist bei ${ziel}.`, ...saetze]);
   }
 }
 // =====================================================================
@@ -325,18 +326,18 @@ function baueRechen() {
 }
 function antwortRechen(o, b) {
   if (rw.geloest || laeuft) return;
-  if (o.art) { b.classList.add("daneben"); return T.melde(satz, "noch", RUECK[o.art]); }
+  if (o.art) { rf++; b.classList.add("daneben"); return T.melde(satz, "noch", RUECK[o.art]); }
   b.classList.add("richtig"); laufeRechen();
 }
 function beschreibung(o, b) {
   if (rw.geloest || laeuft) return;
-  if (!o.ok) { b.classList.add("daneben"); return T.melde(satz, "noch", "Noch nicht. Schau noch einmal: Wie viele Zehner, wie viele Einer, weiter oder zurück?"); }
+  if (!o.ok) { rf++; b.classList.add("daneben"); return T.melde(satz, "noch", "Noch nicht. Schau noch einmal: Wie viele Zehner, wie viele Einer, weiter oder zurück?"); }
   b.classList.add("richtig"); laufeRechen();
 }
 function tippeRechen(n) {
   if (!rw.selbst || rw.umgekehrt || rw.geloest || laeuft) return;
   if (n === rw.a.t) { q.mark(n, "sel"); return laufeRechen(); }
-  q.mark(n, "falsch");
+  q.mark(n, "falsch"); rf++;
   const f = fehlerzahlen(rw.a, 99).find(x => x.x === n);
   T.melde(satz, "noch", f ? RUECK[f.art] : "Noch nicht. Schau noch einmal genau.");
 }
@@ -367,8 +368,10 @@ async function laufeRechen() {
   const tipp = re.querySelector(".auftrag"); if (tipp && rw.selbst) tipp.remove();
   satzBox.style.top = 182 + re.offsetHeight + 18 + "px";
   T.melde(satz, "ok", [`${T.lob()} Der Käfer ist bei ${n}.`, ...saetze, ...hinweise, rechnung(a, true)]);
+  T.fertig(rf === 0);
 }
-neu();
+// Übungsrunde: ★ Wohin läuft der Käfer?, ★★ Finde den Weg, ★★★ Rechenweg
+if (!T.runde({ id: "wege", neu: s => { modus = ["wohin", "weg", "rechen"][s - 1] || "wohin"; stufe = Math.min(s, 2); rf = 0; neu(); return `wege-${modus}-${start}-${ziel}-${Date.now() % 1000}`; } })) neu();
 </script>
 </body>
 </html>

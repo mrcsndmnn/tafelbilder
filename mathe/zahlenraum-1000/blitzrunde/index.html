@@ -57,7 +57,8 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
 const RUNDEN = 10;
@@ -78,6 +79,7 @@ const zeitBox = T.blk(360, 632); const zeitEl = T.el("div", "zeit", "<div></div>
 const bed = T.blk(360, 668); const bedien = T.el("div", "bedien"); bed.appendChild(bedien);
 const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Runde", () => weiter());
 const zaehler = T.el("span", "zaehler"); bedien.append(loesKn, weiterKn, zaehler);
+[weiterKn, zaehler].forEach(x => x.dataset.runde = "aus");
 const satz = T.streifen(T.blk(360, 752, 880), "hilfe");
 
 
@@ -162,7 +164,8 @@ function weiter() {
   if (runde >= RUNDEN) { runde = RUNDEN + 1; T.melde(satz, "ok", "Geschafft! Alle 10 Runden sind fertig."); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; return; }
   runde++; aufg = neueAufgabe(); zeigeAufgabe();
 }
-start();
+// Übungsrunde: eine Startzahl mit Befehl, die Lehrkraft prüft („Lösung“ zeigt das Ergebnis)
+if (!T.runde({ id: "blitzrunde", neu: n => { stufe = n; zeit = 0; runde = 1; aufg = neueAufgabe(); zeigeAufgabe(); return `zb-${aufg.st}-${aufg.ri}-${aufg.k}`; } })) start();
 </script>
 </body>
 </html>

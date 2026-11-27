@@ -3,6 +3,127 @@
  "fach": "Mathematik",
  "tafelbilder": [
   {
+   "id": "entdecken",
+   "titel": "Entdecken: Geh zur Zahl",
+   "pfad": "entdecken/",
+   "svg": "<circle cx=\"19\" cy=\"19\" r=\"11\"/><path d=\"M27 27 L38 38\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 45,
+   "pruefung": "auto"
+  },
+  {
+   "id": "zahlenkreuz",
+   "titel": "Zahlenkreuz und Zahlenfenster",
+   "pfad": "zahlenkreuz/",
+   "svg": "<rect x=\"16\" y=\"4\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"4\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"16\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\" fill=\"currentColor\"/><rect x=\"28\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"16\" y=\"28\" width=\"12\" height=\"12\" rx=\"2\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "linien",
+   "titel": "Linien: Welche Linie?",
+   "pfad": "linien/",
+   "svg": "<rect x=\"4\" y=\"4\" width=\"36\" height=\"36\" rx=\"3\"/><path d=\"M10 34 L34 10\"/><path d=\"M4 22 H40\" stroke-dasharray=\"3 4\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 40,
+   "pruefung": "auto"
+  },
+  {
+   "id": "wege",
+   "titel": "Wege mit dem Marienkäfer",
+   "pfad": "wege/",
+   "svg": "<ellipse cx=\"22\" cy=\"25\" rx=\"13\" ry=\"14\"/><circle cx=\"22\" cy=\"9\" r=\"5\"/><path d=\"M22 14 V39\"/><circle cx=\"15\" cy=\"23\" r=\"2\" fill=\"currentColor\"/><circle cx=\"29\" cy=\"23\" r=\"2\" fill=\"currentColor\"/><circle cx=\"15\" cy=\"31\" r=\"2\" fill=\"currentColor\"/><circle cx=\"29\" cy=\"31\" r=\"2\" fill=\"currentColor\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
+  },
+  {
+   "id": "detektiv",
+   "titel": "Zahlendetektiv",
+   "pfad": "detektiv/",
+   "svg": "<circle cx=\"22\" cy=\"22\" r=\"17\"/><path d=\"M16.5 17 a5.5 5.5 0 1 1 7.5 5 c-1.6.8-2 1.8-2 3.5\"/><circle cx=\"22\" cy=\"31.5\" r=\"1.2\" fill=\"currentColor\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "sprungstellen",
+   "titel": "Sprungstellen",
+   "pfad": "sprungstellen/",
+   "svg": "<path d=\"M6 14 H30 C40 14 40 30 30 30 H12\"/><path d=\"M17 25 L12 30 L17 35\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 40,
+   "pruefung": "auto"
+  },
+  {
+   "id": "fehlersuche",
+   "titel": "Fehlersuche",
+   "pfad": "fehlersuche/",
+   "svg": "<rect x=\"4\" y=\"4\" width=\"36\" height=\"36\" rx=\"3\"/><path d=\"M4 16 H40 M4 28 H40 M16 4 V40 M28 4 V40\"/><path d=\"M30 18 L38 26 M38 18 L30 26\" stroke-width=\"3.5\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
+   "id": "zoom",
+   "titel": "Zoom: Finde die Zahl",
+   "pfad": "zoom/",
+   "svg": "<rect x=\"3\" y=\"26\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"13\" y=\"26\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"23\" y=\"16\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M17 22 L23 18\"/>",
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
+  },
+  {
+   "id": "blitzrunde",
+   "titel": "Blitzrunde zum Stundenbeginn",
+   "pfad": "blitzrunde/",
+   "svg": "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 40,
+   "pruefung": "lehrkraft"
+  },
+  {
    "id": "geheimschrift-lesen",
    "titel": "Geheimschrift lesen",
    "pfad": "geheimschrift-lesen/",
@@ -29,69 +150,6 @@
    ],
    "dauerSek": 90,
    "pruefung": "auto"
-  },
-  {
-   "id": "entdecken",
-   "titel": "Entdecken: Tafel und Stellenwerttafel",
-   "pfad": "entdecken/",
-   "svg": "<circle cx=\"19\" cy=\"19\" r=\"11\"/><path d=\"M27 27 L38 38\"/>",
-   "runde": false
-  },
-  {
-   "id": "zahlenkreuz",
-   "titel": "Zahlenkreuz und Zahlenfenster",
-   "pfad": "zahlenkreuz/",
-   "svg": "<rect x=\"16\" y=\"4\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"4\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"16\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\" fill=\"currentColor\"/><rect x=\"28\" y=\"16\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"16\" y=\"28\" width=\"12\" height=\"12\" rx=\"2\"/>",
-   "runde": false
-  },
-  {
-   "id": "linien",
-   "titel": "Linien: waagerecht, senkrecht, diagonal",
-   "pfad": "linien/",
-   "svg": "<rect x=\"4\" y=\"4\" width=\"36\" height=\"36\" rx=\"3\"/><path d=\"M10 34 L34 10\"/><path d=\"M4 22 H40\" stroke-dasharray=\"3 4\"/>",
-   "runde": false
-  },
-  {
-   "id": "wege",
-   "titel": "Wege mit dem Marienkäfer",
-   "pfad": "wege/",
-   "svg": "<ellipse cx=\"22\" cy=\"25\" rx=\"13\" ry=\"14\"/><circle cx=\"22\" cy=\"9\" r=\"5\"/><path d=\"M22 14 V39\"/><circle cx=\"15\" cy=\"23\" r=\"2\" fill=\"currentColor\"/><circle cx=\"29\" cy=\"23\" r=\"2\" fill=\"currentColor\"/><circle cx=\"15\" cy=\"31\" r=\"2\" fill=\"currentColor\"/><circle cx=\"29\" cy=\"31\" r=\"2\" fill=\"currentColor\"/>",
-   "runde": false
-  },
-  {
-   "id": "detektiv",
-   "titel": "Zahlendetektiv",
-   "pfad": "detektiv/",
-   "svg": "<circle cx=\"22\" cy=\"22\" r=\"17\"/><path d=\"M16.5 17 a5.5 5.5 0 1 1 7.5 5 c-1.6.8-2 1.8-2 3.5\"/><circle cx=\"22\" cy=\"31.5\" r=\"1.2\" fill=\"currentColor\"/>",
-   "runde": false
-  },
-  {
-   "id": "sprungstellen",
-   "titel": "Sprungstellen",
-   "pfad": "sprungstellen/",
-   "svg": "<path d=\"M6 14 H30 C40 14 40 30 30 30 H12\"/><path d=\"M17 25 L12 30 L17 35\"/>",
-   "runde": false
-  },
-  {
-   "id": "fehlersuche",
-   "titel": "Fehlersuche",
-   "pfad": "fehlersuche/",
-   "svg": "<rect x=\"4\" y=\"4\" width=\"36\" height=\"36\" rx=\"3\"/><path d=\"M4 16 H40 M4 28 H40 M16 4 V40 M28 4 V40\"/><path d=\"M30 18 L38 26 M38 18 L30 26\" stroke-width=\"3.5\"/>",
-   "runde": false
-  },
-  {
-   "id": "zoom",
-   "titel": "Zoom: vom Leporello ins Quadrat",
-   "pfad": "zoom/",
-   "svg": "<rect x=\"3\" y=\"26\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"13\" y=\"26\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"23\" y=\"16\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M17 22 L23 18\"/>",
-   "runde": false
-  },
-  {
-   "id": "blitzrunde",
-   "titel": "Blitzrunde zum Stundenbeginn",
-   "pfad": "blitzrunde/",
-   "svg": "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>",
-   "runde": false
   }
  ]
 }

@@ -48,10 +48,11 @@ window.HINWEISE = {
  ]
 };
 </script>
-<script src="../gemeinsam/tafel.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/tafel.js?v=2026112801"></script>
 <script>
 const T = Tafel, S = T.buehne();
-let richtung = "danach", sprungart = "gemischt", start = 0, ziel = 0, cur = 0, geloest = false, laeuft = false;
+let rf = 0, richtung = "danach", sprungart = "gemischt", start = 0, ziel = 0, cur = 0, geloest = false, laeuft = false;
 
 // ---------- Aufbau ----------
 const rWahl = T.gruppe("Richtung", [{ wert: "danach", text: "danach" }, { wert: "davor", text: "davor" }, { wert: "gemischt", text: "gemischt" }],
@@ -103,8 +104,8 @@ function zeigeStart(n) {
 }
 function tippe(n) {
   if (laeuft || geloest) return;
-  if (n === ziel) zeigen(true);
-  else T.melde(satz, "noch", T.NOCH);
+  if (n === ziel) { zeigen(true); T.fertig(rf === 0); }
+  else { rf++; T.melde(satz, "noch", T.NOCH); }
 }
 function zaehle(d) {
   if (laeuft) return;
@@ -150,7 +151,8 @@ async function zeigeSchritt(a, b, mitAntwort, getippt) {
   teile.push(T.aenderungsSatz(a, b), ortSatz(a, b));
   T.melde(satz, mitAntwort && getippt ? "ok" : "", teile);
 }
-neu();
+// Übungsrunde: ★ Zehner danach, ★★ Zehner und Hunderter danach, ★★★ auch davor
+if (!T.runde({ id: "sprungstellen", neu: s => { sprungart = s === 1 ? "zehner" : "gemischt"; richtung = s === 3 ? "gemischt" : "danach"; rf = 0; neu(); return `sp-${start}-${ziel}`; } })) neu();
 </script>
 </body>
 </html>
