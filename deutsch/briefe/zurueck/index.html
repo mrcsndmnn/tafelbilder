@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Der Brief kommt zurück – Briefe</title>
+<link rel="stylesheet" href="../gemeinsam/buehne.css?v=2026112701">
+<link rel="stylesheet" href="../../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Layout: großer Umschlag links, rechts Ideenspeicher „Das braucht die Post“ und Ablage mit Bildkarten, unten Satzstreifen und Schritt-Knöpfe. */
+.schritte{position:absolute;left:50px;top:94px;display:flex;align-items:center;gap:14px;font-size:24px}
+.schritte .punkte{display:flex;gap:8px}
+.schritte .punkte i{width:18px;height:18px;border-radius:50%;border:3px solid #1d2320;background:#fff;display:block}
+.schritte .punkte i.da{background:#1d2320}
+.umschlag{left:48px;top:150px;width:900px;height:556px;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.umschlag.draussen{transform:translateX(1150px)}
+.umschlag{cursor:default}
+.umschlag.tippbar{cursor:pointer}
+.umschlag .abs{position:absolute;left:26px;top:22px;font-size:19px;line-height:1.3;color:#5d6862}
+.umschlag .mk{position:absolute;right:26px;top:22px;width:100px;height:120px}
+.umschlag .mk svg{width:100%;height:100%}
+.umschlag .an{position:absolute;left:0;right:0;top:150px;text-align:center;font-size:84px;color:#1d3a6b}
+.stempel{position:absolute;left:440px;top:290px;width:400px;padding:14px 18px;border:7px solid #c0392b;border-radius:14px;color:#c0392b;text-align:center;
+  transform:rotate(-12deg);background:rgba(255,255,255,.35);font-weight:700;line-height:1.1;display:none}
+.stempel b{display:block;font-size:64px;letter-spacing:4px}
+.stempel span{font-size:28px}
+.gestempelt .stempel{display:block}
+.stempel.neu{animation:stempeln .5s ease-out}
+@keyframes stempeln{0%{transform:rotate(-12deg) scale(2.2);opacity:0}70%{transform:rotate(-12deg) scale(.95);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
+.stempel.weg{transition:opacity .6s, transform .6s;opacity:0;transform:rotate(-12deg) scale(1.3)}
+.botin{position:absolute;left:14px;top:250px;width:230px;height:300px;display:none}
+.botin svg{width:100%;height:100%}
+.blase{position:absolute;left:250px;top:452px;width:400px;background:#fff;border:3px solid #1d2320;border-radius:22px;padding:14px 20px;font-size:30px;font-weight:700;line-height:1.2;display:none}
+.blase::before{content:"";position:absolute;left:-22px;top:30px;border-top:14px solid transparent;border-bottom:14px solid transparent;border-right:22px solid #1d2320}
+.blase::after{content:"";position:absolute;left:-16px;top:33px;border-top:11px solid transparent;border-bottom:11px solid transparent;border-right:18px solid #fff}
+.post-da .botin,.post-da .blase{display:block}
+.postknopf{position:absolute;left:330px;top:640px;z-index:4;font-size:26px;min-height:68px}
+
+.speicher{position:absolute;left:990px;top:150px;width:562px;height:300px;background:#fffbea;border:3px solid #d9a21b;border-radius:16px}
+.speicher>b{position:absolute;left:16px;top:6px;font-size:22px}
+.ablage{left:990px;top:466px;width:562px;height:240px}
+.ablage>b{text-align:left;left:16px;width:auto;top:6px}
+.idee-knopf{position:absolute;right:10px;top:4px;min-height:40px;font-size:18px;padding:4px 12px}
+.karte{position:absolute;width:176px;height:58px;background:#fff;border:3px solid #1d2320;border-radius:12px;display:flex;align-items:center;gap:6px;padding:0 6px;font-size:19px;font-weight:700;line-height:1.05;
+  box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.karte svg{width:42px;height:42px;flex:none}
+.karte.text{justify-content:center;text-align:center;background:#fffdf3;font-size:17px;white-space:normal}
+.karte.treffer{border-color:#2f7d4f;box-shadow:0 0 0 4px rgba(47,125,79,.35)}
+.karte.ablenker{opacity:.45;filter:grayscale(1)}
+.tipp{position:absolute;display:none;background:#fff3b8;border:2px solid #d9a21b;border-radius:12px;padding:8px 14px;font-size:21px;z-index:6}
+.hilfe .tipp{display:block}
+
+.vergleich{position:absolute;left:48px;top:150px;width:900px;height:556px;background:#fff;border:3px solid #1d2320;border-radius:10px;z-index:7;padding:24px 30px}
+.vergleich h2{margin:0 0 16px;font-size:38px}
+.vrow{display:grid;grid-template-columns:64px 300px 1fr;align-items:center;gap:16px;padding:12px 16px;border-radius:14px;background:var(--rbg);margin-bottom:14px;min-height:110px}
+.vrow svg{width:56px;height:56px;color:var(--rc)}
+.vrow strong{font-size:28px;color:var(--rc)}
+.vrow .treffer{display:flex;flex-wrap:wrap;gap:8px;font-size:22px}
+.vrow .treffer span{background:#fff;border:2px solid #2f7d4f;border-radius:999px;padding:2px 12px;font-weight:700}
+.vrow .treffer .offen{border:2px dashed #8fa39a;color:#5d6862;font-weight:400}
+
+.slot{position:absolute;height:64px;border:3px dashed var(--rc);border-radius:12px;background:rgba(255,255,255,.7)}
+.slot .geist{display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:var(--rc);font-size:20px;font-weight:700}
+.hilfe .slot .geist{display:flex}
+.slot.hover{box-shadow:0 0 0 5px rgba(47,125,79,.3)}
+.zeile-tom{position:absolute;font-size:40px;font-weight:700;color:#1d3a6b}
+.chip{position:absolute;height:64px;background:#fff;border:3px solid #1d2320;border-radius:12px;display:grid;place-items:center;font-size:30px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.chip .mark{right:-14px;top:-14px;width:36px;height:36px;font-size:23px}
+.poststempel{position:absolute;left:620px;top:30px;width:170px;height:170px;transform:rotate(-14deg);opacity:0;transition:opacity .4s;pointer-events:none}
+.angekommen .poststempel{opacity:.85}
+
+.woerter{left:48px;top:712px;width:900px;height:52px}
+.woerter span{font-size:18px}
+.satz{left:48px;top:772px;width:1180px;height:100px}
+.nav{position:absolute;left:1250px;top:782px;width:302px;display:flex;gap:10px}
+.nav .knopf{min-height:80px;justify-content:center;font-size:22px}
+.nav .zurueck-k{flex:0 0 100px}
+.nav .weiter-k{flex:1}
+.frage input{font:inherit;font-size:30px;width:100%;padding:10px 14px;border:3px solid #1d2320;border-radius:12px;margin:0 0 18px}
+@media (prefers-reduced-motion: reduce){.umschlag,.stempel.weg,.poststempel{transition:none}.stempel.neu{animation:none}}
+</style>
+</head>
+<body class="tafel">
+<a class="zurueck" href="../" data-runde="aus"><span class="pfeil" aria-hidden="true">←</span> Briefe</a>
+<div id="fit"><div id="stage">
+  <h1 data-runde="aus">Der Brief kommt zurück</h1>
+  <div class="schritte"><span class="punkte" id="punkte" data-runde="aus"></span><span id="auftrag"></span></div>
+  <div class="umschlag draussen" id="env" role="button" aria-label="Umschlag">
+    <div class="abs" id="abs"></div><div class="mk" id="mk"></div>
+    <div class="an handschrift" id="an">An Tom</div>
+    <div class="stempel" id="stempel"><b>ZURÜCK</b><span>Empfänger unbekannt</span></div>
+    <div class="botin" id="botin"></div>
+    <div class="blase">Es gibt so viele Toms! Wo wohnt er denn?</div>
+    <div class="poststempel" id="poststempel"></div>
+  </div>
+  <div class="speicher" id="speicher"><b>Das braucht die Post</b></div>
+  <div class="ablage" id="ablage"><b>Ideen-Karten</b></div>
+</div></div>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/buehne.js?v=2026112701"></script>
+<script src="../gemeinsam/bilder.js?v=2026112701"></script>
+<script src="../gemeinsam/adressen.js?v=2026112701"></script>
+<script>
+const B = Brief, BB = BriefBilder, S = B.buehne(), env = document.getElementById('env');
+const TOM = ADRESSEN[0], SPEICHER_KEY = 'briefe-zurueck-ideen';
+document.getElementById('abs').innerHTML = ABSENDER.join('<br>');
+document.getElementById('mk').innerHTML = BB.marke();
+document.getElementById('botin').innerHTML = BB.postbotin();
+document.getElementById('poststempel').innerHTML = BB.poststempel();
+
+// Bildkarten: passende Karten und Ablenker (wort = Nominativ, akk = für „Wir haben an … gedacht.“)
+const KARTEN = [
+  { id: 'nachname', label: 'Nachname', bild: () => BB.nachname(), wort: 'der Nachname', akk: 'den Nachnamen', zeile: 0 },
+  { id: 'strasse', label: 'Straße', bild: () => BB.strassenschild(), wort: 'die Straße', akk: 'die Straße', zeile: 1 },
+  { id: 'hausnummer', label: 'Haus­nummer', bild: () => BB.hausnummer('12'), wort: 'die Hausnummer', akk: 'die Hausnummer', zeile: 1 },
+  { id: 'herz', label: 'Herz', bild: () => BB.herz(), wort: 'das Herz', akk: 'das Herz' },
+  { id: 'plz', label: 'Postleit­zahl', bild: () => BB.briefkasten('45879'), wort: 'die Postleitzahl', akk: 'die Postleitzahl', zeile: 2 },
+  { id: 'sticker', label: 'Sticker', bild: () => BB.sticker(), wort: 'der Sticker', akk: 'den Sticker' },
+  { id: 'ort', label: 'Stadt (Ort)', bild: () => `<span style="color:#b0552f">${BB.stadt()}</span>`, wort: 'der Ort', akk: 'den Ort', zeile: 2 },
+  { id: 'farbe', label: 'Lieblings­farbe', bild: () => BB.farbe(), wort: 'die Lieblingsfarbe', akk: 'die Lieblingsfarbe' },
+  { id: 'geburtstag', label: 'Geburtstag', bild: () => BB.torte(), wort: 'der Geburtstag', akk: 'den Geburtstag' },
+];
+const ZEILEN = [
+  { cls: 'r-name', wort: 'Name', icon: () => BB.person() },
+  { cls: 'r-str', wort: 'Straße und Hausnummer', icon: () => BB.haus() },
+  { cls: 'r-ort', wort: 'Postleitzahl und Ort', icon: () => BB.stadt() },
+];
+const SCHRITTE = 6;
+let schritt = 1, ideen = [], eigene = [], karten = {}, schritt6 = null, pruefungen = 0;
+// ideen: Liste von Karten-IDs oder { text } (eigene Ideen der Lehrkraft)
+
+function speichern() { B.merken(SPEICHER_KEY, { ideen, eigene }); }
+function laden() { const d = B.laden(SPEICHER_KEY, null); if (d && Array.isArray(d.ideen)) { ideen = d.ideen; eigene = Array.isArray(d.eigene) ? d.eigene : []; } }
+
+// ---------- Karten in Ablage und Ideenspeicher ----------
+const SP = { x: 990, y: 150, w: 562, h: 300 }, AB = { x: 990, y: 466, w: 562, h: 240 };
+function karteEl(key, k) {
+  let el = karten[key];
+  if (!el) {
+    el = B.el('div', 'karte' + (k.text ? ' text' : ''), k.text ? B.esc(k.text) : `${k.bild()}<span>${k.label}</span>`);
+    el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', k.text || k.wort);
+    S.appendChild(el); karten[key] = el;
+    B.ziehbar(el, {
+      start: () => schritt === 4 ? undefined : false,
+      ende: (x, y, los) => {
+        const drin = x + 88 > SP.x && x + 88 < SP.x + SP.w && y + 29 > SP.y && y + 29 < SP.y + SP.h;
+        if (!los) return wechsle(key, k);       // antippen: hinein bzw. heraus
+        if (drin && !istIdee(key)) nimmAuf(key, k); else if (!drin && istIdee(key)) entferne(key, k); else ordne();
+      } });
+    el.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && schritt === 4) { e.preventDefault(); wechsle(key, k); } });
+  }
+  return el;
+}
+const schluessel = i => typeof i === 'string' ? i : 'eigen:' + i.text;
+const istIdee = key => ideen.some(i => schluessel(i) === key);
+function wechsle(key, k) { if (istIdee(key)) entferne(key, k); else nimmAuf(key, k); }
+function nimmAuf(key, k) {
+  if (ideen.length >= 12) return ordne();
+  ideen.push(k.text ? { text: k.text } : k.id); speichern(); ordne();
+  B.satz(`Der Brief kommt nicht an, weil <em>${B.esc(k.text ? '„' + k.text + '“' : k.wort)}</em> fehlt.`);
+}
+function entferne(key, k) {
+  ideen = ideen.filter(i => schluessel(i) !== key);
+  if (k.text) { eigene = eigene.filter(t => t !== k.text); karten[key].remove(); delete karten[key]; }
+  speichern(); ordne();
+}
+function kartenInfo(i) { return typeof i === 'string' ? KARTEN.find(k => k.id === i) : { text: i.text }; }
+function ordne() {
+  // Ideenspeicher: 3 Spalten × 4 Reihen; Ablage: feste Plätze
+  ideen.forEach((i, n) => { const k = kartenInfo(i); if (!k) return; B.setze(karteEl(schluessel(i), k), SP.x + 12 + (n % 3) * 182, SP.y + 40 + Math.floor(n / 3) * 64); });
+  KARTEN.forEach((k, n) => { if (!istIdee(k.id)) B.setze(karteEl(k.id, k), AB.x + 12 + (n % 3) * 182, AB.y + 40 + Math.floor(n / 3) * 64); });
+}
+function zeigeKarten(an, nurIdeen) { Object.entries(karten).forEach(([key, el]) => el.hidden = !an || (nurIdeen && !istIdee(key))); }
+
+// ---------- Eigene Idee (Lehrkraft) ----------
+function neueIdee() {
+  const f = B.el('div', 'frage', `<div class="box"><p>Eigene Idee (höchstens 30 Zeichen):</p><input type="text" maxlength="30" aria-label="Eigene Idee" autocomplete="off"><div class="zeile"></div></div>`);
+  const inp = f.querySelector('input');
+  const ok = () => { const t = inp.value.trim().slice(0, 30); f.remove(); if (!t || ideen.some(i => i.text === t)) return; eigene.push(t); nimmAuf('eigen:' + t, { text: t }); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') f.remove(); });
+  f.querySelector('.zeile').append(B.knopf('Hinzufügen', ok, 'haupt'), B.knopf('Abbrechen', () => f.remove()));
+  S.appendChild(f); inp.focus();
+}
+
+// ---------- Schritte ----------
+const TEXT = {
+  1: ['Unser Brief an Tom ist zurück!', 'Unser Brief an Tom ist zurück!'],
+  2: ['Tippe auf den Umschlag. Was steht da?', 'Auf dem Brief steht: Zurück – Empfänger unbekannt.'],
+  3: ['Was denkt die Post?', 'Es gibt so viele Toms! Wo wohnt er denn?'],
+  4: ['Was braucht die Post? Ziehe die Karten in „Das braucht die Post“.', null],
+  5: ['Wir vergleichen mit der Merkkarte.', null],
+  6: ['Ergänze Toms Adresse. Ziehe die Teile auf den Umschlag.', null],
+};
+function zeigeSchritt(n, vorwaerts) {
+  schritt = n;
+  document.getElementById('punkte').innerHTML = Array.from({ length: SCHRITTE }, (_, i) => `<i class="${i < n ? 'da' : ''}"></i>`).join('');
+  document.getElementById('punkte').setAttribute('aria-label', `Schritt ${n} von ${SCHRITTE}`);
+  document.getElementById('auftrag').textContent = TEXT[n][0];
+  document.querySelectorAll('.vergleich,.postknopf').forEach(x => x.remove());
+  aufraeumen6();
+  S.classList.remove('fertig', 'angekommen');
+  env.classList.toggle('gestempelt', n > 2 || (n === 2 && !vorwaerts));
+  env.classList.toggle('post-da', n === 3 && postGezeigt);
+  env.classList.toggle('tippbar', n === 2);
+  document.getElementById('an').hidden = n === 6;
+  const st = document.getElementById('stempel'); st.classList.remove('neu', 'weg');
+  zeigeKarten(n === 4 || n === 5, n === 5);
+  document.getElementById('speicher').hidden = !(n === 4 || n === 5);
+  document.getElementById('ablage').hidden = !(n === 4 || n === 6);
+  document.getElementById('ablage').querySelector('b').textContent = n === 6 ? 'Das fehlt noch' : 'Ideen-Karten';
+  ideeKn.hidden = n !== 4;
+  kn.pruefen.disabled = n !== 6;
+  zurueckKn.disabled = n === 1; weiterKn.textContent = n === 4 ? 'Vergleichen' : n === 6 ? 'Neu' : 'Weiter →';
+  weiterKn.hidden = n === 6;
+  tipp.textContent = { 1: 'Tipp: Wer hat den Brief geschrieben? Wohin sollte er?', 2: 'Tipp: Tippe auf den Umschlag.', 3: 'Tipp: Woher weiß die Post, wohin der Brief muss?',
+    4: 'Tipp: Wie findet die Post ein Haus? Welche Stadt? Welche Straße?', 5: 'Tipp: Woran haben wir nicht gedacht?', 6: 'Tipp: Die grauen Wörter zeigen, was in die Lücke gehört.' }[n];
+  if (n === 1) {
+    if (vorwaerts && B.bewegt) { env.classList.add('draussen'); requestAnimationFrame(() => requestAnimationFrame(() => env.classList.remove('draussen'))); }
+    else env.classList.remove('draussen');
+    B.satz(TEXT[1][1]);
+  } else env.classList.remove('draussen');
+  if (n === 2) { if (vorwaerts) B.satzLeer('Tippe auf den Umschlag.'); else B.satz(TEXT[2][1]); }
+  if (n === 3) {
+    if (postGezeigt) B.satz(TEXT[3][1]);
+    else { const pk = B.knopf('Was denkt die Post?', zeigePost, 'haupt postknopf'); S.appendChild(pk); B.satzLeer('Was denkt die Post?'); }
+  }
+  if (n === 4) { ordne(); B.satz('Der Brief kommt nicht an, weil … fehlt.'); }
+  if (n === 5) vergleichen();
+  if (n === 6) baueSchritt6();
+}
+let postGezeigt = false;
+function zeigePost() { postGezeigt = true; document.querySelectorAll('.postknopf').forEach(x => x.remove()); env.classList.add('post-da'); B.satz(TEXT[3][1]); }
+function stempeln() {
+  if (schritt !== 2) return;
+  env.classList.add('gestempelt'); const st = document.getElementById('stempel'); st.classList.remove('neu'); void st.offsetWidth; if (B.bewegt) st.classList.add('neu');
+  B.satz(TEXT[2][1]);
+}
+env.addEventListener('click', () => { if (schritt === 2) stempeln(); });
+env.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && schritt === 2) { e.preventDefault(); stempeln(); } });
+env.tabIndex = 0;
+
+function weiter() {
+  if (schritt === 2 && !env.classList.contains('gestempelt')) { stempeln(); return; }
+  if (schritt === 3 && !postGezeigt) { zeigePost(); return; }
+  if (schritt < SCHRITTE) zeigeSchritt(schritt + 1, true);
+}
+
+// ---------- Schritt 5: Vergleichen ----------
+function vergleichen() {
+  const v = B.el('div', 'vergleich', '<h2>Eine Adresse hat:</h2>');
+  const genannt = ideen.map(kartenInfo).filter(k => k && !k.text);
+  ZEILEN.forEach((z, i) => {
+    const treffer = genannt.filter(k => k.zeile === i);
+    const r = B.el('div', 'vrow ' + z.cls, `${z.icon()}<strong>${z.wort}</strong><div class="treffer">${treffer.length ? treffer.map(k => `<span>✓ ${B.esc(k.label.replace(/­/g, ''))}</span>`).join('') : '<span class="offen">Daran haben wir noch nicht gedacht.</span>'}</div>`);
+    v.appendChild(r);
+  });
+  S.appendChild(v);
+  ideen.forEach(i => { const k = kartenInfo(i), el = karten[schluessel(i)]; if (!el || !k) return; el.classList.toggle('treffer', !k.text && k.zeile !== undefined); el.classList.toggle('ablenker', !k.text && k.zeile === undefined); });
+  const akk = genannt.filter(k => k.zeile !== undefined).map(k => k.akk);
+  if (akk.length) B.satz(`Wir haben an <em>${B.esc(liste(akk))}</em> gedacht.`);
+  else B.satz('Wir haben noch nicht an die Adresse gedacht.');
+}
+const liste = l => l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' und ' + l[l.length - 1];
+
+// ---------- Schritt 6: Toms Umschlag ergänzen ----------
+const TEILE = [
+  { text: TOM.nachname, zeile: 0, satz: 'ist der Nachname' },
+  { text: `${TOM.strasse} ${TOM.nr}`, zeile: 1, satz: 'sind Straße und Hausnummer' },
+  { text: `${TOM.plz} ${TOM.ort}`, zeile: 2, satz: 'sind Postleitzahl und Ort' },
+];
+function aufraeumen6() { if (schritt6) { schritt6.els.forEach(x => x.remove()); schritt6 = null; } Object.values(karten).forEach(el => el.classList.remove('treffer', 'ablenker')); }
+function baueSchritt6() {
+  pruefungen = 0;
+  const els = [], slots = [], chips = [];
+  const ox = 48, oy = 150;
+  const tom = B.el('div', 'zeile-tom handschrift', B.esc(TOM.vorname)); B.setze(tom, ox + 320, oy + 290); S.appendChild(tom); els.push(tom);
+  const SL = [{ x: ox + 420, y: oy + 282, w: 300 }, { x: ox + 320, y: oy + 362, w: 400 }, { x: ox + 320, y: oy + 442, w: 400 }];
+  SL.forEach((s, i) => { const el = B.el('div', 'slot ' + ZEILEN[i].cls, `<span class="geist">${i === 0 ? 'Nachname' : ZEILEN[i].wort}</span>`);
+    B.setze(el, s.x, s.y); el.style.width = s.w + 'px'; S.appendChild(el); els.push(el); slots.push(Object.assign({ el, item: null, zeile: i }, s)); });
+  B.mischen(TEILE).forEach((t, n) => {
+    const el = B.el('div', 'chip', `<span>${B.esc(t.text)}</span><span class="mark"></span>`); el.style.width = '380px';
+    const c = { el, t, hx: AB.x + 90, hy: AB.y + 42 + n * 66, slot: null }; B.setze(el, c.hx, c.hy); S.appendChild(el); els.push(el); chips.push(c);
+    el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', t.text);
+    B.ziehbar(el, {
+      bewege: (x, y) => { const z = slotBei(x, y); slots.forEach(s => s.el.classList.toggle('hover', s === z)); },
+      ende: (x, y, los) => { slots.forEach(s => s.el.classList.remove('hover'));
+        const z = los ? slotBei(x, y) : slots.find(s => !s.item); if (z) lege(c, z); else heim(c); } });
+  });
+  function slotBei(x, y) { const cx = x + 190, cy = y + 32; return slots.find(s => cx > s.x - 60 && cx < s.x + s.w + 60 && cy > s.y - 40 && cy < s.y + 104); }
+  function heim(c) { if (c.slot) c.slot.item = null; c.slot = null; c.el.style.width = '380px'; B.setze(c.el, c.hx, c.hy); B.markiere(c.el, null); S.classList.remove('fertig', 'angekommen'); }
+  function lege(c, s) {
+    if (s.item && s.item !== c) heim(s.item);
+    if (c.slot) c.slot.item = null;
+    s.item = c; c.slot = s; c.el.style.width = (s.w - 8) + 'px'; B.setze(c.el, s.x + 4, s.y);
+    chips.forEach(x => B.markiere(x.el, null)); S.classList.remove('fertig', 'angekommen');
+    B.satz(`<em>${B.esc(c.t.text)}</em> ${TEILE[s.zeile].satz}.`);
+  }
+  schritt6 = { els, slots, chips };
+  B.satzLeer('Ziehe die fehlenden Teile auf den Umschlag.');
+}
+function pruefen() {
+  if (schritt !== 6 || !schritt6) return;
+  pruefungen++; let alle = true;
+  schritt6.chips.forEach(c => { const ok = !!c.slot && c.slot.zeile === c.t.zeile; B.markiere(c.el, ok ? true : c.slot ? false : null); if (!ok) alle = false; });
+  if (alle) {
+    const st = document.getElementById('stempel'); st.classList.remove('neu'); st.classList.add('weg');
+    setTimeout(() => env.classList.remove('gestempelt'), B.bewegt ? 600 : 0);
+    S.classList.add('angekommen'); B.satz('Jetzt kommt der Brief an!');
+    Runde.fertig({ ohneFehler: pruefungen === 1 });
+  } else B.satz('Schau noch einmal: Welche Zeile gehört wohin?', 'hinweis');
+}
+function neu() {
+  B.frage('Alles löschen und von vorn beginnen? Die gesammelten Ideen werden gelöscht.', 'Ja, alles löschen', () => {
+    ideen = []; eigene.forEach(t => { const el = karten['eigen:' + t]; if (el) { el.remove(); delete karten['eigen:' + t]; } }); eigene = [];
+    try { localStorage.removeItem(SPEICHER_KEY); } catch (e) {}
+    postGezeigt = false; zeigeSchritt(1, true);
+  });
+}
+
+// ---------- Knöpfe und Leisten ----------
+const woerter = B.wortspeicher(48, 712, 900, 52, ['der Name', 'die Straße', 'die Hausnummer', 'die Postleitzahl', 'der Ort', 'fehlt', 'kommt an']);
+const kn = B.knoepfe({ woerter: an => woerter.classList.toggle('an', an), hilfe: an => S.classList.toggle('hilfe', an), pruefen, neu });
+const tipp = B.el('div', 'tipp'); B.setze(tipp, 990, 712); tipp.style.width = '562px'; S.appendChild(tipp);
+const ideeKn = B.knopf('+ Idee', neueIdee, 'idee-knopf'); ideeKn.title = 'Eigene Idee als Textkarte'; document.getElementById('ablage').appendChild(ideeKn);
+B.satzstreifen(48, 772, 1180, 100);
+const nav = B.el('div', 'nav'); nav.dataset.runde = 'aus';
+const zurueckKn = B.knopf('← Zurück', () => { if (schritt > 1) zeigeSchritt(schritt - 1, false); }, 'zurueck-k');
+const weiterKn = B.knopf('Weiter →', weiter, 'haupt weiter-k');
+nav.append(zurueckKn, weiterKn); S.appendChild(nav);
+
+laden();
+const start = +new URLSearchParams(location.search).get('schritt');
+if (Runde.aktiv) {
+  // Übungsrunde: eine Aufgabe = Toms Adresse ergänzen (Schritt 6)
+  Runde.verbinde({ id: 'zurueck', neueAufgabe() { postGezeigt = true; zeigeSchritt(6, false); Runde.gestartet('zurueck-6-' + Date.now()); },
+    hilfe(an) { kn.hilfe.setze(an); S.classList.toggle('hilfe', an); } });
+} else if (start >= 1 && start <= 6) { postGezeigt = start > 3; zeigeSchritt(start, false); }
+else if (ideen.length) { postGezeigt = true; zeigeSchritt(4, false); }
+else zeigeSchritt(1, true);
+</script>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+ titel: "Der Brief kommt zurück",
+ teile: [
+  { h: "Worum geht es?", text: "Einstieg mit einem Rätsel: Unser Antwortbrief an Tom kommt zurück, weil auf dem Umschlag nur „An Tom“ steht. Die Kinder sammeln, was der Post fehlt. Die Ideen bleiben gespeichert und werden am Stundenende mit der Merkkarte verglichen." },
+  { h: "Schritte (unten rechts: Weiter, Zurück)", punkte: [
+    "1 Der Umschlag fährt herein: „Unser Brief an Tom ist zurück!“",
+    "2 Umschlag antippen: Stempel „ZURÜCK – Empfänger unbekannt“.",
+    "3 **Was denkt die Post?** Die Postbotin fragt: „Es gibt so viele Toms! Wo wohnt er denn?“",
+    "4 Ideen sammeln: Karten in „Das braucht die Post“ ziehen oder antippen. **+ Idee** legt eine eigene Textkarte an (bis 30 Zeichen). Satz: „Der Brief kommt nicht an, weil die Hausnummer fehlt.“",
+    "5 **Vergleichen** (am Stundenende): Neben den Ideen stehen die drei Zeilen einer Adresse. Treffer grün, Ablenker grau.",
+    "6 Die fehlenden Teile auf Toms Umschlag ziehen, dann **Prüfen**: „Jetzt kommt der Brief an!“" ] },
+  { h: "Speichern und Neu", punkte: [
+    "Die Ideen bleiben auf diesem Gerät gespeichert. Beim nächsten Öffnen geht es bei Schritt 4 weiter.",
+    "**Neu** fragt nach und löscht dann alle Ideen.",
+    "Vom **Post-Detektiv** führt ein Knopf direkt zu Schritt 6." ] },
+ ]
+});
+</script>
+</body>
+</html>

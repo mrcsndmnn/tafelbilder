@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Post-Detektiv – Briefe</title>
+<link rel="stylesheet" href="../gemeinsam/buehne.css?v=2026112701">
+<link rel="stylesheet" href="../../../gemeinsam/zurueck.css">
+<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<style>
+/* Layout: Umschlag links (Adresse mit Fehler), Checkliste rechts, Auswahlkarten darunter, Satzstreifen unten. */
+.fall{position:absolute;left:50px;top:94px;display:flex;align-items:center;gap:14px;font-size:24px}
+.punkte{display:flex;gap:8px}
+.punkte i{width:20px;height:20px;border-radius:50%;border:3px solid #1d2320;background:#fff;display:block}
+.punkte i.erledigt{background:#2f7d4f;border-color:#2f7d4f}
+.punkte i.jetzt{background:#f2c14e}
+.umschlag{left:48px;top:150px;width:900px;height:556px}
+.umschlag .abs{position:absolute;left:26px;top:22px;font-size:19px;line-height:1.3;color:#5d6862}
+.marke{position:absolute;width:100px;height:120px;z-index:3;border-radius:6px}
+.marke svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 5px rgba(0,0,0,.2))}
+.ecke{position:absolute;width:170px;height:190px;border-radius:12px;background:transparent;border:0;cursor:pointer;z-index:2;padding:0}
+.ecke:focus-visible{outline:4px solid var(--ok)}
+.zeile{position:absolute;width:452px;height:66px;border:3px solid transparent;border-radius:12px;background:transparent;font-family:var(--font);
+  font-size:36px;text-align:left;padding:0 14px;cursor:pointer;color:#1d2320;display:flex;align-items:center;gap:12px;white-space:nowrap;z-index:2}
+.zeile:hover{background:rgba(47,125,79,.08)}
+.zeile:focus-visible{outline:4px solid var(--ok)}
+.zeile.tipp,.marke.tipp{background:#fff3b8;border-color:#e0c35a}
+.zeile.gefunden,.marke.gefunden{border-color:#d9a21b;background:#fff8d6;animation:leuchten 1s ease-out 1}
+@keyframes leuchten{0%{box-shadow:0 0 0 0 rgba(242,193,78,.9)}100%{box-shadow:0 0 0 22px rgba(242,193,78,0)}}
+.zeile.ziehbar{cursor:grab;background:#fff;border-color:#1d2320;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.luecke{display:inline-block;min-width:120px;height:50px;border:3px dashed #b0552f;border-radius:10px;background:#fff}
+.neu-teil{color:#2f7d4f;font-weight:700}
+.zeile.repariert{background:#e3f2e8;border-color:#2f7d4f}
+
+.check{position:absolute;left:990px;top:150px;width:562px;height:330px;background:#fff;border:3px solid #1d2320;border-radius:16px;padding:10px 16px}
+.check h2{margin:0 0 4px;font-size:24px}
+.crow{display:grid;grid-template-columns:44px 1fr 72px;align-items:center;gap:12px;height:68px;border-radius:12px;padding:0 6px;position:relative}
+.crow+.crow{border-top:2px solid #e3e7e4}
+.crow svg{width:40px;height:40px}
+.crow .t{font-size:22px;font-weight:700;line-height:1.15}
+.crow .bsp{display:none;font-size:17px;color:#5d6862;font-weight:400}
+.hilfe1 .crow .bsp{display:block}
+.box{width:64px;height:64px;border:4px solid #1d2320;border-radius:14px;background:#fff;cursor:pointer;display:grid;place-items:center;font-size:44px;font-weight:700;color:#2f7d4f;padding:0}
+.box:focus-visible{outline:4px solid var(--ok);outline-offset:2px}
+.crow .mark{right:-30px;top:14px}
+.aktionen{position:absolute;left:990px;top:494px;width:562px;display:flex;gap:12px}
+.aktionen .knopf{flex:1;justify-content:center;min-height:60px;font-size:22px}
+.wahl{position:absolute;left:990px;top:574px;width:562px;height:132px;background:var(--tray);border:2px solid #c9d1cb;border-radius:16px}
+.wahl>b{position:absolute;left:0;top:6px;width:100%;text-align:center;font-size:18px;color:var(--soft)}
+.karte{position:absolute;height:64px;background:#fff;border:3px solid #1d2320;border-radius:12px;display:grid;place-items:center;font-size:26px;font-weight:700;white-space:nowrap;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);padding:0 10px}
+.woerter{left:48px;top:712px;width:900px;height:52px}
+.woerter span{font-size:18px}
+.satz{left:48px;top:772px;width:1180px;height:100px}
+.weiter{position:absolute;left:1250px;top:790px;width:302px;min-height:72px;justify-content:center;font-size:24px}
+
+/* Zustellung */
+.strasse{position:absolute;left:48px;top:150px;width:900px;height:556px;background:#eaf4ea;border:3px solid #1d2320;border-radius:10px;z-index:8;overflow:hidden}
+.strasse .weg{position:absolute;left:0;right:0;top:420px;height:90px;background:#9aa39e;border-top:4px solid #5d6862;border-bottom:4px solid #5d6862}
+.strasse .weg::after{content:"";position:absolute;left:0;right:0;top:41px;border-top:6px dashed #fff}
+.strasse .haus{position:absolute;top:240px;width:180px;height:190px}
+.strasse .haus svg{width:100%;height:100%}
+.strasse .bote{position:absolute;left:20px;top:430px;width:120px;height:80px;transition:left 2s ease-in-out, top .6s ease-in}
+.strasse .bote svg{width:100%;height:100%}
+.strasse .schild{position:absolute;left:24px;top:24px;font-size:28px;font-weight:700;background:#fff;border:3px solid #1d2320;border-radius:12px;padding:6px 16px}
+
+/* Abschluss nach sechs Fällen */
+.ende{position:absolute;left:48px;top:150px;width:1504px;height:600px;background:#fff;z-index:9;display:grid;grid-template-columns:900px 1fr;gap:40px;align-items:center}
+.ende .tom{position:relative;height:556px;background:var(--paper);border:3px solid #1d2320;border-radius:10px}
+.ende .tom .an{position:absolute;left:0;right:0;top:230px;text-align:center;font-size:72px}
+.ende .tom .marke{right:26px;top:22px}
+.ende .rechts{display:flex;flex-direction:column;gap:24px;font-size:34px;font-weight:700}
+@media (prefers-reduced-motion: reduce){.zeile.gefunden,.marke.gefunden{animation:none}.strasse .bote{transition:none}}
+</style>
+</head>
+<body class="tafel">
+<a class="zurueck" href="../" data-runde="aus"><span class="pfeil" aria-hidden="true">←</span> Briefe</a>
+<div id="fit"><div id="stage">
+  <h1 data-runde="aus">Post-Detektiv</h1>
+  <div class="fall"><span class="punkte" id="punkte" data-runde="aus"></span><span id="auftrag">Prüfe den Umschlag mit der Checkliste.</span></div>
+  <div class="umschlag" id="env"><div class="abs" id="abs"></div></div>
+  <div class="check" id="check"><h2>Checkliste</h2></div>
+  <div class="aktionen" id="aktionen"></div>
+  <div class="wahl" id="wahl" hidden><b>Was passt in die Lücke?</b></div>
+</div></div>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../gemeinsam/buehne.js?v=2026112701"></script>
+<script src="../gemeinsam/bilder.js?v=2026112701"></script>
+<script src="../gemeinsam/adressen.js?v=2026112701"></script>
+<script>
+const B = Brief, BB = BriefBilder, S = B.buehne();
+const ENV = { x: 48, y: 150, w: 900, h: 556 };
+document.getElementById('abs').innerHTML = ABSENDER.join('<br>');
+
+// ---------- Die Fälle ----------
+// fehlt: welcher Teil fehlt (typ) in welcher Zeile; ziel: was zum Finden angetippt werden muss
+const FAELLE = {
+  1: { fehlt: "nr", zeile: 1, satz: "Hier fehlt die Hausnummer.", anfang: "Hier fehlt …" },
+  2: { fehlt: "plz", zeile: 2, satz: "Hier fehlt die Postleitzahl.", anfang: "Hier fehlt …" },
+  3: { fehlt: "nachname", zeile: 0, satz: "Hier fehlt der Nachname.", anfang: "Hier fehlt …" },
+  4: { fehlt: "strasse", zeile: 1, satz: "Hier fehlt die Straße.", anfang: "Hier fehlt …" },
+  5: { fehlt: "ort", zeile: 2, satz: "Hier fehlt der Ort.", anfang: "Hier fehlt …" },
+  6: { vertauscht: true, satz: "Die Zeilen sind vertauscht.", anfang: "Die Zeilen sind …" },
+  7: { marke: true, satz: "Die Briefmarke klebt an der falschen Stelle.", anfang: "Die Briefmarke klebt …" },
+  8: { richtig: true, satz: "Hier fehlt nichts. Der Brief kann ankommen.", anfang: "Hier fehlt …" },
+};
+const TEILE = [["vorname", "nachname"], ["strasse", "nr"], ["plz", "ort"]];
+const CHECK = [
+  { k: "name", t: "Name", icon: () => BB.person(), cls: "r-name", da: "Der Name ist da." },
+  { k: "str", t: "Straße und Hausnummer", icon: () => BB.haus(), cls: "r-str", da: "Die Straße und die Hausnummer sind da." },
+  { k: "ort", t: "Postleitzahl und Ort", icon: () => BB.stadt(), cls: "r-ort", da: "Die Postleitzahl und der Ort sind da." },
+  { k: "marke", t: "Briefmarke oben rechts", icon: () => `<svg viewBox="0 0 140 170">${BB.marke().replace(/^<svg[^>]*>|<\/svg>$/g, "")}</svg>`, cls: "", da: "Die Briefmarke klebt oben rechts." },
+];
+let folge = [], fallNr = 0, f = null, adr = null, st = null, hilfe = 0, fehler = 0;
+// st: { gefunden, repariert, gesendet, order, haken: {name,str,ort,marke}, markePos }
+
+function neueFolge() {
+  // sechs von acht Fällen, zufällig, Fall 8 nie als erster
+  let l; do { l = B.mischen([1, 2, 3, 4, 5, 6, 7, 8]).slice(0, 6); } while (l[0] === 8);
+  folge = l; fallNr = 0;
+}
+function vorhanden() { // was die Checkliste erwarten darf
+  const n = f.nr;
+  return { name: n !== 3, str: n !== 1 && n !== 4, ort: n !== 2 && n !== 5 && n !== 6, marke: n !== 7 };
+}
+
+// ---------- Aufbau eines Falls ----------
+const ZX = ENV.x + 422, zeilenEl = [0, 1, 2].map(i => { const b = B.el('button', 'zeile'); b.type = 'button'; B.setze(b, ZX, ENV.y + 290 + i * 80); S.appendChild(b); return b; });
+let gezogen = false;
+const marke = B.el('div', 'marke', BB.marke()); marke.setAttribute('role', 'button'); marke.setAttribute('aria-label', 'Briefmarke'); marke.tabIndex = 0; S.appendChild(marke);
+const ecken = { or: B.el('button', 'ecke'), ul: B.el('button', 'ecke') };
+ecken.or.type = ecken.ul.type = 'button'; ecken.or.setAttribute('aria-label', 'Ecke oben rechts'); ecken.ul.setAttribute('aria-label', 'Ecke unten links');
+B.setze(ecken.or, ENV.x + ENV.w - 190, ENV.y + 10); B.setze(ecken.ul, ENV.x + 10, ENV.y + ENV.h - 200); S.append(ecken.or, ecken.ul);
+const MARKE_POS = { or: { x: ENV.x + ENV.w - 126, y: ENV.y + 22 }, ul: { x: ENV.x + 26, y: ENV.y + ENV.h - 142 } };
+
+function starteFall(nr, adresse) {
+  f = Object.assign({ nr }, FAELLE[nr]); adr = adresse;
+  st = { gefunden: false, repariert: false, gesendet: false, order: f.vertauscht ? [2, 0, 1] : [0, 1, 2], haken: {}, markePos: f.marke ? "ul" : "or", ausgewaehlt: null };
+  fehler = 0;
+  document.querySelectorAll('.strasse,.ende').forEach(x => x.remove());
+  document.getElementById('wahl').hidden = true; document.querySelectorAll('.karte').forEach(x => x.remove());
+  weiterKn.hidden = true; abschickenKn.disabled = false; richtigKn.disabled = false;
+  CHECK.forEach(c => { c.box.textContent = ""; c.box.setAttribute('aria-pressed', false); B.markiere(c.row, null); });
+  zeichne(); zeigeBeispiele(); zeigePunkte();
+  document.getElementById('auftrag').textContent = 'Prüfe den Umschlag mit der Checkliste. Was fehlt?';
+  if (hilfe >= 3) B.satz(B.esc(f.anfang), 'hinweis'); else B.satzLeer('Tippe in der Checkliste ab, was da ist.');
+}
+function zeichne() {
+  st.order.forEach((zi, pos) => {
+    const el = zeilenEl[pos], teile = TEILE[zi];
+    el.dataset.zeile = zi;
+    el.innerHTML = teile.map(t => {
+      if (f.fehlt === t && !st.repariert) return st.gefunden ? '<span class="luecke" aria-label="Lücke"></span>' : '';
+      return `<span class="${f.fehlt === t && st.repariert ? "neu-teil" : ""}">${B.esc(adr[t])}</span>`;
+    }).join('');
+    el.setAttribute('aria-label', 'Adresszeile: ' + el.textContent.trim());
+    el.classList.toggle('tipp', hilfe >= 2 && !st.gefunden && (f.zeile === zi || (f.vertauscht && pos === 0)));
+    el.classList.toggle('gefunden', st.gefunden && !st.repariert && (f.zeile === zi || !!f.vertauscht));
+    el.classList.toggle('ziehbar', !!f.vertauscht && st.gefunden && !st.repariert);
+    el.classList.toggle('repariert', st.repariert && (f.zeile === zi || !!f.vertauscht));
+  });
+  const p = MARKE_POS[st.markePos]; B.setze(marke, p.x, p.y);
+  marke.classList.toggle('tipp', hilfe >= 2 && !!f.marke && !st.gefunden);
+  marke.classList.toggle('gefunden', !!f.marke && st.gefunden && !st.repariert);
+}
+function zeigeBeispiele() {
+  const z = adressZeilen(adr);
+  CHECK.forEach((c, i) => c.row.querySelector('.bsp').textContent = i < 3 ? z[i] : 'oben rechts');
+  document.getElementById('check').classList.toggle('hilfe1', hilfe >= 1);
+}
+function zeigePunkte() {
+  document.getElementById('punkte').innerHTML = folge.map((_, i) => `<i class="${i < fallNr ? "erledigt" : i === fallNr ? "jetzt" : ""}"></i>`).join('');
+  document.getElementById('punkte').setAttribute('aria-label', `Fall ${fallNr + 1} von ${folge.length}`);
+}
+
+// ---------- Checkliste ----------
+const check = document.getElementById('check');
+CHECK.forEach(c => {
+  const row = B.el('div', 'crow ' + c.cls, `<span style="color:var(--rc,#1d2320)">${c.icon()}</span><div><div class="t">${c.t}</div><div class="bsp"></div></div><button type="button" class="box" aria-pressed="false" aria-label="${c.t} abhaken"></button><span class="mark"></span>`);
+  check.appendChild(row); c.row = row; c.box = row.querySelector('.box');
+  c.box.addEventListener('click', () => {
+    const an = c.box.getAttribute('aria-pressed') !== 'true'; c.box.setAttribute('aria-pressed', an); c.box.textContent = an ? '✓' : ''; st.haken[c.k] = an;
+    B.markiere(row, null);
+    B.satz(an ? B.esc(c.da) : `Ich nehme den Haken bei <em>${B.esc(c.t)}</em> weg.`);
+  });
+});
+// Prüfen: Stimmen die Haken in der Checkliste?
+function pruefen() {
+  const v = vorhanden(); let alle = true;
+  CHECK.forEach(c => { const ok = !!st.haken[c.k] === v[c.k]; B.markiere(c.row, ok); if (!ok) alle = false; });
+  B.satz(alle ? 'Die Checkliste stimmt.' : 'Schau noch einmal in die Checkliste.', alle ? '' : 'hinweis');
+}
+
+// ---------- Finden ----------
+function tippe(ziel) {
+  if (st.gefunden || st.gesendet || f.richtig) { if (f.richtig && !st.gesendet) { fehler++; B.satz('Schau noch einmal in die Checkliste.', 'hinweis'); } return; }
+  let treffer = false;
+  if (f.vertauscht) treffer = ziel.zeile !== undefined;
+  else if (f.marke) treffer = ziel.marke || ziel.ecke === 'or';
+  else treffer = ziel.zeile === f.zeile;
+  if (!treffer) { fehler++; B.satz('Hier ist alles da. Schau noch einmal.', 'hinweis'); return; }
+  st.gefunden = true; zeichne();
+  B.satz(B.esc(f.satz));
+  if (f.fehlt) zeigeWahl();
+  if (f.vertauscht) document.getElementById('auftrag').textContent = 'Ziehe die Zeilen in die richtige Reihenfolge.';
+  if (f.marke) document.getElementById('auftrag').textContent = 'Ziehe die Briefmarke an die richtige Stelle.';
+}
+zeilenEl.forEach((el, pos) => el.addEventListener('click', () => {
+  if (gezogen) { gezogen = false; return; }
+  if (st.gefunden && f.vertauscht && !st.repariert) return tippeZeileTausch(pos);
+  tippe({ zeile: +el.dataset.zeile });
+}));
+marke.addEventListener('click', () => { if (st.gefunden && f.marke) return; tippe({ marke: true }); });
+marke.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); marke.click(); } });
+ecken.or.addEventListener('click', () => { if (st.gefunden && f.marke && !st.repariert) return setzeMarke('or'); tippe({ ecke: 'or' }); });
+ecken.ul.addEventListener('click', () => { if (st.gefunden && f.marke && !st.repariert) return; tippe({ ecke: 'ul' }); });
+
+// ---------- Reparieren ----------
+// a) fehlender Teil: drei Auswahlkarten, eine passt
+function zeigeWahl() {
+  const wahl = document.getElementById('wahl'); wahl.hidden = false;
+  const andereTypen = B.mischen(["vorname", "nachname", "strasse", "nr", "plz", "ort"].filter(t => t !== f.fehlt && !(f.fehlt === "vorname" && t === "nachname"))).slice(0, 2);
+  const andere = ADRESSEN.filter(a => a !== adr);
+  const karten = B.mischen([{ text: adr[f.fehlt], ok: true }, ...andereTypen.map(t => ({ text: B.wahl(andere)[t], ok: false }))]);
+  karten.forEach((k, i) => {
+    const el = B.el('div', 'karte', B.esc(k.text)); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', k.text + ' in die Lücke legen');
+    el.style.width = '170px'; k.hx = 990 + 14 + i * 182; k.hy = 574 + 48; B.setze(el, k.hx, k.hy); S.appendChild(el); k.el = el;
+    B.ziehbar(el, { ende: (x, y, los) => { if (!los) return legeKarte(k); const l = document.querySelector('.luecke'); if (!l) return zurueck(k);
+      const a = el.getBoundingClientRect(), b = l.getBoundingClientRect(), cx = a.left + a.width / 2, cy = a.top + a.height / 2;
+      if (cx > b.left - 60 && cx < b.right + 60 && cy > b.top - 50 && cy < b.bottom + 50) legeKarte(k); else zurueck(k); } });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); legeKarte(k); } });
+  });
+}
+function zurueck(k) { B.setze(k.el, k.hx, k.hy); }
+function legeKarte(k) {
+  if (st.repariert) return;
+  if (!k.ok) { fehler++; zurueck(k); B.satz(`<em>${B.esc(k.text)}</em> passt nicht in die Lücke. Probiere eine andere Karte.`, 'hinweis'); return; }
+  st.repariert = true; document.querySelectorAll('.karte').forEach(x => x.remove()); document.getElementById('wahl').hidden = true;
+  zeichne(); B.satz('Jetzt ist die Adresse richtig.');
+  document.getElementById('auftrag').textContent = 'Schicke den Brief ab.';
+}
+// b) vertauschte Zeilen: ziehen oder nacheinander antippen
+zeilenEl.forEach((el, pos) => B.ziehbar(el, {
+  start: () => !!(f && f.vertauscht && st.gefunden && !st.repariert) ? undefined : false,
+  ende: (x, y, los) => {
+    const ziel = Math.max(0, Math.min(2, Math.round((y - (ENV.y + 290)) / 80)));
+    B.setze(el, ZX, ENV.y + 290 + pos * 80);
+    if (!los) return;
+    gezogen = true;
+    tausche(pos, ziel);
+  } }));
+function tippeZeileTausch(pos) {
+  if (st.ausgewaehlt === null) { st.ausgewaehlt = pos; zeilenEl[pos].style.boxShadow = '0 0 0 5px rgba(47,125,79,.45)'; B.satz(`Ich nehme die Zeile <em>${B.esc(zeilenEl[pos].textContent.trim())}</em>.`); return; }
+  const a = st.ausgewaehlt; st.ausgewaehlt = null; zeilenEl[a].style.boxShadow = ''; tausche(a, pos);
+}
+function tausche(a, b) {
+  if (a === b) return;
+  [st.order[a], st.order[b]] = [st.order[b], st.order[a]];
+  zeilenEl.forEach((el, i) => B.setze(el, ZX, ENV.y + 290 + i * 80));
+  if (st.order.join() === '0,1,2') { st.repariert = true; zeichne(); B.satz('Jetzt ist die Adresse richtig.'); document.getElementById('auftrag').textContent = 'Schicke den Brief ab.'; }
+  else { zeichne(); B.satz(`Zuerst kommt <em>${B.esc(zeilenEl[0].textContent.trim())}</em>.`); }
+}
+// c) Briefmarke an der falschen Stelle
+B.ziehbar(marke, {
+  start: () => (f && f.marke && st.gefunden && !st.repariert) ? undefined : false,
+  ende: (x, y, los) => { if (!los) return; const p = MARKE_POS.or; if (Math.hypot(x - p.x, y - p.y) < 220) setzeMarke('or'); else zeichne(); } });
+function setzeMarke(ecke) {
+  st.markePos = ecke; st.repariert = ecke === 'or'; zeichne();
+  if (st.repariert) { B.satz('Die Briefmarke klebt <em>oben rechts</em>. Jetzt ist die Adresse richtig.'); document.getElementById('auftrag').textContent = 'Schicke den Brief ab.'; }
+}
+// d) Fangfrage: alles richtig
+function allesRichtig() {
+  if (st.gesendet) return;
+  if (!f.richtig) { fehler++; B.satz('Schau noch einmal in die Checkliste.', 'hinweis'); return; }
+  st.gefunden = st.repariert = true; B.satz(B.esc(f.satz)); document.getElementById('auftrag').textContent = 'Schicke den Brief ab.';
+}
+
+// ---------- Abschicken ----------
+function abschicken() {
+  if (st.gesendet) return;
+  const ok = st.repariert;
+  const s = B.el('div', 'strasse'); s.setAttribute('aria-hidden', 'true');
+  const nummern = B.mischen([adr.nr, ...B.mischen(ADRESSEN.filter(a => a.nr !== adr.nr).map(a => a.nr)).slice(0, 2)]);
+  s.innerHTML = `<div class="schild">${B.esc(ok ? adr.strasse : '???')}</div><div class="weg"></div>` +
+    nummern.map((n, i) => `<div class="haus" style="left:${220 + i * 230}px">${BB.hausNr(n, ["#f8e9e2", "#e4eef8", "#e3f2e8"][i])}</div>`).join('') + `<div class="bote">${BB.brief()}</div>`;
+  S.appendChild(s);
+  const bote = s.querySelector('.bote'), zielX = 220 + nummern.indexOf(adr.nr) * 230 + 30;
+  abschickenKn.disabled = true; richtigKn.disabled = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (ok) { bote.style.left = zielX + 'px'; }
+    else { bote.style.left = '480px'; }
+  }));
+  const dauer = B.bewegt ? 2100 : 50;
+  if (ok) {
+    st.gesendet = true;
+    setTimeout(() => { if (B.bewegt) bote.style.top = '330px'; B.satz(`Der Brief ist bei <em>${B.esc(adr.vorname)}</em> angekommen!`);
+      Runde.fertig({ ohneFehler: fehler === 0 && hilfe === 0 });
+      if (!Runde.aktiv) { weiterKn.hidden = false; weiterKn.textContent = fallNr + 1 >= folge.length ? 'Zum Abschluss →' : 'Nächster Fall →'; weiterKn.focus(); } }, dauer);
+  } else {
+    fehler++;
+    setTimeout(() => { bote.style.left = '20px'; B.satz('Der Brief kommt zurück. Schau noch einmal in die Checkliste.', 'hinweis'); }, dauer);
+    setTimeout(() => { s.remove(); abschickenKn.disabled = false; richtigKn.disabled = false; }, dauer * 2 + 300);
+  }
+}
+
+// ---------- Ablauf ----------
+function weiter() {
+  fallNr++;
+  if (fallNr >= folge.length) return abschluss();
+  starteFall(folge[fallNr], ADRESSEN[fallNr % ADRESSEN.length]);
+}
+function abschluss() {
+  weiterKn.hidden = true; zeigePunkte();
+  const e = B.el('div', 'ende', `<div class="tom"><div class="marke">${BB.marke()}</div><div class="an handschrift">An Tom</div></div>
+    <div class="rechts"><div>Ihr seid echte Post-Detektive!</div><div>Was müssen wir bei Tom ergänzen?</div></div>`);
+  const a = B.el('a', 'knopf haupt', 'Zu Toms Brief →'); a.href = '../zurueck/?schritt=6'; a.style.alignSelf = 'flex-start'; a.style.textDecoration = 'none';
+  e.querySelector('.rechts').appendChild(a); S.appendChild(e);
+  B.satz('Was müssen wir bei Tom ergänzen?');
+}
+function neu() { neueFolge(); const start = B.mischen(ADRESSEN.map((_, i) => i))[0]; starteFall(folge[0], ADRESSEN[start]); }
+
+// Hilfe in Stufen: jedes Antippen eine Stufe mehr (danach wieder aus)
+function setzeHilfe(n) {
+  hilfe = n; kn.hilfe.textContent = hilfe ? `Hilfe ${"●".repeat(hilfe)}${"○".repeat(3 - hilfe)}` : 'Hilfe';
+  kn.hilfe.setAttribute('aria-pressed', hilfe > 0); kn.hilfe.setAttribute('aria-label', hilfe ? `Hilfe Stufe ${hilfe} von 3` : 'Hilfe');
+  zeigeBeispiele(); zeichne();
+  if (hilfe >= 3 && !st.gefunden) B.satz(B.esc(f.anfang), 'hinweis');
+}
+const woerter = B.wortspeicher(48, 712, 900, 52, ['der Name', 'die Straße', 'die Hausnummer', 'die Postleitzahl', 'der Ort', 'fehlt', 'kommt an']);
+const kn = B.knoepfe({ woerter: an => woerter.classList.toggle('an', an), hilfeKlick: () => setzeHilfe((hilfe + 1) % 4), pruefen, neu });
+const richtigKn = B.knopf('Alles richtig!', allesRichtig), abschickenKn = B.knopf('Abschicken ✉', abschicken, 'haupt');
+document.getElementById('aktionen').append(richtigKn, abschickenKn);
+B.satzstreifen(48, 772, 1180, 100);
+const weiterKn = B.knopf('Nächster Fall →', weiter, 'haupt weiter'); weiterKn.hidden = true; weiterKn.dataset.runde = 'aus'; S.appendChild(weiterKn);
+neu();
+// Übungsrunde: ein Fall je Aufgabe (★ fehlende Teile, ★★ alle Fälle)
+if (Runde.aktiv) Runde.verbinde({ id: 'post-detektiv',
+  neueAufgabe(n) { folge = [0]; fallNr = 0; const nr = B.wahl(n >= 2 ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2, 3, 4, 5]); starteFall(nr, B.wahl(ADRESSEN)); Runde.gestartet(`pd-${nr}-${adr.vorname}`); },
+  hilfe(an) { setzeHilfe(an ? 3 : 0); } });
+</script>
+<script src="../../../gemeinsam/hinweise.js"></script>
+<script>
+Hinweise.einbauen({
+ titel: "Post-Detektiv",
+ teile: [
+  { h: "Ablauf pro Fall", punkte: [
+    "**Prüfen**: In der Checkliste abhaken, was auf dem Umschlag da ist. Was fehlt, bleibt leer. Der Knopf **Prüfen** oben zeigt, ob die Haken stimmen.",
+    "**Finden**: Auf dem Umschlag die Stelle antippen, wo etwas fehlt oder falsch ist (Adresszeile oder Ecke). Richtig: die Stelle leuchtet und zeigt eine Lücke. Satz: „Hier fehlt die Hausnummer.“",
+    "**Reparieren**: Die passende Karte in die Lücke ziehen oder antippen. Vertauschte Zeilen oder die Briefmarke an die richtige Stelle ziehen (oder nacheinander antippen).",
+    "**Abschicken**: Stimmt alles, fährt der Brief zum Haus mit der richtigen Hausnummer. Sonst kommt er zurück.",
+    "Manchmal ist alles richtig – dann **Alles richtig!** antippen." ] },
+  { h: "Knöpfe", punkte: [
+    "**Wörter**: Wortspeicher unter dem Umschlag.",
+    "**Hilfe** in Stufen (jedes Antippen eine mehr): 1 Beispiele in der Checkliste, 2 die Fehlerstelle leuchtet leicht, 3 der Satzanfang „Hier fehlt …“. Viertes Antippen: Hilfe aus.",
+    "**Neu**: sechs neue Fälle. Nach dem letzten Fall geht es zu Toms Brief aus dem Einstieg." ] },
+ ]
+});
+</script>
+</body>
+</html>
