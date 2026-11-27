@@ -61,6 +61,7 @@ window.HINWEISE = {
  ],
 };
 </script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
 <script src="../gemeinsam/tafel.js?v=2026112701"></script>
 <script>
 const T = Tafel, S = T.buehne();
@@ -79,6 +80,7 @@ const loes = T.blk(40, 520, 1520, 180, "loesung"); loes.setAttribute("aria-live"
 const akt = T.blk(40, 822, 0, 0, "aktionen");
 const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Zahl →", () => weiter()), nochKn = T.knopf("Noch mal zeigen", () => zeige());
 const zaehler = T.el("span", "zaehler"); akt.append(loesKn, weiterKn, nochKn, zaehler);
+[weiterKn, nochKn, zaehler].forEach(x => x.dataset.runde = "aus");
 const satz = T.streifen(T.blk(40, 712, 1520, 0, "satz"));
 const melde = (art, text) => { satz.className = "streifen" + (art ? " " + art : ""); satz.innerHTML = Array.isArray(text) ? text.map(t => `<p>${t}</p>`).join("") : text; };
 
@@ -159,7 +161,13 @@ function loesung() {
   else teile.push(`Das ist ${anz.wert}.` + (anz.z === 0 ? " Es gibt keine Zehner: Die Null steht an der Zehnerstelle." : anz.e === 0 ? " Es gibt keine Einer: Die Null steht an der Einerstelle." : ""));
   melde("ok", teile);
 }
-start();
+// Übungsrunde: genau eine Zahl, die Lehrkraft prüft (Lösung zeigt die Zahl)
+if (Runde.aktiv) {
+  blitz = false;
+  Runde.verbinde({ id: "geheimschrift-lesen", oben: 92,
+    neueAufgabe(n) { stufe = n; nr = 0; weiter(); Runde.gestartet(`gl-${stufe}-${anz.wert}`); },
+    hilfe(an) { T.S.classList.toggle("hilfen-aus", !an); if (anz) zeichneFeld(); } });
+} else start();
 </script>
 </body>
 </html>

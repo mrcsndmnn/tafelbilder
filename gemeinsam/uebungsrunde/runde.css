@@ -1,0 +1,197 @@
+/* =====================================================================
+   Übungsrunde – Gestaltung (Einrichtung, Rundenrahmen, Abschluss)
+   ===================================================================== */
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Andika";src:url("../../fonts/Andika-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+:root{
+  --bg:#f4f7f4; --card:#ffffff; --ink:#1d2320; --soft:#5d6862; --line:#d5ddd7; --accent:#2f7d4f; --accent-bg:#e3f2e8;
+  --gelb:#ffd84d; --hellgelb:#fff6cc; --grau:#e3e7e4; --grau-text:#9aa39e; --lila:#5e2f91; --lila-bg:#efe6f8;
+  --font:"Andika","Segoe UI",system-ui,-apple-system,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --accent-bg:#1f3527;
+  --hellgelb:#3a3417; --grau:#2b322e; --grau-text:#76807a; --lila:#c9a6ef; --lila-bg:#2e2440; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a17; --card:#1f2622; --ink:#e8eee9; --soft:#a9b4ad; --line:#334039; --accent:#6cc28f; --accent-bg:#1f3527;
+  --hellgelb:#3a3417; --grau:#2b322e; --grau-text:#76807a; --lila:#c9a6ef; --lila-bg:#2e2440; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.45}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Knöpfe ---------- */
+.kn{min-height:64px;min-width:64px;padding:8px 20px;border:2.5px solid var(--ink);border-radius:14px;background:var(--card);
+  font-weight:700;font-size:19px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation;line-height:1.15}
+.kn:hover{background:var(--accent-bg)}
+a.kn{text-decoration:none;color:var(--ink)}
+.kn:focus-visible,.kachel:focus-visible,.karte-k:focus-visible{outline:4px solid var(--accent);outline-offset:3px}
+.kn.haupt{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.kn.haupt:hover{background:var(--accent);border-color:var(--accent)}
+.kn:disabled{opacity:.4;cursor:not-allowed}
+.kn[aria-pressed="true"]{background:var(--accent-bg);border-color:var(--accent)}
+.kn.klein{min-height:48px;font-size:17px;padding:6px 14px}
+.kn .ico{font-size:26px;line-height:1}
+.wahl{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ---------- Einrichtung ---------- */
+.ein{max-width:1000px;margin:0 auto;padding:20px 16px 64px}
+.ein-kopf{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.ein h1{font-size:clamp(28px,4.5vw,40px);margin:4px 0;line-height:1.15;display:flex;align-items:center;gap:14px}
+.ein h1 svg{width:46px;height:46px;flex:none;color:var(--accent)}
+.zurueck-link{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 16px;border:2px solid var(--ink);border-radius:12px;background:var(--card);
+  color:var(--ink);font-weight:700;text-decoration:none}
+.zurueck-link:hover{background:var(--accent-bg)}
+.unter{color:var(--soft);margin:0 0 14px}
+.vorlagen{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 4px}
+.vorlagen .lbl{font-weight:700;color:var(--soft)}
+.vorlage{display:inline-flex;align-items:stretch;border:2.5px solid var(--lila);border-radius:14px;overflow:hidden;background:var(--lila-bg)}
+.vorlage .kn{border:none;border-radius:0;background:transparent;min-height:56px}
+.vorlage .weg{min-width:52px;border-left:2px solid var(--lila);font-size:22px;color:var(--lila)}
+.bereich{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px 18px;margin:16px 0}
+.bereich h2{font-size:22px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.bereich h2 .nr{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:18px;flex:none}
+.hinweis{color:var(--soft);font-size:16px;margin:8px 0 0}
+.kacheln{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.kachel{display:grid;grid-template-columns:52px 1fr;gap:4px 12px;align-items:center;text-align:left;min-height:84px;padding:12px;border:2.5px solid var(--line);
+  border-radius:16px;background:var(--card);cursor:pointer;position:relative}
+.kachel .sym{width:52px;height:52px;border-radius:12px;background:var(--accent-bg);display:grid;place-items:center;grid-row:span 2;font-weight:700;font-size:24px}
+.kachel .sym svg{width:38px;height:38px}
+.kachel strong{font-size:18px;line-height:1.2}
+.kachel small{color:var(--soft);font-size:14px}
+.kachel[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.kachel[aria-pressed="true"]::after{content:"✓";position:absolute;right:10px;top:8px;font-weight:700;color:var(--accent);font-size:22px}
+.kachel:disabled{cursor:not-allowed;opacity:.55;background:var(--grau)}
+.zahlfeld{display:flex;align-items:center;gap:10px}
+.zahlfeld input{width:96px;height:64px;text-align:center;font-size:30px;font-weight:700;border:2.5px solid var(--ink);border-radius:14px;background:var(--card)}
+.zahlfeld .kn{font-size:30px;width:64px;padding:0}
+.zahlfeld input:disabled{background:var(--grau);color:var(--soft)}
+.zeit{margin:10px 0 0;font-weight:700}
+.reihe2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.reihe2{grid-template-columns:1fr}}
+.reihe2 .bereich{margin:0}
+.schalter{display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:6px 16px 6px 10px;border:2.5px solid var(--ink);border-radius:14px;background:var(--card);
+  cursor:pointer;font-weight:700;font-size:18px}
+.schalter .box{width:30px;height:30px;border:2.5px solid var(--ink);border-radius:8px;display:grid;place-items:center;background:var(--card)}
+.schalter[aria-pressed="true"]{background:var(--accent-bg);border-color:var(--accent)}
+.schalter[aria-pressed="true"] .box{background:var(--accent);border-color:var(--accent)}
+.schalter[aria-pressed="true"] .box::after{content:"";width:12px;height:7px;border:3.5px solid #fff;border-top:none;border-right:none;transform:translateY(-2px) rotate(-45deg)}
+textarea{width:100%;min-height:150px;padding:12px;border:2.5px solid var(--ink);border-radius:14px;background:var(--card);font-size:19px;resize:vertical}
+.namen-zeile{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+details.mehr{margin:16px 0}
+details.mehr>summary{cursor:pointer;font-weight:700;font-size:20px;min-height:56px;display:flex;align-items:center;gap:10px;padding:6px 14px;border:2px dashed var(--line);border-radius:14px}
+.mehr-inhalt{display:flex;flex-direction:column;gap:14px;padding:14px 4px}
+.niveau-liste{display:flex;flex-direction:column;gap:8px}
+.niveau-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.niveau-zeile span{min-width:220px;font-weight:700}
+.start-zeile{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:22px;padding-top:18px;border-top:2px solid var(--line)}
+.start-zeile .kn.haupt{font-size:24px;min-height:76px;padding:10px 34px}
+.vorlage-merken{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.vorlage-merken input{height:56px;min-width:min(320px,100%);padding:0 14px;border:2.5px solid var(--ink);border-radius:14px;background:var(--card);font-size:18px}
+.fehlt{color:var(--soft);font-size:16px}
+footer{margin-top:36px;color:var(--soft);font-size:14px}
+footer a{color:inherit}
+
+/* ---------- Rundenrahmen ---------- */
+.runde{position:fixed;inset:0;display:flex;flex-direction:column;background:#eef2ef;color:#1d2320;--ink:#1d2320;--card:#fff;--bg:#f4f7f4;--accent-bg:#e3f2e8;--line:#d5ddd7;--soft:#5d6862;--grau:#e3e7e4;--grau-text:#9aa39e;--lila:#5e2f91;--lila-bg:#efe6f8;--accent:#2f7d4f;--hellgelb:#fff6cc}
+.r-kopf{height:64px;flex:none;display:flex;align-items:center;gap:14px;padding:0 12px;background:#fff;border-bottom:2px solid var(--line)}
+.r-kopf .thema{font-weight:700;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22vw}
+.fortschritt{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+.fortschritt .text{font-weight:700;font-size:19px;white-space:nowrap}
+.balken{flex:1;height:22px;border-radius:11px;background:var(--grau);position:relative;overflow:hidden;min-width:60px}
+.balken i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#f5c518,#f0a500);border-radius:11px;transition:width .4s}
+.balken b{position:absolute;right:6px;top:-3px;font-size:20px}
+.punkte{display:flex;gap:6px;align-items:center}
+.punkte .kn{min-height:52px;font-size:20px;padding:4px 12px}
+.r-kopf .kn{min-height:52px}
+.band{flex:none;display:flex;align-items:center;gap:18px;padding:6px 16px;min-height:76px;background:var(--hellgelb);border-bottom:2px solid #e8d98a}
+.band .wer{font-size:34px;font-weight:700;display:flex;align-items:center;gap:12px;min-width:0}
+.band .wer .sym{font-size:44px;line-height:1}
+.band .wer .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.band .info{color:var(--soft);font-size:18px;font-weight:700}
+.band .platz{flex:1}
+.dots{display:inline-flex;gap:5px;align-items:center}
+.dots i{width:16px;height:16px;border-radius:50%;border:2.5px solid #1d2320;background:#fff;display:block}
+.dots i.voll{background:#f0a500;border-color:#a86f00}
+.buehne{flex:1;position:relative;min-height:0}
+.buehne iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.r-fuss{flex:none;display:flex;align-items:center;gap:12px;padding:8px 12px;background:#fff;border-top:2px solid var(--line);flex-wrap:wrap}
+.r-fuss .platz{flex:1}
+.r-fuss .kn.haupt{min-width:240px;font-size:22px}
+.r-fuss .kn.puls{animation:puls 1.2s ease-in-out infinite}
+@keyframes puls{50%{box-shadow:0 0 0 8px rgba(47,125,79,.35)}}
+
+/* Schichten über der Bühne */
+.schicht{position:fixed;inset:0;z-index:20;background:rgba(20,26,22,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.tafel{background:#fff;color:#1d2320;border-radius:24px;border:3px solid #1d2320;padding:22px;max-width:min(1200px,100%);max-height:100%;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.tafel h2{margin:0 0 14px;font-size:32px;text-align:center}
+.raster{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.karte-k{min-height:96px;min-width:96px;padding:10px;border:3px solid #1d2320;border-radius:16px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  font-weight:700;font-size:24px;position:relative;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.karte-k:hover{background:#e3f2e8}
+.karte-k .sym{font-size:36px;line-height:1}
+.karte-k .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.karte-k.voll{background:#e3e7e4;color:#9aa39e;border-color:#c3cac5;cursor:not-allowed}
+.karte-k.voll .nm{text-decoration:line-through;text-decoration-thickness:3px}
+.karte-k.voll::after{content:"✓";position:absolute;right:8px;top:4px;font-size:22px;color:#2f7d4f}
+.karte-k.ab{background:#e3e7e4;color:#9aa39e;border-style:dashed;border-color:#9aa39e}
+.karte-k.ab::after{content:"☾";position:absolute;right:8px;top:2px;font-size:24px;color:#5d6862}
+.karte-k.klasse{background:#efe6f8;border-color:#5e2f91;color:#5e2f91}
+.tafel .zeile{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.tafel .klein-info{color:#5d6862;font-size:16px;text-align:center;margin:10px 0 0}
+.viele .raster{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+.viele .karte-k{min-height:80px;font-size:20px}
+/* Namensrad */
+.rad-tafel{display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center}
+.rad-tafel svg{width:min(56vh,460px);height:min(56vh,460px)}
+.rad-dreh{transform-origin:300px 300px;transition:transform 2s cubic-bezier(.17,.67,.2,1)}
+.rad-rechts{display:flex;flex-direction:column;gap:14px;align-items:center;min-width:260px}
+.rad-name{font-size:56px;font-weight:700;min-height:72px;text-align:center}
+/* Wechsel zwischen Tafelbildern */
+.wechsel{position:absolute;inset:0;z-index:5;background:rgba(255,255,255,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:40px;font-weight:700}
+.wechsel .sym{width:120px;height:120px;border-radius:26px;background:#e3f2e8;display:grid;place-items:center;font-size:56px;color:#2f7d4f}
+.wechsel .sym svg{width:84px;height:84px}
+.wechsel small{font-size:22px;color:#5d6862}
+/* Lob */
+.lob{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:30;background:#fff;border:4px solid #2f7d4f;color:#2f7d4f;border-radius:24px;padding:18px 40px;
+  font-size:48px;font-weight:700;box-shadow:0 14px 40px rgba(0,0,0,.25);animation:lob 1.5s ease-out forwards;pointer-events:none}
+@keyframes lob{0%{opacity:0;transform:translate(-50%,-40%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+/* Menü */
+.menue{position:fixed;right:10px;top:70px;z-index:25;background:#fff;border:3px solid #1d2320;border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:300px;box-shadow:0 14px 40px rgba(0,0,0,.25)}
+.menue .kn{justify-content:flex-start;width:100%}
+/* Pause */
+.pause{position:fixed;inset:0;z-index:40;background:rgba(15,20,17,.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.pause .gross{font-size:90px;font-weight:700}
+.pause .hand{font-size:120px;line-height:1}
+.pause .kn{background:#fff;color:#1d2320}
+/* Bewertung durch die Lehrkraft */
+.bewerten .zeile .kn{min-width:240px;min-height:96px;font-size:26px}
+
+/* ---------- Abschluss ---------- */
+.ende{max-width:1100px;margin:0 auto;padding:24px 16px 60px;text-align:center}
+.ende h1{font-size:clamp(34px,6vw,60px);margin:10px 0}
+.ende .sterne{font-size:52px;letter-spacing:6px;color:#f0a500}
+.ende .karten{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:22px 0;text-align:center}
+.ende .karte-k{cursor:default}
+.ende .zeile{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:18px 0}
+.diagnose{text-align:left;margin-top:24px;font-size:16px}
+.diagnose summary{cursor:pointer;font-weight:700;min-height:48px;display:flex;align-items:center}
+.diagnose table{border-collapse:collapse;margin:10px 0;width:100%}
+.diagnose th,.diagnose td{border:1.5px solid var(--line);padding:6px 10px;text-align:center}
+.diagnose th:first-child,.diagnose td:first-child{text-align:left}
+.konfetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.konfetti i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:fall 2.6s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
+@media (prefers-reduced-motion: reduce){.konfetti{display:none}.rad-dreh,.balken i{transition:none}.lob{animation:none;opacity:1}.r-fuss .kn.puls{animation:none}}
+@media print{
+  body *{visibility:hidden}
+  .diagnose,.diagnose *{visibility:visible}
+  .diagnose{position:absolute;left:0;top:0;width:100%}
+  .diagnose summary,.diagnose .kn{display:none}
+}
+/* Menü bleibt auch über dem Auswahl-Fenster erreichbar (z. B. für „Runde beenden“) */
+#rMenue{position:relative;z-index:22}
+.tafel.breit{width:min(1200px,100%)}
+.karte-k.klasse .nm{white-space:normal;text-align:center;line-height:1.1}
+.kachel{padding-right:34px}

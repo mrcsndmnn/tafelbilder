@@ -79,6 +79,7 @@ a.tile{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inh
 a.tile:hover{border-color:var(--fc);transform:translateY(-2px)}
 .top{display:flex;gap:8px;flex-wrap:wrap}
 .tag{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--fbg)}
+.tag.runde{background:#e3f2e8;color:#1f6a3a;font-weight:700}
 .tag.klasse{background:transparent;border:1.5px solid var(--line);color:var(--soft)}
 .tile strong{font-size:21px;line-height:1.25}
 .desc{color:var(--soft);font-size:16px}
@@ -203,7 +204,7 @@ const EINTRAEGE = [
   { fach:"mathe", thema:"Zahlenraum bis 1000", art:"Sammlung", klasse:"Klasse 3",
     titel:"Alle Tafelbilder zum Zahlenraum bis 1000",
     beschreibung:"Startseite mit allen elf Tafelbildern und dem Geheimschrift-Generator: 1000er-Tafel als Leporello (10 Quadrate nebeneinander, jedes von 1 bis 100) und Geheimschrift.",
-    url:"mathe/zahlenraum-1000/" },
+    url:"mathe/zahlenraum-1000/", runde:true },
   { fach:"mathe", thema:"Zahlenraum bis 1000", art:"Tafelbild", klasse:"Klasse 3",
     titel:"Entdecken: Tafel und Stellenwerttafel",
     beschreibung:"Mit dem Steuerkreuz über die 1000er-Tafel gehen. Große Zahl, Stellenwerttafel und Satzbausteine zeigen, welche Ziffer sich ändert. Mit Material.",
@@ -327,7 +328,7 @@ const EINTRAEGE = [
   { fach:"uebergreifend", thema:"Vertretung", art:"Sammlung", klasse:["SEP 1","SEP 2","SEP 3","Klasse 3","Klasse 4"],
     titel:"Vertretungsbaukasten",
     beschreibung:"Startseite für jede Vertretung von SEP 1 bis Klasse 4: Klasse und Niveau wählen, Namen eingeben, Ablauf planen. Tafelbilder für Deutsch, Mathe und Sachunterricht, Sprachspiele und Generatoren für Arbeitsblätter.",
-    url:"vertretung/" },
+    url:"vertretung/", runde:true },
   { fach:"uebergreifend", thema:"Vertretung", art:"Tafelbild", klasse:["SEP 1","SEP 2","SEP 3","Klasse 3","Klasse 4"],
     titel:"Vertretungs-Cockpit",
     beschreibung:"Startbild am Board: Begrüßung, Ablauf der Stunde mit Bildkarten, Namensrad, Regeln, Ruhesignal, Timer und Endstand „Klasse gegen Lehrkraft“.",
@@ -485,7 +486,7 @@ function render(){
         <div class="grid tgrid" id="${tid}"${tOffen ? "" : " hidden"}>` +
         tt.map(e => `
           <a class="tile" href="${esc(e.url)}">
-            <div class="top"><span class="tag">${esc(e.art)}</span>${klassenVon(e).map(k => `<span class="tag klasse">${esc(k)}</span>`).join("")}</div>
+            <div class="top"><span class="tag">${esc(e.art)}</span>${e.runde ? `<span class="tag runde" title="Mit Übungsrunde"><span aria-hidden="true">↻★</span> Übungsrunde</span>` : ""}${klassenVon(e).map(k => `<span class="tag klasse">${esc(k)}</span>`).join("")}</div>
             <strong>${esc(e.titel)}</strong>
             <span class="desc">${esc(e.beschreibung)}</span>
             <span class="go">Öffnen →</span>

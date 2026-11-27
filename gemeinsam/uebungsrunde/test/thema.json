@@ -1,0 +1,11 @@
+{
+  "titel": "Test-Themenblock",
+  "fach": "Test",
+  "tafelbilder": [
+    { "id": "platzhalter", "titel": "Platzhalter A", "pfad": "platzhalter/", "runde": true, "niveaus": [1, 2, 3], "dauerSek": 30, "pruefung": "auto",
+      "svg": "<circle cx=\"22\" cy=\"22\" r=\"16\"/><path d=\"M15 22 L20 27 L29 17\"/>" },
+    { "id": "platzhalter-b", "titel": "Platzhalter B", "pfad": "platzhalter/?b=1", "runde": true, "niveaus": [1, 2], "dauerSek": 45, "pruefung": "lehrkraft",
+      "svg": "<rect x=\"8\" y=\"8\" width=\"28\" height=\"28\" rx=\"4\"/>" },
+    { "id": "ohne", "titel": "Ohne Rundenmodus", "pfad": "platzhalter/", "runde": false }
+  ]
+}

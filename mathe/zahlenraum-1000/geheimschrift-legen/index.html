@@ -69,6 +69,7 @@ window.HINWEISE = {
  ],
 };
 </script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
 <script src="../gemeinsam/tafel.js?v=2026112701"></script>
 <script>
 const T = Tafel, S = T.buehne();
@@ -90,6 +91,8 @@ const tasten = T.blk(40, 430, 500, 0, "tasten");
   plusKn[a] = plus; z.append(minus, plus); tasten.appendChild(z);
 });
 const akt = T.el("div", "aktion"); akt.append(T.knopf("Prüfen", () => pruefen(), "haupt"), T.knopf("Alles wegnehmen", () => { liegt = { h: 0, z: 0, e: 0 }; geloest = false; zeichne(); }), T.knopf("Nächste Zahl →", () => neu()));
+akt.lastChild.dataset.runde = "aus";
+let fehlversuche = 0;
 
 const feld = T.blk(570, 176, 990, 456, "legefeld");
 const aktBox = T.blk(570, 644, 990, 0, "aktion"); aktBox.appendChild(akt);
@@ -189,22 +192,26 @@ function pruefen() {
   const satzGelegt = `Ich habe ${liegt.h} Hunderter, ${liegt.z} Zehner und ${liegt.e} Einer gelegt.`;
   if (auf.bed) {
     const z = auf.bed.ziel, passt = liegt.h === z.h && liegt.z === z.z && liegt.e === z.e;
-    if (passt) { geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert} – ${auf.bed.text}. ${T.lob()}`]); return; }
-    if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt! Aber es soll ${auf.bed.text} sein.`, auf.bed.art === "ohneH" ? "Tipp: Entbündle die Hunderter." : "Tipp: Entbündle einmal."]); return; }
-    melde("noch", [satzGelegt, `Das ist ${wert}. Gesucht ist ${auf.wert} – ${auf.bed.text}.`]); return;
+    if (passt) { geloest = true; Runde.fertig({ ohneFehler: fehlversuche === 0 }); melde("ok", [satzGelegt, `Das ist ${auf.wert} – ${auf.bed.text}. ${T.lob()}`]); return; }
+    if (wert === auf.wert) { fehlversuche++, melde("noch", [`Die Zahl ${auf.wert} stimmt! Aber es soll ${auf.bed.text} sein.`, auf.bed.art === "ohneH" ? "Tipp: Entbündle die Hunderter." : "Tipp: Entbündle einmal."]); return; }
+    fehlversuche++, melde("noch", [satzGelegt, `Das ist ${wert}. Gesucht ist ${auf.wert} – ${auf.bed.text}.`]); return;
   }
   if (wert === auf.wert && liegt.z < 10 && liegt.e < 10) {
-    geloest = true; melde("ok", [satzGelegt, `Das ist ${auf.wert}.` + (auf.frage ? ` ${auf.wert} ist ${auf.frage.replace(/.*<b>(.*)<\/b>.*/, "$1")} als ${auf.basis}.` : "") + ` ${T.lob()}`]); return;
+    geloest = true; Runde.fertig({ ohneFehler: fehlversuche === 0 }); melde("ok", [satzGelegt, `Das ist ${auf.wert}.` + (auf.frage ? ` ${auf.wert} ist ${auf.frage.replace(/.*<b>(.*)<\/b>.*/, "$1")} als ${auf.basis}.` : "") + ` ${T.lob()}`]); return;
   }
-  if (wert === auf.wert) { melde("noch", [`Die Zahl ${auf.wert} stimmt!`, `Aber es liegen 10 oder mehr gleiche Zeichen da. Bündle sie.`]); return; }
+  if (wert === auf.wert) { fehlversuche++, melde("noch", [`Die Zahl ${auf.wert} stimmt!`, `Aber es liegen 10 oder mehr gleiche Zeichen da. Bündle sie.`]); return; }
   // Rückmeldung zur ersten falschen Stelle
   const soll = { h: auf.h, z: auf.z, e: auf.e };
   const a = ["h", "z", "e"].find(x => liegt[x] !== soll[x]);
   const zuViel = liegt[a] > soll[a], d = Math.abs(liegt[a] - soll[a]);
-  melde("noch", [`Noch nicht. Schau bei den ${NAME[a][2]}n:`,
+  fehlversuche++, melde("noch", [`Noch nicht. Schau bei den ${NAME[a][2]}n:`,
     `Es ${zuViel ? (d === 1 ? "ist 1 " + NAME[a][0] + " zu viel" : "sind " + d + " " + NAME[a][1] + " zu viel") : (d === 1 ? "fehlt 1 " + NAME[a][0] : "fehlen " + d + " " + NAME[a][1])}.`]);
 }
-neu();
+// Übungsrunde: eine Zahl legen, „Prüfen“ meldet das Ergebnis
+if (Runde.aktiv) Runde.verbinde({ id: "geheimschrift-legen", oben: 160,
+  neueAufgabe(n) { stufe = n; neu(); fehlversuche = 0; Runde.gestartet(`gg-${stufe}-${auf.wert}${auf.basis ? "-" + auf.basis : ""}`); },
+  hilfe(an) { T.S.classList.toggle("hilfen-aus", !an); zeichne(); } });
+else neu();
 </script>
 </body>
 </html>

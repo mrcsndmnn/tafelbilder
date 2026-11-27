@@ -49,10 +49,11 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
 <script src="../../gemeinsam/spiele.js?v=2026112301"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE, RUNDEN = 10;
-let stufe = 1, runde = 0, jetzt = null, beantwortet = false, sterne = 0;
+let stufe = 1, runde = 0, jetzt = null, beantwortet = false, sterne = 0, fehler = 0;
 const feld = V.el("div", "feld"); S.appendChild(feld);
 const nomen = id => V.ohne(V.wort(id).silben);
 // Wort mit hervorgehobenem Reimende
@@ -68,7 +69,7 @@ function karte(id, x, y, w, h, onTap) {
   if (r.hilfe) el.querySelector(".bk").insertAdjacentHTML("beforeend", `<div class="hilfewort">${reimwort(id)}</div>`), el.querySelector(".bild").style.paddingBottom = "50px";
   feld.appendChild(el); return el;
 }
-function zaehler() { feld.appendChild(V.el("div", "zaehler", stufe === 3 ? `Sterne: ${sterne}` : `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`)); }
+function zaehler() { const z = V.el("div", "zaehler", stufe === 3 ? `Sterne: ${sterne}` : `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`); z.dataset.runde = "aus"; feld.appendChild(z); }
 function satzReim(a, b, reimt) { return `${V.wort(a).silben} und ${V.wort(b).silben} rei-men sich${reimt ? "" : " nicht"}.`; }
 
 function neueRunde() {
@@ -109,13 +110,14 @@ function antwort(ja) {
   if (beantwortet) return; beantwortet = true;
   const { a, b, reimt } = jetzt;
   if (ja === reimt) V.lob(); else V.noch("Hör noch mal gut hin.");
+  Runde.fertig({ ohneFehler: ja === reimt });
   r.satz(satzReim(a, b, reimt)); V.sprich(V.ohne(satzReim(a, b, reimt)));
   feld.querySelectorAll(".karte-r .bk").forEach(k => V.leuchte(k));
 }
 function tippe(id, el) {
   if (beantwortet) return;
-  if (id === jetzt.b) { beantwortet = true; V.lob(); V.leuchte(el.querySelector(".bk")); r.satz(satzReim(jetzt.a, id, true)); V.sprich(V.ohne(satzReim(jetzt.a, id, true))); }
-  else { V.noch(); }
+  if (id === jetzt.b) { beantwortet = true; Runde.fertig({ ohneFehler: fehler === 0 }); V.lob(); V.leuchte(el.querySelector(".bk")); r.satz(satzReim(jetzt.a, id, true)); V.sprich(V.ohne(satzReim(jetzt.a, id, true))); }
+  else { fehler++; V.noch(); }
 }
 function feier() {
   feld.innerHTML = "";
@@ -130,7 +132,11 @@ const vorlesen = V.knopf("Vorlesen", () => jetzt && V.vorlesen(jetzt.b && stufe 
 vorlesen.hidden = !V.kannSprechen();
 const r = V.rahmen({ id: "reime", titel: "Reimt sich das?", onWeiter: neueRunde, onNeu: start, extra: [stufenWahl, vorlesen],
   onHilfe: () => { if (jetzt && feld.querySelector(".karte-r")) zeichne(false); } });
-start();
+// Übungsrunde: ein Reimpaar bzw. ein Wort je Aufgabe (Reimkette: Lehrkraft prüft)
+if (Runde.aktiv) Runde.verbinde({ id: "reime", oben: 90,
+  neueAufgabe(n) { stufe = n; runde = 0; fehler = 0; neueRunde(); Runde.gestartet(`reime-${stufe}-${jetzt.a}-${jetzt.b || ""}`); },
+  hilfe(an) { r.setzeHilfe(an); if (jetzt) zeichne(false); } });
+else start();
 </script>
 </body>
 </html>

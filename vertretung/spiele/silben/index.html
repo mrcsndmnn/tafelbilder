@@ -51,10 +51,11 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
 <script src="../../gemeinsam/spiele.js?v=2026112301"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
-let niveau = "mittel", jetzt = null, karte = null, koerbe = [], fertig = false;
+let niveau = "mittel", jetzt = null, karte = null, koerbe = [], fertig = false, fehler = 0;
 const PLATZ = { x: 650, y: 100 };
 const wortzeile = V.el("div", "wortzeile"); wortzeile.setAttribute("aria-live", "polite"); S.appendChild(wortzeile);
 const korbBox = V.el("div", "koerbe"); S.appendChild(korbBox);
@@ -87,8 +88,8 @@ function neuesBild() {
 function waehle(n) {
   if (fertig || !jetzt) return;
   const soll = zahl(jetzt);
-  if (n !== soll) { V.noch("Klatsch noch mal."); zurueck(); return; }
-  fertig = true;
+  if (n !== soll) { fehler++; V.noch("Klatsch noch mal."); zurueck(); return; }
+  fertig = true; Runde.fertig({ ohneFehler: fehler === 0 });
   const k = koerbe[n - 1], ziel = V.rect(k.el);
   V.setze(karte, ziel.x + ziel.w / 2 - 150, ziel.y + 20); karte.classList.add("weg");
   k.el.querySelector(".liste").insertAdjacentHTML("beforeend", `<span>${V.bild(jetzt)}</span>`);
@@ -97,7 +98,7 @@ function waehle(n) {
   const echte = V.silbenzahl(jetzt);
   r.satz(`${V.wort(jetzt).silben} hat ${ZAHLWORT[echte]}.`);
   V.lob(); V.sprich(V.wort(jetzt).silben.replace(/-/g, " – "), .7);
-  V.nach(2600, neuesBild);
+  if (!Runde.aktiv) V.nach(2600, neuesBild);
 }
 function zurueck() { if (karte) { karte.classList.remove("gewaehlt"); V.setze(karte, PLATZ.x, PLATZ.y); } }
 // Ziehen mit Maus, Finger oder Stift
@@ -143,7 +144,12 @@ const koenig = V.knopf(V.bild("klatschen") + "Silbenkönig", () => V.namensrad({
 function start() { V.stop(); baueKoerbe(); neuesBild(); }
 const r = V.rahmen({ id: "silben", titel: "Silben-Sortierer", onWeiter: neuesBild, onNeu: start, extra: [niv, koenig],
   onHilfe: an => { if (an) hilfeZeigen(); else if (!fertig) wortzeile.innerHTML = ""; } });
-start();
+// Übungsrunde: ein Bild je Aufgabe, der richtige Korb meldet das Ergebnis
+if (Runde.aktiv) Runde.verbinde({ id: "silben", oben: 90,
+  neueAufgabe(n) { const nv = { 1: "leicht", 2: "mittel", 3: "schwer" }[n] || "mittel"; V.stop(); if (nv !== niveau || !koerbe.length) { niveau = nv; baueKoerbe(); }
+    fehler = 0; neuesBild(); Runde.gestartet(`silben-${jetzt}`); },
+  hilfe(an) { r.setzeHilfe(an); if (an) hilfeZeigen(); else if (!fertig) wortzeile.innerHTML = ""; } });
+else start();
 </script>
 </body>
 </html>

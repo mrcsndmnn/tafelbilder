@@ -43,11 +43,17 @@ a.kachel:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 footer{margin-top:44px;color:var(--soft);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
 footer a{color:inherit}
 @media (prefers-reduced-motion: reduce){a.kachel{transition:none}a.kachel:hover{transform:none}}
+.zurueck-zeile{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+a.runde-knopf{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:6px 18px 6px 12px;border:2px solid #2f7d4f;border-radius:12px;background:#e3f2e8;color:#1d2320;
+  font-weight:700;font-size:18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+a.runde-knopf svg{width:30px;height:30px;color:#2f7d4f}
+a.runde-knopf:hover{background:#cfe9d8}
+a.runde-knopf:focus-visible{outline:4px solid #2f7d4f;outline-offset:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a></div>
+  <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a><a class="runde-knopf" href="../../gemeinsam/uebungsrunde/?thema=mathe/zahlenraum-1000"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M34 14 A13 13 0 0 0 10 16"/><path d="M10 9 V16 H17"/><path d="M10 30 A13 13 0 0 0 34 28"/><path d="M34 35 V28 H27"/><path d="M22 15.5 L24 20 L28.8 20.4 L25.2 23.6 L26.3 28.3 L22 25.8 L17.7 28.3 L18.8 23.6 L15.2 20.4 L20 20 Z" fill="currentColor" stroke-width="1.5"/></svg>Übungsrunde</a></div>
   <header>
     <h1>Zahlenraum bis 1000 – Tafelbilder</h1>
     <p class="unter">Die 1000er-Tafel als Leporello: 10 Quadrate nebeneinander, jedes von 1 bis 100</p>

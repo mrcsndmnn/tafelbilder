@@ -50,6 +50,7 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
 <script src="../../gemeinsam/spiele.js?v=2026112301"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
@@ -65,6 +66,7 @@ const themen = Object.entries(I.THEMEN).concat([["alle", "Gemischt"]]).map(([k, 
   b.setAttribute("aria-pressed", k === thema); panel.querySelector(".themen").appendChild(b); return b;
 });
 panel.querySelector(".zeile").append(V.knopf("Auflösen", () => aufloesen(), "haupt"), V.knopf("Wer wählt?", () => V.namensrad({ titel: "Wer wählt die nächste Kachel?" })));
+panel.querySelector(".zeile").lastChild.dataset.runde = "aus";
 
 function neu() {
   jetzt = V.ziehe(V.woerter(thema), "versteckt"); geloest = false;
@@ -96,7 +98,11 @@ function aufloesen() {
 const rasterWahl = V.gruppe("Raster", [{ wert: "2x2", text: "2 × 2" }, { wert: "3x3", text: "3 × 3" }, { wert: "4x3", text: "4 × 3" }], raster, v => { raster = v; neu(); }, "versteckt-raster", { 1: "2x2", 2: "3x3", 3: "4x3" });
 raster = rasterWahl.wert;
 const r = V.rahmen({ id: "versteckt", titel: "Was versteckt sich da?", onWeiter: neu, onNeu: neu, onHilfe: zeigeAblage, extra: [rasterWahl] });
-neu();
+// Übungsrunde: ein Bild je Aufgabe, die Lehrkraft prüft (Auflösen zeigt das Wort)
+if (Runde.aktiv) Runde.verbinde({ id: "versteckt", oben: 90,
+  neueAufgabe(n) { raster = { 1: "2x2", 2: "3x3", 3: "4x3" }[n] || "3x3"; neu(); Runde.gestartet(`versteckt-${jetzt}`); },
+  hilfe(an) { r.setzeHilfe(an); zeigeAblage(); } });
+else neu();
 </script>
 </body>
 </html>

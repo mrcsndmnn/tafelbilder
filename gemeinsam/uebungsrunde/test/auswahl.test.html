@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Tests Übungsrunde</title>
+<style>
+:root{--bg:#f4f7f4;--ink:#1d2320;--ok:#2f7d4f;--noch:#a8501a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151a17;--ink:#e8eee9;--ok:#6cc28f;--noch:#f0a66b}}
+:root[data-theme="dark"]{--bg:#151a17;--ink:#e8eee9;--ok:#6cc28f;--noch:#f0a66b}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 "Segoe UI",system-ui,sans-serif;margin:0;padding:20px 16px}
+li.ok{color:var(--ok)} li.fehl{color:var(--noch);font-weight:700}
+#summe{font-size:22px;font-weight:700}
+</style>
+</head>
+<body>
+<h1>Tests: Drankommen-Logik</h1>
+<p id="summe">läuft …</p>
+<ul id="liste"></ul>
+<script type="module">
+import * as A from "../auswahl.js";
+const liste = document.getElementById("liste"); let ok = 0, fehl = 0;
+const test = (name, fn) => { let gut = false, info = ""; try { gut = fn() !== false; } catch (e) { info = " – " + e.message; }
+  const li = document.createElement("li"); li.className = gut ? "ok" : "fehl"; li.textContent = (gut ? "✓ " : "✗ ") + name + info; liste.appendChild(li); gut ? ok++ : fehl++; };
+const gleich = (a, b, t = "") => { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`${t} erwartet ${JSON.stringify(b)}, bekommen ${JSON.stringify(a)}`); };
+const spiele = (r, rnd = Math.random) => { let n = 0; while (!A.rundeVorbei(r) && n < 1000) { A.waehle(r, A.ziehe(r, rnd)); A.abschliessen(r, {}); n++; } return n; };
+
+test("6 Kinder × 2 Durchgänge → genau 12 Züge", () => { const r = A.erstelleRunde({ anzahl: 6, kontingent: 2 }); gleich(A.gesamtZuege(r), 12); gleich(spiele(r), 12); gleich(A.rundeVorbei(r), true); });
+test("Erst alle einmal, dann alle zweimal; nie zweimal direkt hintereinander", () => {
+  for (let v = 0; v < 200; v++) { const r = A.erstelleRunde({ anzahl: 7, kontingent: 3 }); let vorher = null;
+    for (let i = 0; i < 21; i++) { const id = A.ziehe(r); if (id === vorher) throw new Error("doppelt"); const minVor = Math.min(...r.kinder.map(k => k.dran));
+      if (A.kind(r, id).dran !== minVor) throw new Error("Vorrang verletzt"); A.waehle(r, id); A.abschliessen(r, {}); vorher = id; } }
+});
+test("Kind mit vollem Kontingent ist nicht wählbar", () => { const r = A.erstelleRunde({ anzahl: 3, kontingent: 1 }); A.waehle(r, "k1"); A.abschliessen(r, {}); gleich(A.waehle(r, "k1"), false); gleich(A.waehlbareKinder(r).map(k => k.id), ["k2", "k3"]); });
+test("Rückgängig nimmt die Auswahl zurück", () => { const r = A.erstelleRunde({ anzahl: 3 }); A.waehle(r, "k2"); gleich(A.rueckgaengig(r), "auswahl"); gleich(r.aktuell, null); gleich(A.kind(r, "k2").dran, 0); });
+test("Rückgängig gibt dem Kind den letzten Zug zurück", () => { const r = A.erstelleRunde({ anzahl: 3, kontingent: 1 }); A.waehle(r, "k2"); A.abschliessen(r, {}); gleich(A.rueckgaengig(r), "zug"); gleich(A.kind(r, "k2").dran, 0); gleich(r.verlauf.length, 0); gleich(A.waehlbar(r, A.kind(r, "k2")), true); });
+test("Abwesend verringert die Gesamtzahl", () => { const r = A.erstelleRunde({ anzahl: 5, kontingent: 2 }); A.waehle(r, "k1"); A.abschliessen(r, {}); A.setzeAbwesend(r, "k1"); gleich(A.gesamtZuege(r), 9); A.setzeAbwesend(r, "k3"); gleich(A.gesamtZuege(r), 7); gleich(spiele(r) + 1, 7); });
+test("Abwesend wieder antippen = zurück", () => { const r = A.erstelleRunde({ anzahl: 2 }); A.setzeAbwesend(r, "k1"); A.setzeAbwesend(r, "k1", false); gleich(A.gesamtZuege(r), 4); });
+test("Ganze Klasse verlängert die Runde um genau eine Aufgabe", () => { const r = A.erstelleRunde({ anzahl: 4, kontingent: 1 }); A.waehle(r, "klasse"); A.abschliessen(r, {}); gleich(A.gesamtZuege(r), 5); gleich(spiele(r), 4); gleich(r.verlauf.length, 5); });
+test("Nur noch ein Kind wählbar → darf wieder dran", () => { const r = A.erstelleRunde({ anzahl: 2, kontingent: 3 }); A.waehle(r, "k1"); A.abschliessen(r, {}); A.waehle(r, "k1"); A.abschliessen(r, {}); A.waehle(r, "k1"); A.abschliessen(r, {}); gleich(A.ziehe(r), "k2"); A.waehle(r, "k2"); A.abschliessen(r, {}); gleich(A.ziehe(r), "k2"); });
+test("Rundenende, wenn kein Kind mehr wählbar ist", () => { const r = A.erstelleRunde({ anzahl: 1, kontingent: 1 }); gleich(A.rundeVorbei(r), false); A.waehle(r, A.ziehe(r)); gleich(A.rundeVorbei(r), false); A.abschliessen(r, {}); gleich(A.rundeVorbei(r), true); gleich(A.ziehe(r), null); });
+test("Namen: leere Zeilen weg, doppelte unterschieden", () => gleich(A.namenAusText("Lena\n\nTom, Lena\n  lena "), ["Lena", "Tom", "Lena 2", "lena 3"]));
+test("Namen setzen die Schülerzahl", () => { const r = A.erstelleRunde({ anzahl: 8, namen: ["A", "B", "C"] }); gleich(r.kinder.length, 3); });
+test("Ohne Namen: Nummern bzw. Tiere", () => { gleich(A.erstelleRunde({ anzahl: 3 }).kinder.map(k => k.name), ["1", "2", "3"]); const t = A.erstelleRunde({ anzahl: 3, tiere: true }); gleich(t.kinder.map(k => k.symbol), ["🦊", "🐻", "🐸"]); });
+test("Reihenfolge abwechselnd / nacheinander / zufällig", () => {
+  gleich([0, 1, 2, 3, 4].map(z => A.naechstesTafelbild(["a", "b"], "abwechselnd", z, 6)), ["a", "b", "a", "b", "a"]);
+  gleich([0, 1, 2, 3, 4, 5].map(z => A.naechstesTafelbild(["a", "b"], "nacheinander", z, 6)), ["a", "a", "a", "b", "b", "b"]);
+  for (let i = 0; i < 50; i++) if (A.naechstesTafelbild(["a", "b", "c"], "zufaellig", i, 9, Math.random, "b") === "b") throw new Error("Wiederholung");
+});
+test("Zustand übersteht JSON (Speichern/Laden)", () => { const r = A.erstelleRunde({ anzahl: 4 }); A.waehle(r, "k1"); A.abschliessen(r, { tafelbild: "x", ergebnis: "mit-hilfe" }); const s = JSON.parse(JSON.stringify(r)); gleich(A.gesamtZuege(s), 8); gleich(A.erledigteZuege(s), 1); });
+test("Klassenergebnis zählt nur richtig", () => { const r = A.erstelleRunde({ anzahl: 2 }); A.waehle(r, "k1"); A.abschliessen(r, { ergebnis: "richtig" }); A.waehle(r, "k2"); A.abschliessen(r, { ergebnis: "mit-hilfe" }); gleich(A.anteilRichtig(r), .5); });
+
+document.getElementById("summe").textContent = fehl ? `${fehl} Test(s) fehlgeschlagen, ${ok} bestanden` : `Alle ${ok} Tests bestanden`;
+document.body.dataset.ergebnis = fehl ? "fehl" : "ok";
+</script>
+</body>
+</html>
