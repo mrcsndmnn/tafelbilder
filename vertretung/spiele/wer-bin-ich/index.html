@@ -59,10 +59,11 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
-let modus = "raten", jetzt = null, schritt = 0, geloest = false;
+let rf = 0, modus = "raten", jetzt = null, schritt = 0, geloest = false;
 const buehne = V.el("div", "buehne", '<div class="bild"></div><div class="stange"></div><div class="tuch l"></div><div class="tuch r"></div>'); S.appendChild(buehne);
 const bild = buehne.querySelector(".bild");
 const loesung = V.el("div", "loesung"); loesung.setAttribute("aria-live", "polite"); S.appendChild(loesung);
@@ -100,7 +101,7 @@ function zeigeAuswahl() {
   auswahl.innerHTML = `<span class="lbl">${V.w("Wer bin ich?")}</span>`;
   V.mische([jetzt, ...andere]).forEach(id => {
     const b = V.el("button", "", V.karte(id)); b.type = "button"; b.setAttribute("aria-label", V.wort(id).ganz);
-    b.addEventListener("click", () => { if (id === jetzt) aufloesen(); else V.noch(); }); auswahl.appendChild(b);
+    b.addEventListener("click", () => { if (id === jetzt) { aufloesen(); V.fertig(rf === 0); } else { rf++; V.noch(); } }); auswahl.appendChild(b);
   });
 }
 function aufloesen() {
@@ -122,7 +123,8 @@ modus = modusWahl.wert;
 const r = V.rahmen({ id: "wer-bin-ich", titel: "Wer bin ich?", onWeiter: () => { naechster.textContent = "Nächster Hinweis"; neu(); }, onNeu: neu,
   onHilfe: an => { if (an && modus === "raten" && schritt >= 2 && !geloest) zeigeAuswahl(); if (!an) auswahl.innerHTML = ""; },
   extra: [modusWahl, naechster, geheim, aufKnopf] });
-neu();
+// Übungsrunde: Hinweise hören und das Bild wählen
+if (!V.runde({ id: "wer-bin-ich", neu: () => { modus = "raten"; rf = 0; naechster.textContent = "Nächster Hinweis"; neu(); return "wbi-" + jetzt; }, knoepfe: [naechster], hilfe: an => r.setzeHilfe(an) })) neu();
 </script>
 </body>
 </html>

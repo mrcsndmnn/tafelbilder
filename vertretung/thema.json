@@ -49,70 +49,127 @@
    "titel": "Was fehlt?",
    "pfad": "spiele/was-fehlt/",
    "svg": "<circle cx=\"22\" cy=\"22\" r=\"15\"/><path d=\"M17 17 a5 5 0 1 1 7 5 c-1.5 .8-2 1.8-2 3.5\"/><circle cx=\"22\" cy=\"31\" r=\"1.2\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "lehrkraft"
   },
   {
    "id": "wer-bin-ich",
    "titel": "Wer bin ich?",
    "pfad": "spiele/wer-bin-ich/",
    "svg": "<path d=\"M6 8 H38 V36 H6 Z\"/><path d=\"M6 8 Q14 22 6 36 M38 8 Q30 22 38 36\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
   },
   {
    "id": "wimmelbild",
    "titel": "Wimmelbild",
    "pfad": "spiele/wimmelbild/",
    "svg": "<circle cx=\"19\" cy=\"19\" r=\"11\"/><path d=\"M27 27 L38 38\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2
+   ],
+   "dauerSek": 45,
+   "pruefung": "auto"
   },
   {
    "id": "gluecksrad",
    "titel": "Glücksrad mit Aufträgen",
    "pfad": "spiele/gluecksrad/",
    "svg": "<circle cx=\"22\" cy=\"22\" r=\"16\"/><path d=\"M22 6 V38 M6 22 H38 M11 11 L33 33 M33 11 L11 33\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 60,
+   "pruefung": "lehrkraft"
   },
   {
    "id": "blitzlesen",
    "titel": "Blitzlesen",
    "pfad": "deutsch/blitzlesen/",
    "svg": "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 30,
+   "pruefung": "auto"
   },
   {
    "id": "bildergeschichte",
    "titel": "Bildergeschichte ordnen",
    "pfad": "deutsch/bildergeschichte/",
    "svg": "<rect x=\"4\" y=\"10\" width=\"10\" height=\"24\" rx=\"2\"/><rect x=\"17\" y=\"10\" width=\"10\" height=\"24\" rx=\"2\"/><rect x=\"30\" y=\"10\" width=\"10\" height=\"24\" rx=\"2\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 120,
+   "pruefung": "auto"
   },
   {
    "id": "einmaleins-rakete",
    "titel": "Einmaleins-Rakete",
    "pfad": "mathe/einmaleins-rakete/",
    "svg": "<path d=\"M22 4 C30 12 30 26 26 32 H18 C14 26 14 12 22 4 Z\"/><path d=\"M18 32 L13 39 M26 32 L31 39\"/>",
-   "runde": false
-  },
-  {
-   "id": "rechen-bingo",
-   "titel": "Rechen-Bingo",
-   "pfad": "mathe/rechen-bingo/",
-   "svg": "<rect x=\"6\" y=\"6\" width=\"32\" height=\"32\" rx=\"3\"/><path d=\"M6 17 H38 M6 27 H38 M17 6 V38 M27 6 V38\"/><circle cx=\"22\" cy=\"22\" r=\"3\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1
+   ],
+   "dauerSek": 30,
+   "pruefung": "auto"
   },
   {
    "id": "uhr-werkstatt",
    "titel": "Uhr-Werkstatt",
    "pfad": "mathe/uhr-werkstatt/",
    "svg": "<circle cx=\"22\" cy=\"22\" r=\"16\"/><path d=\"M22 12 V22 L29 26\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 60,
+   "pruefung": "auto"
   },
   {
    "id": "wer-wohnt-wo",
    "titel": "Wer wohnt wo?",
    "pfad": "su/wer-wohnt-wo/",
    "svg": "<path d=\"M22 6 L8 32 H36 Z\"/><path d=\"M22 32 V40\"/>",
-   "runde": false
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 120,
+   "pruefung": "auto"
+  },
+  {
+   "id": "rechen-bingo",
+   "titel": "Rechen-Bingo",
+   "pfad": "mathe/rechen-bingo/",
+   "svg": "<rect x=\"6\" y=\"6\" width=\"32\" height=\"32\" rx=\"3\"/><path d=\"M6 17 H38 M6 27 H38 M17 6 V38 M27 6 V38\"/><circle cx=\"22\" cy=\"22\" r=\"3\"/>",
+   "runde": false,
+   "hinweis": "Spiel für die ganze Klasse"
   }
  ]
 }

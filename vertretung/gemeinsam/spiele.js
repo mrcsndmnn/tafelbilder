@@ -365,5 +365,23 @@
     return obj;
   };
 
+  // ---------------- Übungsrunde ----------------
+  // Im Rundenmodus (iframe mit ?modus=runde) sind Kopf- und Fußleiste ausgeblendet. Knöpfe, die das Kind braucht
+  // (z. B. Prüfen), kommen in eine eigene Leiste unten. hilfe(an) schaltet die Hilfe des Spiels.
+  V.runde = ({ id, oben = 90, neu, hilfe, knoepfe = [] }) => {
+    if (!window.Runde || !Runde.aktiv) return false;
+    // Einstellungen (Niveau, Modus, Anzahl …) gibt die Übungsrunde vor
+    const st = document.createElement("style");
+    st.textContent = ".wahlzeile,.einst,.panel .sz,.panel .mo,.panel>.lbl:has(+.sz),.panel>.lbl:has(+.mo){display:none!important}";
+    document.head.appendChild(st);
+    if (knoepfe.length) { const l = V.el("div", "runde-leiste"); l.style.cssText = "position:absolute;left:20px;right:20px;bottom:12px;height:68px;display:flex;align-items:center;gap:14px;z-index:40"; knoepfe.forEach(k => l.appendChild(k)); S.appendChild(l); }
+    let nr = 0;
+    Runde.verbinde({ id, oben,
+      neueAufgabe(n, aus) { V.stop(); const aid = neu(n, aus || []); Runde.gestartet(aid != null ? aid : `${id}-${++nr}`); },
+      hilfe(an) { if (hilfe) hilfe(an); } });
+    return true;
+  };
+  V.fertig = ohneFehler => { if (window.Runde) Runde.fertig({ ohneFehler }); };
+
   window.Spiele = V;
 })();

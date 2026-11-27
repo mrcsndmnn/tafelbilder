@@ -51,7 +51,8 @@ window.HINWEISE = {
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
 <script src="../../gemeinsam/geschichten.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), GS = GESCHICHTEN;
 let niveau = V.niveau(), gIndex = V.laden("bg-geschichte", 0) % GS.liste.length, schlussAn = V.laden("bg-schluss", true);
@@ -117,7 +118,8 @@ function pruefen() {
   if (belegt.slice(0, zuOrdnen).some(x => x === null)) { V.noch("Le-ge zu-erst al-le Bil-der."); return; }
   let alle = true;
   for (let i = 0; i < zuOrdnen; i++) { const ok = belegt[i].bi === idx[i]; belegt[i].el.classList.toggle("ok", ok); belegt[i].el.classList.toggle("falsch", !ok); if (!ok) alle = false; }
-  if (!alle) { V.noch("Fast! Schau auf die o-ran-gen Bil-der."); return; }
+  if (!alle) { rf++; V.noch("Fast! Schau auf die o-ran-gen Bil-der."); return; }
+  V.fertig(rf === 0);
   geloest = true; S.querySelector(".ablage-text")?.remove(); pruefKn.disabled = true; zeigKn.disabled = false; V.lob(); V.punkt("k");
   zeigeAnfaenge();
   r.satz(verdeckt ? "Zum Schluss …" : GS.anfang(0, idx.length) + " " + g.bilder[idx[0]].inv);
@@ -140,7 +142,9 @@ function zeigeSchluss() {
   zeigKn.disabled = true; zeigeAnfaenge();
   const s = GS.anfang(i, idx.length) + " " + g.bilder[bi].inv; r.satz(s); V.sprich(V.ohne(s));
 }
-neu();
+// Übungsrunde: eine Geschichte ordnen und prüfen
+let rf = 0;
+if (!V.runde({ id: "bildergeschichte", neu: n => { niveau = n; rf = 0; gIndex = Math.floor(Math.random() * GS.liste.length); neu(); return "bg-" + gIndex; }, knoepfe: [pruefKn], hilfe: an => { r.setzeHilfe(an); zeigeAnfaenge(); } })) neu();
 </script>
 </body>
 </html>

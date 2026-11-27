@@ -55,7 +55,8 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne();
 const RAEUME = {
@@ -149,9 +150,9 @@ function pruefen() {
   if (offen.length) { V.noch("Ord-ne zu-erst al-le Tie-re zu."); return; }
   geprueft = true; gewaehlt = null; zeichneTiere();
   const falsch = tiere.filter(t => !TIERE[t].r.includes(lage[t]));
-  if (!falsch.length) { V.lob(); V.punkt("k"); pruefKn.disabled = true; }
+  if (!falsch.length) { V.lob(); V.punkt("k"); pruefKn.disabled = true; V.fertig(rf === 0); }
   else {
-    V.noch("Fast! Schau auf die o-ran-gen Tie-re.");
+    rf++; V.noch("Fast! Schau auf die o-ran-gen Tie-re.");
     // falsche Tiere nach kurzer Zeit zurück in die Ablage
     V.nach(1800, () => { falsch.forEach(t => delete lage[t]); geprueft = false; zeichneTiere(); });
   }
@@ -165,7 +166,9 @@ function satzFuer(id) {
   } else { r.satz(s + "."); V.sprich(V.ohne(s + ".")); }
 
 }
-neu();
+// Übungsrunde: Tiere den Lebensräumen zuordnen und prüfen
+let rf = 0;
+if (!V.runde({ id: "wer-wohnt-wo", neu: n => { niveau = n; rf = 0; neu(); }, knoepfe: [pruefKn], hilfe: an => { r.setzeHilfe(an); muster(); } })) neu();
 </script>
 </body>
 </html>

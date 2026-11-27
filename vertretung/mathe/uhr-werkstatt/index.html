@@ -62,11 +62,12 @@ window.HINWEISE = {
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
 <script src="../../gemeinsam/uhr.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), U = Uhr;
 let niveau = V.niveau(), modus = V.laden("uhr-modus", "ablesen"), genau = V.laden("uhr-genau", false);
-let ziel = { h: 8, m: 0 }, ist = { h: 12, m: 0 }, offen = false;
+let rf = 0, ziel = { h: 8, m: 0 }, ist = { h: 12, m: 0 }, offen = false;
 
 const zeile = V.el("div", "wahlzeile"); S.appendChild(zeile);
 const mWahl = V.gruppe("Modus", [{ wert: "ablesen", text: "Ablesen" }, { wert: "einstellen", text: "Einstellen" }, { wert: "tag", text: "Tagesablauf" }], modus, v => { modus = v; neu(); }, "uhr-modus");
@@ -151,8 +152,8 @@ function aufloesen() {
 function pruefen() {
   if (modus === "tag") return tagPruefen();
   if (ist.h % 12 === ziel.h % 12 && ist.m === ziel.m) {
-    uhrBox.classList.add("ok"); offen = true; V.lob(); V.punkt("k"); const t = "Es ist " + U.textSilben(ziel.h, ziel.m) + "."; r.satz(t); V.sprich(V.ohne(t)); pruefKn.disabled = true;
-  } else V.noch(ist.m !== ziel.m ? "Schau noch mal auf den lan-gen Zei-ger." : "Schau noch mal auf den kur-zen Zei-ger.");
+    uhrBox.classList.add("ok"); offen = true; V.fertig(rf === 0); V.lob(); V.punkt("k"); const t = "Es ist " + U.textSilben(ziel.h, ziel.m) + "."; r.satz(t); V.sprich(V.ohne(t)); pruefKn.disabled = true;
+  } else rf++, V.noch(ist.m !== ziel.m ? "Schau noch mal auf den lan-gen Zei-ger." : "Schau noch mal auf den kur-zen Zei-ger.");
 }
 
 // ---------- Tagesablauf ----------
@@ -204,7 +205,8 @@ function tagPruefen() {
   if (alle) { V.lob(); V.punkt("k"); const t = tagAus[0], [h, m] = zeitVon(t); r.satz(`Um ${U.textSilben(h, m)}: ${t.text}`); }
   else V.noch("Fast! Schau auf die o-ran-gen Uh-ren.");
 }
-neu();
+// Übungsrunde: „Einstellen“ – die Uhr auf die genannte Zeit stellen und prüfen
+if (!V.runde({ id: "uhr-werkstatt", neu: n => { niveau = n; modus = "einstellen"; rf = 0; neu(); return `uhr-${ziel.h}-${ziel.m}`; }, knoepfe: [pruefKn], hilfe: an => { r.setzeHilfe(an); zeigePanel(); } })) neu();
 </script>
 </body>
 </html>

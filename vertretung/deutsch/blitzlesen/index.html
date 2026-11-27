@@ -57,7 +57,8 @@ window.HINWEISE = {
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
 <script src="../../gemeinsam/lesen.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), L = LESEN;
 const RUNDE = 10;
@@ -116,6 +117,7 @@ function werte(ok) {
   V.stop(); anz.classList.remove("blitz");
   if (pos >= RUNDE) { neu(); return; }
   ergebnis[pos] = ok; if (ok) { V.lob(); V.punkt("k"); }
+  if (Runde.aktiv) { V.fertig(ok); richtigKn.disabled = true; return; }
   pos++;
   if (pos < RUNDE) naechstes(); else ende();
 }
@@ -133,7 +135,8 @@ function kreiseZeigen() {
   kreise.setAttribute("aria-label", `Runde: ${ergebnis.filter(Boolean).length} richtig, Wort ${Math.min(pos + 1, RUNDE)} von ${RUNDE}`);
 }
 function rekordZeigen() { const x = V.sitzung.hol(schluessel(), null); rekordEl.innerHTML = x === null ? "" : `${V.bild("stern")}Rekord: ${x} von ${RUNDE}`; }
-neu();
+// Übungsrunde: ein Wort blitzen; die Lehrkraft tippt „richtig“ (oder Fertig → „mit Hilfe“)
+if (!V.runde({ id: "blitzlesen", neu: n => { niveau = n; V.stop(); liste = [V.mische(pool())[0]]; pos = 0; ergebnis = []; naechstes(); return "bl-" + jetzt.t; }, knoepfe: [blitzKn, nochKn, aufKn, richtigKn], hilfe: an => { r.setzeHilfe(an); if (offen) zeige(); } })) neu();
 </script>
 </body>
 </html>

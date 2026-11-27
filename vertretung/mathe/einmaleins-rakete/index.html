@@ -63,7 +63,8 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne();
 const STUFEN = 10, KERN = [1, 2, 5, 10];
@@ -136,13 +137,15 @@ function werte(ok) {
   stand[ok ? "k" : "l"]++; zeigeRaketen();
   offen = true; zeige(); r.satz(auf.satz);
   if (ok) V.klang("richtig"); else V.sprich(auf.sprich);
+  if (Runde.aktiv) { V.fertig(ok); return; }
   const sieger = stand.k >= STUFEN ? "k" : stand.l >= STUFEN ? "l" : null;
   if (sieger) { vorbei = true; V.punkt(sieger); (sieger === "k" ? bK : bL).classList.add("sieg");
     V.nach(900, () => sieger === "k" ? V.lob("Die Ra-ke-te der Klas-se ist o-ben!") : V.noch("Die Eu-le war schnel-ler. Noch ei-ne Run-de?")); return; }
   V.nach(1600, naechste);
 }
 function neu() { V.stop(); stand = { k: 0, l: 0 }; vorbei = false; bK.classList.remove("sieg"); bL.classList.remove("sieg"); zeigeRaketen(); naechste(); }
-neu();
+// Übungsrunde: eine Aufgabe je Kind; die Lehrkraft tippt richtig oder falsch
+if (!V.runde({ id: "einmaleins-rakete", neu: () => { naechste(); return "er-" + auf.zeige; }, knoepfe: [richtigKn, falschKn, loesKn], hilfe: an => { r.setzeHilfe(an); zeige(); } })) neu();
 </script>
 </body>
 </html>

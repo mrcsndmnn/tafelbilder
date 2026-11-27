@@ -47,7 +47,8 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE;
 let anzahl = 6, niveau = "eins", karten = [], fehlen = [], phase = "schauen";
@@ -107,7 +108,8 @@ einst.append(V.gruppe("Anzahl", [4, 6, 8].map(n => ({ wert: n, text: String(n) }
 anzahl = einst.children[0].wert; niveau = einst.children[1].wert;
 const r = V.rahmen({ id: "was-fehlt", titel: "Was fehlt?", onWeiter: neu, onNeu: neu, extra: [augenKnopf, zeigKnopf],
   onHilfe: an => fehlen.forEach(k => { const l = k.el.querySelector(".loch"); if (l) l.innerHTML = (an ? V.bild(k.id) : "") + "?"; }) });
-neu();
+// Übungsrunde: Augen zu – ein Kind sagt, was fehlt; die Lehrkraft prüft
+if (!V.runde({ id: "was-fehlt", neu: n => { anzahl = { 1: 4, 2: 6, 3: 8 }[n] || 6; neu(); }, knoepfe: [augenKnopf, zeigKnopf], hilfe: an => r.setzeHilfe(an) })) neu();
 </script>
 </body>
 </html>

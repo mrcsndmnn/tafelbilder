@@ -56,7 +56,8 @@ window.HINWEISE = {
 <script src="../../../gemeinsam/silben.js"></script>
 <script src="../../gemeinsam/inhalte.js?v=2026112301"></script>
 <script src="../../gemeinsam/bilder.js?v=2026112301"></script>
-<script src="../../gemeinsam/spiele.js?v=2026112301"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
+<script src="../../gemeinsam/spiele.js?v=2026112801"></script>
 <script>
 const V = Spiele, S = V.buehne(), I = INHALTE, B = SPIELBILDER, K = 'stroke="#1d2320" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
 const rr = (x, y, w, h, f, r = 6) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" ${K}/>`;
@@ -85,7 +86,7 @@ const SZENEN = {
   },
 };
 let szene = V.laden("wimmel-szene", "zimmer"), modus = V.laden("wimmel-modus", "finde"), niveau = V.laden("wimmel-niveau", "leicht");
-let belegung = [], ziel = null, versteckModus = false, geloest = false;
+let rf = 0, belegung = [], ziel = null, versteckModus = false, geloest = false;
 const feld = V.el("div", "szene"); S.appendChild(feld);
 const panel = V.el("div", "panel"); S.appendChild(panel);
 
@@ -137,8 +138,8 @@ function auftragZeigen() {
 }
 function tippe(id, el) {
   if (modus !== "finde" || geloest) return;
-  if (id === ziel.id) { geloest = true; el.classList.add("treffer"); V.lob(); }
-  else V.noch();
+  if (id === ziel.id) { geloest = true; el.classList.add("treffer"); V.lob(); V.fertig(rf === 0); }
+  else { rf++; V.noch(); }
 }
 function verstecke(i) {
   versteckModus = false; belegung = [{ id: "katze", platz: versteckPlaetze[i] }]; ziel = belegung[0]; zeichne(); auftragZeigen(); V.klang("richtig");
@@ -161,7 +162,8 @@ panel.querySelector(".kn").append(V.knopf("Auflösen", aufloesen, "haupt"), V.kn
 const niv = V.gruppe("Niveau", [{ wert: "leicht", text: "leicht" }, { wert: "schwer", text: "schwer (mit zwischen)" }], niveau, v => { niveau = v; symbole(r.hilfe); neu(); }, "wimmel-niveau", { 1: "leicht", 2: "leicht", 3: "schwer" });
 niveau = niv.wert;
 const r = V.rahmen({ id: "wimmelbild", titel: "Wimmelbild", onWeiter: neu, onNeu: neu, onHilfe: symbole, extra: [niv] });
-neu();
+// Übungsrunde: „Finde …“ – ★ leicht, ★★/★★★ mit „zwischen“
+if (!V.runde({ id: "wimmelbild", neu: n => { modus = "finde"; niveau = n >= 2 ? "schwer" : "leicht"; rf = 0; neu(); return "wim-" + (ziel && ziel.id); }, hilfe: an => { r.setzeHilfe(an); symbole(an); } })) neu();
 </script>
 </body>
 </html>
