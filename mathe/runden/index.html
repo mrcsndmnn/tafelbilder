@@ -6,7 +6,7 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Runden im Zahlenraum bis 1000 – Tafelbilder</title>
-<meta name="description" content="Fünf interaktive Tafelbilder zum Runden auf Zehner und Hunderter.">
+<meta name="description" content="Zehn interaktive Tafelbilder zum Runden auf Zehner und Hunderter.">
 <link rel="stylesheet" href="../../gemeinsam/zurueck.css">
 <style>
 @font-face{font-family:"Andika";src:url("../../fonts/Andika-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
@@ -23,18 +23,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .zurueck-zeile{max-width:none;margin:0 0 20px}
 h1{font-size:clamp(30px,5vw,44px);margin:0 0 4px;line-height:1.15}
 .unter{margin:0;color:var(--soft);max-width:62ch}
-.regel{display:flex;gap:18px;align-items:center;margin:22px 0 0;padding:16px 20px;border:3px solid var(--ink);border-radius:18px;background:#fffdf3;color:#1d2320;max-width:720px}
+.regel{display:flex;gap:18px;align-items:center;margin:22px 0 0;padding:16px 20px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);max-width:720px}
 .regel svg{flex:none;width:120px;height:70px}
 .regel strong{display:block;font-size:20px}
 .regel .ab{color:#2d5f9e;font-weight:700} .regel .auf{color:#24753a;font-weight:700}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}
+.gruppe{margin-top:30px}.gruppe h2{font-size:22px;margin:0 0 12px;color:var(--soft);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 @media (max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}.regel{flex-direction:column;align-items:flex-start}}
-a.kachel{display:grid;grid-template-columns:64px 1fr;gap:6px 16px;align-items:start;text-decoration:none;color:inherit;background:var(--card);
+a.kachel{display:grid;grid-template-columns:64px 1fr;grid-template-rows:auto 1fr;gap:6px 16px;align-items:start;text-decoration:none;color:inherit;background:var(--card);
   border:2px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
 a.kachel:hover{border-color:var(--mathe);transform:translateY(-2px)}
 a.kachel:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.sym{grid-row:span 3;width:64px;height:64px;border-radius:14px;background:var(--mathe-bg);display:grid;place-items:center;color:var(--mathe)}
+.sym{grid-row:span 2;width:64px;height:64px;border-radius:14px;border:2px solid var(--line);display:grid;place-items:center;color:var(--ink)}
 .sym svg{width:44px;height:44px}
 .nr{font-size:14px;font-weight:700;color:var(--mathe)}
 .kachel strong{font-size:21px;line-height:1.25}
@@ -55,31 +56,37 @@ a.runde-knopf:focus-visible{outline:4px solid #2f7d4f;outline-offset:2px}
   <div class="zurueck-zeile"><a class="zurueck" href="../../"><span class="pfeil" aria-hidden="true">←</span> Übersicht</a><a class="runde-knopf" href="../../gemeinsam/uebungsrunde/?thema=mathe/runden"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M34 14 A13 13 0 0 0 10 16"/><path d="M10 9 V16 H17"/><path d="M10 30 A13 13 0 0 0 34 28"/><path d="M34 35 V28 H27"/><path d="M22 15.5 L24 20 L28.8 20.4 L25.2 23.6 L26.3 28.3 L22 25.8 L17.7 28.3 L18.8 23.6 L15.2 20.4 L20 20 Z" fill="currentColor" stroke-width="1.5"/></svg>Übungsrunde</a></div>
   <header>
     <h1>Runden im Zahlenraum bis 1000</h1>
-    <p class="unter">Fünf Tafelbilder zum Runden auf Zehner und Hunderter – vom Zahlenstrahl über die Regel bis zur Anwendung</p>
+    <p class="unter">Zehn Tafelbilder zum Runden auf Zehner und Hunderter – geordnet nach dem Einsatz im Unterricht: einführen, vertiefen, üben, anwenden.</p>
   </header>
   <div class="regel">
-    <svg viewBox="0 0 120 70" aria-hidden="true"><path d="M10 62 L60 10 L60 62Z" fill="#d6eaff"/><path d="M60 10 L110 62 L60 62Z" fill="#dff3e4"/><path d="M4 62 L10 62 L60 10 L110 62 L116 62" fill="none" stroke="#1d2320" stroke-width="4" stroke-linejoin="round"/></svg>
-    <div><strong>So runde ich</strong><span class="ab">Bei 0, 1, 2, 3, 4 wird abgerundet.</span><br><span class="auf">Bei 5, 6, 7, 8, 9 wird aufgerundet.</span></div>
+    <svg viewBox="0 0 120 70" aria-hidden="true"><path d="M4 62 L10 62 L60 10 L110 62 L116 62" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>
+    <div><strong>So runde ich</strong>Bei 0, 1, 2, 3, 4 wird abgerundet.<br>Bei 5, 6, 7, 8, 9 wird aufgerundet.</div>
   </div>
-  <main class="grid" id="grid"></main>
-  <footer>Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten. Gebaut für das Smartboard (Bühne 1600 × 900). Auf jeder Seite erklärt der Knopf „?“ die Bedienung.<br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
+  <main id="grid"></main>
+  <footer>Tipp: Tafelbild öffnen und mit F11 auf Vollbild schalten. Gebaut für das Smartboard (Bühne 1600 × 900). Auf jeder Seite öffnet das Zahnrad oben rechts das Lehrkraftmenü mit Einstellungen und Hinweisen.<br><a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></footer>
 </div>
 <script>
 const S = d => `<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const TAFELN = [
-  ["zahlenstrahl", "Zahlenstrahl-Lupe: Wo ist es näher?", "Am Zahlenstrahl zum nächsten Nachbarn hüpfen – bevor die Regel kommt.", S('<circle cx="18" cy="18" r="11"/><path d="M26 26 L38 38"/><path d="M12 18 H24"/>')],
-  ["rundungsberg", "Der Rundungsberg", "Die Regel als Kugel auf dem Berg, in vier Denkschritten gesprochen.", S('<path d="M3 38 L22 8 L41 38 Z"/><circle cx="31" cy="22" r="4" fill="currentColor"/>')],
-  ["blitzrunde", "Blitzrunde Runden", "10 schnelle Runden: wählen, selbst runden oder „Z oder H?“.", S('<path d="M25 4 L10 25 H21 L18 40 L34 18 H23 Z"/>')],
-  ["fehler-detektiv", "Fehler-Detektiv", "Rundos Fehler finden, verbessern und erklären.", S('<circle cx="18" cy="18" r="11"/><path d="M26 26 L38 38"/><path d="M14 14 L22 22 M22 14 L14 22"/>')],
-  ["schulfest", "Genau oder gerundet? Das Schulfest", "Wann darf ich runden, wann muss es genau sein? Karten sortieren und begründen.", S('<path d="M4 38 L22 8 L40 38 Z"/><path d="M22 8 V38"/><path d="M22 8 V3 L28 5 L22 7"/>')],
+  ["Einführen", "einfuehrung", "Runden Schritt für Schritt", "In 8 Etappen vom „ungefähr“ bis zu besonderen Zahlen. Zum gemeinsamen Erarbeiten.", "<path d=\"M6 36 H16 V28 H26 V20 H36 V10\"/>"],
+  ["Vertiefen", "zahlenstrahl", "Zahlenstrahl-Lupe", "Welcher Nachbar ist näher? Hüpfen und vergleichen.", "<path d=\"M4 26 H40\"/><path d=\"M8 20 V32 M36 20 V32\"/><path d=\"M14 24 Q19 12 24 24\"/>"],
+  ["Vertiefen", "rundungsberg", "Der Rundungsberg", "Die Regel als Kugel auf dem Berg, in vier Denkschritten.", "<path d=\"M3 36 H10 L22 10 L34 36 H41\"/><circle cx=\"16\" cy=\"18\" r=\"3.5\"/>"],
+  ["Üben", "rechentafel", "Rechen-Tafel", "Päckchen wie im Heft: runden, prüfen, entdecken. Mit Druckansicht.", "<path d=\"M8 12 H18 M24 12 H36 M8 22 H18 M24 22 H36 M8 32 H18 M24 32 H36\"/>"],
+  ["Üben", "blitzrunde", "Blitzrunde", "10 schnelle Runden: wählen oder selbst runden.", "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>"],
+  ["Üben", "haeuser", "Zehner-Häuser", "Welche Zahl wohnt in welchem Haus? Sortieren, auch zu zweit.", "<path d=\"M4 20 L13 11 L22 20 V36 H4 Z\"/><path d=\"M22 20 L31 11 L40 20 V36 H22\"/>"],
+  ["Üben", "rueckwaerts", "Rückwärts runden", "Welche Zahlen werden zu 270? Alle finden.", "<path d=\"M36 22 H8\"/><path d=\"M16 14 L8 22 L16 30\"/>"],
+  ["Üben", "fehler-detektiv", "Fehler-Detektiv", "Stimmt die Rundung? Fehler finden und verbessern.", "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/>"],
+  ["Anwenden", "schulfest", "Genau oder gerundet?", "Wann darf ich runden, wann muss es genau sein?", "<path d=\"M8 16 H36 M8 28 H36\"/><path d=\"M14 22 Q18 18 22 22 T30 22\" />"],
+  ["Anwenden", "ungefaehr-rechnen", "Ungefähr rechnen", "Runden, ungefähr rechnen, entscheiden: Reicht das Geld?", "<path d=\"M10 22 H34 M22 10 V34\"/><path d=\"M30 6 Q33 3 36 6 T42 6\"/>"],
 ];
-document.getElementById("grid").innerHTML = TAFELN.map(([pfad, titel, text, sym], i) => `
+const GRUPPEN = ["Einführen", "Vertiefen", "Üben", "Anwenden"];
+document.getElementById("grid").innerHTML = GRUPPEN.map(g => `<section class="gruppe"><h2>${g}</h2><div class="grid">` +
+  TAFELN.filter(t => t[0] === g).map(([, pfad, titel, text, sym]) => `
   <a class="kachel" href="${pfad}/">
-    <span class="sym">${sym}</span>
-    <span class="nr">Tafelbild ${i + 1}</span>
+    <span class="sym">${S(sym)}</span>
     <strong>${titel}</strong>
     <span class="desc">${text}</span>
-  </a>`).join("");
+  </a>`).join("") + "</div></section>").join("");
 </script>
 </body>
 </html>

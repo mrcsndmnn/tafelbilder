@@ -17,6 +17,10 @@
   R.nachbarn = (n, st) => { const b = R.BASIS[st], u = Math.floor(n / b) * b; return n % b === 0 ? { u: n, o: n, rund: true } : { u, o: u + b, rund: false }; };
   R.pruefziffer = (n, st) => st === "Z" ? n % 10 : Math.floor(n / 10) % 10;
   R.pruefstelle = st => R.PRUEF[st];
+  // Alle Zahlen (0 bis 1000), die zu ziel gerundet werden: grenzen(270, "Z") → { von: 265, bis: 274 }
+  R.grenzen = (ziel, st) => { const h = R.BASIS[st] / 2; return { von: Math.max(0, ziel - h), bis: Math.min(1000, ziel + h - 1) }; };
+  // Zweistellige Zahl (11–99) ohne Zehnerzahl; mitte = false schließt 15, 25 … aus
+  R.zweistellig = (mitte = false, vorher) => { for (let v = 0; v < 200; v++) { const n = T.zufall(11, 99); if (n % 10 && (mitte || n % 10 !== 5) && n !== vorher) return n; } return 43; };
   R.istMitte = (n, st) => st === "Z" ? n % 10 === 5 : n % 100 === 50;
 
   // ---------------- Sätze ----------------

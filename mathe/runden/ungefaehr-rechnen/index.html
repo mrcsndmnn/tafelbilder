@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Ungefähr rechnen – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
+<style>
+.frage-text{position:absolute;left:160px;width:1280px;top:110px;font-size:40px;font-weight:700;line-height:1.35;text-align:center}
+.schritte{position:absolute;left:0;width:1600px;top:300px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.schritte .zl{font-size:54px;font-weight:700;white-space:nowrap}
+.schritte .zl.grau{color:#9aa39e}
+.schritte .zl .lu{display:inline-block;min-width:1.8em;border-bottom:4px solid var(--ink);text-align:center}
+.wahl{position:absolute;left:0;width:1600px;top:560px;display:flex;justify-content:center;gap:34px}
+.wahl .knopf{min-width:200px;min-height:96px;font-size:48px;border-width:3px;background:#fff}
+.wahl.text .knopf{font-size:34px;min-width:300px}
+.wahl .knopf.richtig{border-color:var(--ok);border-width:7px}
+.wahl .knopf.weg{opacity:.3}
+.ruhig .rueck{top:690px}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script>
+window.HINWEISE = {
+ titel: "Ungefähr rechnen",
+ teile: [
+  { h: "Worum geht es?", text: "Anwendung und Ausblick auf das Überschlagen. Nur einsetzen, wenn das Überschlagen im Lehrplan als Nächstes kommt." },
+  { h: "So geht es", punkte: [
+    "Oben steht eine Frage aus dem Alltag. Die Schritte erscheinen nacheinander darunter:",
+    "1. Beide Zahlen runden. 2. Gerundet rechnen. 3. Entscheiden: **Reicht** oder **Wird knapp – genau nachrechnen**.",
+    "Danach zeigt **Genau rechnen** auf Wunsch die genaue Summe. **Weiter** stellt die nächste Frage." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Stufe** 1: auf Hunderter, Summe deutlich unter dem Betrag. 2: auf Zehner. 3: auf Hunderter, Ergebnis nah am Betrag (knapp).",
+    "**Vorlesen** liest die Frage vor (wenn das Gerät eine Sprachausgabe hat).",
+    "Neue Aufgaben lassen sich in **aufgaben.js** im selben Ordner ergänzen." ] } ]
+};
+</script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
+<script src="aufgaben.js"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+let genauAn = false, stufe = 1, st = "H", a = null, schritt = 0, rf = 0, letzte = -1, inRunde = false;
+const sprache = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const frage = T.blk(160, 110, 1280, 0, "frage-text");
+const schritte = T.blk(0, 300, 1600, 0, "schritte");
+const wahl = T.blk(0, 560, 1600, 0, "wahl");
+const rueck = T.blk(100, 690, 1400, 0, "rueck");
+const genauKn = T.knopf("Genau rechnen", () => genau());
+const weiterKn = T.knopf("Weiter", () => neu(), "haupt"); weiterKn.dataset.runde = "aus";
+T.kinderknoepfe(genauKn, weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1 Hunderter, deutlich" }, { wert: 2, text: "2 Zehner" }, { wert: 3, text: "3 knapp" }], 1, v => { stufe = v; neu(); }, "ur-stufe");
+stufe = stufenWahl.wert;
+T.kopf({ menue: true, titel: "Ungefähr rechnen", beschreibung: "Runden, ungefähr rechnen, entscheiden.", satzmuster: false,
+  onNeu: () => neu(), onLoesung: () => loesung(), extra: [stufenWahl] });
+if (sprache) T.menue.steuer("Vorlesen", () => vorlesen(frage.textContent));
+
+// ---------- Rechnen ----------
+const grenze = () => st === "H" ? 100 : 30;
+const gerundet = x => R.runde(x.a, st) + R.runde(x.b, st);
+const knapp = x => Math.abs(gerundet(x) - x.betrag) <= grenze();
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); rf = 0; schritt = 0; genauAn = false; st = stufe === 2 ? "Z" : "H";
+  let liste = AUFGABEN.map((x, i) => ({ ...x, i })).filter(x => stufe === 1 ? !knapp(x) && gerundet(x) < x.betrag : stufe === 3 ? knapp(x) : true);
+  if (liste.length > 1) liste = liste.filter(x => x.i !== letzte);
+  a = T.wahl(liste); letzte = a.i;
+  frage.textContent = a.text.replace("{a}", a.a).replace("{b}", a.b).replace("{betrag}", a.betrag);
+  auftrag.textContent = st === "H" ? "Runde auf Hunderter." : "Runde auf Zehner.";
+  genauKn.hidden = true; weiterKn.hidden = true;
+  zeige();
+}
+function zeilen() {
+  const ra = R.runde(a.a, st), rb = R.runde(a.b, st), z = [];
+  z.push(`${a.a} ≈ ${schritt > 0 ? ra : '<span class="lu">?</span>'}`);
+  if (schritt >= 1) z.push(`${a.b} ≈ ${schritt > 1 ? rb : '<span class="lu">?</span>'}`);
+  if (schritt >= 2) z.push(`${ra} + ${rb} = ${schritt > 2 ? ra + rb : '<span class="lu">?</span>'}`);
+  if (genauAn) z.push(`<span class="genau">${a.a} + ${a.b} = ${a.a + a.b}</span>`);
+  return z;
+}
+function zeige() {
+  schritte.innerHTML = zeilen().map((t, i, l) => `<div class="zl${i < l.length - 1 && schritt < 4 ? " grau" : ""}">${t}</div>`).join("");
+  wahl.innerHTML = ""; wahl.classList.remove("text"); T.melde(rueck, "", "");
+  const ra = R.runde(a.a, st), rb = R.runde(a.b, st), b = R.BASIS[st];
+  if (schritt === 0) optionen([R.nachbarn(a.a, st).u, R.nachbarn(a.a, st).o], ra);
+  if (schritt === 1) optionen([R.nachbarn(a.b, st).u, R.nachbarn(a.b, st).o], rb);
+  if (schritt === 2) optionen(T.mischen([ra + rb, ra + rb + b, ra + rb - b]), ra + rb);
+  if (schritt === 3) { wahl.classList.add("text"); optionen(["Reicht", "Wird knapp – genau nachrechnen"], knapp(a) ? "Wird knapp – genau nachrechnen" : "Reicht"); }
+}
+function optionen(werte, richtig) {
+  werte.forEach(w => { const k = T.knopf(String(w), () => {
+    if (k.classList.contains("weg")) return;
+    if (w === richtig) { k.classList.add("richtig"); schritt++; setTimeout(() => schritt <= 3 ? zeige() : entschieden(), T.bewegt ? 500 : 0); wahl.querySelectorAll(".knopf").forEach(x => x.disabled = true); }
+    else { rf++; k.classList.add("weg"); T.melde(rueck, "noch", schritt < 2 ? `Noch nicht. Schau auf die ${R.PRUEFNAME[st]}.` : "Noch nicht. Schau noch einmal."); }
+  }); wahl.appendChild(k); });
+}
+function entschieden(gezeigt) {
+  schritte.innerHTML = zeilen().map(t => `<div class="zl">${t}</div>`).join(""); wahl.innerHTML = "";
+  const g = gerundet(a);
+  T.melde(rueck, gezeigt ? "grau" : "ok", (gezeigt ? "" : T.lob() + " ") + (knapp(a) ? `Ungefähr ${g} – das ist knapp. Wir rechnen genau nach.` : `Ungefähr ${g} – das reicht.`));
+  genauKn.hidden = false; weiterKn.hidden = false;
+  if (!gezeigt) T.fertig(rf === 0);
+}
+function genau() {
+  genauAn = true; schritte.innerHTML = zeilen().map(t => `<div class="zl">${t}</div>`).join(""); genauKn.hidden = true;
+  const s = a.a + a.b;
+  T.melde(rueck, "grau", `Genau: ${s}. ${s <= a.betrag ? "Es reicht." : "Es reicht nicht."}`);
+}
+function loesung() { if (schritt < 4) { schritt = 4; entschieden(true); } }
+function vorlesen(text) { if (!sprache || !text) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; u.rate = .9; speechSynthesis.speak(u); }
+addEventListener("pagehide", () => { if (sprache) speechSynthesis.cancel(); });
+
+if (!T.runde({ id: "ungefaehr-rechnen", neu: s => { inRunde = true; stufe = s; neu(); return `ur-${a.i}-${st}`; } })) neu();
+</script>
+</body>
+</html>

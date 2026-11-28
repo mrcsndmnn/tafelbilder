@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Zehner-Häuser – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
+<style>
+.karte-oben{position:absolute;left:700px;top:100px;width:200px;height:110px;border:3px solid var(--ink);border-radius:16px;background:#fff;
+  font-size:64px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none}
+.karte-oben.gewaehlt{outline:5px solid var(--ink);outline-offset:6px}
+.karte-oben.zurueck{animation:zurueck .45s}
+@keyframes zurueck{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
+@media (prefers-reduced-motion: reduce){.karte-oben.zurueck{animation:none}}
+.karte-oben.ziehen{position:fixed;z-index:100;pointer-events:none;opacity:.9}
+.haeuser{position:absolute;left:0;width:1600px;top:250px;display:flex;justify-content:center;gap:50px}
+.haus{position:relative;width:380px;height:400px;cursor:pointer}
+.haus svg{position:absolute;inset:0;fill:none;stroke:var(--ink);stroke-width:4;stroke-linejoin:round}
+.haus.ziel svg{stroke-width:7}
+.haus .dach{position:absolute;left:0;right:0;top:62px;text-align:center;font-size:48px;font-weight:700}
+.haus .liste{position:absolute;left:30px;right:30px;top:150px;bottom:20px;display:flex;flex-wrap:wrap;gap:4px 18px;align-content:flex-start;justify-content:center;font-size:30px;color:#4d5752}
+.haus .liste span.neu{color:var(--ink);font-weight:700}
+.partner{position:absolute;left:44px;bottom:46px;font-size:24px;color:#6d7772}
+.partner b{color:var(--ink)}
+.rest{position:absolute;left:0;width:1600px;top:216px;text-align:center;font-size:22px;color:#8d9892}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script>
+window.HINWEISE = {
+ titel: "Zehner-Häuser",
+ teile: [
+  { h: "Worum geht es?", text: "Klassifizieren: Jede Zahl wohnt im Haus ihres gerundeten Werts. Gut für Partnerarbeit." },
+  { h: "So geht es", punkte: [
+    "Oben liegt eine Zahlenkarte. Die Kinder ziehen sie in ein Haus – oder tippen einfach das Haus an.",
+    "Falsch gelegte Karten rutschen zurück, darunter steht z. B. „276 liegt näher an 280.“",
+    "Nach 8 Karten liest jedes Haus seine Bewohner vor: „In 280 wohnen: 275, 276, 279, 283.“ **Weiter** startet eine neue Runde." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Runden auf** Zehner (z. B. Häuser 270 und 280) oder Hunderter (z. B. 300 und 400).",
+    "**Stufe** 1: zwei Häuser, keine Mitte. 2: zwei Häuser, mit Mitte und Grenzzahlen. 3: drei Häuser.",
+    "**Fragekind/Antwortkind** blendet unten links ein, wer dran ist. Die Anzeige wechselt nach jeder Karte.",
+    "**Vorlesen** liest am Ende die Bewohner vor (wenn das Gerät eine Sprachausgabe hat)." ] } ]
+};
+</script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+const ANZ = 8;
+let st = "Z", stufe = 1, haeuser = [], karten = [], bewohner = {}, gewaehlt = false, partner = false, wer = 0, rf = 0, inRunde = false, fertigTxt = [];
+const sprache = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const karteEl = T.el("div", "karte-oben"); karteEl.setAttribute("role", "button"); karteEl.tabIndex = 0; S.appendChild(karteEl);
+const rest = T.blk(0, 216, 1600, 0, "rest");
+const hBox = T.blk(0, 250, 1600, 0, "haeuser");
+const rueck = T.blk(100, 680, 1400, 0, "rueck");
+const partnerEl = T.blk(0, 0, 0, 0, "partner"); partnerEl.style.left = ""; partnerEl.style.top = ""; partnerEl.hidden = true; partnerEl.dataset.runde = "aus";
+const weiterKn = T.knopf("Weiter", () => neu(), "haupt"); weiterKn.dataset.runde = "aus"; weiterKn.hidden = true;
+T.kinderknoepfe(weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const stWahl = T.gruppe("Runden auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; neu(); }, "hs-st");
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1" }, { wert: 2, text: "2 mit Mitte" }, { wert: 3, text: "3 drei Häuser" }], 1, v => { stufe = v; neu(); }, "hs-stufe");
+st = stWahl.wert; stufe = stufenWahl.wert;
+const partnerKn = T.schalter("Fragekind/Antwortkind", false, v => { partner = v; zeigePartner(); });
+T.kopf({ menue: true, titel: "Zehner-Häuser", beschreibung: "Welche Zahl wohnt in welchem Haus?", satzmuster: false,
+  onNeu: () => neu(), onLoesung: () => alleEinziehen(), extra: [stWahl, stufenWahl, partnerKn] });
+if (sprache) T.menue.steuer("Vorlesen", () => vorlesen(fertigTxt.join(" ")));
+
+// ---------- Erzeugen ----------
+function neu(anzahl = ANZ) {
+  T.stop(); rf = 0; gewaehlt = false; weiterKn.hidden = true; fertigTxt = [];
+  const b = R.BASIS[st], n = stufe === 3 ? 3 : 2;
+  const start = st === "Z" ? T.zufall(2, 97 - n) * 10 : T.zufall(1, 9 - n) * 100;
+  haeuser = Array.from({ length: n }, (_, i) => start + i * b);
+  bewohner = {}; haeuser.forEach(h => bewohner[h] = []);
+  const von = haeuser[0] - b / 2, bis = haeuser[n - 1] + b / 2 - 1, menge = new Set();
+  for (let v = 0; v < 500 && menge.size < anzahl; v++) {
+    let z = st === "Z" ? T.zufall(von, bis) : T.zufall(Math.ceil(von / 10), Math.floor(bis / 10)) * 10 + (stufe > 1 ? T.zufall(0, 9) : 0);
+    if (z < von || z > bis) continue;
+    if (stufe === 1 && (R.istMitte(z, st) || z % b === 0)) continue;
+    menge.add(z);
+  }
+  karten = T.mischen([...menge]);
+  auftrag.textContent = "In welchem Haus wohnt die Zahl?";
+  T.melde(rueck, "", ""); zeichneHaeuser(); zeigeKarte(); zeigePartner();
+}
+const hausSVG = '<svg viewBox="0 0 380 400" aria-hidden="true"><path d="M20 140 L190 14 L360 140"/><rect x="40" y="140" width="300" height="250"/></svg>';
+function zeichneHaeuser(neuZ) {
+  hBox.innerHTML = "";
+  haeuser.forEach(h => {
+    const d = T.el("div", "haus"); d.dataset.h = h; d.setAttribute("role", "button"); d.tabIndex = 0; d.setAttribute("aria-label", "Haus " + h);
+    d.innerHTML = hausSVG + `<div class="dach">${h}</div>`;
+    const l = T.el("div", "liste"); d.appendChild(l);
+    bewohner[h].slice().sort((a, b) => a - b).forEach(z => l.appendChild(T.el("span", z === neuZ ? "neu" : "", String(z))));
+    d.addEventListener("click", () => { if (karten.length) lege(h); });
+    d.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && karten.length) { e.preventDefault(); lege(h); } });
+    hBox.appendChild(d);
+  });
+}
+function zeigeKarte() {
+  karteEl.hidden = !karten.length; karteEl.classList.toggle("gewaehlt", gewaehlt);
+  if (karten.length) { karteEl.textContent = karten[0]; karteEl.setAttribute("aria-label", "Zahl " + karten[0]); }
+  rest.textContent = karten.length && !inRunde ? `noch ${karten.length} Karten` : "";
+}
+function zeigePartner() { partnerEl.hidden = !partner || inRunde; partnerEl.innerHTML = wer === 0 ? "<b>Fragekind</b> · Antwortkind" : "Fragekind · <b>Antwortkind</b>"; }
+
+// ---------- Ablauf ----------
+function lege(h) {
+  const z = karten[0], r = R.runde(z, st); gewaehlt = false;
+  if (r !== h) {
+    rf++; karteEl.classList.remove("zurueck"); void karteEl.offsetWidth; karteEl.classList.add("zurueck");
+    T.melde(rueck, "noch", haeuser.includes(r) ? `${z} liegt näher an ${r}.` : `Noch nicht. ${R.naeher(z, st)}`); zeigeKarte(); return;
+  }
+  bewohner[h].push(z); karten.shift(); wer = 1 - wer; zeigePartner();
+  zeichneHaeuser(z); T.melde(rueck, "ok", R.istMitte(z, st) ? `${T.lob()} Genau in der Mitte: aufrunden.` : `${T.lob()} ${z} ≈ ${h}`);
+  zeigeKarte();
+  if (!karten.length) ende(true);
+}
+function ende(selbst) {
+  fertigTxt = haeuser.filter(h => bewohner[h].length).map(h => `In ${h} wohnen: ${bewohner[h].slice().sort((a, b) => a - b).join(", ")}.`);
+  T.melde(rueck, selbst ? "ok" : "grau", fertigTxt);
+  if (inRunde) { if (selbst) T.fertig(rf === 0); return; }
+  weiterKn.hidden = false;
+}
+function alleEinziehen() { if (!karten.length) return; karten.forEach(z => bewohner[R.runde(z, st)]?.push(z)); karten = []; zeichneHaeuser(); zeigeKarte(); ende(false); }
+function vorlesen(text) { if (!sprache || !text) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; u.rate = .9; speechSynthesis.speak(u); }
+addEventListener("pagehide", () => { if (sprache) speechSynthesis.cancel(); });
+
+// Ziehen mit Finger oder Maus; kurzes Antippen = auswählen
+karteEl.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  const start = { x: e.clientX, y: e.clientY }, r = karteEl.getBoundingClientRect(); let geist = null;
+  const k = S.getBoundingClientRect().width / 1600;
+  const unter = (x, y) => [...hBox.querySelectorAll(".haus")].find(c => { const q = c.getBoundingClientRect(); return x >= q.left && x <= q.right && y >= q.top && y <= q.bottom; });
+  const bewege = ev => {
+    if (!geist && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 10) return;
+    if (!geist) { geist = karteEl.cloneNode(true); geist.classList.add("ziehen"); geist.style.left = "0"; geist.style.top = "0"; geist.style.transformOrigin = "0 0"; document.body.appendChild(geist); karteEl.style.opacity = ".35"; }
+    geist.style.transform = `translate(${ev.clientX - (start.x - r.left)}px,${ev.clientY - (start.y - r.top)}px) scale(${k})`;
+    const z = unter(ev.clientX, ev.clientY); hBox.querySelectorAll(".haus").forEach(c => c.classList.toggle("ziel", c === z));
+  };
+  const ende_ = ev => {
+    removeEventListener("pointermove", bewege); removeEventListener("pointerup", ende_); removeEventListener("pointercancel", ende_);
+    hBox.querySelectorAll(".haus").forEach(c => c.classList.remove("ziel"));
+    if (!geist) { gewaehlt = !gewaehlt; zeigeKarte(); return; }
+    geist.remove(); karteEl.style.opacity = "";
+    const z = unter(ev.clientX, ev.clientY); if (z) lege(+z.dataset.h);
+  };
+  addEventListener("pointermove", bewege); addEventListener("pointerup", ende_); addEventListener("pointercancel", ende_);
+});
+karteEl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); gewaehlt = !gewaehlt; zeigeKarte(); } });
+
+// Übungsrunde: eine Karte je Aufgabe
+if (!T.runde({ id: "haeuser", neu: s => { inRunde = true; stufe = s; neu(1); return `hs-${karten[0]}-${st}`; } })) neu();
+</script>
+</body>
+</html>

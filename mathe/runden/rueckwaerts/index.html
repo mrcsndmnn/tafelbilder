@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Rückwärts runden – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
+<style>
+.vorrat{position:absolute;left:100px;width:1400px;top:120px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;min-height:220px;align-content:flex-start}
+.karte{width:150px;height:92px;border:3px solid var(--ink);border-radius:14px;background:#fff;font:inherit;font-size:46px;font-weight:700;cursor:pointer;color:var(--ink);padding:0}
+.karte:hover{background:#f3f5f4}
+.karte.zurueck{border-color:var(--noch)}
+.ziel-bereich{position:absolute;left:60px;width:1480px;top:400px}
+.ziel-bereich .lbl{font-size:30px;font-weight:700;color:#6d7772;margin:0 0 12px 10px}
+.zielzeile{display:flex;flex-wrap:nowrap;justify-content:center;gap:12px;min-height:110px;padding:10px;border-top:3px solid #d5ddd7;border-bottom:3px solid #d5ddd7}
+.zielzeile .karte{width:132px;font-size:42px}
+.zielzeile .karte.ok{border-color:var(--ok);border-width:6px}
+.zielzeile .luecke{width:132px;height:92px;border:3px dashed #9aa39e;border-radius:14px}
+.zusatz{position:absolute;left:0;width:1600px;top:76px;text-align:center;font-size:26px;color:#6d7772}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script>
+window.HINWEISE = {
+ titel: "Rückwärts runden",
+ teile: [
+  { h: "Worum geht es?", text: "Die Umkehraufgabe: Welche Zahlen werden zu 270? Die Kinder finden alle Zahlen zu einem gerundeten Wert. Das zeigt sicher, ob die Idee verstanden ist." },
+  { h: "So geht es", punkte: [
+    "Passende Karten antippen: Sie rücken in die Zeile darunter und ordnen sich der Größe nach. Nochmal antippen schiebt sie zurück.",
+    "**Prüfen**: Fehlende Zahlen werden als leere Rahmen angedeutet, falsch gewählte rücken nach oben zurück.",
+    "Am Ende steht der Satz, z. B. „Von 265 bis 274 werden alle Zahlen zu 270.“ **Weiter** stellt eine neue Frage." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Stufe** 1: Zehner, 12 Karten. 2: 16 Karten mit den Grenzzahlen (z. B. 264, 265, 274, 275). 3: Hunderter, Karten in Zehnerschritten, mit der Frage nach der kleinsten und größten Zahl." ] } ]
+};
+</script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+let stufe = 1, ziel = 270, st = "Z", karten = [], gewaehlt = new Set(), luecken = false, fertig = false, rf = 0, vorher = 0;
+
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const zusatz = T.blk(0, 76, 1600, 0, "zusatz");
+const vorrat = T.blk(100, 120, 1400, 0, "vorrat");
+const zb = T.blk(60, 400, 1480, 0, "ziel-bereich");
+const lbl = T.el("div", "lbl"); const zeile = T.el("div", "zielzeile"); zb.append(lbl, zeile);
+const rueck = T.blk(100, 600, 1400, 0, "rueck");
+const pruefKn = T.knopf("Prüfen", () => pruefe(), "haupt");
+T.kinderknoepfe(pruefKn);
+
+// ---------- Lehrkraftmenü ----------
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1 Zehner, 12 Karten" }, { wert: 2, text: "2 mit Grenzzahlen" }, { wert: 3, text: "3 Hunderter" }], 1, v => { stufe = v; neu(); }, "rw-stufe");
+stufe = stufenWahl.wert;
+T.kopf({ menue: true, titel: "Rückwärts runden", beschreibung: "Welche Zahlen werden zu …?", satzmuster: false, onNeu: () => neu(), onLoesung: () => loesung(), extra: [stufenWahl] });
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); rf = 0; gewaehlt = new Set(); luecken = false; fertig = false;
+  st = stufe === 3 ? "H" : "Z";
+  for (let v = 0; v < 50; v++) { ziel = st === "Z" ? T.zufall(2, 98) * 10 : T.zufall(2, 9) * 100; if (ziel !== vorher) break; }
+  vorher = ziel;
+  const g = R.grenzen(ziel, st);
+  if (st === "Z") { const rand = stufe === 1 ? 1 : 3; karten = []; for (let n = g.von - rand; n <= g.bis + rand; n++) karten.push(n); }
+  else { karten = []; for (let n = g.von - 20; n <= g.bis + 11; n += 10) karten.push(n); }
+  karten = T.mischen(karten);
+  auftrag.textContent = `Welche Zahlen werden zu ${ziel}?`;
+  zusatz.textContent = st === "H" ? "Runde auf Hunderter. Welche ist die kleinste? Welche die größte?" : "Runde auf Zehner.";
+  lbl.textContent = `werden zu ${ziel}:`;
+  pruefKn.textContent = "Prüfen"; T.melde(rueck, "", ""); zeichne();
+}
+const passt = n => R.runde(n, st) === ziel;
+function zeichne() {
+  vorrat.innerHTML = ""; zeile.innerHTML = "";
+  karten.filter(n => !gewaehlt.has(n)).forEach(n => vorrat.appendChild(karte(n)));
+  const unten = [...gewaehlt]; if (luecken) karten.filter(n => passt(n) && !gewaehlt.has(n)).forEach(n => unten.push(-n));
+  unten.sort((a, b) => Math.abs(a) - Math.abs(b)).forEach(n => {
+    if (n < 0) { const l = T.el("div", "luecke"); l.setAttribute("aria-label", "fehlende Zahl"); zeile.appendChild(l); }
+    else { const k = karte(n); if (fertig) k.classList.add("ok"); zeile.appendChild(k); }
+  });
+}
+function karte(n) {
+  const b = T.el("button", "karte", String(n)); b.type = "button";
+  b.addEventListener("click", () => { if (fertig) return; gewaehlt.has(n) ? gewaehlt.delete(n) : gewaehlt.add(n); zeichne(); });
+  return b;
+}
+function pruefe() {
+  if (fertig) return neu();
+  const falsch = [...gewaehlt].filter(n => !passt(n)), fehlen = karten.filter(n => passt(n) && !gewaehlt.has(n));
+  if (!falsch.length && !fehlen.length) return geschafft(true);
+  rf++; falsch.forEach(n => gewaehlt.delete(n)); luecken = true; zeichne();
+  falsch.forEach(n => [...vorrat.children].find(k => +k.textContent === n)?.classList.add("zurueck"));
+  const t = [];
+  if (falsch.length) t.push(`${falsch.sort((a, b) => a - b).join(", ")} ${falsch.length === 1 ? "wird" : "werden"} nicht zu ${ziel}.`);
+  if (fehlen.length) t.push(`Es ${fehlen.length === 1 ? "fehlt noch eine Zahl" : `fehlen noch ${fehlen.length} Zahlen`}.`);
+  T.melde(rueck, "noch", t.join(" "));
+}
+function geschafft(selbst) {
+  fertig = true; karten.filter(passt).forEach(n => gewaehlt.add(n)); luecken = false; zeichne();
+  const l = karten.filter(passt).sort((a, b) => a - b), g = R.grenzen(ziel, st);
+  const satz = st === "Z" ? `Von ${g.von} bis ${g.bis} werden alle Zahlen zu ${ziel}.` : `Die kleinste ist ${l[0]}, die größte ist ${l[l.length - 1]}.`;
+  T.melde(rueck, selbst ? "ok" : "grau", (selbst ? T.lob() + " " : "") + satz);
+  pruefKn.textContent = "Weiter";
+  if (selbst) T.fertig(rf === 0);
+}
+function loesung() { if (!fertig) geschafft(false); }
+if (!T.runde({ id: "rueckwaerts", neu: s => { stufe = s; neu(); return `rw-${ziel}-${st}`; } })) neu();
+</script>
+</body>
+</html>

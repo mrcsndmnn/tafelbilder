@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Rechen-Tafel – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
+<style>
+.ueber{position:absolute;left:0;width:1240px;top:40px;text-align:center;font-size:36px;font-weight:700}
+.paket{position:absolute;left:0;width:1240px;top:110px;display:flex;flex-direction:column;align-items:center}
+.zeile{display:grid;grid-template-columns:260px 70px 260px 90px;align-items:center;font-size:64px;font-weight:700;line-height:1.15;color:#c3cac5;cursor:pointer}
+.zeile .l{text-align:right}.zeile .m{text-align:center}
+.zeile .luecke{display:inline-block;min-width:200px;border-bottom:4px solid currentColor;height:1.05em;vertical-align:bottom;text-align:left;padding-left:8px}
+.zeile.aktiv{color:var(--ink)}
+.zeile.geloest{color:var(--ink)}
+.zeile.geloest .luecke{border-bottom-color:transparent}
+.zeile:not(.aktiv):not(.geloest) .zahl span{color:#c3cac5!important}
+.zeile:not(.aktiv):not(.geloest) .pruef{text-decoration-color:#c3cac5}
+.zeile .haken{font-size:40px;color:var(--ok)}
+.zeile .st{font-size:30px;color:#8d9892;margin-left:10px}
+.zeile.wackelt .luecke{animation:wackeln .4s}
+@keyframes wackeln{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion: reduce){.zeile.wackelt .luecke{animation:none}}
+.hinweis{font-size:26px;color:#6d7772;height:34px;margin:-4px 0 4px}
+.einzeln .zeile{font-size:120px;grid-template-columns:460px 120px 460px 120px;margin-top:150px}
+.einzeln .zeile .luecke{min-width:340px}
+.einzeln .hinweis{font-size:32px}
+.auffallen{position:absolute;left:0;width:1240px;top:760px;text-align:center;font-size:32px;font-weight:700}
+.auffallen .muster{font-weight:400;color:#6d7772;margin-top:6px}
+.ziffernfeld{position:absolute;right:40px;bottom:36px;display:grid;grid-template-columns:repeat(3,80px);gap:12px}
+.ziffernfeld .knopf{width:80px;height:80px;min-height:80px;padding:0;font-size:38px;justify-content:center}
+.ziffernfeld .knopf.breit{grid-column:span 3;width:auto;font-size:30px}
+.ziffernfeld .knopf.loeschen{font-size:34px}
+.druck{display:none}
+@media print{
+  #fit,.lkm-zahnrad,.lkm-schublade{display:none!important}
+  body{background:#fff}
+  .druck{display:block!important;position:static!important;overflow:visible!important;padding:0!important;background:#fff!important}
+  .blatt{margin:0!important}
+  .druck-leiste{display:none!important}
+}
+.druck.zeigen{display:block;position:fixed;inset:0;overflow:auto;background:#e9ecea;z-index:200;padding:20px 0}
+.druck-leiste{display:flex;gap:12px;justify-content:center;margin-bottom:16px}
+.druck-leiste button{font:inherit;font-size:18px;padding:10px 18px;border:2px solid #1d2320;border-radius:10px;background:#fff;cursor:pointer}
+.blatt{width:210mm;min-height:297mm;margin:0 auto 20px;background:#fff;padding:18mm 20mm;box-sizing:border-box;font-family:var(--font);color:#000;page-break-after:always;break-after:page}
+.blatt:last-child{page-break-after:auto;break-after:auto}
+.blatt .kopfz{display:flex;justify-content:space-between;font-size:12pt;border-bottom:1px solid #000;padding-bottom:4mm;margin-bottom:8mm}
+.blatt h1{font-size:20pt;margin:0 0 8mm}
+.blatt .az{font-size:22pt;line-height:2.1}
+.blatt .az span.l{display:inline-block;width:40mm;text-align:right}
+.blatt .az span.lu{display:inline-block;width:40mm;border-bottom:1px solid #000;height:1em}
+.blatt .frage{margin-top:12mm;font-size:14pt}
+.blatt .frage .lin{border-bottom:1px solid #000;height:10mm}
+@page{size:A4;margin:0}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script>
+window.HINWEISE = {
+ titel: "Rechen-Tafel Runden",
+ teile: [
+  { h: "Worum geht es?", text: "Automatisieren und entdeckendes Üben mit Rechnungen wie im Heft. Keine Bilder, keine Figuren." },
+  { h: "So geht es", punkte: [
+    "**Paket**: mehrere Aufgaben untereinander. Nur die aktuelle Zeile ist schwarz. Eine andere Zeile antippen macht sie aktuell.",
+    "Die Kinder sagen die Lösung, Sie (oder ein Kind) tippen sie ins **Ziffernfeld** unten rechts und drücken **Prüfen**. Tastatur geht auch (Ziffern, Rücktaste, Enter).",
+    "Richtig: Das Ergebnis bleibt stehen, mit kleinem Häkchen. Noch nicht: Das Ergebnis wackelt und wird gelöscht, darunter ein Tipp.",
+    "Nach einem strukturierten Päckchen erscheint „Was fällt dir auf?“. Mit **Satzmuster** zusätzlich ein Satzanfang." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Stufe** 1: nur Zehner, Einer-Treppe und bunt gemischt. 2: Zehner oder Hunderter, alle Päckchenarten. 3: gemischte Päckchen mit (Z)/(H) und Sonderfällen.",
+    "**Päckchenart**: bunt gemischt, Einer-Treppe, Zehner-Treppe, Mitte, gleiches Ergebnis. **Anzahl** 4/6/8, **Ansicht** Paket/Einzeln.",
+    "**Nur aufdecken**: Antippen der Lücke zeigt das Ergebnis (ohne Ziffernfeld).",
+    "**Druckansicht**: dasselbe Päckchen als Arbeitsblatt (DIN A4, schwarz-weiß) mit getrennter Lösungsseite." ] } ]
+};
+</script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne();
+let stufe = 1, stWahlW = "Z", art = "bunt", anzahl = 6, ansicht = "paket", eingabe = "feld", unterstr = false;
+let paket = [], akt = 0, getippt = "", rf = 0, inRunde = false;
+
+// ---------- Kinderansicht ----------
+const ueber = T.blk(0, 40, 1240, 0, "ueber");
+const box = T.blk(0, 110, 1240, 0, "paket");
+const auff = T.blk(0, 760, 1240, 0, "auffallen");
+const feld = T.blk(0, 0, 0, 0, "ziffernfeld"); feld.style.left = ""; feld.style.top = "";
+[7, 8, 9, 4, 5, 6, 1, 2, 3, 0].forEach(z => feld.appendChild(T.knopf(String(z), () => tippe(String(z)))));
+const loeschKn = T.knopf("⌫", () => { getippt = getippt.slice(0, -1); zeichne(); }, "loeschen"); loeschKn.setAttribute("aria-label", "Löschen");
+feld.insertBefore(loeschKn, feld.lastChild);
+const pruefKn = T.knopf("Prüfen", () => pruefe(), "haupt breit"); feld.appendChild(pruefKn);
+const neuKn = T.knopf("Neues Päckchen", () => neu(), "haupt"); neuKn.dataset.runde = "aus";
+T.kinderknoepfe(neuKn); neuKn.hidden = true;
+
+// ---------- Lehrkraftmenü ----------
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1" }, { wert: 2, text: "2" }, { wert: 3, text: "3 gemischt" }], 1, v => { stufe = v; neu(); }, "rt-stufe");
+const stWahl = T.gruppe("Runden auf (Stufe 2)", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { stWahlW = v; neu(); }, "rt-st");
+const artWahl = T.gruppe("Päckchenart", [{ wert: "bunt", text: "bunt gemischt" }, { wert: "einer", text: "Einer-Treppe" }, { wert: "zehner", text: "Zehner-Treppe" }, { wert: "mitte", text: "Mitte" }, { wert: "gleich", text: "gleiches Ergebnis" }], "bunt", v => { art = v; neu(); }, "rt-art");
+const anzWahl = T.gruppe("Anzahl", [{ wert: 4, text: "4" }, { wert: 6, text: "6" }, { wert: 8, text: "8" }], 6, v => { anzahl = v; neu(); }, "rt-anz");
+const ansWahl = T.gruppe("Ansicht", [{ wert: "paket", text: "Paket" }, { wert: "einzeln", text: "Einzeln" }], "paket", v => { ansicht = v; zeichne(); }, "rt-ans");
+const einWahl = T.gruppe("Eingabe", [{ wert: "feld", text: "Ziffernfeld" }, { wert: "auf", text: "Nur aufdecken" }], "feld", v => { eingabe = v; zeichne(); }, "rt-ein");
+stufe = stufenWahl.wert; stWahlW = stWahl.wert; art = artWahl.wert; anzahl = anzWahl.wert; ansicht = ansWahl.wert; eingabe = einWahl.wert;
+const unterKn = T.schalter("Prüfziffer unterstreichen", false, v => { unterstr = v; zeichne(); });
+T.kopf({ menue: true, titel: "Rechen-Tafel Runden", beschreibung: "Päckchen wie im Heft: runden, prüfen, entdecken.",
+  onNeu: () => neu(), onLoesung: () => alleLoesen(), extra: [stufenWahl, stWahl, artWahl, anzWahl, ansWahl, einWahl], hilfen: [unterKn],
+  onFarben: () => zeichne(), onHilfen: () => zeichne() });
+T.menue.steuer("Druckansicht", () => druckansicht());
+
+// ---------- Päckchen erzeugen ----------
+function lauf(n) { const s = Math.max(1, 5 - Math.floor(n / 2)); return Array.from({ length: n }, (_, i) => s + i).filter(k => k <= 9); }
+function baue() {
+  let a = art, st = stWahlW;
+  if (stufe === 1) { st = "Z"; if (a !== "einer") a = "bunt"; }
+  if (stufe === 3) a = "bunt";
+  if (a === "einer") st = "Z"; if (a === "zehner" || a === "gleich") st = "H";
+  let z = [];
+  if (a === "einer") { const b = T.zufall(1, 9) * 100 + T.zufall(1, 9) * 10; z = lauf(anzahl).map(k => b + k); }
+  if (a === "zehner") { const h = T.zufall(1, 8) * 100, d = T.zufall(1, 9); z = lauf(anzahl).map(k => h + k * 10 + d); }
+  if (a === "mitte") {
+    if (st === "Z") { const s = T.zufall(10, 99 - anzahl); z = Array.from({ length: anzahl }, (_, i) => (s + i) * 10 + 5); }
+    else { const s = T.zufall(0, 9 - Math.min(anzahl, 9)); z = Array.from({ length: Math.min(anzahl, 9) }, (_, i) => (s + i) * 100 + 50).filter(x => x >= 50); }
+  }
+  if (a === "gleich") { const ziel = T.zufall(2, 9) * 100, g = R.grenzen(ziel, "H"), s = new Set();
+    while (s.size < anzahl) s.add(T.zufall(g.von, g.bis)); z = [...s].sort((p, q) => p - q); z = T.mischen(z); }
+  if (a === "bunt") { let v = 0;
+    for (let i = 0; i < anzahl; i++) { const s = stufe === 3 ? T.wahl(["Z", "H"]) : st; const n = R.zufallsZahl(s, stufe === 1 ? 1 : stufe, v); v = n; z.push({ n, st: s }); } }
+  paket = z.map(x => typeof x === "number" ? { n: x, st } : x).map(x => ({ ...x, r: R.runde(x.n, x.st), status: "offen", eingabe: "" }));
+  paket.art = a; paket.gemischt = stufe === 3;
+}
+
+// ---------- Anzeige ----------
+const lupe = st => unterstr && !S.classList.contains("farben") ? st : null;
+function zeichne() {
+  const einz = ansicht === "einzeln" || inRunde;
+  box.classList.toggle("einzeln", einz); box.innerHTML = "";
+  const st0 = paket[0] ? paket[0].st : "Z";
+  ueber.textContent = paket.gemischt ? "Runde." : `Runde auf ${R.NAME[st0]}.`;
+  (einz ? [akt] : paket.map((_, i) => i)).forEach(i => {
+    const p = paket[i]; if (!p) return;
+    const z = T.el("div", "zeile" + (i === akt && p.status === "offen" ? " aktiv" : "") + (p.status === "geloest" ? " geloest" : ""));
+    const wert = p.status === "geloest" ? p.r : (i === akt ? getippt : "");
+    z.innerHTML = `<span class="l zahl">${R.zahl(p.n, lupe(p.st))}</span><span class="m">≈</span><span><span class="luecke">${wert}</span></span>` +
+      `<span>${p.status === "geloest" ? '<span class="haken" aria-label="richtig">✓</span>' : ""}${paket.gemischt ? `<span class="st">(${p.st})</span>` : ""}</span>`;
+    z.addEventListener("click", () => {
+      if (p.status === "geloest") return;
+      if (eingabe === "auf") { p.status = "geloest"; akt = naechste(i); zeichne(); return fertigPruefen(); }
+      if (i !== akt) { akt = i; getippt = ""; zeichne(); }
+    });
+    box.appendChild(z);
+    const h = T.el("div", "hinweis", p.hinweis && i === akt ? p.hinweis : ""); box.appendChild(h);
+  });
+  feld.hidden = eingabe === "auf" || paket.every(p => p.status === "geloest");
+}
+const naechste = i => { for (let k = 1; k <= paket.length; k++) { const j = (i + k) % paket.length; if (paket[j].status === "offen") return j; } return i; };
+
+// ---------- Ablauf ----------
+function neu() {
+  T.stop(); rf = 0; baue(); akt = 0; getippt = ""; auff.innerHTML = ""; neuKn.hidden = true; zeichne();
+}
+function tippe(z) { if (getippt.length < 4 && paket[akt].status === "offen") { getippt += z; zeichne(); } }
+function pruefe() {
+  const p = paket[akt]; if (!p || p.status !== "offen" || getippt === "") return;
+  if (+getippt === p.r) { p.status = "geloest"; p.hinweis = ""; getippt = ""; akt = naechste(akt); zeichne(); fertigPruefen(); }
+  else {
+    rf++; p.hinweis = `Schau auf die ${R.PRUEFNAME[p.st]}.`; zeichne();
+    const z = box.querySelector(".zeile.aktiv"); if (z) z.classList.add("wackelt");
+    setTimeout(() => { getippt = ""; zeichne(); }, T.bewegt ? 450 : 0);
+  }
+}
+function fertigPruefen() {
+  if (!paket.every(p => p.status === "geloest")) return;
+  zeichne();
+  if (inRunde) { T.fertig(rf === 0); return; }
+  neuKn.hidden = false;
+  if (paket.art !== "bunt") {
+    let muster = "";
+    if (paket.art === "einer" || paket.art === "zehner") { const r = paket[0].r, bis = paket.filter(p => p.r === r).pop(); muster = `Von ${paket[0].n} bis ${bis.n} ist das Ergebnis immer …`; }
+    if (paket.art === "mitte") muster = "Genau in der Mitte runden wir immer …";
+    if (paket.art === "gleich") muster = "Alle Ergebnisse sind …";
+    auff.innerHTML = "Was fällt dir auf?" + (T.hilfen() ? `<div class="muster">${muster}</div>` : "");
+  }
+}
+function alleLoesen() { paket.forEach(p => p.status = "geloest"); getippt = ""; fertigPruefen(); zeichne(); }
+addEventListener("keydown", e => {
+  if (document.querySelector(".lkm-schublade.offen") || eingabe === "auf") return;
+  if (/^[0-9]$/.test(e.key)) tippe(e.key); else if (e.key === "Backspace") { getippt = getippt.slice(0, -1); zeichne(); } else if (e.key === "Enter") pruefe();
+});
+
+// ---------- Druckansicht (DIN A4, schwarz-weiß, Lösungsseite getrennt) ----------
+const druck = T.el("div", "druck"); document.body.appendChild(druck);
+function druckansicht() {
+  T.menue.schliessen();
+  const ue = paket.gemischt ? "Runde auf Zehner (Z) oder Hunderter (H)." : `Runde auf ${R.NAME[paket[0].st]}.`;
+  const zeilen = los => paket.map(p => `<div class="az"><span class="l">${p.n}</span> ≈ ${los ? `<b>${p.r}</b>` : '<span class="lu"></span>'}${paket.gemischt ? ` (${p.st})` : ""}</div>`).join("");
+  const kopf = '<div class="kopfz"><span>Name: ______________________</span><span>Datum: ____________</span></div>';
+  const frage = paket.art !== "bunt" ? '<div class="frage">Was fällt dir auf?<div class="lin"></div><div class="lin"></div></div>' : "";
+  druck.innerHTML = `<div class="druck-leiste"><button type="button" id="drucken">Drucken</button><button type="button" id="dzu">Schließen</button></div>
+    <section class="blatt">${kopf}<h1>${ue}</h1>${zeilen(false)}${frage}</section>
+    <section class="blatt"><h1>Lösung</h1>${zeilen(true)}</section>`;
+  druck.classList.add("zeigen");
+  druck.querySelector("#drucken").addEventListener("click", () => window.print());
+  druck.querySelector("#dzu").addEventListener("click", () => druck.classList.remove("zeigen"));
+}
+
+// Übungsrunde: Ansicht Einzeln, eine Aufgabe
+if (!T.runde({ id: "rechentafel", neu: s => { inRunde = true; stufe = s; anzahl = 1; art = "bunt"; neu(); return `rt-${paket[0].n}-${paket[0].st}`; } })) neu();
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
+<meta name="robots" content="noindex, nofollow">
+<title>Runden Schritt für Schritt – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
+<style>
+.wegleiste{position:absolute;left:0;width:1600px;top:44px;display:flex;justify-content:center;gap:22px}
+.wegleiste button{width:22px;height:22px;border-radius:50%;border:3px solid #9aa39e;background:#fff;padding:0;cursor:pointer}
+.wegleiste button.erledigt{background:#9aa39e}
+.wegleiste button.jetzt{border-color:var(--ink);width:26px;height:26px;margin-top:-2px}
+.etappe-name{position:absolute;left:0;width:1600px;top:84px;text-align:center;font-size:24px;color:#6d7772}
+.frage{position:absolute;left:0;width:1600px;top:130px;text-align:center;font-size:36px;font-weight:700}
+.mitte{position:absolute;left:0;width:1600px;top:190px;height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+.mitte .satz{font-size:44px;font-weight:700;text-align:center;line-height:1.3}
+.mitte .satz.grau{color:#9aa39e}
+.mitte .gross{font-size:110px;font-weight:700;line-height:1.05;white-space:nowrap}
+.mitte .klein{font-size:30px;color:#6d7772}
+.strahl text{font-family:var(--font);font-weight:700;fill:var(--ink);text-anchor:middle}
+.strahl .achse,.strahl .st{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.strahl .bogen{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;animation:bogenEin .3s both}
+.strahl .bogen.grau{stroke:#b9c2bc}
+@keyframes bogenEin{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.strahl .bogen{animation:none}}
+.regel{display:flex;flex-direction:column;gap:12px;font-size:48px;font-weight:700}
+.regel div{color:#b9c2bc;letter-spacing:.12em}
+.regel div.an{color:var(--ink)}
+.abdeck{position:relative;display:inline-block}
+.abdeck.zu::after{content:"";position:absolute;left:-.06em;right:-.06em;top:.06em;bottom:.02em;background:#cfd6d1;border-radius:.08em}
+.schild{padding:8px 20px;border:3px solid var(--ink);border-radius:12px;font-size:30px;font-weight:700}
+.optionen{display:flex;gap:30px;justify-content:center;flex-wrap:wrap}
+.optionen .knopf{min-width:200px;min-height:100px;font-size:52px;border-width:3px;background:#fff}
+.optionen.saetze{flex-direction:column;gap:18px}
+.optionen.saetze .knopf{font-size:36px;min-width:900px;min-height:84px}
+.optionen .knopf.richtig{border-color:var(--ok);border-width:7px}
+.optionen .knopf.weg{opacity:.3}
+.haken svg{width:220px;height:220px;fill:none;stroke:var(--ok);stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage"></div></div>
+<script>
+window.HINWEISE = {
+ titel: "Runden Schritt für Schritt",
+ teile: [
+  { h: "Worum geht es?", text: "Kleinschrittige Einführung in 8 Etappen, eine Idee pro Etappe. Sie beginnt mit zweistelligen Zahlen und knüpft an „Zahlenstrahl bis 1000“ an (Nachbarn, Mitte). Gedacht für 2–3 Stunden." },
+  { h: "Aufbau jeder Etappe", punkte: [
+    "**Zeigen**: eine Idee, ein Bild, ein Satz. Sie sprechen, die Kinder sprechen nach. **Weiter** blendet Schritt für Schritt auf.",
+    "**Probieren**: drei kurze Aufgaben derselben Art, eine pro Bildschirm.",
+    "**Das kann ich**: ein großes Häkchen, die Etappe wird oben abgehakt." ] },
+  { h: "Die Etappen", punkte: ["1 Ungefähr reicht · 2 Die Nachbarzehner · 3 Wer ist näher? · 4 Die Mitte · 5 Die Regel · 6 Dreistellig auf Zehner · 7 Auf Hunderter · 8 Besondere Zahlen"] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Etappe** direkt wählen (auch über die Punkte oben), **Zurück**, **Neue Aufgaben** würfelt die Probier-Aufgaben neu.",
+    "**Stufe 2** lässt in Etappe 6 die graue Abdeck-Karte weg.",
+    "Der erreichte Stand wird auf diesem Gerät gemerkt. **Von vorn beginnen** setzt ihn zurück.",
+    "Diese Seite ist zum gemeinsamen Erarbeiten gedacht und wird in der Übungsrunde nicht angeboten." ] } ]
+};
+</script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
+<script>
+const T = Tafel, R = Runden, S = T.buehne(), ns = "http://www.w3.org/2000/svg";
+const KEY = "runden-einfuehrung";
+const NAMEN = ["Ungefähr reicht", "Die Nachbarzehner", "Wer ist näher?", "Die Mitte", "Die Regel", "Dreistellig auf Zehner", "Auf Hunderter", "Besondere Zahlen"];
+let stand = { etappe: 0, fertig: [] };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.etappe >= 0 && s.etappe < 8) stand = { etappe: s.etappe, fertig: Array.isArray(s.fertig) ? s.fertig : [] }; } catch (_) {}
+const merke = () => { try { localStorage.setItem(KEY, JSON.stringify(stand)); } catch (_) {} };
+let teil = "zeigen", schritt = 0, nr = 0, aufgaben = [], stufe = 1, geloest = false;
+
+// ---------- Kinderansicht ----------
+const weg = T.blk(0, 44, 1600, 0, "wegleiste");
+const name = T.blk(0, 84, 1600, 0, "etappe-name");
+const frage = T.blk(0, 130, 1600, 0, "frage");
+const mitte = T.blk(0, 190, 1600, 420, "mitte");
+const rueck = T.blk(100, 660, 1400, 0, "rueck");
+const weiterKn = T.knopf("Weiter", () => weiter(), "haupt");
+T.kinderknoepfe(weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const etWahl = T.gruppe("Etappe", NAMEN.map((n, i) => ({ wert: i, text: String(i + 1), aria: n })), stand.etappe, v => starte(v));
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1 mit Abdeck-Karte" }, { wert: 2, text: "2 ohne" }], 1, v => { stufe = v; if (teil === "probieren") zeigeAufgabe(); }, "einf-stufe");
+stufe = stufenWahl.wert;
+T.kopf({ menue: true, titel: "Runden Schritt für Schritt", beschreibung: "Einführung in 8 Etappen.", satzmuster: false,
+  onNeu: () => { aufgaben = probier(stand.etappe); nr = 0; teil = "probieren"; zeigeAufgabe(); }, extra: [etWahl, stufenWahl] });
+T.menue.steuer("Zurück", () => zurueck());
+T.menue.steuer("Von vorn beginnen", () => { stand = { etappe: 0, fertig: [] }; merke(); starte(0); });
+
+// ---------- Bausteine ----------
+const el = (tag, a, txt) => { const e = document.createElementNS(ns, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+// Kurzer Zahlenstrahl: nur u und o beschriftet, Punkt bei n; huepf = ["l"|"r", …]
+function strahl(u, o, n, huepf = [], grau = []) {
+  const svg = el("svg", { class: "strahl", width: 1100, height: 210, viewBox: "0 0 1100 210" });
+  const X = v => 70 + (v - u) * 960 / (o - u), Y = 120, sch = (o - u) / 10;
+  svg.append(el("line", { class: "achse", x1: 20, y1: Y, x2: 1080, y2: Y }));
+  for (let i = 0; i <= 10; i++) { const h = i % 10 === 0 ? 30 : i === 5 ? 22 : 15; svg.append(el("line", { class: "st", x1: X(u + i * sch), y1: Y - h, x2: X(u + i * sch), y2: Y + h })); }
+  svg.append(el("text", { x: X(u), y: Y + 78, "font-size": 50 }, u), el("text", { x: X(o), y: Y + 78, "font-size": 50 }, o));
+  let k = 0;
+  huepf.forEach(seite => {
+    const ziel = seite === "l" ? u : o, s = ziel < n ? -sch : sch;
+    for (let a = n; a !== ziel; a += s) {
+      const x1 = X(a), x2 = X(a + s);
+      const p = el("path", { class: "bogen" + (grau.includes(seite) ? " grau" : ""), d: `M${x1},${Y - 4} Q${(x1 + x2) / 2},${Y - 64} ${x2},${Y - 4}` });
+      p.style.animationDelay = (T.bewegt ? k++ * 0.18 : 0) + "s"; svg.append(p);
+    }
+  });
+  svg.append(el("circle", { cx: X(n), cy: Y, r: 14, fill: "#1d2320" }), el("text", { x: X(n), y: Y - 76, "font-size": 52 }, n));
+  return svg;
+}
+const div = (cls, html) => T.el("div", cls, html);
+const gl = (n, r, lupe) => div("gross zahl", R.gleichung(n, r, lupe));
+const regel = an => { const d = div("regel"); d.innerHTML = `<div class="${an === "ab" ? "an" : ""}">0 1 2 3 4 → ab</div><div class="${an === "auf" ? "an" : ""}">5 6 7 8 9 → auf</div>`; return d; };
+const abgedeckt = (n, zu) => div("gross zahl", `<span class="abdeck${zu ? " zu" : ""}">${Math.floor(n / 100)}</span>${String(n % 100).padStart(2, "0")}`);
+
+// ---------- Zeigen: je Etappe eine Liste von Schritten ----------
+const ZEIGEN = [
+  [() => [div("satz", "Auf dem Schulhof sind 48 Kinder.")],
+   () => [div("satz grau", "Auf dem Schulhof sind 48 Kinder."), div("satz", "Auf dem Schulhof sind ungefähr 50 Kinder.")],
+   () => [gl(48, 50), div("klein", "≈ heißt „ungefähr“.")]],
+  [() => [strahl(40, 50, 43)], () => [strahl(40, 50, 43), div("satz", "43 liegt zwischen 40 und 50.")]],
+  [() => [strahl(40, 50, 43)], () => [strahl(40, 50, 43, ["l"]), div("satz", "Nach links: 3 Sprünge.")],
+   () => [strahl(40, 50, 43, ["l", "r"], ["r"]), div("satz", "Nach rechts: 7 Sprünge. 43 liegt näher an 40.")]],
+  [() => [strahl(40, 50, 45, ["l", "r"]), div("satz", "45 liegt genau in der Mitte: 5 und 5 Sprünge.")],
+   () => [div("schild", "Abmachung: aufrunden"), gl(45, 50)]],
+  [() => [div("gross zahl", R.zahl(43, "Z")), div("satz", "Ich schaue nur auf die Einer.")],
+   () => [div("gross zahl", R.zahl(43, "Z")), regel(null)],
+   () => [gl(43, 40, "Z"), regel("ab")]],
+  [() => [div("gross zahl", "273")], () => [abgedeckt(273, true), div("satz", "73 ≈ 70")],
+   () => [gl(273, 270, "Z"), div("satz", "Der Hunderter bleibt.")]],
+  [() => [strahl(200, 300, 273)], () => [div("gross zahl", R.zahl(273, "H")), div("satz", "Ich schaue auf die Zehner: 7 → auf")],
+   () => [gl(273, 300, "H")]],
+  [() => [gl(396, 400), div("satz", "Auch der Hunderter ändert sich.")], () => [gl(999, 1000), div("satz", "Es wird 1000.")],
+   () => [gl(340, 340), div("satz", "340 ist schon rund.")], () => [gl(47, 0), div("satz", "Auf Hunderter: 47 ≈ 0")]],
+];
+
+// ---------- Probieren: je Etappe drei Aufgaben ----------
+const SAETZE1 = [["Im Bus sitzen", "Kinder."], ["Im Glas sind", "Murmeln."], ["Das Buch hat", "Seiten."], ["Im Garten stehen", "Bäume."], ["Auf dem Fest sind", "Gäste."]];
+const opt = (werte, richtig) => werte.map(w => ({ text: String(w), ok: Array.isArray(richtig) ? richtig.includes(w) : w === richtig }));
+const nachbarOpt = (n, st) => { const x = R.nachbarn(n, st); return opt([x.u, x.o], R.runde(n, st)); };
+function probier(e) {
+  let vorher = 0; const zz = (mitte) => (vorher = R.zweistellig(mitte, vorher));
+  const drei = f => [0, 1, 2].map(i => f(i));
+  switch (e) {
+    case 0: return drei(i => { const n = zz(), [a, b] = T.wahl(SAETZE1); const r = R.runde(n, "Z");
+      return { frage: "Welcher Satz ist ungefähr?", typ: "saetze", optionen: T.mischen([{ text: `${a} ${n} ${b}`, ok: false }, { text: `${a} ungefähr ${r} ${b}`, ok: true }]), satz: `${n} ≈ ${r}` }; });
+    case 1: return drei(() => { const n = zz(), x = R.nachbarn(n, "Z"); let w = [x.u - 10, x.u, x.o, x.o + 10].filter(z => z >= 0 && z <= 100);
+      return { frage: "Zwischen welchen Zehnern liegt die Zahl? Tippe beide an.", bild: () => [div("gross zahl", n)], optionen: opt(w, [x.u, x.o]), mehrfach: 2, satz: `${n} liegt zwischen ${x.u} und ${x.o}.` }; });
+    case 2: return drei(() => { const n = zz(), x = R.nachbarn(n, "Z");
+      return { frage: "Welcher Zehner ist näher?", bild: () => [strahl(x.u, x.o, n)], optionen: nachbarOpt(n, "Z"), satz: R.naeher(n, "Z") }; });
+    case 3: return T.mischen([T.zufall(1, 9) * 10 + 5, T.zufall(1, 9) * 10 + 5, zz()]).map(n => { const x = R.nachbarn(n, "Z");
+      return { frage: "Auf welchen Zehner runden wir?", bild: () => [strahl(x.u, x.o, n)], optionen: nachbarOpt(n, "Z"), satz: R.istMitte(n, "Z") ? "Genau in der Mitte: Wir runden auf." : R.naeher(n, "Z") }; });
+    case 4: return drei(() => { const n = zz(), d = n % 10, r = R.runde(n, "Z");
+      return { frage: "Ab oder auf?", bild: () => [div("gross zahl", R.zahl(n, "Z"))], optionen: [{ text: "ab", ok: d < 5 }, { text: "auf", ok: d >= 5 }],
+        dann: { frage: "Wie heißt die gerundete Zahl?", bild: () => [div("gross zahl", R.zahl(n, "Z") + '<span class="ca">≈</span>?'), regel(d < 5 ? "ab" : "auf")], optionen: nachbarOpt(n, "Z") }, satz: `${n} ≈ ${r}` }; });
+    case 5: return drei(() => { const n = R.zufallsZahl("Z", 1, vorher); vorher = n;
+      return { frage: "Runde auf Zehner.", bild: () => [stufe === 1 ? abgedeckt(n, true) : div("gross zahl", n)], optionen: nachbarOpt(n, "Z"), satz: `${n} ≈ ${R.runde(n, "Z")}` }; });
+    case 6: return drei(() => { const n = R.zufallsZahl("H", 1, vorher); vorher = n;
+      return { frage: "Runde auf Hunderter.", bild: () => [div("gross zahl", R.zahl(n, "H"))], optionen: nachbarOpt(n, "H"), satz: `${n} ≈ ${R.runde(n, "H")}` }; });
+    case 7: return T.mischen([
+      (() => { const n = T.zufall(1, 8) * 100 + 90 + T.zufall(5, 9); return { frage: "Runde auf Zehner.", bild: () => [div("gross zahl", n)], optionen: nachbarOpt(n, "Z"), satz: `${n} ≈ ${R.runde(n, "Z")}. Der Hunderter wird größer.` }; })(),
+      (() => { const n = T.zufall(11, 98) * 10, x = n; return { frage: "Runde auf Zehner.", bild: () => [div("gross zahl", n)], optionen: opt([x - 10, x, x + 10], x), satz: `${n} ist schon rund.` }; })(),
+      (() => { const n = T.zufall(11, 99); return { frage: "Runde auf Hunderter.", bild: () => [div("gross zahl", n)], optionen: opt([0, 100], R.runde(n, "H")), satz: `${n} ≈ ${R.runde(n, "H")}` }; })()]);
+  }
+}
+
+// ---------- Ablauf ----------
+function wegleiste() {
+  weg.innerHTML = "";
+  NAMEN.forEach((n, i) => { const b = T.el("button", (stand.fertig.includes(i) ? "erledigt " : "") + (i === stand.etappe ? "jetzt" : ""));
+    b.type = "button"; b.setAttribute("aria-label", `Etappe ${i + 1}: ${n}`); b.addEventListener("click", () => starte(i)); weg.appendChild(b); });
+  name.textContent = `${stand.etappe + 1} · ${NAMEN[stand.etappe]}`;
+}
+function fuelle(teile) { mitte.innerHTML = ""; teile.filter(Boolean).forEach(t => mitte.appendChild(t)); }
+function starte(e) {
+  T.stop(); stand.etappe = e; merke(); etWahl.setze(e);
+  teil = "zeigen"; schritt = 0; aufgaben = probier(e); nr = 0; wegleiste(); zeigeSchritt();
+}
+function zeigeSchritt() {
+  frage.textContent = ""; T.melde(rueck, "", ""); weiterKn.textContent = "Weiter";
+  fuelle(ZEIGEN[stand.etappe][schritt]());
+}
+function zeigeAufgabe(teilAufgabe) {
+  geloest = false; const a = teilAufgabe || aufgaben[nr];
+  frage.textContent = `${a.frage}`; T.melde(rueck, "", "");
+  const o = div("optionen" + (a.typ === "saetze" ? " saetze" : "")); let treffer = 0;
+  a.optionen.forEach(op => { const b = T.knopf(op.text, () => {
+    if (geloest || b.classList.contains("richtig")) return;
+    if (op.ok) { b.classList.add("richtig"); treffer++;
+      if (treffer >= (a.mehrfach || 1)) { if (a.dann) { T.melde(rueck, "ok", T.lob()); setTimeout(() => zeigeAufgabe(Object.assign({}, a.dann, { satz: a.satz })), T.bewegt ? 700 : 0); geloest = true; return; }
+        geloest = true; T.melde(rueck, "ok", `${T.lob()} ${a.satz || ""}`); }
+    } else { b.classList.add("weg"); T.melde(rueck, "noch", "Noch nicht. Schau noch einmal."); }
+  }); o.appendChild(b); });
+  fuelle([...(a.bild ? a.bild() : []), o]);
+}
+function kannIch() {
+  teil = "kann"; if (!stand.fertig.includes(stand.etappe)) stand.fertig.push(stand.etappe); merke(); wegleiste();
+  frage.textContent = ""; T.melde(rueck, "ok", "Das kann ich!");
+  fuelle([div("haken", '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 52 L42 76 L84 24"/></svg>')]);
+  weiterKn.textContent = stand.etappe < 7 ? "Nächste Etappe" : "Von vorn";
+}
+function weiter() {
+  T.stop();
+  if (teil === "zeigen") {
+    if (schritt < ZEIGEN[stand.etappe].length - 1) { schritt++; return zeigeSchritt(); }
+    teil = "probieren"; nr = 0; return zeigeAufgabe();
+  }
+  if (teil === "probieren") { if (nr < aufgaben.length - 1) { nr++; return zeigeAufgabe(); } return kannIch(); }
+  if (teil === "kann") starte(stand.etappe < 7 ? stand.etappe + 1 : 0);
+}
+function zurueck() {
+  T.stop();
+  if (teil === "zeigen" && schritt > 0) { schritt--; return zeigeSchritt(); }
+  if (teil === "probieren" && nr > 0) { nr--; return zeigeAufgabe(); }
+  if (teil === "probieren" || teil === "kann") { teil = "zeigen"; schritt = ZEIGEN[stand.etappe].length - 1; return zeigeSchritt(); }
+  if (stand.etappe > 0) starte(stand.etappe - 1);
+}
+starte(stand.etappe);
+</script>
+</body>
+</html>

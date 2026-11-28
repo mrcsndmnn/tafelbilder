@@ -3,10 +3,18 @@
  "fach": "Mathematik",
  "tafelbilder": [
   {
+   "id": "einfuehrung",
+   "titel": "Runden Schritt für Schritt",
+   "pfad": "einfuehrung/",
+   "svg": "<path d=\"M6 36 H16 V28 H26 V20 H36 V10\"/>",
+   "runde": false,
+   "hinweis": "zum gemeinsamen Erarbeiten"
+  },
+  {
    "id": "zahlenstrahl",
-   "titel": "Zahlenstrahl-Lupe: Wo ist es näher?",
+   "titel": "Zahlenstrahl-Lupe",
    "pfad": "zahlenstrahl/",
-   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/><path d=\"M12 18 H24\"/>",
+   "svg": "<path d=\"M4 26 H40\"/><path d=\"M8 20 V32 M36 20 V32\"/><path d=\"M14 24 Q19 12 24 24\"/>",
    "runde": true,
    "niveaus": [
     1,
@@ -18,9 +26,9 @@
   },
   {
    "id": "rundungsberg",
-   "titel": "Der Rundungsberg (Ich bin dran)",
+   "titel": "Der Rundungsberg",
    "pfad": "rundungsberg/",
-   "svg": "<path d=\"M3 38 L22 8 L41 38 Z\"/><circle cx=\"31\" cy=\"22\" r=\"4\" fill=\"currentColor\"/>",
+   "svg": "<path d=\"M3 36 H10 L22 10 L34 36 H41\"/><circle cx=\"16\" cy=\"18\" r=\"3.5\"/>",
    "runde": true,
    "niveaus": [
     1,
@@ -31,8 +39,22 @@
    "pruefung": "auto"
   },
   {
+   "id": "rechentafel",
+   "titel": "Rechen-Tafel",
+   "pfad": "rechentafel/",
+   "svg": "<path d=\"M8 12 H18 M24 12 H36 M8 22 H18 M24 22 H36 M8 32 H18 M24 32 H36\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 30,
+   "pruefung": "auto"
+  },
+  {
    "id": "blitzrunde",
-   "titel": "Blitzrunde Runden",
+   "titel": "Blitzrunde",
    "pfad": "blitzrunde/",
    "svg": "<path d=\"M25 4 L10 25 H21 L18 40 L34 18 H23 Z\"/>",
    "runde": true,
@@ -45,10 +67,38 @@
    "pruefung": "auto"
   },
   {
+   "id": "haeuser",
+   "titel": "Zehner-Häuser",
+   "pfad": "haeuser/",
+   "svg": "<path d=\"M4 20 L13 11 L22 20 V36 H4 Z\"/><path d=\"M22 20 L31 11 L40 20 V36 H22\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 40,
+   "pruefung": "auto"
+  },
+  {
+   "id": "rueckwaerts",
+   "titel": "Rückwärts runden",
+   "pfad": "rueckwaerts/",
+   "svg": "<path d=\"M36 22 H8\"/><path d=\"M16 14 L8 22 L16 30\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 90,
+   "pruefung": "auto"
+  },
+  {
    "id": "fehler-detektiv",
    "titel": "Fehler-Detektiv",
    "pfad": "fehler-detektiv/",
-   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/><path d=\"M14 14 L22 22 M22 14 L14 22\"/>",
+   "svg": "<circle cx=\"18\" cy=\"18\" r=\"11\"/><path d=\"M26 26 L38 38\"/>",
    "runde": true,
    "niveaus": [
     1,
@@ -60,14 +110,28 @@
   },
   {
    "id": "schulfest",
-   "titel": "Schulfest: Gerundet oder nicht?",
+   "titel": "Genau oder gerundet?",
    "pfad": "schulfest/",
-   "svg": "<path d=\"M4 38 L22 8 L40 38 Z\"/><path d=\"M22 8 V38\"/><path d=\"M22 8 V3 L28 5 L22 7\"/>",
+   "svg": "<path d=\"M8 16 H36 M8 28 H36\"/><path d=\"M14 22 Q18 18 22 22 T30 22\" />",
    "runde": true,
    "niveaus": [
     1
    ],
    "dauerSek": 40,
+   "pruefung": "auto"
+  },
+  {
+   "id": "ungefaehr-rechnen",
+   "titel": "Ungefähr rechnen",
+   "pfad": "ungefaehr-rechnen/",
+   "svg": "<path d=\"M10 22 H34 M22 10 V34\"/><path d=\"M30 6 Q33 3 36 6 T42 6\"/>",
+   "runde": true,
+   "niveaus": [
+    1,
+    2,
+    3
+   ],
+   "dauerSek": 120,
    "pruefung": "auto"
   }
  ]
