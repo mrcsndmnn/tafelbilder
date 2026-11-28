@@ -5,85 +5,72 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
-<title>Blitzrunde Runden – Runden</title>
-<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
-<link rel="stylesheet" href="../gemeinsam/runden.css">
-<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<title>Blitzrunde – Runden</title>
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
 <style>
-.karte{display:flex;gap:20px;width:900px;height:430px;padding:26px 30px;border:5px solid var(--ink);border-radius:26px;background:#fff;box-shadow:0 6px 0 #c9d1cb}
-.karte .links{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
-.karte .rechts{width:440px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px}
-.gross{font-size:140px;font-weight:700;line-height:1.05;white-space:nowrap}
-.gross.mittel{font-size:96px}
-.gross.mitlupe{padding-top:40px}
-.frage{font-size:36px;font-weight:700;margin-top:14px;line-height:1.2}
-.ergebnis{font-size:50px;font-weight:700;margin-top:12px;min-height:56px}
-.antwort{width:300px;min-height:100px;font-size:56px}
+.mitte-zahl{position:absolute;left:0;width:1600px;top:170px;text-align:center;font-size:150px;font-weight:700;line-height:1.05;white-space:nowrap}
+.mitte-zahl.gl{font-size:120px}
+.optionen{position:absolute;left:0;width:1600px;top:440px;display:flex;justify-content:center;gap:40px}
+.antwort{min-width:260px;min-height:110px;font-size:60px;border-width:3px;background:#fff}
+.antwort.richtig{border-color:var(--ok);border-width:7px;color:var(--ink);background:#fff}
 .antwort.weg{opacity:.3}
-.antwort.richtig{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
-.zh{width:170px;min-height:150px;font-size:80px;color:#fff;border-color:var(--ink)}
-.zh.z{background:var(--Z)} .zh.h{background:var(--H)}
-.zh.z:hover{background:#b83029} .zh.h:hover{background:#26763a}
-.zh.richtig{box-shadow:0 0 0 8px var(--gelb)}
-.zh.weg{opacity:.3}
-.zhreihe{display:flex;gap:24px}
-.zeit{width:900px;height:20px;border-radius:10px;background:#e6ebe7;overflow:hidden}
-.zeit div{height:100%;width:100%;background:var(--E);border-radius:10px}
-.bedien{display:flex;gap:14px;align-items:center;width:900px}
-.zaehler{margin-left:auto;font-size:30px;font-weight:700;color:var(--soft)}
+.zeitbalken{position:absolute;left:400px;width:800px;top:390px;height:8px;border-radius:4px;background:#eef1ef;overflow:hidden}
+.zeitbalken div{height:100%;width:100%;background:#9aa39e}
+.kleinberg{position:absolute;left:1180px;top:430px;width:380px}
 </style>
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
-<script src="../../../gemeinsam/hinweise.js"></script>
 <script>
 window.HINWEISE = {
  titel: "Blitzrunde Runden",
- start: "**Start** führt zur Startseite mit allen Tafelbildern zum Runden.",
- farben: "**Farben** hat hier keine eigene Wirkung: Die großen Zahlen sind immer in den Stellenwertfarben.",
  teile: [
-  { h: "Worum geht es?", text: "Kurze Wiederholung zum Stundenbeginn (3–5 Minuten), immer im gleichen Ablauf wie die Blitzrunde im Zahlenraum." },
-  { h: "Aufgabenarten", punkte: [
-    "**Wählen**: „Auf welchen Zehner wird gerundet?“ Eine der Antwortkarten antippen.",
-    "**Selbst**: „458 ≈ ?“ Die Klasse sagt die Lösung laut, **Lösung** deckt auf.",
-    "**Z oder H?**: „369 ≈ 400“ – wurde auf Zehner oder Hunderter gerundet? Z oder H antippen.",
-    "**gemischt**: Auf Stufe ●/●● Wählen und Selbst, auf Stufe ●●● alle drei."]},
-  { h: "Ablauf", punkte: [
-    "Nach der Lösung zeigt ein kleiner Rundungsberg die Kugel und ein Satz wie „Die Einerziffer ist 4. Ich runde ab.“",
-    "**Nächste Runde**. Nach 10 Runden ist die Blitzrunde fertig. **Neu** beginnt von vorn.",
-    "**Zeit**: aus, 5 s oder 10 s. Läuft der Balken ab, erscheint die Lösung von selbst.",
-    "**Heftzahlen**: Zahlen aus dem Übungsheft (z. B. 273, 456, 250, 499) kommen bevorzugt dran."]},
-  { h: "Stufen", punkte: ["**●**: nur Zehner, die Prüfstelle ist schon unterstrichen. **●●**: Zehner und Hunderter, ohne Unterstreichung. **●●●**: mit Sonderfällen (Mitte, Übergang, unter 100, schon rund); bei Wählen gibt es dann drei Karten."]}]
+  { h: "Worum geht es?", text: "Zehn schnelle Runden zum Üben: Zahl ansehen, Nachbarn wählen oder selbst runden." },
+  { h: "So geht es", punkte: [
+    "Oben steht die Frage, in der Mitte die Zahl, darunter die Antworten zum Antippen.",
+    "Bei **Selbst** sagen die Kinder das Ergebnis, die Lehrkraft drückt **Lösung**.",
+    "**Weiter** stellt die nächste Runde. Unten links steht klein „Runde x von 10“." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Stufe**: 1 nur Zehner, mit unterstrichener Ziffer. 2 Zehner und Hunderter. 3 mit Sonderfällen und einer dritten Antwort.",
+    "**Art**: Wählen, Selbst, Zehner oder Hunderter?, gemischt. **Zeit**: aus, 5 s, 10 s. **Heftzahlen** mischt Zahlen aus dem Heft unter.",
+    "Hilfen: **Ziffer unterstreichen** (auch ab Stufe 2), **Kleiner Berg** bei der Lösung. Mit **Farben** entfällt das Unterstreichen." ] } ]
 };
 </script>
-<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
-<script src="../gemeinsam/runden.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
 const RUNDEN = 10;
 const HEFTZAHLEN = [273, 456, 250, 499, 875, 922, 505, 750, 138, 255, 359, 229, 351, 258, 349, 275, 396, 47, 55, 950, 754, 458, 369];
 let rf = 0, stufe = 1, art = "waehlen", zeit = 0, heft = T.laden("rblitz-heft", false), runde = 1, aufg = null, gezeigt = false, uhr = null, letzte = 0;
+let unterstr = false, kleinBerg = false;
 
-// ---------- Aufbau ----------
-const stufenWahl = T.stufen(v => { stufe = v; start(); }, "rblitz-stufe");
-const artWahl = T.gruppe("Art", [{ wert: "waehlen", text: "Wählen" }, { wert: "selbst", text: "Selbst" }, { wert: "zh", text: "Z oder H?" }, { wert: "mix", text: "gemischt" }], "waehlen",
-  v => { art = v; start(); }, "rblitz-art");
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const zahlEl = T.blk(0, 170, 1600, 0, "mitte-zahl zahl");
+const zeitEl = T.blk(400, 390, 800, 0, "zeitbalken"); zeitEl.innerHTML = "<div></div>";
+const opt = T.blk(0, 440, 1600, 0, "optionen");
+const rueck = T.blk(100, 640, 1400, 0, "rueck");
+const bergBox = T.blk(1180, 430, 380, 0, "kleinberg");
+const fort = T.blk(0, 0, 0, 0, "fortschritt"); fort.style.left = ""; fort.style.top = "";
+const loesKn = T.knopf("Lösung", () => loesung());
+const weiterKn = T.knopf("Weiter", () => weiter(), "haupt"); weiterKn.dataset.runde = "aus"; fort.dataset.runde = "aus";
+T.kinderknoepfe(loesKn, weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1" }, { wert: 2, text: "2" }, { wert: 3, text: "3 Sonderfälle" }], 1, v => { stufe = v; start(); }, "rblitz-stufe");
+const artWahl = T.gruppe("Art", [{ wert: "waehlen", text: "Wählen" }, { wert: "selbst", text: "Selbst" }, { wert: "zh", text: "Zehner oder Hunderter?" }, { wert: "mix", text: "gemischt" }], "waehlen", v => { art = v; start(); }, "rblitz-art");
 const zeitWahl = T.gruppe("Zeit", [{ wert: 0, text: "aus" }, { wert: 5, text: "5 s" }, { wert: 10, text: "10 s" }], 0, v => { zeit = v; zeigeAufgabe(); }, "rblitz-zeit");
 stufe = stufenWahl.wert; art = artWahl.wert; zeit = zeitWahl.wert;
-T.leiste(stufenWahl, artWahl, zeitWahl);
-
-const kBox = T.blk(350, 182); const karte = T.el("div", "karte"); kBox.appendChild(karte);
-const links = T.el("div", "links"), rechts = T.el("div", "rechts"); karte.append(links, rechts);
-const zeitBox = T.blk(350, 630); const zeitEl = T.el("div", "zeit", "<div></div>"); zeitBox.appendChild(zeitEl);
-const bed = T.blk(350, 664); const bedien = T.el("div", "bedien"); bed.appendChild(bedien);
-const loesKn = T.knopf("Lösung", () => loesung(), "haupt"), weiterKn = T.knopf("Nächste Runde", () => weiter());
 const heftKn = T.schalter("Heftzahlen", heft, v => { heft = v; T.merken("rblitz-heft", v); });
-const zaehler = T.el("span", "zaehler"); bedien.append(loesKn, weiterKn, heftKn, zaehler);
-[weiterKn, heftKn, zaehler].forEach(x => x.dataset.runde = "aus");
-const satz = T.streifen(T.blk(350, 750, 900), "hilfe");
-
-T.kopf({ titel: "Blitzrunde Runden", onNeu: () => start() });
+const unterKn = T.schalter("Ziffer unterstreichen", false, v => { unterstr = v; zeigeZahl(); });
+const bergKn = T.schalter("Kleiner Berg bei der Lösung", false, v => { kleinBerg = v; bergBox.hidden = !v || !gezeigt; });
+T.kopf({ menue: true, titel: "Blitzrunde Runden", beschreibung: "Zehn schnelle Runden: wählen oder selbst runden.", satzmuster: false,
+  onNeu: () => start(), onLoesung: () => loesung(), extra: [stufenWahl, artWahl, zeitWahl, heftKn], hilfen: [unterKn, bergKn], onFarben: () => zeigeZahl() });
 
 // ---------- Aufgaben ----------
 function zahl(st) {
@@ -100,70 +87,74 @@ function neueAufgabe() {
     const x = { art: a, st, n, r };
     if (a === "waehlen") {
       const nb = R.nachbarn(n, st), b = R.BASIS[st];
-      let opt = nb.rund ? [n, n + b] : [nb.u, nb.o];
-      if (stufe === 3) { const abl = T.wahl([nb.u - b, nb.o + b, R.runde(n, R.ANDERE[st])].filter(z => z >= 0 && z <= 1000 && !opt.includes(z))); if (abl != null) opt.push(abl); }
-      x.opt = opt.sort((p, q) => p - q);
+      let o = nb.rund ? [n, n + b] : [nb.u, nb.o];
+      if (stufe === 3) { const abl = T.wahl([nb.u - b, nb.o + b, R.runde(n, R.ANDERE[st])].filter(z => z >= 0 && z <= 1000 && !o.includes(z))); if (abl != null) o.push(abl); }
+      x.opt = o.sort((p, q) => p - q);
     }
     letzte = n; return x;
   }
 }
 
 // ---------- Ablauf ----------
+const lupe = () => (stufe === 1 || unterstr) && !S.classList.contains("farben") && aufg.art !== "zh" ? aufg.st : null;
+function zeigeZahl() {
+  if (!aufg) return; const a = aufg;
+  zahlEl.classList.toggle("gl", a.art === "zh" || gezeigt);
+  if (gezeigt || a.art === "zh") zahlEl.innerHTML = R.gleichung(a.n, a.r, gezeigt ? lupe() : null);
+  else zahlEl.innerHTML = R.zahl(a.n, lupe()) + (a.art === "selbst" ? '<span class="ca">≈</span>?' : "");
+}
+function fortschritt() {
+  fort.innerHTML = `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`;
+}
 function stoppeUhr() { clearTimeout(uhr); uhr = null; const b = zeitEl.firstChild; b.style.transition = "none"; b.style.width = "100%"; }
 addEventListener("pagehide", stoppeUhr);
-function start() {
-  runde = 1; weiterKn.disabled = false;
-  aufg = neueAufgabe(); zeigeAufgabe();
-}
+function start() { runde = 1; weiterKn.disabled = false; aufg = neueAufgabe(); zeigeAufgabe(); }
 function zeigeAufgabe() {
-  stoppeUhr(); gezeigt = false; const a = aufg, lupe = stufe === 1 ? a.st : null;
-  links.innerHTML = ""; rechts.innerHTML = ""; T.melde(satz, "", "");
-  rechts.style.display = a.art === "selbst" ? "none" : "";
+  stoppeUhr(); gezeigt = false; const a = aufg;
+  opt.innerHTML = ""; T.melde(rueck, "", ""); bergBox.hidden = true; bergBox.innerHTML = "";
   if (a.art === "zh") {
-    links.append(T.el("div", "gross mittel zahl", R.gleichung(a.n, a.r)), T.el("div", "frage", "Auf Zehner oder Hunderter gerundet?"));
-    const reihe = T.el("div", "zhreihe"); rechts.appendChild(reihe);
-    ["Z", "H"].forEach(k => { const b = T.knopf(k, () => antwortZH(k, b), "zh " + k.toLowerCase()); b.setAttribute("aria-label", R.NAME[k]); reihe.appendChild(b); });
-  } else if (a.art === "selbst") {
-    links.append(T.el("div", "gross zahl" + (lupe ? " mitlupe" : ""), `${R.zahl(a.n, lupe)}<span class="ca">≈</span>?`), T.el("div", "frage", `Runde auf ${R.NAME[a.st]}.`));
-  } else {
-    links.append(T.el("div", "gross zahl" + (lupe ? " mitlupe" : ""), R.zahl(a.n, lupe)), T.el("div", "frage", `Auf welchen ${R.NAME[a.st]} wird gerundet?`));
-    a.opt.forEach(o => { const b = T.knopf(String(o), () => antwortW(o, b), "antwort"); rechts.appendChild(b); });
+    auftrag.textContent = "Auf Zehner oder Hunderter gerundet?";
+    ["Z", "H"].forEach(k => { const b = T.knopf(R.NAME[k], () => antwortZH(k, b), "antwort"); opt.appendChild(b); });
+  } else if (a.art === "selbst") auftrag.textContent = `Runde auf ${R.NAME[a.st]}.`;
+  else {
+    auftrag.textContent = `Auf welchen ${R.NAME[a.st].replace(/n$/, "")} wird gerundet?`;
+    a.opt.forEach(o => { const b = T.knopf(String(o), () => antwortW(o, b), "antwort"); opt.appendChild(b); });
   }
-  links.appendChild(T.el("div", "ergebnis zahl"));
-  zaehler.textContent = `Runde ${Math.min(runde, RUNDEN)} von ${RUNDEN}`;
-  loesKn.disabled = false; weiterKn.textContent = runde >= RUNDEN ? "Runde beenden" : "Nächste Runde";
-  zeitBox.style.visibility = zeit ? "visible" : "hidden";
+  zeigeZahl(); fortschritt();
+  loesKn.hidden = a.art !== "selbst"; loesKn.disabled = false;
+  weiterKn.textContent = runde >= RUNDEN ? "Fertig" : "Weiter";
+  zeitEl.style.visibility = zeit ? "visible" : "hidden";
   if (zeit) { const b = zeitEl.firstChild; b.getBoundingClientRect(); b.style.transition = `width ${zeit}s linear`; b.style.width = "0%"; uhr = setTimeout(loesung, zeit * 1000); }
 }
 function antwortW(o, b) {
   if (gezeigt) return;
   if (o === aufg.r) { b.classList.add("richtig"); loesung(T.lob()); T.fertig(rf === 0); }
-  else { rf++; b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
+  else { rf++; b.classList.add("weg"); T.melde(rueck, "noch", "Noch nicht. Schau noch einmal."); }
 }
 function antwortZH(k, b) {
   if (gezeigt) return;
   if (k === aufg.st) { b.classList.add("richtig"); loesung(T.lob()); T.fertig(rf === 0); }
-  else { rf++; b.classList.add("weg"); T.melde(satz, "noch", T.NOCH); }
+  else { rf++; b.classList.add("weg"); T.melde(rueck, "noch", "Noch nicht. Schau noch einmal."); }
 }
 function loesung(lob) {
-  if (gezeigt) return; gezeigt = true; clearTimeout(uhr); loesKn.disabled = true;
+  if (gezeigt) return; gezeigt = true; stoppeUhr(); zeitEl.style.visibility = "hidden"; loesKn.disabled = true;
   const a = aufg, d = R.pruefziffer(a.n, a.st);
-  rechts.style.display = "";
-  if (a.art === "selbst") links.querySelector(".gross").innerHTML = R.zahl(a.n, stufe === 1 ? a.st : null);
-  if (a.art !== "zh") links.querySelector(".ergebnis").innerHTML = R.gleichung(a.n, a.r);
-  else { const e = links.querySelector(".ergebnis"); e.style.fontSize = "34px"; e.textContent = `Auf ${R.NAME[a.st]} gerundet.`; }
-  // kleiner Rundungsberg mit der Lösung
-  rechts.innerHTML = ""; const b = R.berg(rechts, { breite: 440 }), nb = Math.floor(a.n / R.BASIS[a.st]) * R.BASIS[a.st];
-  b.fuesse(nb, nb + R.BASIS[a.st]); b.kugel(d, R.FARBE[a.st], true); const seite = d >= 5 ? "o" : "u"; b.rolle(seite); b.fuss(seite);
-  const t = [];
-  if (lob) t.push(lob);
-  if (a.art === "zh") t.push(`Es wurde auf ${R.NAME[a.st]} gerundet. Ich schaue auf die ${R.PRUEFNAME[a.st]}.`);
-  t.push(R.kurzSatz(a.n, a.st), ...R.zusatz(a.n, a.st));
-  T.melde(satz, lob ? "ok" : "", t);
+  if (a.art === "waehlen") [...opt.children].forEach(b => { if (+b.textContent === a.r) b.classList.add("richtig"); });
+  zeigeZahl();
+  if (kleinBerg) {
+    bergBox.hidden = false; bergBox.innerHTML = ""; const b = R.berg(bergBox, { breite: 380 }), nb = Math.floor(a.n / R.BASIS[a.st]) * R.BASIS[a.st];
+    b.fuesse(nb, nb + R.BASIS[a.st]); b.kugel(d, S.classList.contains("farben") ? R.FARBE[a.st] : "#1d2320", true);
+    const seite = d >= 5 ? "o" : "u"; b.rolle(seite); b.fuss(seite);
+  }
+  const satz = a.art === "zh" ? `Auf ${R.NAME[a.st]} gerundet.` : R.kurzSatz(a.n, a.st);
+  T.melde(rueck, lob ? "ok" : "grau", (lob ? lob + " " : "") + satz);
 }
 function weiter() {
   if (!gezeigt) loesung();
-  if (runde >= RUNDEN) { runde = RUNDEN + 1; T.melde(satz, "ok", "Geschafft! Alle 10 Runden sind fertig."); weiterKn.disabled = true; loesKn.disabled = true; zaehler.textContent = "Fertig!"; stoppeUhr(); return; }
+  if (runde >= RUNDEN) {
+    runde = RUNDEN + 1; T.melde(rueck, "ok", "Geschafft! Alle 10 Runden sind fertig.");
+    weiterKn.disabled = true; loesKn.hidden = true; fort.textContent = "Fertig"; stoppeUhr(); return;
+  }
   runde++; aufg = neueAufgabe(); zeigeAufgabe();
 }
 if (!T.runde({ id: "blitzrunde", neu: n => { stufe = n; zeit = 0; rf = 0; runde = 1; aufg = neueAufgabe(); zeigeAufgabe(); return `rb-${aufg.n}-${aufg.st}`; } })) start();

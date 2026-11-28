@@ -55,3 +55,19 @@
 /* In der Stellenwerttafel sitzt die Lupe schräg rechts oben an der Ziffer (nicht im Tafelkopf) */
 .swt td .pruef::before{top:-.08em;left:auto;right:-.42em;margin:0;width:.36em;height:.36em}
 .swt td .pruef::after{top:.24em;left:auto;right:-.47em;margin:0;height:.18em;transform:rotate(-40deg)}
+
+/* ---------- Ruhige Ansicht (GESTALTUNG.md, R4/R5): Berg ohne Farbflächen ---------- */
+.ruhig .berg .hang-l,.ruhig .berg .hang-r{fill:#fff}
+.ruhig .berg .gipfel{display:none}
+.ruhig .berg .wort{display:none}
+.ruhig.abauf .berg .wort{display:inline}
+.ruhig .berg .wort text{fill:#6d7772}
+.ruhig .berg .wort path{stroke:#9aa39e}
+.ruhig .berg .fuss.links rect,.ruhig .berg .fuss.rechts rect{stroke:var(--ink)}
+.ruhig .berg .fuss.an rect{fill:#fff;stroke:var(--ok);stroke-width:7}
+.ruhig .berg .platz.an circle{fill:#fff;stroke:var(--ink);stroke-width:6}
+.ruhig .berg .platz.tippbar:hover circle{stroke:var(--ink)}
+.ruhig .berg .fuss.tippbar:hover rect{fill:#f3f5f4}
+.ruhig .merkkarte .ab,.ruhig .merkkarte .auf{color:var(--ink)}
+.ruhig .swt th.leucht{background:#eef1ef}
+.ruhig .merkkarte{background:#fff;border-width:3px;box-shadow:none;font-size:24px}

@@ -17,7 +17,7 @@
   if (aktiv) {
     document.documentElement.classList.add("runde-modus");
     const st = document.createElement("style");
-    st.textContent = ".runde-modus .kopf,.runde-modus .leiste,.runde-modus .fuss,.runde-modus [data-runde=\"aus\"]{display:none!important}" +
+    st.textContent = ".runde-modus .kopf,.runde-modus .leiste,.runde-modus .fuss:not(g),.runde-modus [data-runde=\"aus\"]{display:none!important}" +
       ".runde-modus body{background:transparent}";
     document.head.appendChild(st);
   }

@@ -6,202 +6,176 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Zahlenstrahl-Lupe – Runden</title>
-<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
-<link rel="stylesheet" href="../gemeinsam/runden.css">
-<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
 <style>
 .strahl text{font-family:var(--font);font-weight:700;fill:var(--ink);text-anchor:middle}
-.strahl .klein{font-size:20px;fill:var(--soft)}
-.strahl .lbl{font-size:26px}
-.strahl .nb rect{fill:#fff;stroke-width:5}
-.strahl .nb text{font-size:44px;dominant-baseline:central}
+.strahl .achse,.strahl .st{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.strahl .klein{font-size:26px;fill:#8d9892;font-weight:400}
+.strahl .nb rect{fill:#fff;stroke:var(--ink);stroke-width:3}
+.strahl .nb text{font-size:60px;dominant-baseline:central}
 .strahl .nb{cursor:pointer}
-.strahl .nb.links rect{stroke:var(--abrand)} .strahl .nb.rechts rect{stroke:var(--aufrand)}
-.strahl .nb.naeher rect{fill:var(--okbg);stroke:var(--ok);stroke-width:8}
-.strahl .fahne rect{fill:var(--gelb);stroke:var(--gelbrand);stroke-width:4}
-.strahl .fahne text{font-size:40px;dominant-baseline:central}
-.strahl .bogen{fill:none;stroke-width:5;stroke-linecap:round}
-.strahl .bogen.l{stroke:var(--abrand)} .strahl .bogen.r{stroke:var(--aufrand)}
-.strahl .bogen.kurz{stroke:var(--ok);stroke-width:9}
-.strahl .zaehl{font-size:24px}
+.strahl .nb:hover rect{fill:#f3f5f4}
+.strahl .nb:focus{outline:none}.strahl .nb:focus-visible rect{stroke-width:6}
+.strahl .nb.richtig rect{stroke:var(--ok);stroke-width:6}
+.strahl .punkt{fill:var(--ink)}
+.strahl .bogen{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;transition:opacity .4s}
+.strahl .bogen.lang{opacity:.18}
+.strahl .zaehl{font-size:24px;fill:#8d9892;font-weight:400}
 .strahl .griff{cursor:grab;touch-action:none}
-.strahl .griff circle{fill:var(--gelb);stroke:var(--gelbrand);stroke-width:5}
-.abmachung{position:absolute;white-space:nowrap;padding:8px 16px;background:#fffdf3;border:3px solid var(--ink);border-radius:12px;font-size:24px;font-weight:700;transform:rotate(-3deg)}
-.schalter{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.strahl .ganz .st{stroke:#9aa39e;stroke-width:2}
+.strahl .ganz text{font-size:20px;fill:#8d9892;font-weight:400}
+.strahl .mittel{stroke:#9aa39e;stroke-width:2;stroke-dasharray:8 8}
+.strahl .abauf{font-size:28px;fill:#6d7772;font-weight:700}
+.zahlmarke{position:absolute;width:400px;text-align:center;pointer-events:none}
+.gleichung-mitte{position:absolute;left:0;width:1600px;text-align:center;font-size:88px;font-weight:700;line-height:1}
+.gleichung-mitte .ca{margin:0 .2em}
+.abmachung{position:absolute;padding:8px 18px;border:3px solid var(--ink);border-radius:12px;font-size:26px;font-weight:700;background:#fff}
 </style>
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
-<script src="../../../gemeinsam/hinweise.js"></script>
 <script>
 window.HINWEISE = {
- titel: "Zahlenstrahl-Lupe",
- start: "**Start** führt zur Startseite mit allen Tafelbildern zum Runden.",
- farben: "**Farben** färbt die Zahl in der Fahne und die Nachbarn in den Stellenwertfarben (Hunderter grün, Zehner rot, Einer blau).",
+ titel: "Zahlenstrahl-Lupe: Wo ist es näher?",
  teile: [
-  { h: "Worum geht es?", text: "Runden heißt: zum nächsten Nachbarn gehen. Die Kinder erleben das am Zahlenstrahl, bevor die Regel kommt." },
+  { h: "Worum geht es?", text: "Runden heißt: zum näheren Nachbarn gehen. Die Kinder erleben das am Zahlenstrahl. Das Tafelbild dient zum Vertiefen, die Einführung übernimmt „Runden Schritt für Schritt“." },
   { h: "So geht es", punkte: [
-    "Oben ist der ganze Zahlenstrahl bis 1000, darunter die **Lupe** mit dem vergrößerten Ausschnitt.",
-    "Frage: „Welcher Nachbar ist näher?“ Die Kinder tippen den linken oder rechten Nachbarn an.",
-    "Danach hüpft die Fahne Schritt für Schritt zu beiden Seiten und zählt mit. Die kürzere Seite leuchtet grün.",
-    "**Zeigen** spielt die Sprünge auch ohne Antwort ab. **Neue Zahl** stellt die nächste Aufgabe.",
-    "**Die Mitte** zeigt eine Zahl genau in der Mitte (z. B. 275): Beide Seiten sind gleich weit. Abmachung: In der Mitte runden wir auf."]},
-  { h: "Auswahl", punkte: [
-    "**Auf Zehner / Hunderter**: Ausschnitt mit 10 Einer-Schritten oder von Hunderter zu Hunderter (die Fahne hüpft dann in Zehnerschritten).",
-    "**Stufe ●**: Zahlen deutlich weg von der Mitte. **●●**: alle Zahlen, auch die Mitte. **●●●**: Sonderfälle wie Übergang zum nächsten Hunderter (396, 960) und Zahlen unter 100.",
-    "**Selbst schieben**: Die Zahl mit dem gelben Griff verschieben, Nachbarn und Satz passen sich sofort an.",
-    "**Einerziffer zeigen** (bei Hunderter: Zehnerziffer): färbt den Bereich 0–4 blau und 5–9 grün. Das ist die Brücke zur Regel im Rundungsberg."]},
-  { h: "Hilfen", punkte: ["Mit **Hilfen aus** stehen im Ausschnitt nur die Nachbarn, und es wird nicht mitgezählt."]}]
+    "Die Zahl steht als Punkt auf dem Ausschnitt. Beschriftet sind nur die beiden Nachbarn.",
+    "Die Kinder tippen den näheren Nachbarn an. Danach hüpft der Punkt zu beiden Seiten. Der kürzere Weg bleibt stehen, der längere verblasst. Darunter erscheint die Gleichung.",
+    "**Weiter** (unten rechts) stellt die nächste Zahl." ] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Runden auf** Zehner oder Hunderter, **Stufe** 1 (weg von der Mitte), 2 (alle Zahlen), 3 (Sonderfälle).",
+    "**Selbst schieben**: Die Zahl mit dem Finger verschieben, die Gleichung passt sich an.",
+    "Hilfen: **Alle Zahlen zeigen**, **Ganzen Zahlenstrahl zeigen**, **Einerziffer zeigen** (Grenze zwischen ab und auf). **Satzmuster** zeigt die Zahlen beim Hüpfen.",
+    "**Die Mitte zeigen**: eine Zahl genau in der Mitte – Abmachung: aufrunden." ] } ]
 };
 </script>
-<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
-<script src="../gemeinsam/runden.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne(), ns = "http://www.w3.org/2000/svg";
-let rf = 0, st = "Z", stufe = 1, n = 273, win = { u: 270, o: 280 }, phase = "frage", schieben = false, ziffer = false;
+let st = "Z", stufe = 1, n = 442, win = { u: 440, o: 450 }, phase = "frage", schieben = false, rf = 0;
+let alleZahlen = false, ganzer = false, ziffer = false;
+const el = (tag, a, txt) => { const e = document.createElementNS(ns, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
 
-// ---------- Aufbau ----------
-const stWahl = T.gruppe("Auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; zifferKn.lastChild.textContent = v === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen"; neu(); }, "strahl-st");
-const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "strahl-stufe");
-st = stWahl.wert; stufe = stufenWahl.wert;
-const zeigenKn = T.knopf("Zeigen", () => zeigen(), "haupt");
-T.leiste(stWahl, stufenWahl, T.knopf("Neue Zahl", () => neu()), T.knopf("Die Mitte", () => mitte()), zeigenKn);
-
-const svg = document.createElementNS(ns, "svg"); svg.setAttribute("class", "strahl"); svg.setAttribute("width", 1600); svg.setAttribute("height", 470);
-T.blk(0, 168).appendChild(svg);
-const sch = T.blk(40, 650); sch.classList.add("schalter");
-const schiebKn = T.schalter("Selbst schieben", false, v => { schieben = v; if (!v) neu(); else { phase = "schieben"; zeichne(); live(); } });
-const zifferKn = T.schalter(st === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen", false, v => { ziffer = v; if (baender) baender.style.display = v ? "" : "none"; });
-sch.append(schiebKn, zifferKn);
-sch.dataset.runde = "aus";
-const gl = T.el("div", "gleichung zahl"); T.blk(40, 800, 380).appendChild(gl);
-const satz = T.streifen(T.blk(440, 650, 1120));
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const svg = el("svg", { class: "strahl", width: 1600, height: 520, viewBox: "0 0 1600 520" }); T.blk(0, 110).appendChild(svg);
+const marke = T.el("div", "zahlmarke zahl gross96"); S.appendChild(marke);
+const gl = T.blk(0, 650, 1600, 0, "gleichung-mitte zahl");
+const rueck = T.blk(100, 760, 1400, 0, "rueck");
 const abm = T.el("div", "abmachung", "Abmachung: aufrunden"); abm.hidden = true; S.appendChild(abm);
-T.kopf({ titel: "Zahlenstrahl-Lupe: Wo ist es näher?", onNeu: () => neu() });
+const weiterKn = T.knopf("Weiter", () => neu(), "haupt"); weiterKn.dataset.runde = "aus";
+T.kinderknoepfe(weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const stWahl = T.gruppe("Runden auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; zifferKn.lastChild.textContent = v === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen"; neu(); }, "rz-st");
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1 weg von der Mitte" }, { wert: 2, text: "2 alle Zahlen" }, { wert: 3, text: "3 Sonderfälle" }], 1, v => { stufe = v; neu(); }, "rz-stufe");
+st = stWahl.wert; stufe = stufenWahl.wert;
+const schiebKn = T.schalter("Selbst schieben", false, v => { schieben = v; neu(n); });
+const alleKn = T.schalter("Alle Zahlen zeigen", false, v => { alleZahlen = v; zeichne(); });
+const ganzKn = T.schalter("Ganzen Zahlenstrahl zeigen", false, v => { ganzer = v; zeichne(); });
+const zifferKn = T.schalter(st === "Z" ? "Einerziffer zeigen" : "Zehnerziffer zeigen", false, v => { ziffer = v; zeichne(); });
+T.kopf({ menue: true, titel: "Zahlenstrahl-Lupe", beschreibung: "Welcher Nachbar ist näher? Hüpfen und vergleichen.",
+  onNeu: () => neu(), onLoesung: () => zeigen(false), extra: [stWahl, stufenWahl, schiebKn], hilfen: [alleKn, ganzKn, zifferKn], onHilfen: () => zeichne() });
+T.menue.steuer("Die Mitte zeigen", () => mitte());
 
 // ---------- Zeichnen ----------
-const X0 = v => 100 + v * 1.4;                        // großer Zahlenstrahl 0–1000
-const AX = 330, XL = 200, XR = 1400;                  // Ausschnitt
+const AX = 260, XL = 160, XR = 1440, X0 = v => 100 + v * 1.4;
 const Xd = v => XL + (v - win.u) * (XR - XL) / (win.o - win.u);
-const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (txt != null) e.textContent = txt; return e; };
-let ebeneBogen, griff, baender;
+let ebeneBogen;
 function zeichne() {
   svg.innerHTML = "";
-  const wx1 = X0(win.u), wx2 = X0(win.o);
-  // Lupen-Linien (zuerst, damit die Beschriftung darüber lesbar bleibt)
-  svg.append(el("path", { d: `M${wx1 - 3},60 L${XL - 30},${AX - 40} L${XR + 30},${AX - 40} L${wx2 + 3},60 Z`, fill: "rgba(243,246,242,.8)", stroke: "#b8860b", "stroke-width": 2.5, "stroke-dasharray": "8 6" }));
-  // großer Zahlenstrahl
-  svg.append(el("line", { x1: X0(0), y1: 40, x2: X0(1000), y2: 40, stroke: "#1d2320", "stroke-width": 4 }));
-  for (let h = 0; h <= 1000; h += 100) { svg.append(el("line", { x1: X0(h), y1: 26, x2: X0(h), y2: 54, stroke: "#1d2320", "stroke-width": 3 }), el("text", { x: X0(h), y: 82, class: "klein" }, h)); }
-  for (let z = 0; z <= 1000; z += 10) if (z % 100) svg.append(el("line", { x1: X0(z), y1: 34, x2: X0(z), y2: 46, stroke: "#8d9892", "stroke-width": 1.5 }));
-  svg.append(el("rect", { x: wx1 - 3, y: 20, width: wx2 - wx1 + 6, height: 40, fill: "rgba(255,224,102,.55)", stroke: "#b8860b", "stroke-width": 3, rx: 4 }));
-  // farbige Bereiche 0–4 / 5–9
-  const b = R.BASIS[st], sp = (XR - XL) / (win.o - win.u);
-  // Ziffer 0–4 blau, 5–9 grün (bei Hunderter: Zehnerziffer, also bis …49 bzw. ab …50)
-  const teil = Xd(win.u + b / 2 - .5);
-  baender = el("g", { style: ziffer ? "" : "display:none" });
-  baender.append(el("rect", { x: XL - sp / 2 - 6, y: AX - 34, width: teil - XL + sp / 2 + 6, height: 68, fill: "#d6eaff" }),
-                 el("rect", { x: teil, y: AX - 34, width: XR - teil + sp / 2 + 6, height: 68, fill: "#dff3e4" }));
-  svg.append(baender);
-  // Ausschnitt
-  svg.append(el("line", { x1: XL - 40, y1: AX, x2: XR + 40, y2: AX, stroke: "#1d2320", "stroke-width": 5 }));
-  for (let v = win.u; v <= win.o; v++) {
-    const gross = st === "Z" || v % 10 === 0;
-    if (!gross && st === "H") { svg.append(el("line", { x1: Xd(v), y1: AX - 10, x2: Xd(v), y2: AX + 10, stroke: "#8d9892", "stroke-width": 2 })); continue; }
-    svg.append(el("line", { x1: Xd(v), y1: AX - 24, x2: Xd(v), y2: AX + 24, stroke: "#1d2320", "stroke-width": 4 }));
-    if (v !== win.u && v !== win.o) svg.append(el("text", { x: Xd(v), y: AX + 56, class: "lbl hilfe" }, v));
+  const b = R.BASIS[st], schritt = b / 10;
+  if (ganzer) {   // kleiner Gesamtstrahl oben, ohne Lupen-Dreieck
+    const g = el("g", { class: "ganz" }); svg.appendChild(g);
+    g.appendChild(el("line", { class: "st", x1: X0(0), y1: 40, x2: X0(1000), y2: 40 }));
+    for (let v = 0; v <= 1000; v += 100) { g.appendChild(el("line", { class: "st", x1: X0(v), y1: 30, x2: X0(v), y2: 50 })); g.appendChild(el("text", { x: X0(v), y: 76 }, v)); }
+    g.appendChild(el("circle", { class: "punkt", cx: X0(n), cy: 40, r: 7 }));
   }
-  // Nachbarn
-  [["u", "links"], ["o", "rechts"]].forEach(([k, cls]) => {
-    const g = el("g", { class: "nb " + cls, transform: `translate(${Xd(win[k])},${AX + 74})`, role: "button", "aria-label": "Nachbar " + win[k] });
-    g.append(el("rect", { x: -78, y: -36, width: 156, height: 72, rx: 14 }));
-    const t = el("text", { x: 0, y: 0 }); t.innerHTML = `<tspan>${win[k]}</tspan>`; g.append(t);
-    g.addEventListener("click", () => antwort(k)); svg.append(g);
+  svg.appendChild(el("line", { class: "achse", x1: XL - 60, y1: AX, x2: XR + 60, y2: AX }));
+  for (let i = 0; i <= 10; i++) {
+    const v = win.u + i * schritt, x = Xd(v), h = i === 0 || i === 10 ? 34 : i === 5 ? 26 : 18;
+    svg.appendChild(el("line", { class: "st", x1: x, y1: AX - h, x2: x, y2: AX + h }));
+    if (alleZahlen && i > 0 && i < 10) svg.appendChild(el("text", { class: "klein", x, y: AX + 64 }, v));
+  }
+  if (ziffer) {   // Grenze zwischen ab und auf (ohne Farben)
+    const xm = (Xd(win.u + 4 * schritt) + Xd(win.u + 5 * schritt)) / 2;
+    svg.appendChild(el("line", { class: "mittel", x1: xm, y1: AX - 120, x2: xm, y2: AX + 40 }));
+    svg.appendChild(el("text", { class: "abauf", x: xm - 140, y: AX - 84 }, "← ab")); svg.appendChild(el("text", { class: "abauf", x: xm + 140, y: AX - 84 }, "auf →"));
+    for (let i = 1; i < 10; i++) svg.appendChild(el("text", { class: "klein", x: Xd(win.u + i * schritt), y: AX - 44 }, i));
+  }
+  ebeneBogen = el("g"); svg.appendChild(ebeneBogen);
+  // Nachbarn: groß, schwarz, schlichter Rahmen
+  [["u", win.u], ["o", win.o]].forEach(([k, v]) => {
+    const g = el("g", { class: "nb", "data-k": k, role: "button", tabindex: 0, "aria-label": "Nachbar " + v, transform: `translate(${Xd(v)},${AX + 110})` });
+    g.innerHTML = `<rect x="-95" y="-46" width="190" height="92" rx="14"/><text>${v}</text>`;
+    g.addEventListener("click", () => antwort(k)); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); antwort(k); } });
+    svg.appendChild(g);
   });
-  ebeneBogen = el("g", {}); svg.append(ebeneBogen);
-  // Fahne
-  const xf = Xd(n), f = el("g", { class: "fahne" });
-  f.append(el("line", { x1: xf, y1: AX, x2: xf, y2: AX - 150, stroke: "#1d2320", "stroke-width": 4 }), el("rect", { x: xf - 64, y: AX - 214, width: 128, height: 64, rx: 10 }));
-  const ft = el("text", { x: xf, y: AX - 182 }); ft.innerHTML = [...T.stellen(n).H + T.stellen(n).Z + T.stellen(n).E].map((d, i, a) => `<tspan class="${["h", "z", "e"].slice(3 - a.length)[i]}">${d}</tspan>`).join("");
-  f.append(ft); svg.append(f);
-  svg.append(el("circle", { cx: X0(n), cy: 40, r: 6, fill: "#b8860b" }));
-  // Griff zum Schieben
-  if (schieben) { griff = el("g", { class: "griff", transform: `translate(${xf},${AX})` }); griff.append(el("circle", { r: 32 })); svg.append(griff); }
-  abm.hidden = true;
+  // Punkt mit der Zahl darüber
+  const p = el("circle", { class: "punkt" + (schieben ? " griff" : ""), cx: Xd(n), cy: AX, r: schieben ? 22 : 16 }); svg.appendChild(p);
+  marke.innerHTML = T.zahlHTML(n); marke.style.left = (Xd(n) - 200) + "px"; marke.style.top = (110 + AX - 215) + "px";
 }
-// Farben für die Fahnenzahl (SVG: fill statt color)
-const farbStil = document.createElement("style");
-farbStil.textContent = ".farben .strahl .fahne .h{fill:var(--H)}.farben .strahl .fahne .z{fill:var(--Z)}.farben .strahl .fahne .e{fill:var(--E)}";
-document.head.appendChild(farbStil);
 
 // ---------- Ablauf ----------
 function neu(zahl) {
-  T.stop(); n = zahl || R.zufallsZahl(st, stufe, n); win = R.nachbarn(n, st);
-  phase = schieben ? "schieben" : "frage"; gl.innerHTML = ""; zeichne();
-  if (schieben) live(); else T.melde(satz, "", "Welcher Nachbar ist näher? Tippe ihn an.");
+  T.stop(); rf = 0; abm.hidden = true; gl.innerHTML = ""; T.melde(rueck, "", "");
+  let v = zahl; if (!v) { for (let i = 0; i < 50; i++) { v = R.zufallsZahl(st, stufe, n); if (!R.nachbarn(v, st).rund) break; } }
+  n = v; win = R.nachbarn(n, st); if (win.rund) win = { u: n, o: n + R.BASIS[st] };
+  phase = schieben ? "schieben" : "frage";
+  auftrag.textContent = schieben ? "Schiebe die Zahl. Wohin wird gerundet?" : "Welcher Nachbar ist näher?";
+  zeichne(); if (schieben) live();
 }
-function mitte() {
-  if (schieben) { schiebKn.click(); }
-  const b = R.BASIS[st]; const u = st === "Z" ? T.zufall(1, 99) * 10 : T.zufall(1, 9) * 100;
-  neu(u + b / 2); zeigen();
-}
-function ergebnisSaetze() {
-  const t = [R.zwischen(n, st), R.naeher(n, st)];
-  if (R.istMitte(n, st)) t.push("Genau in der Mitte runden wir auf.");
-  t.push(`${n} ≈ ${R.runde(n, st)}.`);
-  return t;
-}
+function mitte() { schieben = false; schiebKn.setAttribute("aria-pressed", "false"); const b = R.BASIS[st]; neu((st === "Z" ? T.zufall(1, 99) * 10 : T.zufall(1, 9) * 100) + b / 2); }
 function antwort(k) {
   if (phase !== "frage") return;
   const lu = n - win.u, lo = win.o - n;
-  if (lu === lo) { zeigen(); T.fertig(k === "o" && rf === 0); return; }
-  if ((k === "u") === (lu < lo)) { T.melde(satz, "ok", T.lob()); zeigen(true); T.fertig(rf === 0); }
-  else rf++, T.melde(satz, "noch", "Noch nicht. Schau noch einmal genau. Wie viele Schritte sind es?");
+  if (lu === lo) { zeigen(false); T.fertig(k === "o" && rf === 0); return; }
+  if ((k === "u") === (lu < lo)) {
+    svg.querySelector(`.nb[data-k="${k}"]`).classList.add("richtig");
+    T.melde(rueck, "ok", `${T.lob()} ${n} liegt näher an ${k === "u" ? win.u : win.o}.`); zeigen(true); T.fertig(rf === 0);
+  } else { rf++; T.melde(rueck, "noch", "Noch nicht. Zähle die Sprünge."); }
 }
-async function hupfe(ziel, seite, lauf) {
-  const b = st === "Z" ? 1 : 10, sgn = ziel < n ? -1 : 1; let a = n, gez = 0;
+async function hupfe(ziel, lauf) {
+  const b = st === "Z" ? 1 : 10, sgn = ziel < n ? -1 : 1; let a = n, gez = 0; const boegen = [];
   while (a !== ziel) {
-    const nx = Math.abs(ziel - a) > b ? a + sgn * b : ziel, x1 = Xd(a), x2 = Xd(nx), h = Math.min(70, Math.abs(x2 - x1) * .6) + 12;
-    const p = el("path", { class: "bogen " + seite, d: `M${x1},${AX - 4} Q${(x1 + x2) / 2},${AX - 4 - 2 * h} ${x2},${AX - 4}` }); ebeneBogen.append(p);
+    const nx = Math.abs(ziel - a) > b ? a + sgn * b : ziel, x1 = Xd(a), x2 = Xd(nx), h = Math.min(60, Math.abs(x2 - x1) * .55) + 10;
+    const p = el("path", { class: "bogen", d: `M${x1},${AX - 6} Q${(x1 + x2) / 2},${AX - 6 - 2 * h} ${x2},${AX - 6}` }); ebeneBogen.append(p); boegen.push(p);
     gez += Math.abs(nx - a);
-    ebeneBogen.append(el("text", { x: (x1 + x2) / 2, y: AX - h - 16, class: "zaehl hilfe" }, gez));
-    a = nx; await T.warte(st === "Z" ? 330 : 260); if (lauf !== T.lauf) return false;
+    if (T.hilfen()) ebeneBogen.append(el("text", { class: "zaehl", x: (x1 + x2) / 2, y: AX - h - 18 }, gez));
+    a = nx; await T.warte(T.bewegt ? (st === "Z" ? 320 : 250) : 0); if (lauf !== T.lauf) return null;
   }
-  return true;
+  return boegen;
 }
-async function zeigen(schonGelobt) {
+async function zeigen(gelobt) {
   if (phase === "gezeigt" || schieben) return;
   phase = "gezeigt"; T.stop(); const lauf = T.lauf; ebeneBogen.innerHTML = "";
-  if (!await hupfe(win.u, "l", lauf)) return;
-  if (!await hupfe(win.o, "r", lauf)) return;
+  const L = await hupfe(win.u, lauf); if (!L) return;
+  const Rr = await hupfe(win.o, lauf); if (!Rr) return;
   const lu = n - win.u, lo = win.o - n;
-  const kurz = lu === lo ? null : lu < lo ? "l" : "r";
-  if (kurz) ebeneBogen.querySelectorAll(".bogen." + kurz).forEach(p => p.classList.add("kurz"));
-  if (kurz || lu === lo) svg.querySelector(`.nb.${lu < lo ? "links" : "rechts"}`).classList.add("naeher");
-  if (lu === lo) { abm.hidden = false; const r = svg.getBoundingClientRect(), k = S.getBoundingClientRect().width / 1600;
-    abm.style.left = "1250px"; abm.style.top = "290px"; }
+  if (lu !== lo) (lu < lo ? Rr : L).forEach(p => p.classList.add("lang"));
+  else { abm.hidden = false; abm.style.left = (Xd(n) - 150) + "px"; abm.style.top = (110 + AX + 60) + "px"; }
   gl.innerHTML = R.gleichung(n, R.runde(n, st)); gl.classList.remove("einblenden"); void gl.offsetWidth; gl.classList.add("einblenden");
-  const t = ergebnisSaetze(); if (schonGelobt) t.unshift(T.lob());
-  T.melde(satz, schonGelobt ? "ok" : "", t);
+  if (!gelobt) T.melde(rueck, "grau", lu === lo ? `${n} liegt genau in der Mitte. Wir runden auf.` : R.naeher(n, st));
 }
-// Selbst schieben: Zahl mit dem Griff verschieben
-function live() {
-  gl.innerHTML = R.gleichung(n, R.runde(n, st));
-  T.melde(satz, "", n === win.u || n === win.o ? [`${n} ist schon ein ${R.NAME[st]}.`, `${n} ≈ ${n}.`] : ergebnisSaetze());
-}
-let ziehe = false;
-svg.addEventListener("pointerdown", e => { if (!schieben || !e.target.closest(".griff")) return; ziehe = true; svg.setPointerCapture(e.pointerId); e.preventDefault(); });
+function live() { gl.innerHTML = R.gleichung(n, R.runde(n, st)); T.melde(rueck, "grau", R.naeher(n, st)); }
+// Selbst schieben: Punkt ziehen
+let zieht = false;
+svg.addEventListener("pointerdown", e => { if (!schieben || !e.target.closest(".griff")) return; zieht = true; try { svg.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
 svg.addEventListener("pointermove", e => {
-  if (!ziehe) return;
-  const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; const x = p.matrixTransform(svg.getScreenCTM().inverse()).x;
+  if (!zieht) return;
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const x = pt.matrixTransform(svg.getScreenCTM().inverse()).x;
   const v = Math.max(win.u, Math.min(win.o, Math.round(win.u + (x - XL) * (win.o - win.u) / (XR - XL))));
   if (v !== n && v >= 1) { n = v; zeichne(); live(); }
 });
-const loslassen = () => { ziehe = false; };
-svg.addEventListener("pointerup", loslassen); svg.addEventListener("pointercancel", loslassen);
-// Übungsrunde: Welcher Nachbar ist näher? Hilfe = Ziffer zeigen
-if (!T.runde({ id: "zahlenstrahl", neu: s => { stufe = s; schieben = false; rf = 0; neu(); return `rz-${n}-${st}`; }, hilfe: an => { ziffer = an; if (baender) baender.style.display = an ? "" : "none"; } })) neu();
+["pointerup", "pointercancel"].forEach(t => svg.addEventListener(t, () => { zieht = false; }));
+
+if (!T.runde({ id: "zahlenstrahl", neu: s => { stufe = s; schieben = false; neu(); return `rz-${n}-${st}`; } })) neu();
 </script>
 </body>
 </html>

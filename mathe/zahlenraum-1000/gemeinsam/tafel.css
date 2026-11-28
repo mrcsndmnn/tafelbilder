@@ -136,3 +136,26 @@ body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);ov
   .swt td.neu,.lepo button.blink .mini{animation:none}
   *{transition:none!important}
 }
+
+/* ---------- Ruhige Ansicht mit Lehrkraftmenü (GESTALTUNG.md) ---------- */
+.kinderknoepfe{position:absolute;right:40px;bottom:36px;display:flex;gap:18px;z-index:20}
+.knopf.kind{min-height:72px;font-size:30px;padding:0 34px;border-width:3px}
+.ruhig{--ruhig-grau:#9aa39e}
+.ruhig .auftrag-zeile{position:absolute;left:60px;right:120px;top:34px;font-size:32px;font-weight:700;color:var(--ink)}
+.ruhig .rueck{position:absolute;left:100px;right:100px;text-align:center;font-size:32px;line-height:1.3;min-height:44px;color:var(--ink)}
+.ruhig .rueck.ok{color:var(--ok)}
+.ruhig .rueck.noch{color:var(--noch)}
+.ruhig .rueck.grau{color:#6d7772}
+.ruhig .fortschritt{position:absolute;left:44px;bottom:46px;display:flex;gap:10px;align-items:center;font-size:22px;color:#8d9892}
+.ruhig .fortschritt i{width:16px;height:16px;border-radius:50%;border:2.5px solid #8d9892;display:block}
+.ruhig .fortschritt i.voll{background:#8d9892}
+.ruhig .fortschritt i.jetzt{border-color:var(--ink)}
+/* Ruhige Ansicht: Ziffern nur bei „Farben (H/Z/E)“ farbig (R4) */
+.ruhig:not(.farben) .zahl .t,.ruhig:not(.farben) .zahl .h,.ruhig:not(.farben) .zahl .z,.ruhig:not(.farben) .zahl .e{color:var(--ink)}
+.ruhig .pruef::before,.ruhig .pruef::after{display:none}
+.ruhig .pruef{text-decoration:underline;text-decoration-color:var(--ink);text-decoration-thickness:.07em;text-underline-offset:.14em}
+.ruhig #stage,.ruhig{background:#fff}
+.ruhig .gross96{font-size:96px;font-weight:700;line-height:1}
+@keyframes wackeln{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.wackelt{animation:wackeln .35s ease-in-out 2}
+@media (prefers-reduced-motion: reduce){.wackelt{animation:none}}

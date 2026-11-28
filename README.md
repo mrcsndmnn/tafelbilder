@@ -8,3 +8,7 @@ Die Seiten sollen nicht in Suchmaschinen erscheinen. Jede neue HTML-Seite bekomm
 ```html
 <meta name="robots" content="noindex, nofollow">
 ```
+
+## Gestaltung
+
+Für alle Tafelbilder gelten die Regeln in [GESTALTUNG.md](GESTALTUNG.md): eine Aufgabe, ein Blickpunkt, höchstens zwei Kinderknöpfe, Einstellungen im Lehrkraftmenü (Zahnrad).

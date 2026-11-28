@@ -6,88 +6,75 @@
 <!-- Suchmaschinen sollen diese Seite nicht aufnehmen -->
 <meta name="robots" content="noindex, nofollow">
 <title>Der Rundungsberg – Runden</title>
-<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css">
-<link rel="stylesheet" href="../gemeinsam/runden.css">
-<link rel="stylesheet" href="../../../gemeinsam/hinweise.css">
+<link rel="stylesheet" href="../../zahlenraum-1000/gemeinsam/tafel.css?v=2026112802">
+<link rel="stylesheet" href="../gemeinsam/runden.css?v=2026112802">
+<link rel="stylesheet" href="../../../gemeinsam/lehrkraftmenue.css?v=2026112802">
 <style>
-.schritte{display:flex;gap:14px;align-items:center}
-.schritte span{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;border:3px solid var(--line);font-size:26px;font-weight:700;color:var(--soft);background:#fff}
-.schritte span.an{background:var(--gelb);border-color:var(--gelbrand);color:var(--ink)}
-.schritte span.fertig{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
-.swt th.leucht{box-shadow:0 0 0 6px var(--gelb),0 0 0 9px var(--gelbrand)}
-.swt td .pruef{font-size:inherit}
-.eingabe{display:flex;gap:10px;align-items:center}
-.eingabe input{width:150px;height:64px;font-family:var(--font);font-size:32px;font-weight:700;text-align:center;border:3px solid var(--ink);border-radius:14px;color:var(--ink);background:#fff}
-.eingabe label{font-size:22px;font-weight:700;color:var(--soft)}
-.zeile{display:flex;gap:12px;align-items:center}
+.zahl-oben{position:absolute;left:0;width:1600px;top:96px;text-align:center}
+.zahl-oben .gleichung{font-size:96px}
+.bergplatz{position:absolute;left:350px;top:222px}
+.hilfe-links{position:absolute;left:40px;top:250px;width:300px}
+.hilfe-links .swt{transform:scale(.8);transform-origin:left top}
 </style>
 </head>
 <body>
 <div id="fit"><div id="stage"></div></div>
-<script src="../../../gemeinsam/hinweise.js"></script>
 <script>
 window.HINWEISE = {
  titel: "Der Rundungsberg",
- start: "**Start** führt zur Startseite mit allen Tafelbildern zum Runden.",
- farben: "**Farben** hat hier keine eigene Wirkung: Die Zahl in der Stellenwerttafel ist immer farbig.",
  teile: [
-  { h: "Worum geht es?", text: "Die Regel aus dem Heft (0–4 abrunden, 5–9 aufrunden) wird als Kugel auf einem Berg sichtbar und in vier festen Denkschritten gesprochen." },
+  { h: "Worum geht es?", text: "Die Regel 0–4 abrunden, 5–9 aufrunden wird als Kugel auf einem Berg sichtbar. Die Kinder sprechen vier feste Denkschritte." },
   { h: "Zeigen (Lehrkraft führt)", punkte: [
-    "**Weiter** geht die vier Schritte durch: 1. „Ich runde auf Zehner.“ 2. „Ich schaue auf die Einer.“ (Lupe) 3. „Die Einerziffer ist 3.“ (Kugel fliegt auf den Berg) 4. „3 ist links vom Gipfel. Ich runde ab.“ (Kugel rollt zum Fuß).",
-    "Die Schritt-Leiste oben links zeigt, wo ihr gerade seid. Nach Schritt 4 startet **Weiter** eine neue Zahl.",
-    "Eine eigene Zahl: im Feld **Zahl** eingeben und **Übernehmen**."]},
-  { h: "Ich bin dran", punkte: ["Die Kinder tippen den Platz der Prüfziffer auf dem Berg an und dann den Fuß, zu dem die Kugel rollt. Nach jedem Schritt gibt es eine Rückmeldung."]},
-  { h: "Auswahl", punkte: [
-    "**Auf Zehner / Hunderter**: Der Berg bleibt gleich, nur die Lupe wandert (bei Hunderter auf die Zehnerstelle) und die Füße wechseln.",
-    "**Stufe ●**: nur Zehner. **●●**: Zehner oder Hunderter wählbar. **●●●**: wechselt nach jeder Aufgabe, mit Sonderfällen (Mitte, Übergang wie 396 → 400, schon runde Zahlen), ohne Schritt-Leiste.",
-    "**Merkkarte** blendet die Regel aus dem Heft ein."]},
-  { h: "Hilfen", punkte: ["Mit **Hilfen aus** verschwinden die Hangfarben und die Wörter „abrunden“/„aufrunden“. Nur die Zahlen 0–9 bleiben auf dem Berg."]}]
+    "**Weiter** (unten rechts) geht die vier Schritte durch. Es steht immer nur der aktuelle Satz da: 1. „Ich runde auf Zehner.“ 2. „Ich schaue auf die Einer.“ (Ziffer wird unterstrichen) 3. „Die Einerziffer ist 3.“ (Kugel auf den Berg) 4. „Ich runde ab.“ (Kugel rollt).",
+    "Danach steht oben die Gleichung, z. B. 273 ≈ 270. **Weiter** startet eine neue Zahl." ] },
+  { h: "Ich bin dran", punkte: ["Die Kinder tippen den Platz der Ziffer auf dem Berg an, dann den Fuß, zu dem die Kugel rollt."] },
+  { h: "Im Lehrkraftmenü", punkte: [
+    "**Modus**, **Runden auf**, **Stufe** und **Eigene Zahl**.",
+    "Hilfen: **ab/auf zeigen** (graue Wörter am Berg), **Merkkarte**, **Stellenwerttafel**. **Farben** färbt Ziffern und Kugel nach Stellenwert." ] } ]
 };
 </script>
-<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112701"></script>
-<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112801"></script>
-<script src="../gemeinsam/runden.js"></script>
+<script src="../../../gemeinsam/uebungsrunde/runde-client.js?v=2026112802"></script>
+<script src="../../zahlenraum-1000/gemeinsam/tafel.js?v=2026112802"></script>
+<script src="../../../gemeinsam/lehrkraftmenue.js?v=2026112802"></script>
+<script src="../gemeinsam/runden.js?v=2026112802"></script>
 <script>
 const T = Tafel, R = Runden, S = T.buehne();
-let rf = 0, modus = "zeigen", st = "Z", stufe = 1, n = 273, schritt = 0, phase = "platz", saetze = [];
+let rf = 0, modus = "zeigen", st = "Z", stufe = 1, n = 273, schritt = 0, phase = "platz";
 
-// ---------- Aufbau ----------
-const modusWahl = T.gruppe("", [{ wert: "zeigen", text: "Zeigen" }, { wert: "dran", text: "Ich bin dran" }], "zeigen", v => { modus = v; neu(n); }, "berg-modus");
-const stWahl = T.gruppe("Auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; neu(); }, "berg-st");
-const stufenWahl = T.stufen(v => { stufe = v; neu(); }, "berg-stufe");
+// ---------- Kinderansicht ----------
+const auftrag = T.blk(60, 34, 1300, 0, "auftrag-zeile");
+const oben = T.blk(0, 96, 1600, 0, "zahl-oben");
+const bergBox = T.blk(350, 222, 0, 0, "bergplatz");
+const berg = R.berg(bergBox, { breite: 900, onPlatz: i => platz(i), onFuss: f => fuss(f) });
+const rueck = T.blk(100, 700, 1400, 0, "rueck");
+const links = T.blk(40, 250, 300, 0, "hilfe-links");
+const swtBox = T.el("div"); links.appendChild(swtBox); const swt = T.stellenwerttafel(swtBox); swtBox.hidden = true;
+const merk = T.el("div", "merkkarte", R.MERK); merk.hidden = true; merk.style.marginTop = "20px"; links.appendChild(merk);
+const weiterKn = T.knopf("Weiter", () => weiter(), "haupt"); weiterKn.dataset.runde = "aus";
+T.kinderknoepfe(weiterKn);
+
+// ---------- Lehrkraftmenü ----------
+const modusWahl = T.gruppe("Modus", [{ wert: "zeigen", text: "Zeigen" }, { wert: "dran", text: "Ich bin dran" }], "zeigen", v => { modus = v; neu(n); }, "berg-modus");
+const stWahl = T.gruppe("Runden auf", [{ wert: "Z", text: "Zehner" }, { wert: "H", text: "Hunderter" }], "Z", v => { st = v; neu(); }, "berg-st");
+const stufenWahl = T.gruppe("Stufe", [{ wert: 1, text: "1" }, { wert: 2, text: "2" }, { wert: 3, text: "3 Sonderfälle" }], 1, v => { stufe = v; neu(); }, "berg-stufe");
 modus = modusWahl.wert; st = stWahl.wert; stufe = stufenWahl.wert;
-T.leiste(modusWahl, stWahl, stufenWahl, T.knopf("Neue Zahl", () => neu()));
-
-const links = T.blk(40, 186, 520);
-const schritteEl = T.el("div", "schritte", [1, 2, 3, 4].map(i => `<span>${i}</span>`).join("")); links.appendChild(schritteEl);
-const swtBox = T.el("div"); swtBox.style.marginTop = "26px"; links.appendChild(swtBox); const swt = T.stellenwerttafel(swtBox);
-const gl = T.el("div", "gleichung zahl"); gl.style.margin = "24px 0 0"; gl.style.minHeight = "72px"; links.appendChild(gl);
-const z1 = T.el("div", "zeile"); z1.style.marginTop = "20px"; links.appendChild(z1);
-const weiterKn = T.knopf("Weiter", () => weiter(), "haupt");
-const merkKn = T.schalter("Merkkarte", false, v => { merk.hidden = !v; });
-z1.append(weiterKn, merkKn);
-const ein = T.el("div", "eingabe", '<label for="zahl">Zahl</label><input id="zahl" type="text" inputmode="numeric" maxlength="3" autocomplete="off">');
-ein.style.marginTop = "18px"; links.appendChild(ein);
+const ein = T.el("div", "eingabe", '<label for="zahl">Eigene Zahl</label><input id="zahl" type="text" inputmode="numeric" maxlength="3" autocomplete="off">');
 const uebernehmen = T.knopf("Übernehmen", () => { const v = parseInt(ein.querySelector("input").value, 10); if (v >= 1 && v <= 999) neu(v); });
-ein.appendChild(uebernehmen);
-ein.querySelector("input").addEventListener("keydown", e => { if (e.key === "Enter") uebernehmen.click(); });
-
-const bergBox = T.blk(580, 176);
-const berg = R.berg(bergBox, { breite: 960, onPlatz: i => platz(i), onFuss: f => fuss(f) });
-const satz = T.streifen(T.blk(580, 670, 980));
-const merk = T.el("div", "merkkarte", R.MERK); T.blk(40, 712, 520).appendChild(merk); merk.hidden = true;
-T.kopf({ titel: "Der Rundungsberg", onNeu: () => neu() });
+ein.appendChild(uebernehmen); ein.querySelector("input").addEventListener("keydown", e => { if (e.key === "Enter") uebernehmen.click(); });
+const abaufKn = T.schalter("ab/auf zeigen", false, v => S.classList.toggle("abauf", v));
+const merkKn = T.schalter("Merkkarte", false, v => { merk.hidden = !v; });
+const swtKn = T.schalter("Stellenwerttafel", false, v => { swtBox.hidden = !v; });
+T.kopf({ menue: true, titel: "Der Rundungsberg", beschreibung: "Die Kugel zeigt: abrunden oder aufrunden?",
+  satzmuster: false, onNeu: () => neu(), onLoesung: () => loesung(), extra: [modusWahl, stWahl, stufenWahl, ein], hilfen: [abaufKn, merkKn, swtKn],
+  onFarben: () => { if (berg.el.querySelector(".kugel").style.visibility === "visible") berg.el.querySelector(".kugel circle").setAttribute("fill", farbe()); } });
 
 // ---------- Anzeige ----------
+const farbe = () => S.classList.contains("farben") ? R.FARBE[st] : "#1d2320";
+function zeigeZahl(mitPruef) { oben.innerHTML = `<span class="zahl gross96">${R.zahl(n, mitPruef ? st : null)}</span>`; }
 function tafel(markierung) {
-  swt.zeige(n);
-  const t = swtBox.querySelector("table");
+  swt.zeige(n); const t = swtBox.querySelector("table");
   if (markierung >= 1) t.querySelector("th." + st.toLowerCase()).classList.add("leucht");
   if (markierung >= 2) { const td = t.querySelector("td." + R.PRUEF[st].toLowerCase()); td.innerHTML = `<span class="pruef">${td.textContent}</span>`; }
-}
-function zeigeSchritte() {
-  schritteEl.style.visibility = stufe === 3 ? "hidden" : "visible";
-  [...schritteEl.children].forEach((s, i) => { s.className = i + 1 < schritt ? "fertig" : i + 1 === schritt ? "an" : ""; if (schritt === 4 && i === 3 && phase === "fertig") s.className = "fertig"; });
 }
 const fuesse = () => { const b = R.BASIS[st], u = Math.floor(n / b) * b; return { u, o: u + b }; };
 
@@ -98,51 +85,57 @@ function neu(zahl) {
   if (stufe === 3 && !zahl) { st = T.wahl(["Z", "H"]); stWahl.setze(st); }
   n = zahl || R.zufallsZahl(st, stufe, n);
   const f = fuesse(); berg.leere(); berg.fuesse(f.u, f.o); berg.tippbar(modus === "dran");
-  gl.innerHTML = ""; saetze = []; weiterKn.style.display = modus === "zeigen" ? "" : "none"; ein.style.display = modus === "zeigen" ? "" : "none";
-  if (modus === "zeigen") { schritt = 0; phase = "platz"; tafel(0); T.melde(satz, "", "Drücke „Weiter“."); }
-  else {
-    schritt = 3; phase = "platz"; tafel(2);
-    saetze = R.denkschritte(n, st).slice(0, 2);
-    T.melde(satz, "", [...saetze, "Wo liegt die Kugel? Tippe den Platz auf dem Berg an."]);
+  weiterKn.textContent = "Weiter";
+  if (modus === "zeigen") {
+    schritt = 0; phase = "platz"; zeigeZahl(false); tafel(0);
+    auftrag.textContent = "Wir runden zusammen."; T.melde(rueck, "grau", "");
+    weiterKn.hidden = false;
+  } else {
+    schritt = 3; phase = "platz"; zeigeZahl(true); tafel(2);
+    auftrag.textContent = "Wo liegt die Kugel? Tippe den Platz an.";
+    T.melde(rueck, "", ""); weiterKn.hidden = true;
   }
-  zeigeSchritte();
 }
 async function weiter() {
-  if (modus !== "zeigen") return;
+  if (modus !== "zeigen") return neu();
   if (phase === "fertig") return neu();
   if (phase === "rollt") return;
   schritt++; const d = R.pruefziffer(n, st), ds = R.denkschritte(n, st);
-  saetze.push(ds[schritt - 1]); tafel(Math.min(schritt, 2));
-  if (schritt === 3) berg.kugel(d, R.FARBE[st]);
-  if (schritt === 4) { phase = "rollt"; berg.kugel(d, R.FARBE[st], true); await rollen(d); phase = "fertig"; }
-  zeigeSchritte();
-  T.melde(satz, "", schritt === 4 ? [...saetze, ...R.zusatz(n, st)] : saetze);
+  tafel(Math.min(schritt, 2)); if (schritt >= 2) zeigeZahl(true);
+  T.melde(rueck, "", ds[schritt - 1]);   // immer nur der aktuelle Satz
+  if (schritt === 3) berg.kugel(d, farbe());
+  if (schritt === 4) { phase = "rollt"; berg.kugel(d, farbe(), true); await rollen(d); phase = "fertig"; weiterKn.textContent = "Neue Zahl"; }
 }
 async function rollen(d) {
-  const lauf = T.lauf; const seite = d >= 5 ? "o" : "u";
+  const lauf = T.lauf, seite = d >= 5 ? "o" : "u";
   berg.rolle(seite); await T.warte(700); if (lauf !== T.lauf) return;
-  berg.fuss(seite); const r = R.runde(n, st);
-  gl.innerHTML = R.gleichung(n, r); gl.classList.remove("einblenden"); void gl.offsetWidth; gl.classList.add("einblenden");
-  // Übergang: Hunderter (oder 1000) ändert sich mit
-  if (st === "Z" && Math.floor(r / 100) !== Math.floor(n / 100)) swtBox.querySelector("th.h")?.classList.add("leucht");
+  berg.fuss(seite);
+  oben.innerHTML = `<span class="gleichung zahl einblenden">${R.gleichung(n, R.runde(n, st))}</span>`;
+  auftrag.textContent = "";
+}
+function loesung() {
+  if (phase === "fertig" || phase === "rollt") return;
+  T.stop(); const d = R.pruefziffer(n, st); zeigeZahl(true); tafel(2);
+  berg.kugel(d, farbe(), true); phase = "rollt";
+  rollen(d).then(() => { phase = "fertig"; T.melde(rueck, "grau", R.kurzSatz(n, st)); if (modus === "zeigen") weiterKn.textContent = "Neue Zahl"; });
 }
 function platz(i) {
   if (modus !== "dran" || phase !== "platz") return;
   const d = R.pruefziffer(n, st);
-  if (i !== d) { rf++; berg.platz(i, "falsch"); return T.melde(satz, "noch", [`Noch nicht. Schau auf die ${R.PRUEFNAME[st]}ziffer.`]); }
-  berg.kugel(d, R.FARBE[st]); phase = "fuss"; schritt = 4; zeigeSchritte();
-  saetze.push(R.denkschritte(n, st)[2]);
-  T.melde(satz, "ok", [`${T.lob()} ` + saetze[2], "Wohin rollt die Kugel? Tippe den Fuß an."]);
+  if (i !== d) { rf++; berg.platz(i, "falsch"); return T.melde(rueck, "noch", `Noch nicht. Schau auf die ${R.PRUEFNAME[st]}ziffer.`); }
+  berg.platz(i); berg.kugel(d, farbe()); phase = "fuss";
+  auftrag.textContent = "Wohin rollt die Kugel? Tippe den Fuß an.";
+  T.melde(rueck, "ok", `${T.lob()} Die ${R.PRUEFNAME[st]}ziffer ist ${d}.`);
 }
 async function fuss(f) {
   if (modus !== "dran" || phase !== "fuss") return;
   const d = R.pruefziffer(n, st), richtig = d >= 5 ? "o" : "u";
-  if (f !== richtig) return rf++, T.melde(satz, "noch", `Noch nicht. Liegt die ${d} links oder rechts vom Gipfel?`);
-  phase = "rollt"; await rollen(d); phase = "fertig"; zeigeSchritte();
-  T.melde(satz, "ok", [T.lob(), R.denkschritte(n, st)[3], ...R.zusatz(n, st), R.ungefaehr(n, st)]);
+  if (f !== richtig) return rf++, T.melde(rueck, "noch", `Noch nicht. ${d} – abrunden oder aufrunden?`);
+  phase = "rollt"; await rollen(d); phase = "fertig";
+  T.melde(rueck, "ok", `${T.lob()} ${R.denkschritte(n, st)[3]}`);
   T.fertig(rf === 0);
 }
-// Übungsrunde: „Ich bin dran“ – Platz der Kugel und Fuß antippen; Hilfe = Merkkarte
+// Übungsrunde: „Ich bin dran“; Hilfe = Merkkarte
 if (!T.runde({ id: "rundungsberg", neu: s => { stufe = s; modus = "dran"; rf = 0; neu(); return `berg-${n}-${st}`; }, hilfe: an => { merk.hidden = !an; } })) neu(273);
 </script>
 </body>

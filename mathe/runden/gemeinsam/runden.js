@@ -30,7 +30,7 @@
   R.denkschritte = (n, st) => {
     const d = R.pruefziffer(n, st), re = d >= 5;
     return [`Ich runde auf ${R.NAME[st]}.`, `Ich schaue auf die ${R.PRUEFNAME[st]}.`,
-      `Die ${R.PRUEFNAME[st]}ziffer ist ${d}.`, `${d} ist ${re ? "rechts" : "links"} vom Gipfel. Ich runde ${re ? "auf" : "ab"}.`];
+      `Die ${R.PRUEFNAME[st]}ziffer ist ${d}.`, `${d} – ich runde ${re ? "auf" : "ab"}.`];
   };
   // Zusätze für Sonderfälle
   R.zusatz = (n, st) => {

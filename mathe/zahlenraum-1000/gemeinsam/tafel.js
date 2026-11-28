@@ -171,7 +171,9 @@
 
   // ---------------- Kopfleiste ----------------
   // Links „Start“ und Titel, rechts eigene Schalter, „Farben“, „Hilfen“, „Neu“
-  T.kopf = ({ titel, onNeu, extra = [], onHilfen, farbenKey = "farben", farbenStd = false, onFarben }) => {
+  T.kopf = (opt) => {
+    if (opt.menue) return T.menueKopf(opt);
+    const { titel, onNeu, extra = [], onHilfen, farbenKey = "farben", farbenStd = false, onFarben } = opt;
     const k = T.el("div", "kopf");
     const start = T.el("a", "knopf start", '<span aria-hidden="true">←</span> Start'); start.href = "../";
     k.append(start);
@@ -197,8 +199,32 @@
     T.S.appendChild(k);
     return k;
   };
+  // ---------------- Lehrkraftmenü (GESTALTUNG.md) ----------------
+  // T.kopf({ menue: true, titel, beschreibung, onNeu, onLoesung, onZuruecksetzen, extra, hilfen, onHilfen, onFarben, start })
+  // Kein Titel und keine Leisten auf der Bühne: Einstellungen, Hilfen und Steuerung liegen in der Schublade.
+  // Hilfen (Farben, Satzmuster) stehen beim Laden immer auf aus (R6). Braucht gemeinsam/lehrkraftmenue.js.
+  T.menueKopf = ({ titel, beschreibung = "", onNeu, onLoesung, onZuruecksetzen, extra = [], hilfen = [], onHilfen, onFarben, farben = true, satzmuster = true, start = "../" }) => {
+    T.S.classList.remove("farben"); T.S.classList.add("hilfen-aus", "ruhig");
+    const H = window.HINWEISE;
+    const m = window.Lehrkraftmenue.baue({ buehne: T.S, titel: (H && H.titel) || titel, beschreibung,
+      aufgabe: extra,
+      steuerung: { neu: onNeu ? () => { T.stop(); onNeu(); } : null, loesung: onLoesung || null, zuruecksetzen: onZuruecksetzen || null },
+      hinweise: H ? { teile: H.teile } : null, start });
+    const sch = [];
+    if (farben) sch.push(T.schalter("Farben (H/Z/E)", false, v => { T.S.classList.toggle("farben", v); if (onFarben) onFarben(v); }));
+    if (satzmuster) sch.push(T.schalter("Satzmuster", false, v => { T.S.classList.toggle("hilfen-aus", !v); if (onHilfen) onHilfen(v); }));
+    m.hilfe(...sch, ...hilfen);
+    m.farbenSchalter = farben ? sch[0] : null; m.satzSchalter = satzmuster ? sch[farben ? 1 : 0] : null;
+    T.menue = m; return m;
+  };
+  // Kinderknöpfe: höchstens zwei, unten rechts, 72 px (R1, R7)
+  T.kinderknoepfe = (...kn) => {
+    const d = T.el("div", "kinderknoepfe"); kn.filter(Boolean).forEach(k => { k.classList.add("kind"); d.appendChild(k); });
+    T.S.appendChild(d); return d;
+  };
   T.hilfen = () => !T.S.classList.contains("hilfen-aus");
   T.leiste = (...teile) => {
+    if (T.menue) { T.menue.aufgabe(...teile); const l = T.el("div", "leiste"); l.hidden = true; return l; }
     const l = T.el("div", "leiste");
     teile.forEach((t, i) => { if (i) l.appendChild(T.el("span", "trenner")); l.appendChild(t); });
     T.S.appendChild(l); return l;
@@ -290,7 +316,7 @@
   // ---------------- Satzstreifen / Rückmeldung ----------------
   T.streifen = (box, cls) => { const s = T.el("div", "streifen" + (cls ? " " + cls : "")); s.setAttribute("aria-live", "polite"); box.appendChild(s); return s; };
   T.melde = (el, art, text) => {
-    el.className = el.className.replace(/\b(ok|noch)\b/g, "").trim();
+    el.className = el.className.replace(/\b(ok|noch|grau)\b/g, "").trim();
     if (art) el.classList.add(art);
     el.innerHTML = Array.isArray(text) ? text.map(t => `<p>${t}</p>`).join("") : text;
   };
@@ -299,7 +325,7 @@
   // Im Rundenmodus (iframe mit ?modus=runde) meldet sich das Tafelbild beim Rahmen an.
   // neu(niveau, ausschliessen) zeigt genau eine Aufgabe und darf eine Aufgaben-ID zurückgeben.
   // Kopf und Leiste blendet runde-client.js aus; Elemente mit data-runde="aus" ebenso.
-  T.runde = ({ id, oben = 92, neu, hilfe }) => {
+  T.runde = ({ id, oben = T.menue ? 0 : 92, neu, hilfe }) => {
     if (!window.Runde || !Runde.aktiv) return false;
     let nr = 0;
     Runde.verbinde({ id, oben,
